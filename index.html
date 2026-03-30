@@ -1,0 +1,1922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>PitchOps</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Syne:wght@500;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0C2340;--navy-mid:#163359;--blue:#185FA5;--blue-light:#378ADD;
+  --blue-pale:#E6F1FB;--blue-mid:#85B7EB;--green:#3B6D11;--green-pale:#EAF3DE;
+  --amber:#854F0B;--amber-pale:#FAEEDA;--amber-mid:#EF9F27;
+  --teal:#0F6E56;--teal-pale:#E1F5EE;--coral:#993C1D;--coral-pale:#FAECE7;
+  --purple:#534AB7;--purple-pale:#EEEDFE;--red:#A32D2D;--red-pale:#FCEBEB;
+  --surface:#f5f7fa;--card:#fff;--border:rgba(0,0,0,0.09);
+  --text:#0C2340;--text-muted:#5a6a82;--text-hint:#96a6bb;
+  --radius:12px;--radius-sm:8px;
+  --shadow:0 2px 12px rgba(12,35,64,0.08);--shadow-lg:0 8px 32px rgba(12,35,64,0.14);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5}
+h1,h2,h3,.syne{font-family:'Syne',sans-serif}
+
+/* SCREENS */
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+#screen-login,#screen-admin-login{align-items:center;justify-content:center;background:linear-gradient(145deg,#0C2340 0%,#163359 60%,#185FA5 100%)}
+
+/* LOGIN */
+.login-card{background:white;border-radius:20px;padding:2.5rem;width:100%;max-width:420px;box-shadow:var(--shadow-lg)}
+.brand-mark{display:flex;align-items:center;gap:10px;margin-bottom:2rem}
+.brand-icon{width:40px;height:40px;background:var(--navy);border-radius:10px;display:flex;align-items:center;justify-content:center}
+.brand-icon svg{width:22px;height:22px;fill:white}
+.brand-name{font-size:22px;font-weight:700;color:var(--navy);letter-spacing:-0.5px;font-family:'Syne',sans-serif}
+.brand-name span{color:var(--blue)}
+.login-title{font-size:17px;font-weight:500;margin-bottom:.25rem}
+.login-sub{font-size:13px;color:var(--text-muted);margin-bottom:1.5rem}
+
+/* FORMS */
+.field{margin-bottom:1rem}
+.field label{display:block;font-size:12px;color:var(--text-muted);margin-bottom:5px;font-weight:500;letter-spacing:.3px}
+.field input,.field select,.field textarea{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:#fafbfc;outline:none;transition:border-color .15s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue-light);background:white}
+.field textarea{resize:vertical;min-height:72px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 20px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;border:none;transition:all .15s}
+.btn-primary{background:var(--navy);color:white}.btn-primary:hover{background:var(--navy-mid)}
+.btn-blue{background:var(--blue);color:white}.btn-blue:hover{background:var(--blue-light)}
+.btn-ghost{background:transparent;color:var(--text-muted);border:1px solid var(--border)}.btn-ghost:hover{background:var(--surface)}
+.btn-danger{background:var(--red-pale);color:var(--red)}.btn-danger:hover{background:#f7c1c1}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-full{width:100%}
+
+/* TOPNAV */
+.topnav{background:var(--navy);padding:0 1.5rem;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.topnav-brand{display:flex;align-items:center;gap:8px}
+.topnav-brand .brand-name{font-size:18px;color:white}
+.topnav-badge{font-size:11px;font-weight:500;background:rgba(255,255,255,.15);color:rgba(255,255,255,.85);border-radius:20px;padding:2px 10px}
+.topnav-right{display:flex;align-items:center;gap:10px}
+.lang-select{background:rgba(255,255,255,.15);border:none;color:white;font-family:'DM Sans',sans-serif;font-size:13px;border-radius:6px;padding:4px 8px;cursor:pointer;outline:none}
+.breadcrumb{font-size:13px;color:var(--blue-mid);display:flex;align-items:center;gap:6px}
+.breadcrumb button{background:none;border:none;color:var(--blue-mid);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;text-decoration:underline;padding:0}
+.breadcrumb button:hover{color:white}
+
+/* CARDS / PANELS */
+.card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden}
+.card-header{padding:1rem 1.25rem .75rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:14px;font-weight:600;color:var(--text);font-family:'Syne',sans-serif}
+.card-body{padding:1.25rem}
+
+/* ── PROJECTS HOME ── */
+#screen-projects{background:var(--surface)}
+.projects-home{padding:1.5rem;max-width:1200px;margin:0 auto}
+
+.projects-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:1.5rem;flex-wrap:wrap}
+.projects-toolbar h2{font-size:20px;font-family:'Syne',sans-serif;color:var(--text);flex:1}
+
+.status-filter{display:flex;gap:6px;flex-wrap:wrap}
+.status-pill{padding:5px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:white;color:var(--text-muted);transition:all .15s}
+.status-pill.active-pill{background:var(--navy);color:white;border-color:var(--navy)}
+.status-pill.active-status{background:var(--green-pale);color:var(--green);border-color:var(--green)}
+.status-pill.planned-status{background:var(--amber-pale);color:var(--amber);border-color:var(--amber)}
+.status-pill.finished-status{background:var(--surface);color:var(--text-muted);border-color:var(--border)}
+
+.projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}
+
+.project-card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:box-shadow .15s,transform .12s}
+.project-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+.project-card-banner{height:8px}
+.project-card-body{padding:1rem 1.25rem}
+.project-card-code{font-size:11px;font-weight:600;letter-spacing:.8px;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px}
+.project-card-name{font-size:16px;font-weight:700;font-family:'Syne',sans-serif;color:var(--text);margin-bottom:4px}
+.project-card-meta{font-size:12px;color:var(--text-muted);margin-bottom:10px}
+.project-card-footer{display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid var(--border)}
+.project-venues-count{font-size:12px;color:var(--text-muted)}
+.status-badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px}
+.status-active{background:var(--green-pale);color:var(--green)}
+.status-planned{background:var(--amber-pale);color:var(--amber)}
+.status-finished{background:var(--surface);color:var(--text-muted);border:1px solid var(--border)}
+
+/* ── PROJECT DETAIL (admin inside project) ── */
+#screen-project-detail{background:var(--surface)}
+.project-hero{padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;border-bottom:3px solid transparent}
+.project-hero-left h2{font-size:20px;color:white;font-family:'Syne',sans-serif}
+.project-hero-left p{font-size:13px;color:rgba(255,255,255,.7)}
+.hero-stats{display:flex;gap:.75rem;flex-wrap:wrap}
+.hero-stat{background:rgba(255,255,255,.12);border-radius:var(--radius-sm);padding:.5rem .9rem;text-align:center}
+.hero-stat .val{font-size:20px;font-weight:600;color:white;font-family:'Syne',sans-serif}
+.hero-stat .lbl{font-size:10px;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.5px}
+
+.project-body{padding:1.5rem;display:grid;grid-template-columns:300px 1fr;gap:1.25rem;max-width:1200px;margin:0 auto;width:100%}
+@media(max-width:900px){.project-body{grid-template-columns:1fr}}
+
+/* venue list in project */
+.venue-item{display:flex;align-items:flex-start;gap:10px;padding:10px 1.25rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s}
+.venue-item:last-child{border-bottom:none}
+.venue-item:hover{background:var(--surface)}
+.venue-item.selected{background:var(--blue-pale)}
+.venue-dot{width:28px;height:28px;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:2px}
+.venue-item-name{font-size:13px;font-weight:600;color:var(--text);line-height:1.3}
+.venue-item-city{font-size:11px;color:var(--text-muted);margin-top:1px}
+.venue-item-contact{font-size:11px;color:var(--text-hint);margin-top:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.venue-item-actions{display:flex;gap:4px;margin-top:5px}
+.venue-item-right{margin-left:auto;flex-shrink:0}
+
+/* ops table */
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;padding:.75rem 1.25rem;border-bottom:1px solid var(--border);background:#fafbfc}
+.filter-bar select,.filter-bar input{padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text);background:white;outline:none}
+.ops-table{width:100%;border-collapse:collapse;font-size:13px}
+.ops-table th{text-align:left;padding:8px 12px;font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);background:#fafbfc}
+.ops-table td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:top}
+.ops-table tr:last-child td{border-bottom:none}
+.ops-table tr:hover td{background:var(--surface)}
+.flag-btn{background:none;border:none;cursor:pointer;font-size:16px;opacity:.4;transition:opacity .15s}
+.flag-btn:hover,.flag-btn.flagged{opacity:1}
+.comment-box input{width:100%;font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;margin-top:4px}
+.comment-text{font-size:12px;color:var(--text-muted);font-style:italic;margin-top:2px}
+
+/* ── VENUE DASHBOARD ── */
+#screen-venue{background:var(--surface)}
+.venue-hero{background:linear-gradient(135deg,#0C2340 0%,#185FA5 100%);padding:1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.venue-hero-left h2{font-size:22px;color:white;margin-bottom:2px;font-family:'Syne',sans-serif}
+.venue-hero-left p{font-size:13px;color:var(--blue-mid)}
+.venue-hero-project{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);border-radius:20px;padding:3px 12px;font-size:12px;color:rgba(255,255,255,.9);margin-bottom:6px}
+.venue-body{padding:1.5rem;display:grid;grid-template-columns:1fr 1.5fr;gap:1.25rem;max-width:1100px;margin:0 auto;width:100%}
+@media(max-width:720px){.venue-body{grid-template-columns:1fr}}
+
+/* op badge */
+.op-badge{width:36px;height:36px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;letter-spacing:.5px;flex-shrink:0}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.3px}
+
+/* history */
+.hist-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.hist-item:last-child{border-bottom:none}
+.hist-item-info{flex:1;min-width:0}
+.hist-item-name{font-size:13px;font-weight:600;color:var(--text)}
+.hist-item-meta{font-size:12px;color:var(--text-muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist-item-date{font-size:11px;color:var(--text-hint);white-space:nowrap}
+
+/* staff tags */
+.staff-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.staff-tag{display:flex;align-items:center;gap:5px;background:var(--blue-pale);color:var(--blue);border-radius:20px;padding:3px 10px 3px 8px;font-size:12px;font-weight:500}
+.staff-tag-remove{background:none;border:none;cursor:pointer;color:var(--blue);font-size:14px;line-height:1;display:flex;align-items:center;padding:0}
+.staff-input-row{display:flex;gap:6px}
+.staff-input-row input{flex:1}
+
+/* photos */
+.photo-upload-area{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:.9rem;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;background:#fafbfc;position:relative}
+.photo-upload-area:hover{border-color:var(--blue-light);background:var(--blue-pale)}
+.photo-upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.photo-upload-icon{font-size:20px;margin-bottom:3px}
+.photo-upload-text{font-size:12px;color:var(--text-muted)}
+.photo-upload-hint{font-size:11px;color:var(--text-hint);margin-top:2px}
+.photo-previews{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.photo-thumb{position:relative;width:80px;height:80px;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border);flex-shrink:0}
+.photo-thumb img{width:100%;height:100%;object-fit:cover;display:block;cursor:pointer}
+.photo-thumb-remove{position:absolute;top:3px;right:3px;width:18px;height:18px;background:rgba(12,35,64,.75);color:white;border:none;border-radius:50%;cursor:pointer;font-size:11px;line-height:1;display:flex;align-items:center;justify-content:center}
+.admin-photo-strip{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap}
+.admin-photo-strip img{width:44px;height:44px;object-fit:cover;border-radius:6px;border:1px solid var(--border);cursor:pointer;transition:transform .12s}
+.admin-photo-strip img:hover{transform:scale(1.1)}
+
+/* lightbox */
+.lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:300;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+.lightbox.open{display:flex}
+.lightbox img{max-width:92vw;max-height:80vh;border-radius:var(--radius);object-fit:contain}
+.lightbox-close{position:absolute;top:1rem;right:1rem;background:rgba(255,255,255,.15);border:none;color:white;font-size:22px;width:40px;height:40px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.lightbox-nav{display:flex;gap:12px;align-items:center}
+.lightbox-nav button{background:rgba(255,255,255,.15);border:none;color:white;font-size:20px;width:40px;height:40px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.lightbox-nav button:hover{background:rgba(255,255,255,.3)}
+.lightbox-counter{font-size:13px;color:rgba(255,255,255,.7);min-width:50px;text-align:center}
+
+/* modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(12,35,64,.5);z-index:100;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.open{display:flex}
+.modal{background:white;border-radius:var(--radius);width:100%;max-width:520px;box-shadow:var(--shadow-lg);overflow:hidden;max-height:90vh;display:flex;flex-direction:column}
+.modal-header{padding:1.25rem 1.5rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.modal-title{font-size:16px;font-weight:600;font-family:'Syne',sans-serif;color:var(--text)}
+.modal-close{background:none;border:none;font-size:20px;color:var(--text-muted);cursor:pointer;line-height:1}
+.modal-body{padding:1.25rem 1.5rem;overflow-y:auto}
+.modal-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;flex-shrink:0}
+
+/* admin stats */
+.admin-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:1.5rem}
+@media(max-width:700px){.admin-stats{grid-template-columns:repeat(2,1fr)}}
+.stat-card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:1rem 1.25rem;box-shadow:var(--shadow)}
+.stat-card .lbl{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;font-weight:500;margin-bottom:4px}
+.stat-card .val{font-size:26px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif}
+
+/* misc */
+.empty-state{text-align:center;padding:2.5rem 1rem;color:var(--text-hint);font-size:13px}
+.empty-state .ico{font-size:32px;margin-bottom:.5rem}
+.link-copy{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;font-size:12px;color:var(--blue);word-break:break-all;margin-top:6px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--navy);color:white;padding:12px 20px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;box-shadow:var(--shadow-lg);z-index:200;opacity:0;transform:translateY(8px);transition:all .2s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+.tabs{display:flex;border-bottom:1px solid var(--border)}
+.tab-btn{padding:10px 16px;background:none;border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+.tab-btn.active{color:var(--blue);border-bottom-color:var(--blue)}
+.color-opts{display:flex;gap:8px;flex-wrap:wrap}
+.color-opt{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:border-color .15s}
+.color-opt.picked{border-color:var(--navy)}
+.venue-type-opts{display:flex;gap:10px}
+.venue-type-opt{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 16px;border:2px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .15s;background:white;min-width:90px}
+.venue-type-opt:hover{border-color:var(--blue-light);background:var(--blue-pale)}
+.venue-type-opt.picked{border-color:var(--blue);background:var(--blue-pale)}
+.venue-type-opt svg{width:32px;height:32px}
+.venue-type-opt span{font-size:12px;font-weight:500;color:var(--text-muted)}
+.venue-type-opt.picked span{color:var(--blue)}
+.venue-type-badge{display:inline-flex;align-items:center;justify-content:center;font-size:18px;width:28px;height:28px;background:var(--surface);border:1px solid var(--border);border-radius:8px;flex-shrink:0}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="screen-login" class="screen active">
+  <div class="login-card">
+    <div class="brand-mark">
+      <div class="brand-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg></div>
+      <span class="brand-name">Pitch<span>Ops</span></span>
+    </div>
+    <p class="login-title">Welcome to PitchOps</p>
+    <p class="login-sub">Pitch operations management for elite venues</p>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:1.25rem">
+      <button class="btn btn-primary btn-full" onclick="showScreen('screen-admin-login')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="white"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+        Sign in as Master Admin
+      </button>
+      <div style="text-align:center;font-size:12px;color:var(--text-hint)">— or —</div>
+      <div class="field" style="margin:0"><label>Venue access token</label><input id="venue-token-input" type="text" placeholder="Paste your venue token..."/></div>
+      <button class="btn btn-blue btn-full" onclick="venueTokenLogin()">Access Venue Dashboard</button>
+    </div>
+    <div style="text-align:center">
+      <select id="lang-select-login" onchange="setLang(this.value)" style="padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;outline:none;background:white">
+        <option value="en">🌐 English</option><option value="pl">🇵🇱 Polski</option><option value="es">🇪🇸 Español</option>
+        <option value="fr">🇫🇷 Français</option><option value="de">🇩🇪 Deutsch</option><option value="pt">🇵🇹 Português</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ADMIN LOGIN ══ -->
+<div id="screen-admin-login" class="screen">
+  <div class="login-card">
+    <div class="brand-mark">
+      <div class="brand-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg></div>
+      <span class="brand-name">Pitch<span>Ops</span></span>
+    </div>
+    <p class="login-title">Master Admin</p>
+    <p class="login-sub">Restricted access — authorised users only</p>
+    <div class="field"><label>Email</label><input id="admin-email-input" type="email" placeholder="Enter your email..."/></div>
+    <div class="field"><label>Password</label><input id="admin-pass-input" type="password" placeholder="Enter your password..."/></div>
+    <div id="admin-login-error" style="display:none;font-size:12px;color:var(--red);margin-bottom:.75rem;padding:8px 12px;background:var(--red-pale);border-radius:var(--radius-sm)"></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost" onclick="showScreen('screen-login')">Back</button>
+      <button class="btn btn-primary" style="flex:1" onclick="adminLogin()">Sign in</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PROJECTS HOME ══ -->
+<div id="screen-projects" class="screen">
+  <div class="topnav">
+    <div class="topnav-brand">
+      <span class="brand-name" style="color:white">Pitch<span style="color:var(--blue-light)">Ops</span></span>
+      <span class="topnav-badge">Master Admin</span>
+    </div>
+    <div class="topnav-right">
+      <select class="lang-select" onchange="setLang(this.value)" id="lang-select-admin"><option value="en">EN</option><option value="pl">PL</option><option value="es">ES</option><option value="fr">FR</option><option value="de">DE</option><option value="pt">PT</option></select>
+      <button class="btn btn-blue btn-sm" onclick="openModal('modal-add-project')">+ New project</button>
+      <button class="btn btn-ghost btn-sm" style="color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.2)" onclick="openModal('modal-change-password')">🔑</button>
+      <button class="btn btn-ghost btn-sm" style="color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.2)" onclick="logout()">Sign out</button>
+    </div>
+  </div>
+  <div class="projects-home">
+    <div class="projects-toolbar">
+      <h2 id="projects-heading">Projects</h2>
+      <div class="status-filter">
+        <button class="status-pill active-pill" onclick="filterProjects('all',this)">All</button>
+        <button class="status-pill" onclick="filterProjects('active',this)">Active</button>
+        <button class="status-pill" onclick="filterProjects('planned',this)">Planned</button>
+        <button class="status-pill" onclick="filterProjects('finished',this)">Finished</button>
+      </div>
+      <input type="text" id="project-search" placeholder="Search projects..." oninput="renderProjects()" style="padding:7px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;outline:none;width:180px"/>
+    </div>
+    <div class="projects-grid" id="projects-grid"></div>
+  </div>
+</div>
+
+<!-- ══ PROJECT DETAIL ══ -->
+<div id="screen-project-detail" class="screen">
+  <div class="topnav">
+    <div class="topnav-brand">
+      <span class="brand-name" style="color:white">Pitch<span style="color:var(--blue-light)">Ops</span></span>
+      <div class="breadcrumb">
+        <span>/</span>
+        <button onclick="backToProjects()">Projects</button>
+        <span>/</span>
+        <span id="detail-breadcrumb" style="color:rgba(255,255,255,.85)"></span>
+      </div>
+    </div>
+    <div class="topnav-right">
+      <select class="lang-select" onchange="setLang(this.value)" id="lang-select-detail"><option value="en">EN</option><option value="pl">PL</option><option value="es">ES</option><option value="fr">FR</option><option value="de">DE</option><option value="pt">PT</option></select>
+      <button class="btn btn-ghost btn-sm" style="color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.2)" onclick="openViewerLinkModal()">🔗 Share</button>
+      <button class="btn btn-blue btn-sm" onclick="openAddVenueModal()">+ Add venue</button>
+      <button class="btn btn-ghost btn-sm" style="color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.2)" onclick="logout()">Sign out</button>
+    </div>
+  </div>
+  <div id="project-hero" class="project-hero">
+    <div class="project-hero-left">
+      <div id="detail-project-tag" class="venue-hero-project"></div>
+      <h2 id="detail-project-name"></h2>
+      <p id="detail-project-meta"></p>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="val" id="pd-stat-venues">0</div><div class="lbl">Venues</div></div>
+      <div class="hero-stat"><div class="val" id="pd-stat-ops">0</div><div class="lbl">Total ops</div></div>
+      <div class="hero-stat"><div class="val" id="pd-stat-today">0</div><div class="lbl">Today</div></div>
+      <div class="hero-stat"><div class="val" id="pd-stat-week">0</div><div class="lbl">This week</div></div>
+    </div>
+  </div>
+  <div class="project-body">
+    <!-- venues sidebar -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Venues</span>
+        <button class="btn btn-ghost btn-sm" onclick="openManageTypesModal()">⚙ Op types</button>
+      </div>
+      <div id="detail-venue-list"></div>
+    </div>
+    <!-- ops panel -->
+    <div class="card">
+      <div class="filter-bar">
+        <select id="filter-venue" onchange="renderDetailOps()"><option value="">All venues</option></select>
+        <select id="filter-type" onchange="renderDetailOps()"><option value="">All types</option></select>
+        <input type="date" id="filter-from" onchange="renderDetailOps()"/>
+        <input type="date" id="filter-to" onchange="renderDetailOps()"/>
+        <button class="btn btn-ghost btn-sm" onclick="clearDetailFilters()">Clear</button>
+        <button class="btn btn-blue btn-sm" onclick="exportCSV()">CSV</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="ops-table">
+          <thead><tr>
+            <th>Date</th><th>Venue</th><th>Type</th><th>Zone</th><th>Staff</th><th>Notes</th><th>Photos</th><th>Flag</th>
+          </tr></thead>
+          <tbody id="detail-ops-tbody"></tbody>
+        </table>
+      </div>
+      <div id="detail-ops-empty" class="empty-state" style="display:none"><div class="ico">📋</div><div>No operations found</div></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ PROJECT VIEWER ══ -->
+<div id="screen-viewer" class="screen">
+  <div class="topnav">
+    <div class="topnav-brand">
+      <span class="brand-name" style="color:white">Pitch<span style="color:var(--blue-light)">Ops</span></span>
+      <span class="topnav-badge" id="viewer-badge">Project View</span>
+    </div>
+    <div class="topnav-right">
+      <select class="lang-select" onchange="setLang(this.value)" id="lang-select-viewer"><option value="en">EN</option><option value="pl">PL</option><option value="es">ES</option><option value="fr">FR</option><option value="de">DE</option><option value="pt">PT</option></select>
+      <button class="btn btn-ghost btn-sm" style="color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.2)" onclick="logout()">Exit</button>
+    </div>
+  </div>
+  <div id="viewer-hero" class="project-hero">
+    <div class="project-hero-left">
+      <div id="viewer-project-tag" class="venue-hero-project"></div>
+      <h2 id="viewer-project-name"></h2>
+      <p id="viewer-project-meta"></p>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="val" id="vw-stat-venues">0</div><div class="lbl">Venues</div></div>
+      <div class="hero-stat"><div class="val" id="vw-stat-ops">0</div><div class="lbl">Total ops</div></div>
+    </div>
+  </div>
+  <div class="project-body">
+    <!-- venues sidebar -->
+    <div class="card">
+      <div class="card-header"><span class="card-title">Venues</span></div>
+      <div id="viewer-venue-list"></div>
+    </div>
+    <!-- ops table — read only -->
+    <div class="card">
+      <div class="filter-bar">
+        <select id="vw-filter-venue" onchange="renderViewerOps()"><option value="">All venues</option></select>
+        <select id="vw-filter-type" onchange="renderViewerOps()"><option value="">All types</option></select>
+        <input type="date" id="vw-filter-from" onchange="renderViewerOps()"/>
+        <input type="date" id="vw-filter-to" onchange="renderViewerOps()"/>
+        <button class="btn btn-ghost btn-sm" onclick="clearViewerFilters()">Clear</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="ops-table">
+          <thead><tr>
+            <th>Date</th><th>Venue</th><th>Type</th><th>Zone</th><th>Staff</th><th>Notes</th><th>Photos</th>
+          </tr></thead>
+          <tbody id="viewer-ops-tbody"></tbody>
+        </table>
+      </div>
+      <div id="viewer-ops-empty" class="empty-state" style="display:none"><div class="ico">📋</div><div>No operations found</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ VENUE DASHBOARD ══ -->
+<div id="screen-venue" class="screen">
+  <div class="topnav">
+    <div class="topnav-brand">
+      <span class="brand-name" style="color:white">Pitch<span style="color:var(--blue-light)">Ops</span></span>
+      <span class="topnav-badge" id="venue-badge">Venue</span>
+    </div>
+    <div class="topnav-right">
+      <select class="lang-select" onchange="setLang(this.value)" id="lang-select-venue"><option value="en">EN</option><option value="pl">PL</option><option value="es">ES</option><option value="fr">FR</option><option value="de">DE</option><option value="pt">PT</option></select>
+      <button class="btn btn-ghost btn-sm" style="color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.2)" onclick="openVenueContactModal()">✏️ My contact</button>
+      <button class="btn btn-ghost btn-sm" style="color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.2)" onclick="logout()">Sign out</button>
+    </div>
+  </div>
+  <div class="venue-hero">
+    <div class="venue-hero-left">
+      <div class="venue-hero-project" id="venue-project-tag"></div>
+      <h2 id="venue-hero-name">Stadium</h2>
+      <p id="venue-hero-sub">Pitch operations log</p>
+      <div id="venue-contact-info" style="margin-top:8px;display:none;font-size:12px;color:rgba(255,255,255,.75);line-height:1.8"></div>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="val" id="stat-total">0</div><div class="lbl" data-i18n="stat_total">This month</div></div>
+      <div class="hero-stat"><div class="val" id="stat-last">—</div><div class="lbl" data-i18n="stat_last">Last op</div></div>
+      <div class="hero-stat"><div class="val" id="stat-common">—</div><div class="lbl" data-i18n="stat_common">Top type</div></div>
+    </div>
+  </div>
+  <div class="venue-body">
+    <!-- LOG FORM -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title" data-i18n="log_op">Log new operation</span>
+        <button class="btn btn-ghost btn-sm" onclick="openManageTypesModal()" style="font-size:11px">⚙ Types</button>
+      </div>
+      <div class="card-body">
+        <div class="field"><label data-i18n="op_type">Operation type</label><select id="new-op-type"></select></div>
+        <div class="field">
+          <label data-i18n="op_zone">Pitch area / zone</label>
+          <select id="new-op-zone" onchange="toggleCustomZone()">
+            <option>Full pitch</option><option>Goal mouth (N)</option><option>Goal mouth (S)</option>
+            <option>Centre circle</option><option>Penalty areas</option><option>Wings</option><option value="Custom">Custom...</option>
+          </select>
+        </div>
+        <div class="field" id="zone-custom-wrap" style="display:none"><label data-i18n="op_zone_custom">Custom zone</label><input id="new-op-zone-custom" type="text" placeholder="Describe area..."/></div>
+        <div class="field"><label data-i18n="op_equipment">Equipment used</label><input id="new-op-equipment" type="text" placeholder="e.g. Toro 3550, solid tine..."/></div>
+        <div class="field"><label data-i18n="op_weather">Weather conditions</label><input id="new-op-weather" type="text" placeholder="e.g. Sunny, 14°C, light wind"/></div>
+        <div class="field">
+          <label data-i18n="op_staff">Done by (staff)</label>
+          <div class="staff-tags" id="staff-tags"></div>
+          <div class="staff-input-row" style="margin-top:8px">
+            <input id="staff-name-input" type="text" placeholder="Add staff name..."/>
+            <button class="btn btn-ghost btn-sm" onclick="addStaff()">Add</button>
+          </div>
+          <p style="font-size:11px;color:var(--text-hint);margin-top:4px" data-i18n="op_staff_hint">You can add multiple staff members</p>
+        </div>
+        <div class="field"><label data-i18n="op_notes">Notes / observations</label><textarea id="new-op-notes" placeholder="Any observations, measurements, remarks..."></textarea></div>
+        <div class="field"><label data-i18n="op_date">Date & time</label><input id="new-op-date" type="datetime-local"/></div>
+        <div class="field">
+          <label data-i18n="op_photos">Photos (max 4)</label>
+          <div class="photo-upload-area" id="new-photo-drop">
+            <input type="file" accept="image/*" multiple id="new-photo-input" onchange="handlePhotoSelect(this,'new')"/>
+            <div class="photo-upload-icon">📷</div>
+            <div class="photo-upload-text" data-i18n="photo_tap">Tap to add photos</div>
+            <div class="photo-upload-hint" data-i18n="photo_hint">JPG, PNG · max 4 photos</div>
+          </div>
+          <div class="photo-previews" id="new-photo-previews"></div>
+        </div>
+        <button class="btn btn-blue btn-full" onclick="logOperation()" data-i18n="btn_log">Log operation</button>
+      </div>
+    </div>
+    <!-- HISTORY -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title" data-i18n="history">Operation history</span>
+        <input type="text" id="venue-hist-search" placeholder="Search..." oninput="renderVenueHistory()" style="padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;outline:none;width:130px"/>
+      </div>
+      <div id="venue-history-list" style="padding:0 1.25rem;max-height:560px;overflow-y:auto"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODALS ══ -->
+
+<!-- ADD PROJECT -->
+<div class="modal-overlay" id="modal-add-project">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">New project</span><button class="modal-close" onclick="closeModal('modal-add-project')">✕</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Project code / ID</label><input id="new-proj-code" type="text" placeholder="e.g. U20FWWC26"/></div>
+      <div class="field"><label>Full project name</label><input id="new-proj-name" type="text" placeholder="e.g. FIFA U-20 Women's World Cup 2026"/></div>
+      <div class="field"><label>Country / Location</label><input id="new-proj-country" type="text" placeholder="e.g. Poland"/></div>
+      <div class="field">
+        <label>Status</label>
+        <select id="new-proj-status">
+          <option value="planned">Planned</option>
+          <option value="active">Active</option>
+          <option value="finished">Finished</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Project colour</label>
+        <div class="color-opts" id="proj-color-opts">
+          <div class="color-opt picked" data-c="#185FA5" style="background:#185FA5" onclick="pickProjColor(this)"></div>
+          <div class="color-opt" data-c="#3B6D11" style="background:#3B6D11" onclick="pickProjColor(this)"></div>
+          <div class="color-opt" data-c="#854F0B" style="background:#854F0B" onclick="pickProjColor(this)"></div>
+          <div class="color-opt" data-c="#534AB7" style="background:#534AB7" onclick="pickProjColor(this)"></div>
+          <div class="color-opt" data-c="#993C1D" style="background:#993C1D" onclick="pickProjColor(this)"></div>
+          <div class="color-opt" data-c="#0F6E56" style="background:#0F6E56" onclick="pickProjColor(this)"></div>
+          <div class="color-opt" data-c="#A32D2D" style="background:#A32D2D" onclick="pickProjColor(this)"></div>
+          <div class="color-opt" data-c="#0C2340" style="background:#0C2340" onclick="pickProjColor(this)"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-add-project')">Cancel</button>
+      <button class="btn btn-primary" onclick="createProject()">Create project</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT PROJECT -->
+<div class="modal-overlay" id="modal-edit-project">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Edit project</span><button class="modal-close" onclick="closeModal('modal-edit-project')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-proj-id"/>
+      <div class="field"><label>Project code / ID</label><input id="edit-proj-code" type="text"/></div>
+      <div class="field"><label>Full project name</label><input id="edit-proj-name" type="text"/></div>
+      <div class="field"><label>Country / Location</label><input id="edit-proj-country" type="text"/></div>
+      <div class="field"><label>Status</label>
+        <select id="edit-proj-status">
+          <option value="planned">Planned</option><option value="active">Active</option><option value="finished">Finished</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Project colour</label>
+        <div class="color-opts" id="edit-proj-color-opts">
+          <div class="color-opt" data-c="#185FA5" style="background:#185FA5" onclick="pickEditProjColor(this)"></div>
+          <div class="color-opt" data-c="#3B6D11" style="background:#3B6D11" onclick="pickEditProjColor(this)"></div>
+          <div class="color-opt" data-c="#854F0B" style="background:#854F0B" onclick="pickEditProjColor(this)"></div>
+          <div class="color-opt" data-c="#534AB7" style="background:#534AB7" onclick="pickEditProjColor(this)"></div>
+          <div class="color-opt" data-c="#993C1D" style="background:#993C1D" onclick="pickEditProjColor(this)"></div>
+          <div class="color-opt" data-c="#0F6E56" style="background:#0F6E56" onclick="pickEditProjColor(this)"></div>
+          <div class="color-opt" data-c="#A32D2D" style="background:#A32D2D" onclick="pickEditProjColor(this)"></div>
+          <div class="color-opt" data-c="#0C2340" style="background:#0C2340" onclick="pickEditProjColor(this)"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="deleteProject()">Delete project</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-edit-project')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditProject()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD VENUE -->
+<div class="modal-overlay" id="modal-add-venue">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Add venue to project</span><button class="modal-close" onclick="closeModal('modal-add-venue')">✕</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Venue name</label><input id="new-venue-name" type="text" placeholder="e.g. Stadion Śląski"/></div>
+      <div class="field"><label>City / Country</label><input id="new-venue-city" type="text" placeholder="e.g. Chorzów, Poland"/></div>
+      <div class="field"><label>Responsible person</label><input id="new-venue-person" type="text" placeholder="e.g. Jan Kowalski"/></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="field"><label>Contact phone</label><input id="new-venue-phone" type="tel" placeholder="e.g. +48 600 123 456"/></div>
+        <div class="field"><label>Contact email</label><input id="new-venue-email" type="email" placeholder="e.g. jan@stadion.pl"/></div>
+      </div>
+      <div class="field">
+        <label>Venue type</label>
+        <div class="venue-type-opts">
+          <div class="venue-type-opt picked" data-vtype="Stadium" onclick="pickVenueType(this)">
+            <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="20" width="28" height="4" rx="1" fill="#185FA5"/>
+              <rect x="4" y="14" width="4" height="6" fill="#378ADD"/>
+              <rect x="24" y="14" width="4" height="6" fill="#378ADD"/>
+              <rect x="6" y="8" width="20" height="6" rx="1" fill="#185FA5" opacity=".5"/>
+              <ellipse cx="16" cy="22" rx="8" ry="3" fill="#0C2340" opacity=".15"/>
+              <rect x="8" y="14" width="16" height="6" rx="1" fill="#E6F1FB" stroke="#185FA5" stroke-width="1"/>
+              <ellipse cx="16" cy="17" rx="5" ry="2" stroke="#185FA5" stroke-width="1" fill="none"/>
+            </svg>
+            <span>Stadium</span>
+          </div>
+          <div class="venue-type-opt" data-vtype="Training Site" onclick="pickVenueType(this)">
+            <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="8" width="28" height="18" rx="2" fill="#EAF3DE" stroke="#3B6D11" stroke-width="1.5"/>
+              <line x1="16" y1="8" x2="16" y2="26" stroke="#3B6D11" stroke-width="1" stroke-dasharray="2 2"/>
+              <rect x="2" y="8" width="28" height="18" rx="2" fill="none" stroke="#3B6D11" stroke-width="1.5"/>
+              <rect x="10" y="8" width="12" height="18" fill="none" stroke="#3B6D11" stroke-width="1" opacity=".5"/>
+              <circle cx="16" cy="17" r="3" stroke="#3B6D11" stroke-width="1.5" fill="none"/>
+              <line x1="2" y1="17" x2="6" y2="17" stroke="#3B6D11" stroke-width="1.5"/>
+              <line x1="26" y1="17" x2="30" y2="17" stroke="#3B6D11" stroke-width="1.5"/>
+            </svg>
+            <span>Training site</span>
+          </div>
+          <div class="venue-type-opt" data-vtype="Other" onclick="pickVenueType(this)">
+            <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="16" cy="16" r="12" stroke="#854F0B" stroke-width="1.5" fill="#FAEEDA"/>
+              <path d="M10 16 Q16 8 22 16 Q16 24 10 16Z" stroke="#854F0B" stroke-width="1.5" fill="none"/>
+              <line x1="4" y1="16" x2="28" y2="16" stroke="#854F0B" stroke-width="1" opacity=".5"/>
+              <line x1="16" y1="4" x2="16" y2="28" stroke="#854F0B" stroke-width="1" opacity=".5"/>
+            </svg>
+            <span>Other</span>
+          </div>
+        </div>
+      </div>
+      <div id="venue-link-result" style="display:none;margin-top:.5rem">
+        <p style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:4px">Unique venue link:</p>
+        <div class="link-copy"><span id="venue-link-text" style="word-break:break-all;flex:1"></span><button class="btn btn-ghost btn-sm" onclick="copyVenueLink()">Copy</button></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-add-venue')">Cancel</button>
+      <button class="btn btn-primary" onclick="createVenue()">Create venue</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- EDIT VENUE -->
+<div class="modal-overlay" id="modal-edit-venue">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Edit venue</span><button class="modal-close" onclick="closeModal('modal-edit-venue')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-venue-id"/>
+      <div class="field"><label>Venue name</label><input id="edit-venue-name" type="text"/></div>
+      <div class="field"><label>City / Country</label><input id="edit-venue-city" type="text"/></div>
+      <div class="field"><label>Responsible person</label><input id="edit-venue-person" type="text" placeholder="e.g. Jan Kowalski"/></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="field"><label>Contact phone</label><input id="edit-venue-phone" type="tel" placeholder="e.g. +48 600 123 456"/></div>
+        <div class="field"><label>Contact email</label><input id="edit-venue-email" type="email" placeholder="e.g. jan@stadion.pl"/></div>
+      </div>
+      <div class="field">
+        <label>Venue type</label>
+        <div class="venue-type-opts" id="edit-venue-type-opts">
+          <div class="venue-type-opt" data-vtype="Stadium" onclick="pickEditVenueType(this)">
+            <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="20" width="28" height="4" rx="1" fill="#185FA5"/>
+              <rect x="4" y="14" width="4" height="6" fill="#378ADD"/>
+              <rect x="24" y="14" width="4" height="6" fill="#378ADD"/>
+              <rect x="6" y="8" width="20" height="6" rx="1" fill="#185FA5" opacity=".5"/>
+              <rect x="8" y="14" width="16" height="6" rx="1" fill="#E6F1FB" stroke="#185FA5" stroke-width="1"/>
+              <ellipse cx="16" cy="17" rx="5" ry="2" stroke="#185FA5" stroke-width="1" fill="none"/>
+            </svg>
+            <span>Stadium</span>
+          </div>
+          <div class="venue-type-opt" data-vtype="Training Site" onclick="pickEditVenueType(this)">
+            <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="8" width="28" height="18" rx="2" fill="#EAF3DE" stroke="#3B6D11" stroke-width="1.5"/>
+              <line x1="16" y1="8" x2="16" y2="26" stroke="#3B6D11" stroke-width="1" stroke-dasharray="2 2"/>
+              <rect x="2" y="8" width="28" height="18" rx="2" fill="none" stroke="#3B6D11" stroke-width="1.5"/>
+              <rect x="10" y="8" width="12" height="18" fill="none" stroke="#3B6D11" stroke-width="1" opacity=".5"/>
+              <circle cx="16" cy="17" r="3" stroke="#3B6D11" stroke-width="1.5" fill="none"/>
+              <line x1="2" y1="17" x2="6" y2="17" stroke="#3B6D11" stroke-width="1.5"/>
+              <line x1="26" y1="17" x2="30" y2="17" stroke="#3B6D11" stroke-width="1.5"/>
+            </svg>
+            <span>Training site</span>
+          </div>
+          <div class="venue-type-opt" data-vtype="Other" onclick="pickEditVenueType(this)">
+            <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="16" cy="16" r="12" stroke="#854F0B" stroke-width="1.5" fill="#FAEEDA"/>
+              <path d="M10 16 Q16 8 22 16 Q16 24 10 16Z" stroke="#854F0B" stroke-width="1.5" fill="none"/>
+              <line x1="4" y1="16" x2="28" y2="16" stroke="#854F0B" stroke-width="1" opacity=".5"/>
+              <line x1="16" y1="4" x2="16" y2="28" stroke="#854F0B" stroke-width="1" opacity=".5"/>
+            </svg>
+            <span>Other</span>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:.5rem">
+        <p style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:4px">Venue link:</p>
+        <div class="link-copy"><span id="edit-venue-link-text" style="word-break:break-all;flex:1"></span><button class="btn btn-ghost btn-sm" onclick="copyEditVenueLink()">Copy</button></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="deleteVenue()">Delete venue</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-edit-venue')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditVenue()">Save changes</button>
+    </div>
+  </div>
+</div>
+<!-- EDIT OPERATION -->
+<div class="modal-overlay" id="modal-edit-op">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Edit operation</span><button class="modal-close" onclick="closeModal('modal-edit-op')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-op-id"/>
+      <div class="field"><label>Operation type</label><select id="edit-op-type"></select></div>
+      <div class="field"><label>Pitch area / zone</label><input id="edit-op-zone" type="text"/></div>
+      <div class="field"><label>Equipment used</label><input id="edit-op-equipment" type="text"/></div>
+      <div class="field"><label>Weather conditions</label><input id="edit-op-weather" type="text"/></div>
+      <div class="field">
+        <label>Done by (staff)</label>
+        <div class="staff-tags" id="edit-staff-tags"></div>
+        <div class="staff-input-row" style="margin-top:8px">
+          <input id="edit-staff-input" type="text" placeholder="Add staff name..."/>
+          <button class="btn btn-ghost btn-sm" onclick="addEditStaff()">Add</button>
+        </div>
+      </div>
+      <div class="field"><label>Notes / observations</label><textarea id="edit-op-notes"></textarea></div>
+      <div class="field"><label>Date & time</label><input id="edit-op-date" type="datetime-local"/></div>
+      <div class="field">
+        <label>Photos (max 4)</label>
+        <div class="photo-upload-area">
+          <input type="file" accept="image/*" multiple id="edit-photo-input" onchange="handlePhotoSelect(this,'edit')"/>
+          <div class="photo-upload-icon">📷</div>
+          <div class="photo-upload-text">Tap to add / replace photos</div>
+          <div class="photo-upload-hint">JPG, PNG · max 4 photos</div>
+        </div>
+        <div class="photo-previews" id="edit-photo-previews"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="deleteOperation()">Delete</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-edit-op')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditOperation()">Save changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- MANAGE OP TYPES -->
+<div class="modal-overlay" id="modal-op-types">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Manage operation types</span><button class="modal-close" onclick="closeModal('modal-op-types')">✕</button></div>
+    <div class="modal-body">
+      <div id="op-types-list" style="margin-bottom:1rem"></div>
+      <div style="display:flex;gap:8px">
+        <input id="new-op-type-input" type="text" placeholder="New operation type..." style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;outline:none"/>
+        <button class="btn btn-blue btn-sm" onclick="addOpType()">Add</button>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-primary" onclick="closeModal('modal-op-types')">Done</button></div>
+  </div>
+</div>
+
+<!-- VENUE CONTACT EDIT -->
+<div class="modal-overlay" id="modal-venue-contact">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">My contact details</span><button class="modal-close" onclick="closeModal('modal-venue-contact')">✕</button></div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:1rem">Update the contact information for this venue. Only you and the admin can see this.</p>
+      <div class="field"><label>Responsible person</label><input id="vc-person" type="text" placeholder="e.g. Jan Kowalski"/></div>
+      <div class="field"><label>Contact phone</label><input id="vc-phone" type="tel" placeholder="e.g. +48 600 123 456"/></div>
+      <div class="field"><label>Contact email</label><input id="vc-email" type="email" placeholder="e.g. jan@stadion.pl"/></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-venue-contact')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveVenueContact()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHANGE PASSWORD -->
+<div class="modal-overlay" id="modal-change-password">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Change admin password</span><button class="modal-close" onclick="closeModal('modal-change-password')">✕</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Current password</label><input id="cp-current" type="password" placeholder="Current password"/></div>
+      <div class="field"><label>New password</label><input id="cp-new" type="password" placeholder="New password (min 8 chars)"/></div>
+      <div class="field"><label>Confirm new password</label><input id="cp-confirm" type="password" placeholder="Repeat new password"/></div>
+      <div id="cp-error" style="display:none;font-size:12px;color:var(--red);padding:8px 12px;background:var(--red-pale);border-radius:var(--radius-sm)"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-change-password')">Cancel</button>
+      <button class="btn btn-primary" onclick="changePassword()">Update password</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROJECT VIEWER LINK -->
+<div class="modal-overlay" id="modal-viewer-link">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Project viewer link</span><button class="modal-close" onclick="closeModal('modal-viewer-link')">✕</button></div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:1rem">Share this link to give read-only access to this project. Anyone with the link can view all venues and operations but cannot edit anything.</p>
+      <div id="viewer-link-display" class="link-copy">
+        <span id="viewer-link-text" style="word-break:break-all;flex:1;font-size:12px"></span>
+        <button class="btn btn-ghost btn-sm" onclick="copyViewerLink()">Copy</button>
+      </div>
+      <div style="margin-top:1rem;display:flex;gap:8px">
+        <button class="btn btn-danger btn-sm" onclick="revokeViewerLink()">🔄 Regenerate link</button>
+        <span style="font-size:12px;color:var(--text-hint);align-self:center">Old link will stop working</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="closeModal('modal-viewer-link')">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+  <button class="lightbox-close" onclick="closeLightboxBtn()">✕</button>
+  <img id="lightbox-img" src="" alt=""/>
+  <div class="lightbox-nav">
+    <button onclick="lightboxNav(-1)">←</button>
+    <span class="lightbox-counter" id="lightbox-counter"></span>
+    <button onclick="lightboxNav(1)">→</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+// ════════════════════════════════════════
+// SUPABASE CONFIG
+// ════════════════════════════════════════
+const SUPA_URL = 'https://dqlcgqfkyvzneakgcyxq.supabase.co';
+const SUPA_KEY = 'sb_publishable_8_HjwuO-JgyzcpahkWXepg_Z-v3UUYm';
+const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+// ════════════════════════════════════════
+// STATE (local cache only — source of truth is Supabase)
+// ════════════════════════════════════════
+// ════════════════════════════════════════
+const ADMIN_EMAILS = ['kris.puzio@fifa.org','kpuzio33@gmail.com'];
+const ADMIN_PASS_KEY = 'pitchops_admin_pass';
+
+let state = {
+  projects: [],
+  venues: [],
+  operations: [],
+  opTypes: ['Mowing','Aeration','Scarifying','Top dressing','Seeding','Fertilizing','Irrigation check','Line marking','Pest/disease treatment'],
+  currentVenueId: null,
+  currentProjectId: null,
+  currentViewerProjectId: null,
+  currentStaff: [],
+  editStaff: [],
+  selectedProjColor: '#185FA5',
+  editProjColor: '#185FA5',
+  selectedVenueType: 'Stadium',
+  selectedEditVenueType: 'Stadium',
+  adminFlags: {},
+  adminComments: {},
+  lang: 'en',
+  projectFilter: 'all',
+};
+
+function getAdminPass(){ return localStorage.getItem(ADMIN_PASS_KEY)||'admin123'; }
+
+// Data loaded from Supabase on login
+function save() { /* data saved to Supabase directly */ }
+
+// ── SUPABASE LOADERS ──
+async function loadAll() {
+  showLoading(true);
+  try {
+    const [proj, ven, ops, types] = await Promise.all([
+      supa.from('pitchops_projects').select('*').order('created_at'),
+      supa.from('pitchops_venues').select('*').order('created_at'),
+      supa.from('pitchops_operations').select('*').order('operation_date', {ascending:false}),
+      supa.from('pitchops_op_types').select('*').order('name'),
+    ]);
+    state.projects = (proj.data||[]).map(dbToProject);
+    state.venues = (ven.data||[]).map(dbToVenue);
+    state.operations = (ops.data||[]).map(dbToOp);
+    state.opTypes = (types.data||[]).map(t=>t.name);
+  } catch(e) { showToast('Error loading data: '+e.message); }
+  showLoading(false);
+}
+
+async function loadVenueData(venueId) {
+  showLoading(true);
+  try {
+    const [ops, types] = await Promise.all([
+      supa.from('pitchops_operations').select('*').eq('venue_id', venueId).order('operation_date', {ascending:false}),
+      supa.from('pitchops_op_types').select('*').order('name'),
+    ]);
+    state.operations = state.operations.filter(o=>o.venueId!==venueId).concat((ops.data||[]).map(dbToOp));
+    state.opTypes = (types.data||[]).map(t=>t.name);
+  } catch(e) { showToast('Error loading data: '+e.message); }
+  showLoading(false);
+}
+
+// ── DB MAPPERS ──
+function dbToProject(r){ return {id:r.id,code:r.code,name:r.name,country:r.country||'',status:r.status||'planned',color:r.color||'#185FA5',viewerToken:r.viewer_token||'',createdAt:r.created_at}; }
+function dbToVenue(r){ return {id:r.id,name:r.name,city:r.city||'',color:r.color||'#185FA5',venueType:r.venue_type||'Stadium',token:r.token,projectIds:r.project_ids||[],responsiblePerson:r.responsible_person||'',contactPhone:r.contact_phone||'',contactEmail:r.contact_email||'',createdAt:r.created_at}; }
+function dbToOp(r){ return {id:r.id,venueId:r.venue_id,type:r.type,zone:r.zone||'',equipment:r.equipment||'',weather:r.weather||'',staff:r.staff||[],notes:r.notes||'',date:r.operation_date,photos:r.photos||[],flagged:r.flagged||false,adminComment:r.admin_comment||'',createdAt:r.created_at}; }
+
+function projectToDb(p){ return {id:p.id,code:p.code,name:p.name,country:p.country,status:p.status,color:p.color,viewer_token:p.viewerToken||null}; }
+function venueToDb(v){ return {id:v.id,name:v.name,city:v.city,color:v.color,token:v.token,project_ids:v.projectIds,venue_type:v.venueType||'Stadium',responsible_person:v.responsiblePerson||null,contact_phone:v.contactPhone||null,contact_email:v.contactEmail||null}; }
+function opToDb(o){ return {id:o.id,venue_id:o.venueId,type:o.type,zone:o.zone,equipment:o.equipment,weather:o.weather,staff:o.staff,notes:o.notes,operation_date:o.date,photos:o.photos,flagged:o.flagged||false,admin_comment:o.adminComment||''}; }
+
+// ── LOADING INDICATOR ──
+function showLoading(on){
+  let el=document.getElementById('global-loader');
+  if(!el){ el=document.createElement('div'); el.id='global-loader'; el.style.cssText='position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#185FA5,#378ADD);z-index:999;transition:opacity .3s'; document.body.appendChild(el); }
+  el.style.opacity=on?'1':'0';
+}
+
+// ════════════════════════════════════════
+// I18N
+// ════════════════════════════════════════
+const i18n = {
+  en:{ stat_total:'This month',stat_last:'Last op',stat_common:'Top type',log_op:'Log new operation',op_type:'Operation type',op_zone:'Pitch area / zone',op_zone_custom:'Custom zone',op_equipment:'Equipment used',op_weather:'Weather conditions',op_staff:'Done by (staff)',op_staff_hint:'You can add multiple staff members',op_notes:'Notes / observations',op_date:'Date & time',btn_log:'Log operation',history:'Operation history',op_photos:'Photos (max 4)',photo_tap:'Tap to add photos',photo_hint:'JPG, PNG · max 4 photos' },
+  pl:{ stat_total:'Ten miesiąc',stat_last:'Ostatnia op.',stat_common:'Dominuje',log_op:'Dodaj operację',op_type:'Typ operacji',op_zone:'Strefa boiska',op_zone_custom:'Własna strefa',op_equipment:'Sprzęt',op_weather:'Pogoda',op_staff:'Wykonał/a',op_staff_hint:'Możesz dodać kilka osób',op_notes:'Notatki',op_date:'Data i godzina',btn_log:'Zapisz operację',history:'Historia operacji',op_photos:'Zdjęcia (max 4)',photo_tap:'Dotknij aby dodać zdjęcia',photo_hint:'JPG, PNG · max 4 zdjęcia' },
+  es:{ stat_total:'Este mes',stat_last:'Última op.',stat_common:'Más común',log_op:'Registrar operación',op_type:'Tipo de operación',op_zone:'Zona del terreno',op_zone_custom:'Zona personalizada',op_equipment:'Equipo utilizado',op_weather:'Condiciones meteorológicas',op_staff:'Realizado por',op_staff_hint:'Puedes añadir varios empleados',op_notes:'Notas / observaciones',op_date:'Fecha y hora',btn_log:'Registrar',history:'Historial',op_photos:'Fotos (máx 4)',photo_tap:'Toca para añadir fotos',photo_hint:'JPG, PNG · máx 4 fotos' },
+  fr:{ stat_total:'Ce mois',stat_last:'Dernière op.',stat_common:'Plus fréquent',log_op:"Ajouter opération",op_type:"Type d'opération",op_zone:'Zone du terrain',op_zone_custom:'Zone personnalisée',op_equipment:'Équipement utilisé',op_weather:'Météo',op_staff:'Réalisé par',op_staff_hint:'Vous pouvez ajouter plusieurs agents',op_notes:'Notes / observations',op_date:'Date et heure',btn_log:'Enregistrer',history:'Historique',op_photos:'Photos (max 4)',photo_tap:'Appuyer pour ajouter des photos',photo_hint:'JPG, PNG · max 4 photos' },
+  de:{ stat_total:'Diesen Monat',stat_last:'Letzte Op.',stat_common:'Häufigste',log_op:'Neue Maßnahme',op_type:'Maßnahmentyp',op_zone:'Bereich',op_zone_custom:'Benutzerdefinierter Bereich',op_equipment:'Geräte',op_weather:'Wetterbedingungen',op_staff:'Durchgeführt von',op_staff_hint:'Mehrere Mitarbeiter möglich',op_notes:'Notizen',op_date:'Datum und Uhrzeit',btn_log:'Maßnahme speichern',history:'Maßnahmenhistorie',op_photos:'Fotos (max 4)',photo_tap:'Tippen um Fotos hinzuzufügen',photo_hint:'JPG, PNG · max 4 Fotos' },
+  pt:{ stat_total:'Este mês',stat_last:'Última op.',stat_common:'Mais comum',log_op:'Registar operação',op_type:'Tipo de operação',op_zone:'Zona do relvado',op_zone_custom:'Zona personalizada',op_equipment:'Equipamento',op_weather:'Condições meteorológicas',op_staff:'Realizado por',op_staff_hint:'Pode adicionar vários trabalhadores',op_notes:'Notas / observações',op_date:'Data e hora',btn_log:'Registar',history:'Histórico',op_photos:'Fotos (máx 4)',photo_tap:'Toque para adicionar fotos',photo_hint:'JPG, PNG · máx 4 fotos' },
+};
+function t(k){ return (i18n[state.lang]||i18n.en)[k]||k; }
+function setLang(l){
+  state.lang=l; save();
+  document.querySelectorAll('[data-i18n]').forEach(el=>{ const v=(i18n[l]||i18n.en)[el.dataset.i18n]; if(v) el.textContent=v; });
+  document.querySelectorAll('.lang-select,#lang-select-login').forEach(s=>s.value=l);
+}
+
+// ════════════════════════════════════════
+// SCREENS
+// ════════════════════════════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function logout(){ state.currentVenueId=null; state.currentProjectId=null; showScreen('screen-login'); }
+function backToProjects(){ state.currentProjectId=null; showScreen('screen-projects'); renderProjects(); }
+
+// ── VIEWER LINK ──
+function openViewerLinkModal(){
+  const pid=state.currentProjectId; if(!pid) return;
+  const proj=state.projects.find(p=>p.id===pid); if(!proj) return;
+  if(!proj.viewerToken) proj.viewerToken=genToken();
+  const link=window.location.href.split('?')[0]+'?view='+proj.viewerToken;
+  document.getElementById('viewer-link-text').textContent=link;
+  openModal('modal-viewer-link');
+  // persist token if new
+  supa.from('pitchops_projects').update({viewer_token:proj.viewerToken}).eq('id',pid);
+}
+
+function copyViewerLink(){
+  navigator.clipboard.writeText(document.getElementById('viewer-link-text').textContent).then(()=>showToast('Viewer link copied!'));
+}
+
+async function revokeViewerLink(){
+  if(!confirm('Regenerate link? The old link will immediately stop working.')) return;
+  const pid=state.currentProjectId; if(!pid) return;
+  const proj=state.projects.find(p=>p.id===pid); if(!proj) return;
+  proj.viewerToken=genToken();
+  await supa.from('pitchops_projects').update({viewer_token:proj.viewerToken}).eq('id',pid);
+  const link=window.location.href.split('?')[0]+'?view='+proj.viewerToken;
+  document.getElementById('viewer-link-text').textContent=link;
+  showToast('New viewer link generated!');
+}
+
+// ── VIEWER DASHBOARD ──
+async function enterViewerDashboard(proj){
+  state.currentViewerProjectId=proj.id;
+  document.getElementById('viewer-badge').textContent=proj.code+' — View only';
+  document.getElementById('viewer-project-tag').textContent=proj.code;
+  document.getElementById('viewer-project-name').textContent=proj.name;
+  document.getElementById('viewer-project-meta').textContent=(proj.country?'📍 '+proj.country+' · ':'')+({active:'🟢 Active',planned:'🟡 Planned',finished:'⚫ Finished'}[proj.status]||'');
+  document.getElementById('viewer-hero').style.background=`linear-gradient(135deg,${proj.color}dd 0%,${proj.color} 100%)`;
+
+  // load all data for this project
+  showLoading(true);
+  const vids_res = await supa.from('pitchops_venues').select('*');
+  const allVenues = (vids_res.data||[]).map(dbToVenue).filter(v=>v.projectIds.includes(proj.id));
+  state.venues = allVenues;
+  const vids = allVenues.map(v=>v.id);
+  if(vids.length){
+    const ops_res = await supa.from('pitchops_operations').select('*').in('venue_id',vids).order('operation_date',{ascending:false});
+    state.operations = (ops_res.data||[]).map(dbToOp);
+  } else { state.operations=[]; }
+  const types_res = await supa.from('pitchops_op_types').select('*').order('name');
+  state.opTypes = (types_res.data||[]).map(t=>t.name);
+  showLoading(false);
+
+  const venues=projectVenues(proj.id);
+  document.getElementById('vw-stat-venues').textContent=venues.length;
+  document.getElementById('vw-stat-ops').textContent=state.operations.length;
+
+  // viewer venue list — copy link only, no edit/delete
+  const vlist=document.getElementById('viewer-venue-list');
+  if(!venues.length){ vlist.innerHTML=`<div class="empty-state"><div class="ico">🏟</div><div>No venues in this project.</div></div>`; }
+  else {
+    vlist.innerHTML=venues.map(v=>{
+      const vc=state.operations.filter(o=>o.venueId===v.id).length;
+      const cityShort=(v.city||'').split(',')[0].trim();
+      return `<div class="venue-item" onclick="focusViewerVenue('${v.id}')">
+        <div class="venue-dot">${venueTypeDot(v.venueType,v.color)}</div>
+        <div style="flex:1;min-width:0">
+          <div class="venue-item-name">${esc(v.name)}</div>
+          <div class="venue-item-city">${cityShort?esc(cityShort)+' · ':''}${vc} op${vc!==1?'s':''}</div>
+          ${v.responsiblePerson||v.contactPhone?`<div class="venue-item-contact">${v.responsiblePerson?`<span>👤 ${esc(v.responsiblePerson)}</span>`:''}${v.contactPhone?`<span>📞 ${esc(v.contactPhone)}</span>`:''}</div>`:''}
+          <div class="venue-item-actions">
+            <button class="btn btn-ghost btn-sm" title="Copy venue link" onclick="copyVenueViewerLink(event,'${v.token}')">🔗 Copy venue link</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // populate viewer filters
+  document.getElementById('vw-filter-venue').innerHTML=`<option value="">All venues</option>`+venues.map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('');
+  document.getElementById('vw-filter-type').innerHTML=`<option value="">All types</option>`+state.opTypes.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
+  renderViewerOps();
+  showScreen('screen-viewer');
+}
+
+function focusViewerVenue(vid){
+  document.getElementById('vw-filter-venue').value=vid;
+  renderViewerOps();
+  document.querySelectorAll('#viewer-venue-list .venue-item').forEach(el=>el.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+}
+
+function copyVenueViewerLink(e,token){
+  e.stopPropagation();
+  const link=window.location.href.split('?')[0]+'?token='+token;
+  navigator.clipboard.writeText(link).then(()=>showToast('Venue link copied!'));
+}
+
+function renderViewerOps(){
+  const fVenue=document.getElementById('vw-filter-venue')?.value||'';
+  const fType=document.getElementById('vw-filter-type')?.value||'';
+  const fFrom=document.getElementById('vw-filter-from')?.value;
+  const fTo=document.getElementById('vw-filter-to')?.value;
+  let ops=[...state.operations].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  if(fVenue) ops=ops.filter(o=>o.venueId===fVenue);
+  if(fType) ops=ops.filter(o=>o.type===fType);
+  if(fFrom) ops=ops.filter(o=>new Date(o.date)>=new Date(fFrom));
+  if(fTo) ops=ops.filter(o=>new Date(o.date)<=new Date(fTo+'T23:59:59'));
+  const tbody=document.getElementById('viewer-ops-tbody');
+  const empty=document.getElementById('viewer-ops-empty');
+  if(!ops.length){tbody.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  tbody.innerHTML=ops.map(op=>{
+    const venue=state.venues.find(v=>v.id===op.venueId);
+    const badge=opBadge(op.type);
+    const staffStr=(op.staff&&op.staff.length)?op.staff.join(', '):'—';
+    return `<tr>
+      <td style="white-space:nowrap;font-size:12px">${formatDateOnly(op.date)}</td>
+      <td><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:${venue?.color||'#888'};flex-shrink:0"></span>${esc(venue?.name||'')}</span></td>
+      <td><span class="badge" style="background:${badge.bg};color:${badge.fg}">${esc(op.type)}</span></td>
+      <td style="font-size:12px">${esc(op.zone||'—')}</td>
+      <td style="font-size:12px">${esc(staffStr)}</td>
+      <td style="font-size:12px;max-width:200px;white-space:pre-wrap;word-break:break-word">${esc(op.notes||'')}</td>
+      <td>${op.photos&&op.photos.length?`<div class="admin-photo-strip">${op.photos.map((p,i)=>`<img src="${p.dataUrl}" onclick="openLightboxFromOp('${op.id}',${i})">`).join('')}</div>`:'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function clearViewerFilters(){
+  document.getElementById('vw-filter-venue').value='';
+  document.getElementById('vw-filter-type').value='';
+  document.getElementById('vw-filter-from').value='';
+  document.getElementById('vw-filter-to').value='';
+  document.querySelectorAll('#viewer-venue-list .venue-item').forEach(el=>el.classList.remove('selected'));
+  renderViewerOps();
+}
+
+async function adminLogin(){
+  const email = document.getElementById('admin-email-input').value.trim().toLowerCase();
+  const pass = document.getElementById('admin-pass-input').value;
+  const errEl = document.getElementById('admin-login-error');
+  errEl.style.display='none';
+  if(!ADMIN_EMAILS.includes(email)){
+    errEl.textContent='This email is not authorised for admin access.';
+    errEl.style.display='block'; return;
+  }
+  if(pass !== getAdminPass()){
+    errEl.textContent='Incorrect password.';
+    errEl.style.display='block'; return;
+  }
+  await loadAll();
+  populateOpTypeSelects();
+  showScreen('screen-projects'); renderProjects();
+}
+
+function changePassword(){
+  const cur=document.getElementById('cp-current').value;
+  const nw=document.getElementById('cp-new').value;
+  const cf=document.getElementById('cp-confirm').value;
+  const err=document.getElementById('cp-error');
+  err.style.display='none';
+  if(cur!==getAdminPass()){err.textContent='Current password is incorrect.';err.style.display='block';return;}
+  if(nw.length<8){err.textContent='New password must be at least 8 characters.';err.style.display='block';return;}
+  if(nw!==cf){err.textContent='Passwords do not match.';err.style.display='block';return;}
+  localStorage.setItem(ADMIN_PASS_KEY,nw);
+  closeModal('modal-change-password');
+  document.getElementById('cp-current').value='';
+  document.getElementById('cp-new').value='';
+  document.getElementById('cp-confirm').value='';
+  showToast('Password updated successfully!');
+}
+
+async function venueTokenLogin(){
+  const tok = document.getElementById('venue-token-input').value.trim();
+  showLoading(true);
+  const {data:venues} = await supa.from('pitchops_venues').select('*').eq('token',tok);
+  showLoading(false);
+  if(venues&&venues.length){
+    const venue=dbToVenue(venues[0]);
+    state.venues=[venue];
+    state.currentVenueId=venue.id;
+    await loadVenueData(venue.id);
+    populateOpTypeSelects();
+    enterVenueDashboard(venue);
+  } else showToast('Invalid venue token');
+}
+
+// ════════════════════════════════════════
+// PROJECTS
+// ════════════════════════════════════════
+let _projFilter = 'all';
+
+function filterProjects(f, btn){
+  _projFilter = f;
+  document.querySelectorAll('.status-pill').forEach(b=>b.classList.remove('active-pill'));
+  btn.classList.add('active-pill');
+  renderProjects();
+}
+
+function renderProjects(){
+  const search = (document.getElementById('project-search')?.value||'').toLowerCase();
+  let list = [...state.projects].sort((a,b)=>{
+    const order={active:0,planned:1,finished:2};
+    return (order[a.status]||0)-(order[b.status]||0) || a.code.localeCompare(b.code);
+  });
+  if(_projFilter!=='all') list=list.filter(p=>p.status===_projFilter);
+  if(search) list=list.filter(p=>p.code.toLowerCase().includes(search)||p.name.toLowerCase().includes(search)||(p.country||'').toLowerCase().includes(search));
+
+  const grid = document.getElementById('projects-grid');
+  if(!list.length){
+    grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="ico">🏆</div><div>No projects yet. Click "+ New project" to create your first one.</div></div>`;
+    return;
+  }
+  grid.innerHTML = list.map(p=>{
+    const venueCount = state.venues.filter(v=>v.projectIds&&v.projectIds.includes(p.id)).length;
+    const opCount = projectOps(p.id).length;
+    const statusClass = {active:'status-active',planned:'status-planned',finished:'status-finished'}[p.status]||'status-planned';
+    const statusLabel = {active:'Active',planned:'Planned',finished:'Finished'}[p.status]||p.status;
+    return `<div class="project-card" onclick="openProject('${p.id}')">
+      <div class="project-card-banner" style="background:${p.color}"></div>
+      <div class="project-card-body">
+        <div class="project-card-code">${esc(p.code)}</div>
+        <div class="project-card-name">${esc(p.name)}</div>
+        <div class="project-card-meta">${p.country?'📍 '+esc(p.country)+'  ·  ':''} ${opCount} operations</div>
+        <div class="project-card-footer">
+          <span class="project-venues-count">${venueCount} venue${venueCount!==1?'s':''}</span>
+          <div style="display:flex;align-items:center;gap:6px">
+            <button class="btn btn-ghost btn-sm" onclick="editProjectModal(event,'${p.id}')">Edit</button>
+            <span class="status-badge ${statusClass}">${statusLabel}</span>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function createProject(){
+  const code = document.getElementById('new-proj-code').value.trim();
+  const name = document.getElementById('new-proj-name').value.trim();
+  if(!code||!name){ showToast('Please enter project code and name'); return; }
+  const proj = {
+    id:'proj_'+Date.now(), code, name,
+    country: document.getElementById('new-proj-country').value.trim(),
+    status: document.getElementById('new-proj-status').value,
+    color: state.selectedProjColor,
+    createdAt: new Date().toISOString()
+  };
+  const {error} = await supa.from('pitchops_projects').insert(projectToDb(proj));
+  if(error){ showToast('Error: '+error.message); return; }
+  state.projects.push(proj);
+  closeModal('modal-add-project');
+  document.getElementById('new-proj-code').value='';
+  document.getElementById('new-proj-name').value='';
+  document.getElementById('new-proj-country').value='';
+  renderProjects(); showToast('Project created!');
+}
+
+function editProjectModal(e, pid){
+  e.stopPropagation();
+  const p = state.projects.find(x=>x.id===pid); if(!p) return;
+  document.getElementById('edit-proj-id').value=pid;
+  document.getElementById('edit-proj-code').value=p.code;
+  document.getElementById('edit-proj-name').value=p.name;
+  document.getElementById('edit-proj-country').value=p.country||'';
+  document.getElementById('edit-proj-status').value=p.status;
+  state.editProjColor=p.color;
+  document.querySelectorAll('#edit-proj-color-opts .color-opt').forEach(el=>{
+    el.classList.toggle('picked', el.dataset.c===p.color);
+  });
+  openModal('modal-edit-project');
+}
+
+async function saveEditProject(){
+  const id=document.getElementById('edit-proj-id').value;
+  const idx=state.projects.findIndex(p=>p.id===id); if(idx===-1) return;
+  state.projects[idx]={...state.projects[idx],
+    code:document.getElementById('edit-proj-code').value.trim(),
+    name:document.getElementById('edit-proj-name').value.trim(),
+    country:document.getElementById('edit-proj-country').value.trim(),
+    status:document.getElementById('edit-proj-status').value,
+    color:state.editProjColor,
+  };
+  const {error} = await supa.from('pitchops_projects').update(projectToDb(state.projects[idx])).eq('id',id);
+  if(error){ showToast('Error: '+error.message); return; }
+  closeModal('modal-edit-project'); renderProjects();
+  if(state.currentProjectId===id) renderProjectDetail(id);
+  showToast('Project updated');
+}
+
+async function deleteProject(){
+  const id=document.getElementById('edit-proj-id').value;
+  if(!confirm('Delete this project? Venues and operations will NOT be deleted.')) return;
+  const {error} = await supa.from('pitchops_projects').delete().eq('id',id);
+  if(error){ showToast('Error: '+error.message); return; }
+  state.projects=state.projects.filter(p=>p.id!==id);
+  // remove project from all venues
+  for(const v of state.venues){
+    if(v.projectIds&&v.projectIds.includes(id)){
+      v.projectIds=v.projectIds.filter(pid=>pid!==id);
+      await supa.from('pitchops_venues').update({project_ids:v.projectIds}).eq('id',v.id);
+    }
+  }
+  closeModal('modal-edit-project'); renderProjects(); showToast('Project deleted');
+}
+
+function openProject(pid){
+  state.currentProjectId=pid;
+  renderProjectDetail(pid);
+  showScreen('screen-project-detail');
+}
+
+function renderProjectDetail(pid){
+  const proj = state.projects.find(p=>p.id===pid); if(!proj) return;
+  // hero styling
+  const hero = document.getElementById('project-hero');
+  hero.style.background=`linear-gradient(135deg, ${proj.color}dd 0%, ${proj.color} 100%)`;
+  document.getElementById('detail-breadcrumb').textContent=proj.code;
+  document.getElementById('detail-project-tag').textContent=proj.code;
+  document.getElementById('detail-project-name').textContent=proj.name;
+  document.getElementById('detail-project-meta').textContent=(proj.country?'📍 '+proj.country+' · ':'')+({active:'🟢 Active',planned:'🟡 Planned',finished:'⚫ Finished'}[proj.status]||'');
+
+  const venues = projectVenues(pid);
+  const ops = projectOps(pid);
+  const now = new Date();
+  const today = now.toDateString();
+  const weekAgo = new Date(now-7*86400000);
+  document.getElementById('pd-stat-venues').textContent=venues.length;
+  document.getElementById('pd-stat-ops').textContent=ops.length;
+  document.getElementById('pd-stat-today').textContent=ops.filter(o=>new Date(o.date).toDateString()===today).length;
+  document.getElementById('pd-stat-week').textContent=ops.filter(o=>new Date(o.date)>=weekAgo).length;
+
+  // venue list
+  const vlist = document.getElementById('detail-venue-list');
+  if(!venues.length){ vlist.innerHTML=`<div class="empty-state"><div class="ico">🏟</div><div>No venues yet. Click "+ Add venue".</div></div>`; }
+  else {
+    vlist.innerHTML=venues.map(v=>{
+      const vc=state.operations.filter(o=>o.venueId===v.id).length;
+      const cityShort=(v.city||'').split(',')[0].trim();
+      return `<div class="venue-item" onclick="focusDetailVenue('${v.id}')">
+        <div class="venue-dot">${venueTypeDot(v.venueType, v.color)}</div>
+        <div style="flex:1;min-width:0">
+          <div class="venue-item-name">${esc(v.name)}</div>
+          <div class="venue-item-city">${cityShort ? esc(cityShort)+' · ' : ''}${vc} op${vc!==1?'s':''}</div>
+          ${v.responsiblePerson||v.contactPhone ? `<div class="venue-item-contact">
+            ${v.responsiblePerson?`<span>👤 ${esc(v.responsiblePerson)}</span>`:''}
+            ${v.contactPhone?`<span>📞 ${esc(v.contactPhone)}</span>`:''}
+          </div>` : ''}
+          <div class="venue-item-actions">
+            <button class="btn btn-ghost btn-sm" title="Copy link" onclick="copyVenueLinkById(event,'${v.token}')">🔗</button>
+            <button class="btn btn-ghost btn-sm" onclick="openEditVenueModal(event,'${v.id}')">✏️</button>
+            <button class="btn btn-danger btn-sm" onclick="removeVenueFromProject(event,'${v.id}')">×</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // populate filter dropdowns
+  const fv=document.getElementById('filter-venue');
+  fv.innerHTML=`<option value="">All venues</option>`+venues.map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('');
+  populateOpTypeSelects();
+  renderDetailOps();
+}
+
+function projectVenues(pid){
+  const typeOrder={'Stadium':0,'Training Site':1,'Other':2};
+  return state.venues
+    .filter(v=>v.projectIds&&v.projectIds.includes(pid))
+    .sort((a,b)=>{
+      const tA=typeOrder[a.venueType||'Stadium']??2;
+      const tB=typeOrder[b.venueType||'Stadium']??2;
+      if(tA!==tB) return tA-tB;
+      // Strip country suffix (e.g. "Katowice, Polska" → "katowice") for city comparison
+      const cityA=(a.city||'').split(',')[0].trim().toLowerCase();
+      const cityB=(b.city||'').split(',')[0].trim().toLowerCase();
+      if(cityA!==cityB) return cityA.localeCompare(cityB);
+      return (a.name||'').toLowerCase().localeCompare((b.name||'').toLowerCase());
+    });
+}
+function projectOps(pid){
+  const vids=new Set(projectVenues(pid).map(v=>v.id));
+  return state.operations.filter(o=>vids.has(o.venueId));
+}
+
+function focusDetailVenue(vid){
+  document.getElementById('filter-venue').value=vid;
+  renderDetailOps();
+  document.querySelectorAll('#detail-venue-list .venue-item').forEach(el=>el.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+}
+
+function renderDetailOps(){
+  const pid=state.currentProjectId; if(!pid) return;
+  const fVenue=document.getElementById('filter-venue')?.value||'';
+  const fType=document.getElementById('filter-type')?.value||'';
+  const fFrom=document.getElementById('filter-from')?.value;
+  const fTo=document.getElementById('filter-to')?.value;
+  let ops=[...projectOps(pid)].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  if(fVenue) ops=ops.filter(o=>o.venueId===fVenue);
+  if(fType) ops=ops.filter(o=>o.type===fType);
+  if(fFrom) ops=ops.filter(o=>new Date(o.date)>=new Date(fFrom));
+  if(fTo) ops=ops.filter(o=>new Date(o.date)<=new Date(fTo+'T23:59:59'));
+
+  const tbody=document.getElementById('detail-ops-tbody');
+  const empty=document.getElementById('detail-ops-empty');
+  if(!ops.length){ tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  tbody.innerHTML=ops.map(op=>{
+    const venue=state.venues.find(v=>v.id===op.venueId);
+    const badge=opBadge(op.type);
+    const flagged=op.flagged||false;
+    const comment=op.adminComment||'';
+    const staffStr=(op.staff&&op.staff.length)?op.staff.join(', '):'—';
+    return `<tr>
+      <td style="white-space:nowrap;font-size:12px">${formatDateOnly(op.date)}</td>
+      <td><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:${venue?.color||'#888'};flex-shrink:0"></span>${esc(venue?.name||'Unknown')}</span></td>
+      <td><span class="badge" style="background:${badge.bg};color:${badge.fg}">${esc(op.type)}</span></td>
+      <td style="font-size:12px">${esc(op.zone||'—')}</td>
+      <td style="font-size:12px">${esc(staffStr)}</td>
+      <td style="font-size:12px;max-width:220px">
+        ${op.notes?`<div style="white-space:pre-wrap;word-break:break-word;line-height:1.4;margin-bottom:4px">${esc(op.notes)}</div>`:''}
+        ${comment?`<div class="comment-text">💬 ${esc(comment)}</div>`:''}
+        <input type="text" placeholder="Comment..." value="${esc(comment)}" onchange="saveComment('${op.id}',this.value)" style="width:100%;font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:5px;font-family:'DM Sans',sans-serif;outline:none;margin-top:3px"/>
+      </td>
+      <td>${op.photos&&op.photos.length?`<div class="admin-photo-strip">${op.photos.map((p,i)=>`<img src="${p.dataUrl}" onclick="openLightboxFromOp('${op.id}',${i})">`).join('')}</div>`:'<span style="color:var(--text-hint);font-size:12px">—</span>'}</td>
+      <td><button class="flag-btn ${flagged?'flagged':''}" onclick="toggleFlag('${op.id}',this)">🚩</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function clearDetailFilters(){
+  document.getElementById('filter-venue').value='';
+  document.getElementById('filter-type').value='';
+  document.getElementById('filter-from').value='';
+  document.getElementById('filter-to').value='';
+  document.querySelectorAll('#detail-venue-list .venue-item').forEach(el=>el.classList.remove('selected'));
+  renderDetailOps();
+}
+
+// ════════════════════════════════════════
+// VENUES
+// ════════════════════════════════════════
+function genToken(){ return Math.random().toString(36).slice(2,10)+Math.random().toString(36).slice(2,6); }
+
+function openAddVenueModal(){
+  document.getElementById('new-venue-name').value='';
+  document.getElementById('new-venue-city').value='';
+  document.getElementById('venue-link-result').style.display='none';
+  state.selectedVenueType='Stadium';
+  document.querySelectorAll('.venue-type-opt').forEach((el,i)=>el.classList.toggle('picked',i===0));
+  document.getElementById('new-venue-person').value='';
+  document.getElementById('new-venue-phone').value='';
+  document.getElementById('new-venue-email').value='';
+  openModal('modal-add-venue');
+}
+
+async function createVenue(){
+  const name=document.getElementById('new-venue-name').value.trim();
+  if(!name){ showToast('Please enter a venue name'); return; }
+  const token=genToken();
+  const pid=state.currentProjectId;
+  // check if venue with same name already exists — if so, just add project link
+  let venue = state.venues.find(v=>v.name.toLowerCase()===name.toLowerCase());
+  if(!venue){
+    venue={id:'v_'+Date.now(),name,city:document.getElementById('new-venue-city').value.trim(),color:state.selectedVenueType==='Stadium'?'#185FA5':state.selectedVenueType==='Training Site'?'#3B6D11':'#854F0B',venueType:state.selectedVenueType,token,projectIds:[],responsiblePerson:document.getElementById('new-venue-person').value.trim(),contactPhone:document.getElementById('new-venue-phone').value.trim(),contactEmail:document.getElementById('new-venue-email').value.trim(),createdAt:new Date().toISOString()};
+    state.venues.push(venue);
+  }
+  if(pid && !venue.projectIds.includes(pid)) venue.projectIds.push(pid);
+  // upsert venue to Supabase
+  const {error} = await supa.from('pitchops_venues').upsert(venueToDb(venue));
+  if(error){ showToast('Error: '+error.message); return; }
+  const link=window.location.href.split('?')[0]+'?token='+venue.token;
+  document.getElementById('venue-link-text').textContent=link;
+  document.getElementById('venue-link-result').style.display='block';
+  renderProjectDetail(pid);
+  showToast('Venue added!');
+}
+
+function copyVenueLinkById(e,token){
+  e.stopPropagation();
+  navigator.clipboard.writeText(window.location.href.split('?')[0]+'?token='+token).then(()=>showToast('Link copied!'));
+}
+function copyVenueLink(){
+  navigator.clipboard.writeText(document.getElementById('venue-link-text').textContent).then(()=>showToast('Link copied!'));
+}
+
+async function removeVenueFromProject(e,vid){
+  e.stopPropagation();
+  if(!confirm('Remove this venue from the project?')) return;
+  const v=state.venues.find(x=>x.id===vid); if(!v) return;
+  v.projectIds=v.projectIds.filter(pid=>pid!==state.currentProjectId);
+  const {error} = await supa.from('pitchops_venues').update({project_ids:v.projectIds}).eq('id',vid);
+  if(error){ showToast('Error: '+error.message); return; }
+  renderProjectDetail(state.currentProjectId); showToast('Venue removed from project');
+}
+
+// ════════════════════════════════════════
+// VENUE DASHBOARD
+// ════════════════════════════════════════
+function enterVenueDashboard(venue){
+  const proj=state.projects.find(p=>venue.projectIds&&venue.projectIds.includes(p.id));
+  document.getElementById('venue-hero-name').textContent=venue.name;
+  document.getElementById('venue-hero-sub').textContent=venue.city||'Pitch operations log';
+  document.getElementById('venue-badge').textContent=venue.name;
+  const ptag=document.getElementById('venue-project-tag');
+  if(proj){ ptag.textContent=proj.code; ptag.style.display='inline-flex'; }
+  else ptag.style.display='none';
+  document.getElementById('new-op-date').value=nowLocal();
+  state.currentStaff=[]; currentPhotos.new=[];
+  renderStaffTags(); renderPhotoPreviews('new');
+  populateOpTypeSelects(); renderVenueStats(); renderVenueHistory();
+  renderVenueContactInfo();
+  showScreen('screen-venue');
+}
+
+function venueOps(){ return state.operations.filter(o=>o.venueId===state.currentVenueId).sort((a,b)=>new Date(b.date)-new Date(a.date)); }
+
+function renderVenueStats(){
+  const ops=venueOps(); const now=new Date();
+  const thisMonth=ops.filter(o=>{const d=new Date(o.date);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});
+  document.getElementById('stat-total').textContent=thisMonth.length;
+  if(ops.length){ const diff=Math.floor((now-new Date(ops[0].date))/86400000); document.getElementById('stat-last').textContent=diff===0?'Today':diff+'d'; }
+  else document.getElementById('stat-last').textContent='—';
+  if(ops.length){ const freq={}; ops.forEach(o=>freq[o.type]=(freq[o.type]||0)+1); const top=Object.entries(freq).sort((a,b)=>b[1]-a[1])[0]; document.getElementById('stat-common').textContent=top?top[0].slice(0,7):'—'; }
+  else document.getElementById('stat-common').textContent='—';
+}
+
+function renderVenueHistory(){
+  const search=(document.getElementById('venue-hist-search')?.value||'').toLowerCase();
+  const ops=venueOps().filter(o=>!search||o.type.toLowerCase().includes(search)||(o.notes||'').toLowerCase().includes(search)||(o.staff||[]).join(' ').toLowerCase().includes(search));
+  const container=document.getElementById('venue-history-list');
+  if(!ops.length){ container.innerHTML=`<div class="empty-state"><div class="ico">📋</div><div>No operations logged yet.</div></div>`; return; }
+  container.innerHTML=ops.map(op=>{
+    const badge=opBadge(op.type);
+    const staffStr=(op.staff&&op.staff.length)?op.staff.join(', '):'—';
+    return `<div class="hist-item">
+      <div class="op-badge" style="background:${badge.bg};color:${badge.fg}">${badge.abbr}</div>
+      <div class="hist-item-info">
+        <div class="hist-item-name">${esc(op.type)}</div>
+        <div class="hist-item-meta">${esc(op.zone||'')}${op.equipment?' · '+esc(op.equipment):''}${staffStr!=='—'?' · '+esc(staffStr):''}${op.weather?' · '+esc(op.weather):''}</div>
+        ${op.notes?`<div style="font-size:12px;color:var(--text-hint);margin-top:2px;font-style:italic">${esc(op.notes)}</div>`:''}
+        ${op.photos&&op.photos.length?`<div class="admin-photo-strip" style="margin-top:6px">${op.photos.map((p,i)=>`<img src="${p.dataUrl}" onclick="openLightboxFromOp('${op.id}',${i})">`).join('')}</div>`:''}
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
+        <div class="hist-item-date">${formatDate(op.date)}</div>
+        <button class="btn btn-ghost btn-sm" onclick="openEditModal('${op.id}')">Edit</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════
+// LOG / EDIT / DELETE OPERATION
+// ════════════════════════════════════════
+async function logOperation(){
+  const zoneEl=document.getElementById('new-op-zone');
+  const zone=zoneEl.value==='Custom'?(document.getElementById('new-op-zone-custom').value.trim()||'Custom'):zoneEl.value;
+  const op={
+    id:'op_'+Date.now(),
+    venueId:state.currentVenueId,
+    type:document.getElementById('new-op-type').value,
+    zone, equipment:document.getElementById('new-op-equipment').value.trim(),
+    weather:document.getElementById('new-op-weather').value.trim(),
+    staff:[...state.currentStaff],
+    notes:document.getElementById('new-op-notes').value.trim(),
+    date:document.getElementById('new-op-date').value||nowLocal(),
+    photos:currentPhotos.new.map(p=>({dataUrl:p.dataUrl,name:p.name})),
+    createdAt:new Date().toISOString()
+  };
+  const {error} = await supa.from('pitchops_operations').insert(opToDb(op));
+  if(error){ showToast('Error saving: '+error.message); return; }
+  state.operations.unshift(op);
+  document.getElementById('new-op-equipment').value='';
+  document.getElementById('new-op-weather').value='';
+  document.getElementById('new-op-notes').value='';
+  document.getElementById('new-op-date').value=nowLocal();
+  state.currentStaff=[]; currentPhotos.new=[];
+  renderStaffTags(); renderPhotoPreviews('new');
+  renderVenueStats(); renderVenueHistory();
+  showToast('Operation logged!');
+}
+
+function openEditModal(opId){
+  const op=state.operations.find(o=>o.id===opId); if(!op) return;
+  populateOpTypeSelects();
+  document.getElementById('edit-op-id').value=opId;
+  document.getElementById('edit-op-type').value=op.type;
+  document.getElementById('edit-op-zone').value=op.zone||'';
+  document.getElementById('edit-op-equipment').value=op.equipment||'';
+  document.getElementById('edit-op-weather').value=op.weather||'';
+  document.getElementById('edit-op-notes').value=op.notes||'';
+  document.getElementById('edit-op-date').value=op.date||'';
+  state.editStaff=op.staff?[...op.staff]:[];
+  renderEditStaffTags();
+  currentPhotos.edit=op.photos?op.photos.map(p=>({dataUrl:p.dataUrl,name:p.name||'photo'})):[];
+  renderPhotoPreviews('edit');
+  openModal('modal-edit-op');
+}
+
+async function saveEditOperation(){
+  const id=document.getElementById('edit-op-id').value;
+  const idx=state.operations.findIndex(o=>o.id===id); if(idx===-1) return;
+  state.operations[idx]={...state.operations[idx],
+    type:document.getElementById('edit-op-type').value,
+    zone:document.getElementById('edit-op-zone').value,
+    equipment:document.getElementById('edit-op-equipment').value.trim(),
+    weather:document.getElementById('edit-op-weather').value.trim(),
+    staff:[...state.editStaff],
+    notes:document.getElementById('edit-op-notes').value.trim(),
+    date:document.getElementById('edit-op-date').value,
+    photos:currentPhotos.edit.map(p=>({dataUrl:p.dataUrl,name:p.name||'photo'})),
+  };
+  const {error} = await supa.from('pitchops_operations').update(opToDb(state.operations[idx])).eq('id',id);
+  if(error){ showToast('Error: '+error.message); return; }
+  closeModal('modal-edit-op');
+  renderVenueHistory(); renderVenueStats(); renderDetailOps();
+  showToast('Operation updated');
+}
+
+async function deleteOperation(){
+  const id=document.getElementById('edit-op-id').value;
+  if(!confirm('Delete this operation?')) return;
+  const {error} = await supa.from('pitchops_operations').delete().eq('id',id);
+  if(error){ showToast('Error: '+error.message); return; }
+  state.operations=state.operations.filter(o=>o.id!==id);
+  closeModal('modal-edit-op');
+  renderVenueHistory(); renderVenueStats(); renderDetailOps();
+  showToast('Operation deleted');
+}
+
+// ════════════════════════════════════════
+// OP TYPES
+// ════════════════════════════════════════
+function populateOpTypeSelects(){
+  ['new-op-type','edit-op-type'].forEach(id=>{
+    const s=document.getElementById(id); if(!s) return;
+    s.innerHTML=state.opTypes.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
+  });
+  const ft=document.getElementById('filter-type');
+  if(ft) ft.innerHTML=`<option value="">All types</option>`+state.opTypes.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
+}
+function openManageTypesModal(){ renderOpTypesList(); openModal('modal-op-types'); }
+function renderOpTypesList(){
+  document.getElementById('op-types-list').innerHTML=state.opTypes.map((t,i)=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:13px">${esc(t)}</span>
+      <button class="btn btn-danger btn-sm" onclick="removeOpType(${i})">Remove</button>
+    </div>`).join('');
+}
+async function addOpType(){
+  const val=document.getElementById('new-op-type-input').value.trim();
+  if(!val||state.opTypes.includes(val)){ showToast(val?'Type already exists':'Enter a type name'); return; }
+  const {error} = await supa.from('pitchops_op_types').insert({name:val});
+  if(error){ showToast(error.message); return; }
+  state.opTypes.push(val);
+  document.getElementById('new-op-type-input').value='';
+  renderOpTypesList(); populateOpTypeSelects(); showToast('Type added');
+}
+async function removeOpType(i){
+  const name=state.opTypes[i];
+  await supa.from('pitchops_op_types').delete().eq('name',name);
+  state.opTypes.splice(i,1); renderOpTypesList(); populateOpTypeSelects();
+}
+
+// ════════════════════════════════════════
+// STAFF TAGS
+// ════════════════════════════════════════
+function addStaff(){
+  const inp=document.getElementById('staff-name-input'); const name=inp.value.trim(); if(!name) return;
+  if(!state.currentStaff.includes(name)){ state.currentStaff.push(name); renderStaffTags(); } inp.value='';
+}
+function removeStaff(name){ state.currentStaff=state.currentStaff.filter(n=>n!==name); renderStaffTags(); }
+function renderStaffTags(){
+  document.getElementById('staff-tags').innerHTML=state.currentStaff.map(n=>`
+    <div class="staff-tag"><span>${esc(n)}</span><button class="staff-tag-remove" onclick="removeStaff('${esc(n)}')">×</button></div>`).join('');
+}
+function addEditStaff(){
+  const inp=document.getElementById('edit-staff-input'); const name=inp.value.trim(); if(!name) return;
+  if(!state.editStaff.includes(name)){ state.editStaff.push(name); renderEditStaffTags(); } inp.value='';
+}
+function removeEditStaff(name){ state.editStaff=state.editStaff.filter(n=>n!==name); renderEditStaffTags(); }
+function renderEditStaffTags(){
+  document.getElementById('edit-staff-tags').innerHTML=state.editStaff.map(n=>`
+    <div class="staff-tag"><span>${esc(n)}</span><button class="staff-tag-remove" onclick="removeEditStaff('${esc(n)}')">×</button></div>`).join('');
+}
+document.getElementById('staff-name-input').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addStaff();}});
+document.getElementById('edit-staff-input').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addEditStaff();}});
+
+// ════════════════════════════════════════
+// PHOTOS
+// ════════════════════════════════════════
+const currentPhotos={new:[],edit:[]};
+const MAX_PHOTOS=4;
+function handlePhotoSelect(input,ctx){
+  const files=Array.from(input.files);
+  const allowed=MAX_PHOTOS-currentPhotos[ctx].length;
+  if(allowed<=0){showToast('Maximum 3 photos per operation');input.value='';return;}
+  files.slice(0,allowed).forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=e=>compressImage(e.target.result,1200,.82,dataUrl=>{
+      currentPhotos[ctx].push({dataUrl,name:file.name});renderPhotoPreviews(ctx);
+    });
+    reader.readAsDataURL(file);
+  });
+  if(files.length>allowed) showToast('Only '+allowed+' more photo(s) added');
+  input.value='';
+}
+function compressImage(dataUrl,maxDim,quality,cb){
+  const img=new Image(); img.onload=()=>{
+    let w=img.width,h=img.height;
+    if(w>maxDim||h>maxDim){ if(w>h){h=Math.round(h*maxDim/w);w=maxDim;}else{w=Math.round(w*maxDim/h);h=maxDim;} }
+    const c=document.createElement('canvas'); c.width=w; c.height=h;
+    c.getContext('2d').drawImage(img,0,0,w,h); cb(c.toDataURL('image/jpeg',quality));
+  }; img.src=dataUrl;
+}
+function renderPhotoPreviews(ctx){
+  const container=document.getElementById(ctx+'-photo-previews'); if(!container) return;
+  container.innerHTML=currentPhotos[ctx].map((p,i)=>`
+    <div class="photo-thumb">
+      <img src="${p.dataUrl}" onclick="openLightboxFromPreview('${ctx}',${i})"/>
+      <button class="photo-thumb-remove" onclick="removePhoto('${ctx}',${i})">✕</button>
+    </div>`).join('');
+}
+function removePhoto(ctx,idx){ currentPhotos[ctx].splice(idx,1); renderPhotoPreviews(ctx); }
+
+// lightbox
+let _lbPhotos=[],_lbIdx=0;
+function openLightbox(photos,idx){_lbPhotos=photos;_lbIdx=idx;updateLightbox();document.getElementById('lightbox').classList.add('open');}
+function openLightboxFromPreview(ctx,idx){openLightbox(currentPhotos[ctx].map(p=>p.dataUrl),idx);}
+function openLightboxFromOp(opId,idx){const op=state.operations.find(o=>o.id===opId);if(op?.photos?.length)openLightbox(op.photos.map(p=>p.dataUrl),idx);}
+function updateLightbox(){document.getElementById('lightbox-img').src=_lbPhotos[_lbIdx];document.getElementById('lightbox-counter').textContent=(_lbIdx+1)+' / '+_lbPhotos.length;document.querySelector('.lightbox-nav').style.display=_lbPhotos.length>1?'flex':'none';}
+function lightboxNav(d){_lbIdx=(_lbIdx+d+_lbPhotos.length)%_lbPhotos.length;updateLightbox();}
+function closeLightbox(e){if(e.target===document.getElementById('lightbox'))closeLightboxBtn();}
+function closeLightboxBtn(){document.getElementById('lightbox').classList.remove('open');}
+document.addEventListener('keydown',e=>{if(!document.getElementById('lightbox').classList.contains('open'))return;if(e.key==='ArrowLeft')lightboxNav(-1);if(e.key==='ArrowRight')lightboxNav(1);if(e.key==='Escape')closeLightboxBtn();});
+
+// ════════════════════════════════════════
+// EXPORT CSV
+// ════════════════════════════════════════
+function exportCSV(){
+  const pid=state.currentProjectId; if(!pid) return;
+  const ops=[...projectOps(pid)].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const rows=[['Date','Project','Venue','Type','Zone','Equipment','Weather','Staff','Notes','Photos','Flagged','Comment']];
+  const proj=state.projects.find(p=>p.id===pid);
+  ops.forEach(op=>{
+    const venue=state.venues.find(v=>v.id===op.venueId);
+    rows.push([op.date,proj?.code||'',venue?.name||'',op.type,op.zone||'',op.equipment||'',op.weather||'',(op.staff||[]).join('; '),op.notes||'',(op.photos||[]).length,state.adminFlags[op.id]?'Yes':'No',state.adminComments[op.id]||'']);
+  });
+  const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='pitchops_'+(proj?.code||'export')+'_'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
+  showToast('CSV exported!');
+}
+
+// ════════════════════════════════════════
+// FLAGS & COMMENTS
+// ════════════════════════════════════════
+async function toggleFlag(opId,btn){
+  const op=state.operations.find(o=>o.id===opId); if(!op) return;
+  op.flagged=!op.flagged; btn.classList.toggle('flagged',op.flagged);
+  await supa.from('pitchops_operations').update({flagged:op.flagged}).eq('id',opId);
+}
+async function saveComment(opId,val){
+  const op=state.operations.find(o=>o.id===opId); if(!op) return;
+  op.adminComment=val.trim();
+  await supa.from('pitchops_operations').update({admin_comment:op.adminComment}).eq('id',opId);
+}
+
+// ════════════════════════════════════════
+// COLOR PICKERS
+// ════════════════════════════════════════
+function pickProjColor(el){document.querySelectorAll('#proj-color-opts .color-opt').forEach(e=>e.classList.remove('picked'));el.classList.add('picked');state.selectedProjColor=el.dataset.c;}
+function pickEditProjColor(el){document.querySelectorAll('#edit-proj-color-opts .color-opt').forEach(e=>e.classList.remove('picked'));el.classList.add('picked');state.editProjColor=el.dataset.c;}
+function pickVenueType(el){document.querySelectorAll('#modal-add-venue .venue-type-opt').forEach(e=>e.classList.remove('picked'));el.classList.add('picked');state.selectedVenueType=el.dataset.vtype;}
+function pickEditVenueType(el){document.querySelectorAll('#edit-venue-type-opts .venue-type-opt').forEach(e=>e.classList.remove('picked'));el.classList.add('picked');state.selectedEditVenueType=el.dataset.vtype;}
+
+function openEditVenueModal(e, vid){
+  e.stopPropagation();
+  const v=state.venues.find(x=>x.id===vid); if(!v) return;
+  document.getElementById('edit-venue-id').value=vid;
+  document.getElementById('edit-venue-name').value=v.name;
+  document.getElementById('edit-venue-city').value=v.city||'';
+  document.getElementById('edit-venue-person').value=v.responsiblePerson||'';
+  document.getElementById('edit-venue-phone').value=v.contactPhone||'';
+  document.getElementById('edit-venue-email').value=v.contactEmail||'';
+  state.selectedEditVenueType=v.venueType||'Stadium';
+  document.querySelectorAll('#edit-venue-type-opts .venue-type-opt').forEach(el=>{
+    el.classList.toggle('picked', el.dataset.vtype===state.selectedEditVenueType);
+  });
+  const link=window.location.href.split('?')[0]+'?token='+v.token;
+  document.getElementById('edit-venue-link-text').textContent=link;
+  openModal('modal-edit-venue');
+}
+
+function copyEditVenueLink(){
+  navigator.clipboard.writeText(document.getElementById('edit-venue-link-text').textContent).then(()=>showToast('Link copied!'));
+}
+
+async function saveEditVenue(){
+  const id=document.getElementById('edit-venue-id').value;
+  const idx=state.venues.findIndex(v=>v.id===id); if(idx===-1) return;
+  const vtype=state.selectedEditVenueType;
+  const color=vtype==='Training Site'?'#3B6D11':vtype==='Other'?'#854F0B':'#185FA5';
+  const person=document.getElementById('edit-venue-person').value.trim();
+  const phone=document.getElementById('edit-venue-phone').value.trim();
+  const email=document.getElementById('edit-venue-email').value.trim();
+  state.venues[idx]={...state.venues[idx],
+    name:document.getElementById('edit-venue-name').value.trim(),
+    city:document.getElementById('edit-venue-city').value.trim(),
+    venueType:vtype, color,
+    responsiblePerson:person, contactPhone:phone, contactEmail:email
+  };
+  const {error}=await supa.from('pitchops_venues').update({
+    name:state.venues[idx].name,
+    city:state.venues[idx].city,
+    venue_type:vtype, color,
+    responsible_person:person, contact_phone:phone, contact_email:email
+  }).eq('id',id);
+  if(error){showToast('Error: '+error.message);return;}
+  closeModal('modal-edit-venue');
+  renderProjectDetail(state.currentProjectId);
+  showToast('Venue updated!');
+}
+
+async function deleteVenue(){
+  const id=document.getElementById('edit-venue-id').value;
+  if(!confirm('Delete this venue and ALL its operations permanently?')) return;
+  const {error}=await supa.from('pitchops_operations').delete().eq('venue_id',id);
+  if(error){showToast('Error: '+error.message);return;}
+  const {error:e2}=await supa.from('pitchops_venues').delete().eq('id',id);
+  if(e2){showToast('Error: '+e2.message);return;}
+  state.venues=state.venues.filter(v=>v.id!==id);
+  state.operations=state.operations.filter(o=>o.venueId!==id);
+  closeModal('modal-edit-venue');
+  renderProjectDetail(state.currentProjectId);
+  showToast('Venue deleted');
+}
+
+// ════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════
+function toggleCustomZone(){ document.getElementById('zone-custom-wrap').style.display=document.getElementById('new-op-zone').value==='Custom'?'block':'none'; }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function nowLocal(){ return new Date().toISOString().slice(0,16); }
+function formatDate(dt){ if(!dt) return '—'; const d=new Date(dt); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); }
+function formatDateOnly(dt){ if(!dt) return '—'; return new Date(dt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+
+function openVenueContactModal(){
+  const v=state.venues.find(x=>x.id===state.currentVenueId); if(!v) return;
+  document.getElementById('vc-person').value=v.responsiblePerson||'';
+  document.getElementById('vc-phone').value=v.contactPhone||'';
+  document.getElementById('vc-email').value=v.contactEmail||'';
+  openModal('modal-venue-contact');
+}
+
+async function saveVenueContact(){
+  const vid=state.currentVenueId;
+  const idx=state.venues.findIndex(v=>v.id===vid); if(idx===-1) return;
+  const person=document.getElementById('vc-person').value.trim();
+  const phone=document.getElementById('vc-phone').value.trim();
+  const email=document.getElementById('vc-email').value.trim();
+  state.venues[idx]={...state.venues[idx],responsiblePerson:person,contactPhone:phone,contactEmail:email};
+  const {error}=await supa.from('pitchops_venues').update({
+    responsible_person:person||null,contact_phone:phone||null,contact_email:email||null
+  }).eq('id',vid);
+  if(error){showToast('Error: '+error.message);return;}
+  closeModal('modal-venue-contact');
+  renderVenueContactInfo();
+  showToast('Contact details saved!');
+}
+
+function renderVenueContactInfo(){
+  const v=state.venues.find(x=>x.id===state.currentVenueId); if(!v) return;
+  const el=document.getElementById('venue-contact-info'); if(!el) return;
+  if(v.responsiblePerson||v.contactPhone||v.contactEmail){
+    el.style.display='block';
+    el.innerHTML=[
+      v.responsiblePerson?'👤 '+v.responsiblePerson:'',
+      v.contactPhone?'📞 '+v.contactPhone:'',
+      v.contactEmail?'✉️ '+v.contactEmail:''
+    ].filter(Boolean).join('&nbsp;&nbsp;·&nbsp;&nbsp;');
+  } else { el.style.display='none'; }
+}
+
+function venueTypeDot(type, color){
+  const c = color||'#185FA5';
+  if(type==='Training Site'){
+    return `<svg width="26" height="26" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="1" y="7" width="30" height="18" rx="3" fill="${c}22" stroke="${c}" stroke-width="1.8"/>
+      <line x1="16" y1="7" x2="16" y2="25" stroke="${c}" stroke-width="1.2" stroke-dasharray="2 2"/>
+      <rect x="9" y="7" width="14" height="18" fill="none" stroke="${c}" stroke-width="1" opacity=".5"/>
+      <circle cx="16" cy="16" r="3.5" stroke="${c}" stroke-width="1.5" fill="none"/>
+      <line x1="1" y1="16" x2="5" y2="16" stroke="${c}" stroke-width="1.8"/>
+      <line x1="27" y1="16" x2="31" y2="16" stroke="${c}" stroke-width="1.8"/>
+    </svg>`;
+  }
+  if(type==='Other'){
+    return `<svg width="26" height="26" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="16" cy="16" r="13" fill="${c}22" stroke="${c}" stroke-width="1.8"/>
+      <path d="M9 16 Q16 7 23 16 Q16 25 9 16Z" stroke="${c}" stroke-width="1.5" fill="none"/>
+      <line x1="3" y1="16" x2="29" y2="16" stroke="${c}" stroke-width="1.2" opacity=".6"/>
+      <line x1="16" y1="3" x2="16" y2="29" stroke="${c}" stroke-width="1.2" opacity=".6"/>
+    </svg>`;
+  }
+  // Stadium (default)
+  return `<svg width="26" height="26" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="19" width="28" height="5" rx="1.5" fill="${c}"/>
+    <rect x="4" y="13" width="4" height="6" fill="${c}" opacity=".7"/>
+    <rect x="24" y="13" width="4" height="6" fill="${c}" opacity=".7"/>
+    <rect x="6" y="7" width="20" height="6" rx="1" fill="${c}" opacity=".35"/>
+    <rect x="8" y="13" width="16" height="6" rx="1" fill="${c}22" stroke="${c}" stroke-width="1.2"/>
+    <ellipse cx="16" cy="16" rx="5" ry="2" stroke="${c}" stroke-width="1.2" fill="none"/>
+  </svg>`;
+}
+
+function venueTypeIcon(type){
+  const t=type||'Stadium';
+  if(t==='Training Site') return '<svg width="18" height="18" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="8" width="28" height="18" rx="2" fill="#EAF3DE" stroke="#3B6D11" stroke-width="1.5"/><line x1="16" y1="8" x2="16" y2="26" stroke="#3B6D11" stroke-width="1" stroke-dasharray="2 2"/><rect x="2" y="8" width="28" height="18" rx="2" fill="none" stroke="#3B6D11" stroke-width="1.5"/><rect x="10" y="8" width="12" height="18" fill="none" stroke="#3B6D11" stroke-width="1" opacity=".5"/><circle cx="16" cy="17" r="3" stroke="#3B6D11" stroke-width="1.5" fill="none"/><line x1="2" y1="17" x2="6" y2="17" stroke="#3B6D11" stroke-width="1.5"/><line x1="26" y1="17" x2="30" y2="17" stroke="#3B6D11" stroke-width="1.5"/></svg>';
+  if(t==='Other') return '<svg width="18" height="18" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="12" stroke="#854F0B" stroke-width="1.5" fill="#FAEEDA"/><path d="M10 16 Q16 8 22 16 Q16 24 10 16Z" stroke="#854F0B" stroke-width="1.5" fill="none"/><line x1="4" y1="16" x2="28" y2="16" stroke="#854F0B" stroke-width="1" opacity=".5"/><line x1="16" y1="4" x2="16" y2="28" stroke="#854F0B" stroke-width="1" opacity=".5"/></svg>';
+  return '<svg width="18" height="18" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="20" width="28" height="4" rx="1" fill="#185FA5"/><rect x="4" y="14" width="4" height="6" fill="#378ADD"/><rect x="24" y="14" width="4" height="6" fill="#378ADD"/><rect x="6" y="8" width="20" height="6" rx="1" fill="#185FA5" opacity=".5"/><rect x="8" y="14" width="16" height="6" rx="1" fill="#E6F1FB" stroke="#185FA5" stroke-width="1"/><ellipse cx="16" cy="17" rx="5" ry="2" stroke="#185FA5" stroke-width="1" fill="none"/></svg>';
+}
+
+const OP_COLORS=[
+  {key:'Mowing',bg:'#E6F1FB',fg:'#185FA5',abbr:'MOW'},{key:'Aeration',bg:'#EAF3DE',fg:'#3B6D11',abbr:'AER'},
+  {key:'Scarifying',bg:'#FAEEDA',fg:'#854F0B',abbr:'SCR'},{key:'Top dressing',bg:'#EEEDFE',fg:'#534AB7',abbr:'TOP'},
+  {key:'Seeding',bg:'#E1F5EE',fg:'#0F6E56',abbr:'SED'},{key:'Fertilizing',bg:'#FAEEDA',fg:'#854F0B',abbr:'FRT'},
+  {key:'Irrigation check',bg:'#E6F1FB',fg:'#185FA5',abbr:'IRR'},{key:'Line marking',bg:'#FCEBEB',fg:'#A32D2D',abbr:'LMK'},
+  {key:'Pest/disease treatment',bg:'#FAECE7',fg:'#993C1D',abbr:'PST'},
+];
+function opBadge(type){const f=OP_COLORS.find(c=>c.key===type);if(f)return f;const b=OP_COLORS[(type.charCodeAt(0)+(type.charCodeAt(1)||0))%OP_COLORS.length];return{bg:b.bg,fg:b.fg,abbr:type.slice(0,3).toUpperCase()};}
+
+// ════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════
+async function init(){
+  setLang(state.lang);
+
+  const params=new URLSearchParams(window.location.search);
+
+  // check ?view= — project viewer flow
+  const viewTok=params.get('view');
+  if(viewTok){
+    showLoading(true);
+    const {data:projs}=await supa.from('pitchops_projects').select('*').eq('viewer_token',viewTok);
+    showLoading(false);
+    if(projs&&projs.length){
+      const proj=dbToProject(projs[0]);
+      await enterViewerDashboard(proj);
+      return;
+    }
+    showToast('Invalid or expired viewer link');
+  }
+
+  // check ?token= — venue manager flow
+  const tok=params.get('token');
+  if(tok){
+    showLoading(true);
+    // load venue by token
+    const {data:venues} = await supa.from('pitchops_venues').select('*').eq('token',tok);
+    if(venues&&venues.length){
+      const venue=dbToVenue(venues[0]);
+      state.venues=[venue];
+      state.currentVenueId=venue.id;
+      // load ops and types for this venue
+      await loadVenueData(venue.id);
+      populateOpTypeSelects();
+      showLoading(false);
+      enterVenueDashboard(venue);
+      return;
+    }
+    showLoading(false);
+    showToast('Invalid venue token');
+  }
+  showScreen('screen-login');
+}
+init();
+</script>
+</body>
+</html>
