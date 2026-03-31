@@ -628,7 +628,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     <!-- HISTORY -->
     <div class="card">
       <div class="card-header">
-        <span class="card-title">Task history</span>
+        <span class="card-title">All tasks</span>
         <input type="text" id="venue-hist-search" placeholder="Search..." oninput="renderVenueHistory()" style="padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;outline:none;width:130px"/>
       </div>
       <div id="venue-history-list" style="padding:0 1.25rem;max-height:560px;overflow-y:auto"></div>
@@ -1821,7 +1821,6 @@ function renderVenueStats(){
 function renderVenueHistory(){
   const search=(document.getElementById('venue-hist-search')?.value||'').toLowerCase();
   const ops=venueOps()
-    .filter(o=>o.status!=='planned') // planned tasks shown in Schedule, not history
     .filter(o=>!search||o.type.toLowerCase().includes(search)||(o.notes||'').toLowerCase().includes(search)||(o.staff||[]).join(' ').toLowerCase().includes(search));
   const container=document.getElementById('venue-history-list');
   if(!ops.length){ if(container) container.innerHTML=`<div class="empty-state"><div class="ico">📋</div><div>No tasks logged yet.</div></div>`; return; }
