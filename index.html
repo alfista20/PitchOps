@@ -1205,7 +1205,7 @@ async function loadVenueData(venueId) {
 }
 
 // ── SINGLE SOURCE OF TRUTH: refresh venue ops + re-render all views ──
-async async function refreshVenueOps(venueId, silent=false){
+async function refreshVenueOps(venueId, silent=false){
   if(!silent) showLoading(true);
   try {
     const [ops, types] = await Promise.all([
