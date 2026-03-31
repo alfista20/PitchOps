@@ -102,7 +102,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 .status-finished{background:var(--surface);color:var(--text-muted);border:1px solid var(--border)}
 
 /* ── PROJECT DETAIL (admin inside project) ── */
-#screen-project-detail{background:var(--surface)}
+#screen-project-detail{background:var(--surface);overflow-y:auto}
 .project-hero{padding:1rem 1.25rem;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:.75rem;border-bottom:3px solid transparent}
 .project-hero-left h2{font-size:18px;color:white;font-family:'Syne',sans-serif}
 .project-hero-left p{font-size:12px;color:rgba(255,255,255,.7)}
@@ -421,7 +421,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     </div>
   </div>
   <!-- PROJECT TABS -->
-  <div style="background:white;border-bottom:2px solid var(--border);padding:0 1rem;display:flex;gap:0;flex-shrink:0;position:sticky;top:0;z-index:10">
+  <div style="background:white;border-bottom:2px solid var(--border);padding:0 1rem;display:flex;gap:0;flex-shrink:0">
     <button class="tab-btn active" id="ptab-ops" onclick="switchProjectTab('ops')">📋 Operations</button>
     <button class="tab-btn" id="ptab-calendar" onclick="switchProjectTab('calendar')">📅 Schedule</button>
   </div>
@@ -487,7 +487,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
           <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:2px;background:var(--green);display:inline-block"></span>Completed</span>
           <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:2px;background:var(--red);display:inline-block"></span>Missed</span>
         </div>
-        <div id="gantt-grid" style="overflow-x:auto"></div>
+        <div id="gantt-grid" style="overflow-x:auto;width:100%"></div>
       </div>
     </div>
     <div id="venue-cal-view" style="display:none;padding:.75rem">
@@ -2079,15 +2079,20 @@ function openVenueCal(venueId) {
   const venue = state.venues.find(v=>v.id===venueId);
   document.getElementById('venue-cal-name').textContent = venue ? venue.name : '';
   document.getElementById('gantt-view').style.display = 'none';
-  const vcv = document.getElementById('venue-cal-view');
-  vcv.style.display = 'block';
+  document.getElementById('venue-cal-view').style.display = 'block';
   setVenueCalView('week');
+  // scroll to top so calendar is visible
+  window.scrollTo({top:0,behavior:'smooth'});
+  document.getElementById('screen-project-detail').scrollTop = 0;
 }
 
 function exitVenueCal() {
   state.currentVenueCalId = null;
   document.getElementById('venue-cal-view').style.display = 'none';
   document.getElementById('gantt-view').style.display = 'block';
+  window.scrollTo({top:0,behavior:'smooth'});
+  document.getElementById('screen-project-detail').scrollTop = 0;
+  renderGantt();
 }
 
 function venueCalNav(dir) { venueCalOffset += dir; renderVenueCal(); }
@@ -2350,15 +2355,11 @@ function switchProjectTab(tab){
   document.getElementById('ptab-ops').classList.toggle('active', tab==='ops');
   document.getElementById('ptab-calendar').classList.toggle('active', tab==='calendar');
   document.getElementById('ptab-ops-content').style.display = tab==='ops' ? '' : 'none';
-  const calEl=document.getElementById('ptab-calendar-content');
+  document.getElementById('ptab-calendar-content').style.display = tab==='calendar' ? 'block' : 'none';
   if(tab==='calendar'){
-    calEl.style.display='block';
-    // ensure gantt-view is visible, venue-cal hidden
     document.getElementById('gantt-view').style.display='block';
     document.getElementById('venue-cal-view').style.display='none';
     renderGantt();
-  } else {
-    calEl.style.display='none';
   }
 }
 
@@ -2393,10 +2394,7 @@ async function renderGantt(){
 
   const venues=projectVenues(pid);
   const grid=document.getElementById('gantt-grid');
-
-  // Show loading skeleton immediately
   if(!grid) return;
-  grid.innerHTML=`<div style="padding:1.5rem;text-align:center;color:var(--text-hint);font-size:13px">Loading calendar...</div>`;
 
   const plans=await loadPlans(pid);
 
@@ -2410,8 +2408,7 @@ async function renderGantt(){
   });
   const dayNames=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
-  const minW = Math.max(700, venues.length > 0 ? 700 : 700);
-  let html=`<div style="min-width:700px"><div class="gantt-header">
+  let html=`<div style="overflow-x:auto"><table style="width:100%;min-width:700px;border-collapse:collapse"><colgroup><col style="width:150px"/>${days.map(()=>'<col/>').join('')}</colgroup><thead><tr class="gantt-header"><th class="gantt-header-venue" style="text-align:left">Venue</th>
     <div class="gantt-header-venue">Venue</div>
     ${days.map((d,i)=>{
       const isToday=d.getTime()===today.getTime();
@@ -2427,12 +2424,12 @@ async function renderGantt(){
   } else {
     html+=venues.map(v=>{
       const vPlans=plans.filter(p=>p.venueId===v.id);
-      let rowHtml=`<div class="gantt-row">
-        <div class="gantt-venue-cell" onclick="openVenueCal('${v.id}')" style="cursor:pointer" title="Open ${esc(v.name)} calendar">
-          <div class="g-venue-name" style="color:var(--blue)">${esc(v.name)}</div>
-          <div class="g-venue-type">${v.venueType==='Training Site'?'⬜':'🏟'} ${esc(v.venueType||'Stadium')}</div>
+      let rowHtml=`<tr style="border-bottom:1px solid var(--border)">
+        <td onclick="openVenueCal('${v.id}')" style="padding:8px 10px;border-right:1px solid var(--border);vertical-align:top;cursor:pointer;background:white">
+          <div style="font-size:12px;font-weight:600;color:var(--blue)">${esc(v.name)}</div>
+          <div style="font-size:10px;color:var(--text-hint)">${v.venueType==='Training Site'?'⬜':'🏟'} ${esc(v.venueType||'Stadium')}</div>
           <div style="font-size:9px;color:var(--text-hint);margin-top:2px">tap to drill in →</div>
-        </div>`;
+        </td>`;
 
       days.forEach(d=>{
         const dStr=d.toISOString().slice(0,10);
@@ -2440,27 +2437,29 @@ async function renderGantt(){
         const dayPlans=vPlans.filter(p=>p.dateFrom<=dStr && p.dateTo>=dStr && (ganttStatusFilter==='all'||p.status===ganttStatusFilter));
         const dayOps=state.operations.filter(o=>o.venueId===v.id && (o.date||'').slice(0,10)===dStr);
 
+        const chipColors={planned:'background:#FAEEDA;color:#854F0B;border-left:2px solid #854F0B',inprogress:'background:#E6F1FB;color:#185FA5;border-left:2px solid #185FA5',completed:'background:#EAF3DE;color:#3B6D11;border-left:2px solid #3B6D11',missed:'background:#FCEBEB;color:#A32D2D;border-left:2px solid #A32D2D'};
+
         let cellContent='';
         dayPlans.forEach(p=>{
-          const chipClass='chip-'+p.status;
+          const cs=chipColors[p.status]||chipColors.planned;
           const label=esc(p.opType||p.opTypes?.[0]||'');
-          const timeLabel=p.timeFrom&&p.timeTo?` ${p.timeFrom}–${p.timeTo}`:'';
-          cellContent+=`<div class="op-chip ${chipClass}" onclick="event.stopPropagation();openEditPlanModal('${p.id}')" title="${label}${timeLabel}" style="display:block;width:100%;box-sizing:border-box">${label}<span style="opacity:.7;font-size:8px;display:block">${timeLabel}</span></div>`;
+          const tl=p.timeFrom?`${p.timeFrom}–${p.timeTo}`:'';
+          cellContent+=`<div onclick="event.stopPropagation();openEditPlanModal('${p.id}')" style="border-radius:3px;padding:2px 4px;font-size:9px;font-weight:600;margin-bottom:2px;cursor:pointer;${cs}">${label}${tl?`<span style="display:block;font-size:8px;opacity:.8">${tl}</span>`:''}</div>`;
         });
         dayOps.forEach(o=>{
-          const badge=opBadge(o.type);
-          cellContent+=`<div class="op-chip chip-completed" style="display:block;width:100%;box-sizing:border-box;background:${badge.bg};color:${badge.fg};border-left:2px solid ${badge.fg}" title="Logged: ${esc(o.type)}">✓ ${esc(o.type.slice(0,8))}</div>`;
+          const b=opBadge(o.type);
+          cellContent+=`<div style="border-radius:3px;padding:2px 4px;font-size:9px;font-weight:600;margin-bottom:2px;background:${b.bg};color:${b.fg};border-left:2px solid ${b.fg}">✓ ${esc(o.type.slice(0,10))}</div>`;
         });
 
-        rowHtml+=`<div class="gantt-day-cell ${isToday?'today-col':''}" onclick="quickAddPlan('${v.id}','${dStr}')" style="display:flex;flex-direction:column;align-items:stretch;gap:2px;padding:3px">${cellContent}</div>`;
+        rowHtml+=`<td onclick="quickAddPlan('${v.id}','${dStr}')" style="padding:3px;border-right:1px solid var(--border);vertical-align:top;cursor:pointer;${isToday?'background:rgba(24,95,165,0.04)':''}" onmouseover="this.style.background='var(--blue-pale)'" onmouseout="this.style.background='${isToday?'rgba(24,95,165,0.04)':'white'}'">${cellContent}</td>`;
       });
 
-      rowHtml+=`</div>`;
+      rowHtml+=`</tr>`;
       return rowHtml;
     }).join('');
   }
 
-  html += '</div>';
+  html += '</tbody></table>';
   grid.innerHTML=html;
 }
 
