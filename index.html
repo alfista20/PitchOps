@@ -881,7 +881,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
         </div>
       </div>
       <div class="field"><label>Notes / observations</label><textarea id="edit-op-notes"></textarea></div>
-      <div class="field"><label>Date & time</label><input id="edit-op-date" type="datetime-local"/></div>
+      <div class="field"><label>Task date (when it happens)</label><input id="edit-op-date" type="date"/></div>
       <div class="field">
         <label>Time window</label>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
@@ -963,7 +963,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
         <p style="font-size:11px;color:var(--text-hint);margin-top:4px" data-i18n="op_staff_hint">You can add multiple staff members</p>
       </div>
       <div class="field"><label data-i18n="op_notes">Notes / observations</label><textarea id="new-op-notes" placeholder="Any observations, measurements, remarks..."></textarea></div>
-      <div class="field"><label data-i18n="op_date">Date & time</label><input id="new-op-date" type="datetime-local"/></div>
+      <div class="field"><label data-i18n="op_date">Task date (when it happens)</label><input id="new-op-date" type="date"/></div>
       <div class="field">
         <label>Time window</label>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
@@ -1235,14 +1235,15 @@ async function refreshVenueOps(venueId, silent=false){
 function dbToProject(r){ return {id:r.id,code:r.code,name:r.name,country:r.country||'',status:r.status||'planned',color:r.color||'#185FA5',viewerToken:r.viewer_token||'',createdAt:r.created_at}; }
 function dbToVenue(r){ return {id:r.id,name:r.name,city:r.city||'',color:r.color||'#185FA5',venueType:r.venue_type||'Stadium',token:r.token,projectIds:r.project_ids||[],responsiblePerson:r.responsible_person||'',contactPhone:r.contact_phone||'',contactEmail:r.contact_email||'',createdAt:r.created_at}; }
 function dbToOp(r){
-  const d=r.operation_date;
-  const autoStatus=d&&new Date(d)>new Date()?'planned':'inprogress';
+  const d=(r.operation_date||'').slice(0,10); // always date-only YYYY-MM-DD
+  const today=new Date().toISOString().slice(0,10);
+  const autoStatus=d>today?'planned':'inprogress'; // never auto-completed
   return {id:r.id,venueId:r.venue_id,type:r.type,zone:r.zone||'',equipment:r.equipment||'',weather:r.weather||'',staff:r.staff||[],notes:r.notes||'',date:d,timeFrom:r.time_from||'08:00',timeTo:r.time_to||'17:00',status:r.status||autoStatus,photos:r.photos||[],flagged:r.flagged||false,adminComment:r.admin_comment||'',createdAt:r.created_at};
 }
 
 function projectToDb(p){ return {id:p.id,code:p.code,name:p.name,country:p.country,status:p.status,color:p.color,viewer_token:p.viewerToken||null}; }
 function venueToDb(v){ return {id:v.id,name:v.name,city:v.city,color:v.color,token:v.token,project_ids:v.projectIds,venue_type:v.venueType||'Stadium',responsible_person:v.responsiblePerson||null,contact_phone:v.contactPhone||null,contact_email:v.contactEmail||null}; }
-function opToDb(o){ return {id:o.id,venue_id:o.venueId,type:o.type,zone:o.zone,equipment:o.equipment,weather:o.weather,staff:o.staff,notes:o.notes,operation_date:o.date,time_from:o.timeFrom||'08:00',time_to:o.timeTo||'17:00',status:o.status||'completed',photos:o.photos,flagged:o.flagged||false,admin_comment:o.adminComment||''}; }
+function opToDb(o){ return {id:o.id,venue_id:o.venueId,type:o.type,zone:o.zone,equipment:o.equipment,weather:o.weather,staff:o.staff,notes:o.notes,operation_date:(o.date||'').slice(0,10),time_from:o.timeFrom||'08:00',time_to:o.timeTo||'17:00',status:o.status||'inprogress',photos:o.photos,flagged:o.flagged||false,admin_comment:o.adminComment||''}; }
 
 // ── LOADING INDICATOR ──
 function showLoading(on){
@@ -1255,12 +1256,12 @@ function showLoading(on){
 // I18N
 // ════════════════════════════════════════
 const i18n = {
-  en:{ stat_total:'This month',stat_last:'Last op',stat_common:'Top type',log_op:'Log new task',op_type:'Task type',op_zone:'Pitch area / zone',op_zone_custom:'Custom zone',op_equipment:'Equipment used',op_weather:'Weather conditions',op_staff:'Done by (staff)',op_staff_hint:'You can add multiple staff members',op_notes:'Notes / observations',op_date:'Date & time',btn_log:'Log task',history:'Task history',op_photos:'Photos (max 4)',photo_tap:'Tap to add photos',photo_hint:'JPG, PNG · max 4 photos' },
-  pl:{ stat_total:'Ten miesiąc',stat_last:'Ostatnia op.',stat_common:'Dominuje',log_op:'Dodaj zadanie',op_type:'Typ zadania',op_zone:'Strefa boiska',op_zone_custom:'Własna strefa',op_equipment:'Sprzęt',op_weather:'Pogoda',op_staff:'Wykonał/a',op_staff_hint:'Możesz dodać kilka osób',op_notes:'Notatki',op_date:'Data i godzina',btn_log:'Zapisz zadanie',history:'Historia zadań',op_photos:'Zdjęcia (max 4)',photo_tap:'Dotknij aby dodać zdjęcia',photo_hint:'JPG, PNG · max 4 zdjęcia' },
-  es:{ stat_total:'Este mes',stat_last:'Última op.',stat_common:'Más común',log_op:'Registrar tarea',op_type:'Tipo de tarea',op_zone:'Zona del terreno',op_zone_custom:'Zona personalizada',op_equipment:'Equipo utilizado',op_weather:'Condiciones meteorológicas',op_staff:'Realizado por',op_staff_hint:'Puedes añadir varios empleados',op_notes:'Notas / observaciones',op_date:'Fecha y hora',btn_log:'Registrar',history:'Historial',op_photos:'Fotos (máx 4)',photo_tap:'Toca para añadir fotos',photo_hint:'JPG, PNG · máx 4 fotos' },
-  fr:{ stat_total:'Ce mois',stat_last:'Dernière op.',stat_common:'Plus fréquent',log_op:'Ajouter tâche',op_type:'Type de tâche',op_zone:'Zone du terrain',op_zone_custom:'Zone personnalisée',op_equipment:'Équipement utilisé',op_weather:'Météo',op_staff:'Réalisé par',op_staff_hint:'Vous pouvez ajouter plusieurs agents',op_notes:'Notes / observations',op_date:'Date et heure',btn_log:'Enregistrer',history:'Historique',op_photos:'Photos (max 4)',photo_tap:'Appuyer pour ajouter des photos',photo_hint:'JPG, PNG · max 4 photos' },
-  de:{ stat_total:'Diesen Monat',stat_last:'Letzte Op.',stat_common:'Häufigste',log_op:'Neue Aufgabe',op_type:'Aufgabentyp',op_zone:'Bereich',op_zone_custom:'Benutzerdefinierter Bereich',op_equipment:'Geräte',op_weather:'Wetterbedingungen',op_staff:'Durchgeführt von',op_staff_hint:'Mehrere Mitarbeiter möglich',op_notes:'Notizen',op_date:'Datum und Uhrzeit',btn_log:'Aufgabe speichern',history:'Aufgabenhistorie',op_photos:'Fotos (max 4)',photo_tap:'Tippen um Fotos hinzuzufügen',photo_hint:'JPG, PNG · max 4 Fotos' },
-  pt:{ stat_total:'Este mês',stat_last:'Última op.',stat_common:'Mais comum',log_op:'Registar tarefa',op_type:'Tipo de tarefa',op_zone:'Zona do relvado',op_zone_custom:'Zona personalizada',op_equipment:'Equipamento',op_weather:'Condições meteorológicas',op_staff:'Realizado por',op_staff_hint:'Pode adicionar vários trabalhadores',op_notes:'Notas / observações',op_date:'Data e hora',btn_log:'Registar',history:'Histórico',op_photos:'Fotos (máx 4)',photo_tap:'Toque para adicionar fotos',photo_hint:'JPG, PNG · máx 4 fotos' },
+  en:{ stat_total:'This month',stat_last:'Last op',stat_common:'Top type',log_op:'Log new task',op_type:'Task type',op_zone:'Pitch area / zone',op_zone_custom:'Custom zone',op_equipment:'Equipment used',op_weather:'Weather conditions',op_staff:'Done by (staff)',op_staff_hint:'You can add multiple staff members',op_notes:'Notes / observations',op_date:'Task date',btn_log:'Log task',history:'Task history',op_photos:'Photos (max 4)',photo_tap:'Tap to add photos',photo_hint:'JPG, PNG · max 4 photos' },
+  pl:{ stat_total:'Ten miesiąc',stat_last:'Ostatnia op.',stat_common:'Dominuje',log_op:'Dodaj zadanie',op_type:'Typ zadania',op_zone:'Strefa boiska',op_zone_custom:'Własna strefa',op_equipment:'Sprzęt',op_weather:'Pogoda',op_staff:'Wykonał/a',op_staff_hint:'Możesz dodać kilka osób',op_notes:'Notatki',op_date:'Data zadania',btn_log:'Zapisz zadanie',history:'Historia zadań',op_photos:'Zdjęcia (max 4)',photo_tap:'Dotknij aby dodać zdjęcia',photo_hint:'JPG, PNG · max 4 zdjęcia' },
+  es:{ stat_total:'Este mes',stat_last:'Última op.',stat_common:'Más común',log_op:'Registrar tarea',op_type:'Tipo de tarea',op_zone:'Zona del terreno',op_zone_custom:'Zona personalizada',op_equipment:'Equipo utilizado',op_weather:'Condiciones meteorológicas',op_staff:'Realizado por',op_staff_hint:'Puedes añadir varios empleados',op_notes:'Notas / observaciones',op_date:'Fecha de la tarea',btn_log:'Registrar',history:'Historial',op_photos:'Fotos (máx 4)',photo_tap:'Toca para añadir fotos',photo_hint:'JPG, PNG · máx 4 fotos' },
+  fr:{ stat_total:'Ce mois',stat_last:'Dernière op.',stat_common:'Plus fréquent',log_op:'Ajouter tâche',op_type:'Type de tâche',op_zone:'Zone du terrain',op_zone_custom:'Zone personnalisée',op_equipment:'Équipement utilisé',op_weather:'Météo',op_staff:'Réalisé par',op_staff_hint:'Vous pouvez ajouter plusieurs agents',op_notes:'Notes / observations',op_date:'Date de la tâche',btn_log:'Enregistrer',history:'Historique',op_photos:'Photos (max 4)',photo_tap:'Appuyer pour ajouter des photos',photo_hint:'JPG, PNG · max 4 photos' },
+  de:{ stat_total:'Diesen Monat',stat_last:'Letzte Op.',stat_common:'Häufigste',log_op:'Neue Aufgabe',op_type:'Aufgabentyp',op_zone:'Bereich',op_zone_custom:'Benutzerdefinierter Bereich',op_equipment:'Geräte',op_weather:'Wetterbedingungen',op_staff:'Durchgeführt von',op_staff_hint:'Mehrere Mitarbeiter möglich',op_notes:'Notizen',op_date:'Aufgabendatum',btn_log:'Aufgabe speichern',history:'Aufgabenhistorie',op_photos:'Fotos (max 4)',photo_tap:'Tippen um Fotos hinzuzufügen',photo_hint:'JPG, PNG · max 4 Fotos' },
+  pt:{ stat_total:'Este mês',stat_last:'Última op.',stat_common:'Mais comum',log_op:'Registar tarefa',op_type:'Tipo de tarefa',op_zone:'Zona do relvado',op_zone_custom:'Zona personalizada',op_equipment:'Equipamento',op_weather:'Condições meteorológicas',op_staff:'Realizado por',op_staff_hint:'Pode adicionar vários trabalhadores',op_notes:'Notas / observações',op_date:'Data da tarefa',btn_log:'Registar',history:'Histórico',op_photos:'Fotos (máx 4)',photo_tap:'Toque para adicionar fotos',photo_hint:'JPG, PNG · máx 4 fotos' },
 };
 function t(k){ return (i18n[state.lang]||i18n.en)[k]||k; }
 function setLang(l){
@@ -1790,7 +1791,7 @@ async function enterVenueDashboard(venue){
   const ptag=document.getElementById('venue-project-tag');
   if(proj){ ptag.textContent=proj.code; ptag.style.display='inline-flex'; }
   else ptag.style.display='none';
-  document.getElementById('new-op-date').value=nowLocal();
+  document.getElementById('new-op-date').value=new Date().toISOString().slice(0,10);
   state.currentStaff=[]; currentPhotos.new=[];
   renderStaffTags(); renderPhotoPreviews('new');
   // SINGLE DATA LOAD — all renders read from state.operations after this
@@ -1835,7 +1836,8 @@ function renderVenueHistory(){
         ${op.photos&&op.photos.length?`<div class="admin-photo-strip" style="margin-top:6px">${op.photos.map((p,i)=>`<img src="${p.dataUrl}" onclick="openLightboxFromOp('${op.id}',${i})">`).join('')}</div>`:''}
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
-        <div class="hist-item-date">${formatDate(op.date)}</div>
+        <div class="hist-item-date">${formatDateOnly(op.date)}</div>
+        <div style="font-size:10px;color:var(--text-hint);margin-top:2px">logged ${formatDate(op.createdAt||op.date)}</div>
         <button class="btn btn-ghost btn-sm" onclick="openEditModal('${op.id}')">Edit</button>
       </div>
     </div>`;
@@ -1850,10 +1852,11 @@ async function logOperation(){
 
   const zoneEl=document.getElementById('new-op-zone');
   const zone=zoneEl.value==='Custom'?(document.getElementById('new-op-zone-custom').value.trim()||'Custom'):zoneEl.value;
-  const opDateVal = document.getElementById('new-op-date').value||nowLocal();
+  const opDateOnly = document.getElementById('new-op-date').value||new Date().toISOString().slice(0,10);
   const opTimeFrom = document.getElementById('new-op-time-from')?.value||'08:00';
   const opTimeTo = document.getElementById('new-op-time-to')?.value||'17:00';
-  const isFutureOp = new Date(opDateVal) > new Date();
+  const opDateVal = opDateOnly; // store date only, time stored separately in time_from/time_to
+  const isFutureOp = new Date(opDateOnly) > new Date();
   const selectedStatus = document.getElementById('new-op-status')?.value||'planned';
   const autoStatus = isFutureOp ? 'planned' : 'inprogress';
   const manualStatus = selectedStatus === 'auto' ? autoStatus : selectedStatus;
@@ -1865,7 +1868,7 @@ async function logOperation(){
     weather:document.getElementById('new-op-weather').value.trim(),
     staff:[...state.currentStaff],
     notes:document.getElementById('new-op-notes').value.trim(),
-    date:opDateVal,
+    date:opDateOnly,
     timeFrom:opTimeFrom,
     timeTo:opTimeTo,
     status:manualStatus,
@@ -1878,7 +1881,7 @@ async function logOperation(){
   document.getElementById('new-op-equipment').value='';
   document.getElementById('new-op-weather').value='';
   document.getElementById('new-op-notes').value='';
-  document.getElementById('new-op-date').value=nowLocal();
+  document.getElementById('new-op-date').value=new Date().toISOString().slice(0,10);
   state.currentStaff=[]; currentPhotos.new=[];
   renderStaffTags(); renderPhotoPreviews('new');
   if(state.currentVenueId){
@@ -1900,7 +1903,7 @@ function openEditModal(opId){
   document.getElementById('edit-op-equipment').value=op.equipment||'';
   document.getElementById('edit-op-weather').value=op.weather||'';
   document.getElementById('edit-op-notes').value=op.notes||'';
-  document.getElementById('edit-op-date').value=op.date||'';
+  document.getElementById('edit-op-date').value=(op.date||'').slice(0,10);
   state.editStaff=op.staff?[...op.staff]:[];
   renderEditStaffTags();
   currentPhotos.edit=op.photos?op.photos.map(p=>({dataUrl:p.dataUrl,name:p.name||'photo'})):[];
@@ -1918,7 +1921,7 @@ function openEditModal(opId){
 async function saveEditOperation(){
   const id=document.getElementById('edit-op-id').value;
   const idx=state.operations.findIndex(o=>o.id===id); if(idx===-1) return;
-  const editDateVal=document.getElementById('edit-op-date').value;
+  const editDateVal=(document.getElementById('edit-op-date').value||'').slice(0,10);
   const editStatus=document.getElementById('edit-op-status')?.value||'completed';
   // Block completed status if date is in the future
   if(editStatus==='completed' && editDateVal){
@@ -2957,7 +2960,7 @@ function openNewOpModal(venueId, dateStr, timeStr){
 
 function openLogTaskModal(dateStr, timeStr, prefillType, prefillStatus){
   populateOpTypeSelects();
-  document.getElementById('new-op-date').value = dateStr ? dateStr+'T'+(timeStr||'08:00') : nowLocal();
+  document.getElementById('new-op-date').value = dateStr||new Date().toISOString().slice(0,10);
   document.getElementById('new-op-time-from').value = timeStr||'08:00';
   document.getElementById('new-op-time-to').value = '17:00';
   document.getElementById('new-op-status').value = prefillStatus||'auto';
