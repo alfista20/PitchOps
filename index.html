@@ -1717,6 +1717,7 @@ function enterVenueDashboard(venue){
   if(proj){ ptag.textContent=proj.code; ptag.style.display='inline-flex'; }
   else ptag.style.display='none';
   document.getElementById('new-op-date').value=nowLocal();
+  document.getElementById('new-op-date').max=nowLocal();
   state.currentStaff=[]; currentPhotos.new=[];
   renderStaffTags(); renderPhotoPreviews('new');
   populateOpTypeSelects(); renderVenueStats(); renderVenueHistory();
@@ -1766,6 +1767,12 @@ function renderVenueHistory(){
 // LOG / EDIT / DELETE OPERATION
 // ════════════════════════════════════════
 async function logOperation(){
+  const opDateVal=document.getElementById('new-op-date').value;
+  if(opDateVal){
+    const opDate=new Date(opDateVal);
+    const now=new Date();
+    if(opDate>now){showToast('Cannot log an operation in the future.');return;}
+  }
   const zoneEl=document.getElementById('new-op-zone');
   const zone=zoneEl.value==='Custom'?(document.getElementById('new-op-zone-custom').value.trim()||'Custom'):zoneEl.value;
   const op={
@@ -1813,6 +1820,12 @@ function openEditModal(opId){
 async function saveEditOperation(){
   const id=document.getElementById('edit-op-id').value;
   const idx=state.operations.findIndex(o=>o.id===id); if(idx===-1) return;
+  const editDateVal=document.getElementById('edit-op-date').value;
+  if(editDateVal){
+    const editDate=new Date(editDateVal);
+    const now=new Date();
+    if(editDate>now){showToast('Cannot set a future date for a logged operation.');return;}
+  }
   state.operations[idx]={...state.operations[idx],
     type:document.getElementById('edit-op-type').value,
     zone:document.getElementById('edit-op-zone').value,
@@ -1838,6 +1851,8 @@ async function deleteOperation(){
   state.operations=state.operations.filter(o=>o.id!==id);
   closeModal('modal-edit-op');
   renderVenueHistory(); renderVenueStats(); renderDetailOps();
+  if(document.getElementById('vtab-schedule-content')?.style.display==='block') renderVenueSched();
+  if(document.getElementById('ptab-calendar-content')?.style.display==='block') renderGantt();
   showToast('Operation deleted');
 }
 
@@ -2480,7 +2495,7 @@ async function renderGantt(){
       });
       dayOps.forEach(o=>{
         const b=opBadge(o.type);
-        chips+=`<div style="border-radius:3px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;background:${b.bg};color:${b.fg};border-left:3px solid ${b.fg}">✓ ${esc(o.type.slice(0,12))}</div>`;
+        chips+=`<div onclick="event.stopPropagation();openEditModal('${o.id}')" style="border-radius:3px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;cursor:pointer;background:${b.bg};color:${b.fg};border-left:3px solid ${b.fg}" title="Click to edit">✓ ${esc(o.type.slice(0,12))}</div>`;
       });
       cells+=`<td onclick="quickAddPlan('${v.id}','${dStr}')" style="padding:3px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${isT?'rgba(24,95,165,0.04)':'white'}" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${isT?'rgba(24,95,165,0.04)':'white'}'">${chips}</td>`;
     });
@@ -2589,22 +2604,71 @@ async function openEditPlanModal(planId){
 async function saveEditPlan(){
   const id=document.getElementById('edit-plan-id').value;
   const opType=document.getElementById('edit-plan-op-type').value;
+  const newStatus=document.getElementById('edit-plan-status').value;
   if(!opType){showToast('Please select an operation type');return;}
+
+  // fetch current plan to check previous status
+  const {data:oldData}=await supa.from('pitchops_plans').select('*').eq('id',id).single();
+  const wasCompleted=oldData&&oldData.status==='completed';
+
+  // Block completed status if dateTo is strictly in the future
+  if(newStatus==='completed'){
+    const planDate=new Date(dateTo+'T23:59:59');
+    const now=new Date();
+    if(planDate>now){showToast('Cannot mark as completed — the end date is in the future.');return;}
+  }
+
+  const dateFrom=document.getElementById('edit-plan-from').value;
+  const dateTo=document.getElementById('edit-plan-to').value;
+  const timeFrom=document.getElementById('edit-plan-time-from').value||'08:00';
+  const timeTo=document.getElementById('edit-plan-time-to').value||'17:00';
+  const notes=document.getElementById('edit-plan-notes').value.trim();
+
   const {error}=await supa.from('pitchops_plans').update({
     op_types:[opType],
-    date_from:document.getElementById('edit-plan-from').value,
-    date_to:document.getElementById('edit-plan-to').value,
-    time_from:document.getElementById('edit-plan-time-from').value||'08:00',
-    time_to:document.getElementById('edit-plan-time-to').value||'17:00',
-    notes:document.getElementById('edit-plan-notes').value.trim(),
+    date_from:dateFrom,
+    date_to:dateTo,
+    time_from:timeFrom,
+    time_to:timeTo,
+    notes:notes,
     priority:document.getElementById('edit-plan-priority').value,
-    status:document.getElementById('edit-plan-status').value,
+    status:newStatus,
   }).eq('id',id);
   if(error){showToast('Error: '+error.message);return;}
+
+  // Auto-create logged operation when status set to completed for first time
+  if(newStatus==='completed' && !wasCompleted){
+    const venueId=oldData.venue_id;
+    const projectId=oldData.project_id;
+    // use dateTo + timeFrom as the operation datetime
+    const opDate=`${dateTo}T${timeFrom}`;
+    const op={
+      id:'op_'+Date.now(),
+      venueId, projectId,
+      type:opType,
+      zone:'Full pitch',
+      equipment:'',weather:'',
+      staff:[],
+      notes:notes||(opType+' — completed from plan'),
+      date:opDate,
+      photos:[],
+      flagged:false,admin_comment:'',
+      createdAt:new Date().toISOString()
+    };
+    const {error:opErr}=await supa.from('pitchops_operations').insert(opToDb(op));
+    if(!opErr){
+      state.operations.unshift(op);
+      showToast('Plan completed — operation logged automatically!');
+    } else {
+      showToast('Plan updated! (Could not auto-log: '+opErr.message+')');
+    }
+  } else {
+    showToast('Plan updated!');
+  }
+
   closeModal('modal-edit-plan');
-  showToast('Plan updated!');
   if(state.currentProjectId) renderGantt();
-  if(state.currentVenueId) renderVenueUpcoming();
+  if(state.currentVenueId){ renderVenueUpcoming(); renderVenueSched(); renderVenueStats(); renderVenueHistory(); }
 }
 
 async function deletePlan(){
@@ -2749,7 +2813,7 @@ async function renderVenueSched(){
     let opChips='';
     dayOps.forEach(o=>{
       const b=opBadge(o.type);
-      opChips+=`<div style="border-radius:3px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;background:${b.bg};color:${b.fg};border-left:3px solid ${b.fg}">✓ ${esc(o.type.slice(0,14))}</div>`;
+      opChips+=`<div onclick="openEditModal('${o.id}')" style="border-radius:3px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;cursor:pointer;background:${b.bg};color:${b.fg};border-left:3px solid ${b.fg}" title="Click to edit">✓ ${esc(o.type.slice(0,14))}</div>`;
     });
 
     planCells+=`<td onclick="quickAddPlan('${vid}','${dStr}')" style="padding:3px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bg}" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bg}'">${planChips||'<div style="min-height:32px"></div>'}</td>`;
