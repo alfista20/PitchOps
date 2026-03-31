@@ -217,8 +217,8 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--navy);color:white;padding:12px 20px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;box-shadow:var(--shadow-lg);z-index:200;opacity:0;transform:translateY(8px);transition:all .2s;pointer-events:none}
 .toast.show{opacity:1;transform:translateY(0)}
 .tabs{display:flex;border-bottom:1px solid var(--border)}
-.tab-btn{padding:10px 16px;background:none;border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
-.tab-btn.active{color:var(--blue);border-bottom-color:var(--blue)}
+.tab-btn{padding:12px 18px;background:none;border:none;border-bottom:3px solid transparent;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;transition:all .15s;margin:0}
+.tab-btn.active{color:var(--blue);border-bottom-color:var(--blue);background:rgba(24,95,165,0.04)}
 .color-opts{display:flex;gap:8px;flex-wrap:wrap}
 .color-opt{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:border-color .15s}
 .color-opt.picked{border-color:var(--navy)}
@@ -230,6 +230,60 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 .venue-type-opt span{font-size:12px;font-weight:500;color:var(--text-muted)}
 .venue-type-opt.picked span{color:var(--blue)}
 .venue-type-badge{display:inline-flex;align-items:center;justify-content:center;font-size:18px;width:28px;height:28px;background:var(--surface);border:1px solid var(--border);border-radius:8px;flex-shrink:0}
+
+/* ── CALENDAR / GANTT ── */
+.gantt-wrap{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden}
+.gantt-topbar{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border-bottom:1px solid var(--border);background:#fafbfc;flex-wrap:wrap;gap:8px}
+.week-nav{display:flex;align-items:center;gap:8px;background:white;border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px 10px}
+.week-nav button{background:none;border:none;cursor:pointer;font-size:16px;color:var(--text-muted);padding:0 4px;line-height:1}
+.week-nav span{font-size:13px;font-weight:500;color:var(--text);min-width:160px;text-align:center}
+.gantt-legend{display:flex;gap:10px;flex-wrap:wrap}
+.gantt-legend-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)}
+.gantt-legend-dot{width:8px;height:8px;border-radius:2px}
+.gantt-header{display:grid;grid-template-columns:150px repeat(7,1fr);border-bottom:2px solid var(--border);background:#fafbfc}
+.gantt-header-venue{padding:8px 10px;font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;border-right:1px solid var(--border)}
+.gantt-header-day{padding:6px 4px;text-align:center;border-right:1px solid var(--border)}
+.gantt-header-day:last-child{border-right:none}
+.g-day-name{font-size:9px;color:var(--text-hint);text-transform:uppercase;letter-spacing:.3px}
+.g-day-num{font-size:14px;font-weight:600;color:var(--text)}
+.g-day-num.today-num{color:var(--blue);background:var(--blue-pale);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;margin:0 auto}
+.gantt-row{display:grid;grid-template-columns:150px repeat(7,1fr);border-bottom:1px solid var(--border);min-height:56px}
+.gantt-row:last-child{border-bottom:none}
+.gantt-venue-cell{padding:8px 10px;border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;gap:2px;background:white;cursor:default}
+.g-venue-name{font-size:11px;font-weight:600;color:var(--text)}
+.g-venue-type{font-size:10px;color:var(--text-hint)}
+.gantt-day-cell{border-right:1px solid var(--border);padding:3px;position:relative;cursor:pointer;transition:background .12s;min-height:56px}
+.gantt-day-cell:last-child{border-right:none}
+.gantt-day-cell:hover{background:var(--blue-pale)}
+.gantt-day-cell.today-col{background:rgba(24,95,165,0.04)}
+.gantt-day-cell.today-col:hover{background:var(--blue-pale)}
+.op-chip{border-radius:4px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;cursor:pointer;transition:opacity .12s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.op-chip:hover{opacity:.8}
+.chip-planned{background:var(--amber-pale);color:var(--amber);border-left:2px solid var(--amber)}
+.chip-inprogress{background:var(--blue-pale);color:var(--blue);border-left:2px solid var(--blue)}
+.chip-completed{background:var(--green-pale);color:var(--green);border-left:2px solid var(--green)}
+.chip-missed{background:var(--red-pale);color:var(--red);border-left:2px solid var(--red)}
+.status-filter-bar{display:flex;gap:6px;flex-wrap:wrap}
+.sf-pill{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:white;color:var(--text-muted);transition:all .12s}
+.sf-pill.sf-active{background:var(--navy);color:white;border-color:var(--navy)}
+
+/* UPCOMING in venue dashboard */
+.upcoming-section{margin-bottom:1.25rem}
+.upcoming-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--surface);border-radius:var(--radius-sm);border:1px solid var(--border);margin-bottom:6px;cursor:default}
+.upcoming-item.urgent{border-color:var(--amber);background:var(--amber-pale)}
+.upcoming-item.today-plan{border-color:var(--blue);background:var(--blue-pale)}
+.upcoming-date-col{font-size:11px;color:var(--text-muted);min-width:72px;flex-shrink:0}
+.upcoming-date-label{font-size:10px;font-weight:600;color:var(--amber);margin-top:2px}
+.upcoming-types{flex:1;min-width:0}
+.upcoming-type-chip{display:inline-flex;align-items:center;background:white;border:1px solid var(--border);border-radius:20px;padding:2px 8px;font-size:11px;font-weight:500;color:var(--text);margin-right:4px;margin-bottom:2px}
+.upcoming-note{font-size:11px;color:var(--text-hint);margin-top:3px;font-style:italic}
+.upcoming-actions{display:flex;gap:5px;flex-shrink:0;align-items:flex-start}
+.plan-status-badge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;white-space:nowrap}
+.psb-planned{background:var(--amber-pale);color:var(--amber)}
+.psb-inprogress{background:var(--blue-pale);color:var(--blue)}
+.psb-completed{background:var(--green-pale);color:var(--green)}
+.psb-missed{background:var(--red-pale);color:var(--red)}
+
 </style>
 </head>
 <body>
@@ -341,7 +395,14 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       <div class="hero-stat"><div class="val" id="pd-stat-week">0</div><div class="lbl">This week</div></div>
     </div>
   </div>
-  <div class="project-body">
+  <!-- PROJECT TABS -->
+  <div style="background:white;border-bottom:2px solid var(--border);padding:0 1rem;display:flex;gap:0;flex-shrink:0;position:sticky;top:0;z-index:10">
+    <button class="tab-btn active" id="ptab-ops" onclick="switchProjectTab('ops')">📋 Operations</button>
+    <button class="tab-btn" id="ptab-calendar" onclick="switchProjectTab('calendar')">📅 Calendar</button>
+  </div>
+
+  <!-- OPS TAB -->
+  <div id="ptab-ops-content" class="project-body">
     <!-- venues sidebar -->
     <div class="card">
       <div class="card-header">
@@ -369,6 +430,38 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
         </table>
       </div>
       <div id="detail-ops-empty" class="empty-state" style="display:none"><div class="ico">📋</div><div>No operations found</div></div>
+    </div>
+  </div>
+  </div><!-- end ptab-ops-content -->
+
+  <!-- CALENDAR TAB -->
+  <div id="ptab-calendar-content" style="display:none;padding:1rem;max-width:1200px;margin:0 auto;width:100%">
+    <div class="gantt-wrap">
+      <div class="gantt-topbar">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <div class="week-nav">
+            <button onclick="ganttNav(-1)">←</button>
+            <span id="gantt-week-label">Loading...</span>
+            <button onclick="ganttNav(1)">→</button>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="ganttGoToday()">Today</button>
+          <div class="status-filter-bar">
+            <div class="sf-pill sf-active" onclick="ganttFilter('all',this)">All</div>
+            <div class="sf-pill" onclick="ganttFilter('planned',this)">Planned</div>
+            <div class="sf-pill" onclick="ganttFilter('inprogress',this)">In progress</div>
+            <div class="sf-pill" onclick="ganttFilter('completed',this)">Completed</div>
+            <div class="sf-pill" onclick="ganttFilter('missed',this)">Missed</div>
+          </div>
+        </div>
+        <button class="btn btn-blue btn-sm" onclick="openPlanModal()">+ Plan window</button>
+      </div>
+      <div class="gantt-legend" style="padding:.5rem 1rem;border-bottom:1px solid var(--border)">
+        <div class="gantt-legend-item"><div class="gantt-legend-dot" style="background:var(--amber)"></div>Planned</div>
+        <div class="gantt-legend-item"><div class="gantt-legend-dot" style="background:var(--blue)"></div>In progress</div>
+        <div class="gantt-legend-item"><div class="gantt-legend-dot" style="background:var(--green)"></div>Completed</div>
+        <div class="gantt-legend-item"><div class="gantt-legend-dot" style="background:var(--red)"></div>Missed</div>
+      </div>
+      <div id="gantt-grid"></div>
     </div>
   </div>
 </div>
@@ -457,6 +550,15 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       <div class="card-header">
         <span class="card-title" data-i18n="log_op">Log new operation</span>
         <button class="btn btn-ghost btn-sm" onclick="openManageTypesModal()" style="font-size:11px">⚙ Types</button>
+      </div>
+      <!-- UPCOMING PLANS -->
+      <div id="venue-upcoming" class="upcoming-section" style="padding:0 1.25rem;display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem 0 .5rem">
+          <span style="font-size:12px;font-weight:600;color:var(--text);font-family:'Syne',sans-serif">📅 Upcoming plans</span>
+          <button class="btn btn-ghost btn-sm" style="font-size:11px" onclick="openVenuePlanModal()">+ Add plan</button>
+        </div>
+        <div id="venue-upcoming-list"></div>
+        <div style="height:1px;background:var(--border);margin:.75rem 0"></div>
       </div>
       <div class="card-body">
         <div class="field"><label data-i18n="op_type">Operation type</label><select id="new-op-type"></select></div>
@@ -810,6 +912,81 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     </div>
     <div class="modal-footer">
       <button class="btn btn-primary" onclick="closeModal('modal-viewer-link')">Done</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- PLAN WINDOW MODAL -->
+<div class="modal-overlay" id="modal-plan">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">New planning window</span><button class="modal-close" onclick="closeModal('modal-plan')">✕</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Venue</label><select id="plan-venue-sel"></select></div>
+      <div class="field">
+        <label>Operation types (select all that apply)</label>
+        <div id="plan-type-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px"></div>
+      </div>
+      <div class="field">
+        <label>Date window</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><label style="font-size:10px;color:var(--text-hint)">From</label><input id="plan-date-from" type="date"/></div>
+          <div><label style="font-size:10px;color:var(--text-hint)">To</label><input id="plan-date-to" type="date"/></div>
+        </div>
+      </div>
+      <div class="field"><label>Notes for venue manager</label><input id="plan-notes" type="text" placeholder="e.g. Use fine sand mix, after aeration..."/></div>
+      <div class="field"><label>Priority</label>
+        <select id="plan-priority">
+          <option value="normal">Normal</option>
+          <option value="high">High</option>
+          <option value="critical">Critical</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-plan')">Cancel</button>
+      <button class="btn btn-primary" onclick="savePlan()">Create window</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT PLAN MODAL -->
+<div class="modal-overlay" id="modal-edit-plan">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Edit planning window</span><button class="modal-close" onclick="closeModal('modal-edit-plan')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-plan-id"/>
+      <div class="field">
+        <label>Operation types</label>
+        <div id="edit-plan-type-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px"></div>
+      </div>
+      <div class="field">
+        <label>Date window</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><label style="font-size:10px;color:var(--text-hint)">From</label><input id="edit-plan-from" type="date"/></div>
+          <div><label style="font-size:10px;color:var(--text-hint)">To</label><input id="edit-plan-to" type="date"/></div>
+        </div>
+      </div>
+      <div class="field"><label>Notes</label><input id="edit-plan-notes" type="text"/></div>
+      <div class="field"><label>Priority</label>
+        <select id="edit-plan-priority">
+          <option value="normal">Normal</option>
+          <option value="high">High</option>
+          <option value="critical">Critical</option>
+        </select>
+      </div>
+      <div class="field"><label>Status</label>
+        <select id="edit-plan-status">
+          <option value="planned">Planned</option>
+          <option value="inprogress">In progress</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="deletePlan()">Delete</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-edit-plan')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditPlan()">Save changes</button>
     </div>
   </div>
 </div>
@@ -1452,7 +1629,7 @@ function enterVenueDashboard(venue){
   state.currentStaff=[]; currentPhotos.new=[];
   renderStaffTags(); renderPhotoPreviews('new');
   populateOpTypeSelects(); renderVenueStats(); renderVenueHistory();
-  renderVenueContactInfo();
+  renderVenueContactInfo(); renderVenueUpcoming();
   showScreen('screen-venue');
 }
 
@@ -1919,6 +2096,325 @@ async function init(){
   }
   showScreen('screen-login');
 }
+// ════════════════════════════════════════
+// PLANS / CALENDAR
+// ════════════════════════════════════════
+let ganttWeekOffset = 0;
+let ganttStatusFilter = 'all';
+let planTypeSelections = [];
+let editPlanTypeSelections = [];
+
+// ── DB MAPPERS ──
+function dbToPlan(r){ return {id:r.id,venueId:r.venue_id,projectId:r.project_id,opTypes:r.op_types||[],dateFrom:r.date_from,dateTo:r.date_to,notes:r.notes||'',priority:r.priority||'normal',status:r.status||'planned',createdBy:r.created_by||'admin',createdAt:r.created_at}; }
+function planToDb(p){ return {id:p.id,venue_id:p.venueId,project_id:p.projectId,op_types:p.opTypes,date_from:p.dateFrom,date_to:p.dateTo,notes:p.notes,priority:p.priority,status:p.status,created_by:p.createdBy}; }
+
+// ── LOAD PLANS ──
+async function loadPlans(projectId){
+  const {data,error}=await supa.from('pitchops_plans').select('*').eq('project_id',projectId).order('date_from');
+  if(error){ console.error(error); return []; }
+  return (data||[]).map(dbToPlan);
+}
+
+async function loadVenuePlans(venueId){
+  const {data,error}=await supa.from('pitchops_plans').select('*').eq('venue_id',venueId).order('date_from');
+  if(error){ console.error(error); return []; }
+  return (data||[]).map(dbToPlan);
+}
+
+// ── TAB SWITCHING ──
+function switchProjectTab(tab){
+  document.getElementById('ptab-ops').classList.toggle('active', tab==='ops');
+  document.getElementById('ptab-calendar').classList.toggle('active', tab==='calendar');
+  document.getElementById('ptab-ops-content').style.display = tab==='ops' ? '' : 'none';
+  document.getElementById('ptab-calendar-content').style.display = tab==='calendar' ? 'block' : 'none';
+  if(tab==='calendar') renderGantt();
+}
+
+// ── GANTT ──
+function ganttWeekStart(offset){
+  const now = new Date();
+  const day = now.getDay()||7;
+  const mon = new Date(now);
+  mon.setDate(now.getDate() - day + 1 + offset*7);
+  mon.setHours(0,0,0,0);
+  return mon;
+}
+
+function ganttNav(dir){ ganttWeekOffset+=dir; renderGantt(); }
+function ganttGoToday(){ ganttWeekOffset=0; renderGantt(); }
+function ganttFilter(f,btn){
+  ganttStatusFilter=f;
+  document.querySelectorAll('.sf-pill').forEach(p=>p.classList.remove('sf-active'));
+  btn.classList.add('sf-active');
+  renderGantt();
+}
+
+async function renderGantt(){
+  const pid=state.currentProjectId; if(!pid) return;
+  const weekStart=ganttWeekStart(ganttWeekOffset);
+  const days=Array.from({length:7},(_,i)=>{ const d=new Date(weekStart); d.setDate(weekStart.getDate()+i); return d; });
+  const today=new Date(); today.setHours(0,0,0,0);
+
+  // update label
+  const opts={day:'2-digit',month:'short'};
+  document.getElementById('gantt-week-label').textContent=
+    days[0].toLocaleDateString('en-GB',opts)+' — '+days[6].toLocaleDateString('en-GB',opts)+' '+days[0].getFullYear();
+
+  const venues=projectVenues(pid);
+  const plans=await loadPlans(pid);
+
+  // auto-mark missed plans
+  const now=new Date(); now.setHours(0,0,0,0);
+  for(const plan of plans){
+    if(plan.status==='planned' && new Date(plan.dateTo) < now){
+      plan.status='missed';
+      await supa.from('pitchops_plans').update({status:'missed'}).eq('id',plan.id);
+    }
+  }
+
+  const grid=document.getElementById('gantt-grid');
+  const dayNames=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+  let html=`<div class="gantt-header">
+    <div class="gantt-header-venue">Venue</div>
+    ${days.map((d,i)=>{
+      const isToday=d.getTime()===today.getTime();
+      return `<div class="gantt-header-day">
+        <div class="g-day-name">${dayNames[i]}</div>
+        <div class="g-day-num ${isToday?'today-num':''}">${d.getDate()}</div>
+      </div>`;
+    }).join('')}
+  </div>`;
+
+  if(!venues.length){
+    html+=`<div class="empty-state" style="padding:2rem"><div class="ico">📅</div><div>No venues in this project</div></div>`;
+  } else {
+    html+=venues.map(v=>{
+      const vPlans=plans.filter(p=>p.venueId===v.id);
+      let rowHtml=`<div class="gantt-row">
+        <div class="gantt-venue-cell">
+          <div class="g-venue-name">${esc(v.name)}</div>
+          <div class="g-venue-type">${v.venueType==='Training Site'?'⬜':'🏟'} ${esc(v.venueType||'Stadium')}</div>
+        </div>`;
+
+      days.forEach(d=>{
+        const dStr=d.toISOString().slice(0,10);
+        const isToday=d.getTime()===today.getTime();
+        const dayPlans=vPlans.filter(p=>p.dateFrom<=dStr && p.dateTo>=dStr && (ganttStatusFilter==='all'||p.status===ganttStatusFilter));
+        const dayOps=state.operations.filter(o=>o.venueId===v.id && (o.date||'').slice(0,10)===dStr);
+
+        let cellContent='';
+        dayPlans.forEach(p=>{
+          const chipClass='chip-'+p.status;
+          const label=p.opTypes.slice(0,2).join(', ')+(p.opTypes.length>2?'…':'');
+          cellContent+=`<span class="op-chip ${chipClass}" onclick="openEditPlanModal('${p.id}')" title="${esc(p.opTypes.join(', '))}">${label}</span>`;
+        });
+        dayOps.forEach(o=>{
+          const badge=opBadge(o.type);
+          cellContent+=`<span class="op-chip chip-completed" style="background:${badge.bg};color:${badge.fg};border-color:${badge.fg}" title="Logged: ${esc(o.type)}">✓ ${esc(o.type.slice(0,8))}</span>`;
+        });
+
+        rowHtml+=`<div class="gantt-day-cell ${isToday?'today-col':''}" onclick="quickAddPlan('${v.id}','${dStr}')">${cellContent}</div>`;
+      });
+
+      rowHtml+=`</div>`;
+      return rowHtml;
+    }).join('');
+  }
+
+  grid.innerHTML=html;
+}
+
+// ── PLAN MODAL ──
+function openPlanModal(venueId, dateStr){
+  const pid=state.currentProjectId; if(!pid) return;
+  const venues=projectVenues(pid);
+  const sel=document.getElementById('plan-venue-sel');
+  sel.innerHTML=venues.map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('');
+  if(venueId) sel.value=venueId;
+
+  planTypeSelections=[];
+  renderPlanTypeChips('plan-type-chips', planTypeSelections, (t)=>{
+    const idx=planTypeSelections.indexOf(t);
+    if(idx===-1) planTypeSelections.push(t); else planTypeSelections.splice(idx,1);
+    renderPlanTypeChips('plan-type-chips', planTypeSelections, arguments.callee);
+  });
+
+  const today=new Date().toISOString().slice(0,10);
+  document.getElementById('plan-date-from').value=dateStr||today;
+  document.getElementById('plan-date-to').value=dateStr||today;
+  document.getElementById('plan-notes').value='';
+  document.getElementById('plan-priority').value='normal';
+  openModal('modal-plan');
+}
+
+function openVenuePlanModal(){
+  const vid=state.currentVenueId; if(!vid) return;
+  const venue=state.venues.find(v=>v.id===vid); if(!venue) return;
+  const pid=venue.projectIds&&venue.projectIds[0]||'';
+  planTypeSelections=[];
+  renderPlanTypeChips('plan-type-chips', planTypeSelections, (t)=>{
+    const idx=planTypeSelections.indexOf(t);
+    if(idx===-1) planTypeSelections.push(t); else planTypeSelections.splice(idx,1);
+    renderPlanTypeChips('plan-type-chips', planTypeSelections, arguments.callee);
+  });
+  document.getElementById('plan-venue-sel').innerHTML=`<option value="${vid}">${esc(venue.name)}</option>`;
+  document.getElementById('plan-date-from').value=new Date().toISOString().slice(0,10);
+  document.getElementById('plan-date-to').value=new Date().toISOString().slice(0,10);
+  document.getElementById('plan-notes').value='';
+  document.getElementById('plan-priority').value='normal';
+  openModal('modal-plan');
+}
+
+function quickAddPlan(venueId, dateStr){ openPlanModal(venueId, dateStr); }
+
+function renderPlanTypeChips(containerId, selected, onToggle){
+  const container=document.getElementById(containerId); if(!container) return;
+  container.innerHTML=state.opTypes.map(t=>{
+    const isSel=selected.includes(t);
+    return `<div class="btn btn-ghost btn-sm" style="font-size:11px;${isSel?'background:var(--blue-pale);color:var(--blue);border-color:var(--blue);':''}" onclick="togglePlanChip('${containerId}','${esc(t)}')">${esc(t)}</div>`;
+  }).join('');
+}
+
+function togglePlanChip(containerId, type){
+  if(containerId==='plan-type-chips'){
+    const idx=planTypeSelections.indexOf(type);
+    if(idx===-1) planTypeSelections.push(type); else planTypeSelections.splice(idx,1);
+    renderPlanTypeChips('plan-type-chips', planTypeSelections, null);
+  } else {
+    const idx=editPlanTypeSelections.indexOf(type);
+    if(idx===-1) editPlanTypeSelections.push(type); else editPlanTypeSelections.splice(idx,1);
+    renderPlanTypeChips('edit-plan-type-chips', editPlanTypeSelections, null);
+  }
+}
+
+async function savePlan(){
+  const venueId=document.getElementById('plan-venue-sel').value;
+  const dateFrom=document.getElementById('plan-date-from').value;
+  const dateTo=document.getElementById('plan-date-to').value;
+  if(!venueId||!dateFrom||!dateTo){showToast('Please fill all required fields');return;}
+  if(planTypeSelections.length===0){showToast('Select at least one operation type');return;}
+  if(dateTo<dateFrom){showToast('End date must be after start date');return;}
+  const venue=state.venues.find(v=>v.id===venueId);
+  const pid=state.currentProjectId||venue?.projectIds?.[0]||'';
+  const plan={id:'plan_'+Date.now(),venueId,projectId:pid,opTypes:[...planTypeSelections],
+    dateFrom,dateTo,notes:document.getElementById('plan-notes').value.trim(),
+    priority:document.getElementById('plan-priority').value,status:'planned',createdBy:'admin'};
+  const {error}=await supa.from('pitchops_plans').insert(planToDb(plan));
+  if(error){showToast('Error: '+error.message);return;}
+  closeModal('modal-plan');
+  showToast('Planning window created!');
+  if(state.currentProjectId) renderGantt();
+  if(state.currentVenueId) renderVenueUpcoming();
+}
+
+// ── EDIT PLAN MODAL ──
+async function openEditPlanModal(planId){
+  const {data}=await supa.from('pitchops_plans').select('*').eq('id',planId).single();
+  if(!data) return;
+  const plan=dbToPlan(data);
+  document.getElementById('edit-plan-id').value=planId;
+  editPlanTypeSelections=[...plan.opTypes];
+  renderPlanTypeChips('edit-plan-type-chips', editPlanTypeSelections, null);
+  document.getElementById('edit-plan-from').value=plan.dateFrom;
+  document.getElementById('edit-plan-to').value=plan.dateTo;
+  document.getElementById('edit-plan-notes').value=plan.notes;
+  document.getElementById('edit-plan-priority').value=plan.priority;
+  document.getElementById('edit-plan-status').value=plan.status;
+  openModal('modal-edit-plan');
+}
+
+async function saveEditPlan(){
+  const id=document.getElementById('edit-plan-id').value;
+  if(editPlanTypeSelections.length===0){showToast('Select at least one operation type');return;}
+  const {error}=await supa.from('pitchops_plans').update({
+    op_types:editPlanTypeSelections,
+    date_from:document.getElementById('edit-plan-from').value,
+    date_to:document.getElementById('edit-plan-to').value,
+    notes:document.getElementById('edit-plan-notes').value.trim(),
+    priority:document.getElementById('edit-plan-priority').value,
+    status:document.getElementById('edit-plan-status').value,
+  }).eq('id',id);
+  if(error){showToast('Error: '+error.message);return;}
+  closeModal('modal-edit-plan');
+  showToast('Plan updated!');
+  if(state.currentProjectId) renderGantt();
+  if(state.currentVenueId) renderVenueUpcoming();
+}
+
+async function deletePlan(){
+  const id=document.getElementById('edit-plan-id').value;
+  if(!confirm('Delete this planning window?')) return;
+  const {error}=await supa.from('pitchops_plans').delete().eq('id',id);
+  if(error){showToast('Error: '+error.message);return;}
+  closeModal('modal-edit-plan');
+  showToast('Plan deleted');
+  if(state.currentProjectId) renderGantt();
+  if(state.currentVenueId) renderVenueUpcoming();
+}
+
+// ── VENUE UPCOMING ──
+async function renderVenueUpcoming(){
+  const vid=state.currentVenueId; if(!vid) return;
+  const plans=await loadVenuePlans(vid);
+  const today=new Date().toISOString().slice(0,10);
+  const now=new Date(); now.setHours(0,0,0,0);
+
+  // auto-mark missed
+  for(const p of plans){
+    if(p.status==='planned' && new Date(p.dateTo) < now){
+      p.status='missed';
+      await supa.from('pitchops_plans').update({status:'missed'}).eq('id',p.id);
+    }
+  }
+
+  // show upcoming and active (not missed, not completed from past)
+  const visible=plans.filter(p=>p.status!=='missed' && p.dateTo>=today).slice(0,5);
+
+  const section=document.getElementById('venue-upcoming');
+  const list=document.getElementById('venue-upcoming-list');
+
+  if(!visible.length){ section.style.display='none'; return; }
+  section.style.display='block';
+
+  list.innerHTML=visible.map(p=>{
+    const isToday=p.dateFrom<=today && p.dateTo>=today;
+    const urgent=isToday && p.status==='planned';
+    const badge=`<span class="plan-status-badge psb-${p.status}">${{planned:'Planned',inprogress:'In progress',completed:'Completed'}[p.status]||p.status}</span>`;
+    const typeChips=p.opTypes.map(t=>`<span class="upcoming-type-chip">${esc(t)}</span>`).join('');
+    const dateLabel=p.dateFrom===p.dateTo?formatDateOnly(p.dateFrom):formatDateOnly(p.dateFrom)+' → '+formatDateOnly(p.dateTo);
+    const byLabel=p.createdBy==='admin'?'Set by admin':'Added by you';
+    return `<div class="upcoming-item ${urgent?'urgent':isToday?'today-plan':''}">
+      <div class="upcoming-date-col">
+        <div>${dateLabel}</div>
+        ${urgent?'<div class="upcoming-date-label">TODAY</div>':''}
+      </div>
+      <div class="upcoming-types">
+        <div>${typeChips}</div>
+        <div class="upcoming-note">${byLabel}${p.notes?' · '+esc(p.notes):''}</div>
+      </div>
+      <div class="upcoming-actions">
+        ${badge}
+        ${p.status!=='completed'?`<button class="btn btn-ghost btn-sm" style="font-size:11px" onclick="openEditPlanModal('${p.id}')">✏️</button>`:''}
+        ${isToday && p.status!=='completed'?`<button class="btn btn-blue btn-sm" style="font-size:11px" onclick="prefillFromPlan('${p.id}')">Log →</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function prefillFromPlan(planId){
+  const {data}=await supa.from('pitchops_plans').select('*').eq('id',planId).single();
+  if(!data) return;
+  const plan=dbToPlan(data);
+  // pre-fill the form with first op type
+  const typeEl=document.getElementById('new-op-type');
+  if(typeEl && plan.opTypes.length) typeEl.value=plan.opTypes[0];
+  if(plan.notes) document.getElementById('new-op-notes').value=plan.notes;
+  // scroll to form
+  document.querySelector('.card-body').scrollIntoView({behavior:'smooth'});
+  showToast('Form pre-filled from plan — add details and log!');
+}
+
 init();
 </script>
 </body>
