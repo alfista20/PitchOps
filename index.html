@@ -460,7 +460,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
   </div><!-- end ptab-ops-content -->
 
   <!-- CALENDAR TAB -->
-  <div id="ptab-calendar-content" style="display:none;padding:.75rem 1rem;max-width:1200px;margin:0 auto;width:100%;box-sizing:border-box">
+  <div id="ptab-calendar-content" style="display:none;padding:.75rem 1rem;width:100%;box-sizing:border-box;align-self:stretch">
     <div id="gantt-view">
       <div style="background:white;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden">
         <div style="padding:.6rem .75rem;border-bottom:1px solid var(--border);background:#fafbfc;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
@@ -2514,19 +2514,23 @@ function switchProjectTab(tab){
   document.getElementById('ptab-ops-content').style.display = tab==='ops' ? '' : 'none';
   document.getElementById('ptab-calendar-content').style.display = tab==='calendar' ? 'block' : 'none';
   if(tab==='calendar'){
+    const calEl=document.getElementById('ptab-calendar-content');
+    calEl.style.display='block';
     document.getElementById('gantt-view').style.display='block';
     document.getElementById('venue-cal-view').style.display='none';
-    renderGantt();
+    // Small timeout ensures DOM is painted before rendering table
+    setTimeout(()=>renderGantt(), 0);
   }
 }
 
 // ── GANTT ──
 function ganttWeekStart(offset){
-  const now = new Date();
-  const day = now.getDay()||7;
-  const mon = new Date(now);
-  mon.setDate(now.getDate() - day + 1 + offset*7);
-  mon.setHours(0,0,0,0);
+  // Build from local date parts to avoid timezone shift
+  const t=new Date();
+  const localDate=new Date(t.getFullYear(), t.getMonth(), t.getDate());
+  const day=localDate.getDay()||7; // Mon=1 ... Sun=7
+  const mon=new Date(localDate);
+  mon.setDate(localDate.getDate() - day + 1 + (offset||0)*7);
   return mon;
 }
 
@@ -2543,7 +2547,7 @@ async function renderGantt(){
   const pid=state.currentProjectId; if(!pid) return;
   const weekStart=ganttWeekStart(ganttWeekOffset);
   const days=Array.from({length:7},(_,i)=>{ const d=new Date(weekStart); d.setDate(weekStart.getDate()+i); return d; });
-  const today=new Date(); today.setHours(0,0,0,0);
+  const todayLocal=new Date(); const today=new Date(todayLocal.getFullYear(),todayLocal.getMonth(),todayLocal.getDate());
   const dayNames=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   const opts={day:'2-digit',month:'short'};
   document.getElementById('gantt-week-label').textContent=
@@ -2872,7 +2876,7 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
   const grid=document.getElementById(gridId); if(!grid) return;
   const weekStart=ganttWeekStart(weekOffset||0);
   const days=Array.from({length:7},(_,i)=>{ const d=new Date(weekStart); d.setDate(weekStart.getDate()+i); return d; });
-  const today=new Date(); today.setHours(0,0,0,0);
+  const todayLocal=new Date(); const today=new Date(todayLocal.getFullYear(),todayLocal.getMonth(),todayLocal.getDate());
   const dayNames=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   const opts={day:'2-digit',month:'short'};
 
@@ -2944,7 +2948,11 @@ function switchVenueTab(tab){
   if(tab==='schedule'){
     venueSchedOffset=0;
     const vid=state.currentVenueId;
-    if(vid) refreshVenueOps(vid, true).then(()=>renderWeekCalendar(vid,'venue-sched-grid',0));
+    if(vid){
+      // Show current week immediately from cached state, then refresh
+      renderWeekCalendar(vid,'venue-sched-grid',0);
+      refreshVenueOps(vid,true).then(()=>renderWeekCalendar(vid,'venue-sched-grid',0));
+    }
   }
 }
 
