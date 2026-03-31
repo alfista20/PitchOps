@@ -1942,7 +1942,22 @@ async function saveEditOperation(){
   const {error} = await supa.from('pitchops_operations').update(opToDb(state.operations[idx])).eq('id',id);
   if(error){ showToast('Error: '+error.message); return; }
   closeModal('modal-edit-op');
-  renderVenueHistory(); renderVenueStats(); renderDetailOps();
+  // Get venueId from the op itself (works from both venue and admin context)
+  const updatedOp=state.operations[idx];
+  const venueIdForRender=updatedOp.venueId;
+  renderVenueHistory();
+  renderVenueStats();
+  renderVenueUpcoming();
+  renderDetailOps();
+  // Always re-render schedule if visible — use venueId from op
+  if(document.getElementById('vtab-schedule-content')?.style.display==='block'){
+    renderWeekCalendar(venueIdForRender,'venue-sched-grid',venueSchedOffset);
+  }
+  // Also re-render venue cal drill-down if visible (admin)
+  if(document.getElementById('venue-cal-view')?.style.display==='block' && state.currentVenueCalId){
+    renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
+  }
+  if(document.getElementById('ptab-calendar-content')?.style.display==='block') renderGantt();
   showToast('Task updated');
 }
 
@@ -1953,12 +1968,16 @@ async function deleteOperation(){
   if(error){ showToast('Error: '+error.message); return; }
   state.operations=state.operations.filter(o=>o.id!==id);
   closeModal('modal-edit-op');
-  if(state.currentVenueId){
-    await loadVenueData(state.currentVenueId);
-    renderVenueStats(); renderVenueHistory(); renderVenueUpcoming();
-    if(document.getElementById('vtab-schedule-content')?.style.display==='block') renderVenueSched();
-  }
+  renderVenueHistory();
+  renderVenueStats();
+  renderVenueUpcoming();
   renderDetailOps();
+  if(document.getElementById('vtab-schedule-content')?.style.display==='block' && state.currentVenueId){
+    renderWeekCalendar(state.currentVenueId,'venue-sched-grid',venueSchedOffset);
+  }
+  if(document.getElementById('venue-cal-view')?.style.display==='block' && state.currentVenueCalId){
+    renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
+  }
   if(document.getElementById('ptab-calendar-content')?.style.display==='block') renderGantt();
   showToast('Task deleted');
 }
