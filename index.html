@@ -1222,9 +1222,9 @@ async function refreshVenueOps(venueId, silent=false){
     renderVenueStats();
     renderVenueHistory();
     renderVenueUpcoming();
-    // Re-render calendar if visible
+    // Re-render calendar if visible (call renderWeekCalendar directly to avoid loop)
     const schedVisible=document.getElementById('vtab-schedule-content')?.style.display==='block';
-    if(schedVisible) renderVenueSched();
+    if(schedVisible) renderWeekCalendar(venueId,'venue-sched-grid',venueSchedOffset);
     // Re-render admin gantt if visible
     const ganttVisible=document.getElementById('ptab-calendar-content')?.style.display==='block';
     if(ganttVisible) renderGantt();
@@ -2941,7 +2941,11 @@ function switchVenueTab(tab){
   document.getElementById('vtab-log-content').style.display = tab==='log' ? '' : 'none';
 
   document.getElementById('vtab-schedule-content').style.display = tab==='schedule' ? 'block' : 'none';
-  if(tab==='schedule'){ venueSchedOffset=0; renderVenueSched(); }
+  if(tab==='schedule'){
+    venueSchedOffset=0;
+    const vid=state.currentVenueId;
+    if(vid) refreshVenueOps(vid, true).then(()=>renderWeekCalendar(vid,'venue-sched-grid',0));
+  }
 }
 
 
@@ -2998,9 +3002,8 @@ function openNewOpForDate(dateStr){
 function venueSchedNav(dir){ venueSchedOffset+=dir; renderVenueSched(); }
 function venueSchedToday(){ venueSchedOffset=0; renderVenueSched(); }
 
-async function renderVenueSched(){
+function renderVenueSched(){
   const vid=state.currentVenueId; if(!vid) return;
-  await refreshVenueOps(vid, true);
   renderWeekCalendar(vid, 'venue-sched-grid', venueSchedOffset);
 }
 
