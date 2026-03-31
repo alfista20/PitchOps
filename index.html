@@ -1450,18 +1450,20 @@ function changePassword(){
 }
 
 async function venueTokenLogin(){
-  const tok = document.getElementById('venue-token-input').value.trim();
+  const tok = document.getElementById('venue-token-input').value.trim().replace(/\s/g,'');
+  if(!tok){ showToast('Please paste your venue token'); return; }
   showLoading(true);
-  const {data:venues} = await supa.from('pitchops_venues').select('*').eq('token',tok);
+  const {data:venues, error} = await supa.from('pitchops_venues').select('*').eq('token',tok);
   showLoading(false);
+  if(error){ showToast('Connection error: '+error.message); return; }
   if(venues&&venues.length){
     const venue=dbToVenue(venues[0]);
     state.venues=[venue];
     state.currentVenueId=venue.id;
-    await loadVenueData(venue.id);
-    populateOpTypeSelects();
-    enterVenueDashboard(venue);
-  } else showToast('Invalid venue token');
+    await enterVenueDashboard(venue);
+  } else {
+    showToast('Token not found — please check and try again');
+  }
 }
 
 // ════════════════════════════════════════
@@ -1785,6 +1787,7 @@ async function removeVenueFromProject(e,vid){
 // VENUE DASHBOARD
 // ════════════════════════════════════════
 async function enterVenueDashboard(venue){
+  state.currentVenueId = venue.id;
   const proj=state.projects.find(p=>venue.projectIds&&venue.projectIds.includes(p.id));
   document.getElementById('venue-hero-name').textContent=venue.name;
   document.getElementById('venue-hero-sub').textContent=venue.city||'Pitch operations log';
@@ -1792,18 +1795,15 @@ async function enterVenueDashboard(venue){
   const ptag=document.getElementById('venue-project-tag');
   if(proj){ ptag.textContent=proj.code; ptag.style.display='inline-flex'; }
   else ptag.style.display='none';
-  document.getElementById('new-op-date').value=new Date().toISOString().slice(0,10);
+  document.getElementById('new-op-date').value=todayStr();
   state.currentStaff=[]; currentPhotos.new=[];
   renderStaffTags(); renderPhotoPreviews('new');
-  // SINGLE DATA LOAD — all renders read from state.operations after this
-  await loadVenueData(venue.id);
-  populateOpTypeSelects();
-  renderVenueStats();
-  renderVenueHistory();
-  renderVenueContactInfo();
-  renderVenueUpcoming();
-  switchVenueTab('log');
   showScreen('screen-venue');
+  // Load data then render
+  await refreshVenueOps(venue.id, true);
+  populateOpTypeSelects();
+  renderVenueContactInfo();
+  switchVenueTab('log');
 }
 
 function venueOps(){ return state.operations.filter(o=>o.venueId===state.currentVenueId).sort((a,b)=>new Date(b.date)-new Date(a.date)); }
