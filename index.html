@@ -2470,20 +2470,14 @@ async function init(){
   const tok=params.get('token');
   if(tok){
     showLoading(true);
-    // load venue by token
     const {data:venues} = await supa.from('pitchops_venues').select('*').eq('token',tok);
+    showLoading(false);
     if(venues&&venues.length){
       const venue=dbToVenue(venues[0]);
       state.venues=[venue];
-      state.currentVenueId=venue.id;
-      // load ops and types for this venue
-      await loadVenueData(venue.id);
-      populateOpTypeSelects();
-      showLoading(false);
-      enterVenueDashboard(venue);
+      await enterVenueDashboard(venue);
       return;
     }
-    showLoading(false);
     showToast('Invalid venue token');
   }
   showScreen('screen-login');
