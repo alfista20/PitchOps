@@ -1205,7 +1205,7 @@ async function loadVenueData(venueId) {
 }
 
 // ── SINGLE SOURCE OF TRUTH: refresh venue ops + re-render all views ──
-async function refreshVenueOps(venueId, silent=false){
+async async function refreshVenueOps(venueId, silent=false){
   if(!silent) showLoading(true);
   try {
     const [ops, types] = await Promise.all([
@@ -1587,7 +1587,7 @@ function openProject(pid){
   renderProjectDetail(pid);
   showScreen('screen-project-detail');
   // Silently refresh ops in background to ensure fresh data
-  refreshProjectOps(id, true);
+  refreshProjectOps(pid, true);
 }
 
 function updateDetailStats(pid){
@@ -1616,6 +1616,7 @@ function renderProjectDetail(pid){
   updateDetailStats(pid);
 
   // venue list
+  const venues = projectVenues(pid);
   const vlist = document.getElementById('detail-venue-list');
   if(!venues.length){ vlist.innerHTML=`<div class="empty-state"><div class="ico">🏟</div><div>No venues yet. Click "+ Add venue".</div></div>`; }
   else {
@@ -3005,6 +3006,7 @@ function venueSchedToday(){ venueSchedOffset=0; renderVenueSched(); }
 
 async function renderVenueSched(){
   const vid=state.currentVenueId; if(!vid) return;
+  await refreshVenueOps(vid, true);
   renderWeekCalendar(vid, 'venue-sched-grid', venueSchedOffset);
 }
 
