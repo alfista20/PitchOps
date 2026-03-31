@@ -81,9 +81,9 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 .status-filter{display:flex;gap:6px;flex-wrap:wrap}
 .status-pill{padding:5px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:white;color:var(--text-muted);transition:all .15s}
 .status-pill.active-pill{background:var(--navy);color:white;border-color:var(--navy)}
-.status-pill.active-status{background:var(--green-pale);color:var(--green);border-color:var(--green)}
-.status-pill.planned-status{background:var(--amber-pale);color:var(--amber);border-color:var(--amber)}
-.status-pill.finished-status{background:var(--surface);color:var(--text-muted);border-color:var(--border)}
+.status-pill
+.status-pill
+.status-pill
 
 .projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}
 
@@ -124,7 +124,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 .venue-item-city{font-size:11px;color:var(--text-muted);margin-top:1px}
 .venue-item-contact{font-size:11px;color:var(--text-hint);margin-top:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .venue-item-actions{display:flex;gap:4px;margin-top:5px}
-.venue-item-right{margin-left:auto;flex-shrink:0}
+
 
 /* ops table */
 .filter-bar{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;padding:.65rem 1rem;border-bottom:1px solid var(--border);background:#fafbfc;-webkit-overflow-scrolling:touch}
@@ -229,7 +229,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 .venue-type-opt svg{width:32px;height:32px}
 .venue-type-opt span{font-size:12px;font-weight:500;color:var(--text-muted)}
 .venue-type-opt.picked span{color:var(--blue)}
-.venue-type-badge{display:inline-flex;align-items:center;justify-content:center;font-size:18px;width:28px;height:28px;background:var(--surface);border:1px solid var(--border);border-radius:8px;flex-shrink:0}
+
 
 /* ── CALENDAR / GANTT ── */
 .gantt-wrap{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden}
@@ -241,15 +241,15 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 .gantt-legend-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)}
 .gantt-legend-dot{width:8px;height:8px;border-radius:2px}
 .gantt-header{display:grid;grid-template-columns:150px repeat(7,1fr);border-bottom:2px solid var(--border);background:#fafbfc}
-.gantt-header-venue{padding:8px 10px;font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;border-right:1px solid var(--border)}
+
 .gantt-header-day{padding:6px 4px;text-align:center;border-right:1px solid var(--border)}
 .gantt-header-day:last-child{border-right:none}
-.g-day-name{font-size:9px;color:var(--text-hint);text-transform:uppercase;letter-spacing:.3px}
+
 .g-day-num{font-size:14px;font-weight:600;color:var(--text)}
 .g-day-num.today-num{color:var(--blue);background:var(--blue-pale);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;margin:0 auto}
 .gantt-row{display:grid;grid-template-columns:150px repeat(7,1fr);border-bottom:1px solid var(--border);min-height:56px}
 .gantt-row:last-child{border-bottom:none}
-.gantt-venue-cell{padding:8px 10px;border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;gap:2px;background:white;cursor:default}
+
 .g-venue-name{font-size:11px;font-weight:600;color:var(--text)}
 .g-venue-type{font-size:10px;color:var(--text-hint)}
 .gantt-day-cell{border-right:1px solid var(--border);padding:3px;position:relative;cursor:pointer;transition:background .12s;min-height:56px;display:flex;flex-direction:column;align-items:stretch}
@@ -279,15 +279,15 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 .upcoming-note{font-size:11px;color:var(--text-hint);margin-top:3px;font-style:italic}
 .upcoming-actions{display:flex;gap:5px;flex-shrink:0;align-items:flex-start}
 .plan-status-badge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;white-space:nowrap}
-.psb-planned{background:var(--amber-pale);color:var(--amber)}
-.psb-inprogress{background:var(--blue-pale);color:var(--blue)}
-.psb-completed{background:var(--green-pale);color:var(--green)}
-.psb-missed{background:var(--red-pale);color:var(--red)}
+
+
+
+
 
 
 /* VENUE CALENDAR DRILL-DOWN */
-.vcal-day-view{display:grid;grid-template-columns:60px 1fr;border-top:1px solid var(--border)}
-.vcal-hour{padding:4px 8px;font-size:10px;color:var(--text-hint);border-bottom:1px solid var(--border);border-right:1px solid var(--border);text-align:right;background:#fafbfc}
+
+
 .vcal-slot{min-height:44px;border-bottom:1px solid var(--border);padding:2px 4px;position:relative;cursor:pointer}
 .vcal-slot:hover{background:var(--blue-pale)}
 .vcal-month{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid var(--border)}
@@ -2506,26 +2506,11 @@ async function init(){
 // ════════════════════════════════════════
 let ganttWeekOffset = 0;
 let ganttStatusFilter = 'all';
-let planTypeSelections = [];
-let editPlanTypeSelections = [];
+
+
 
 // ── DB MAPPERS ──
-function dbToPlan(r){ return {id:r.id,venueId:r.venue_id,projectId:r.project_id,opTypes:r.op_types||[],opType:r.op_types&&r.op_types[0]||'',dateFrom:r.date_from,dateTo:r.date_to,timeFrom:r.time_from||'08:00',timeTo:r.time_to||'17:00',notes:r.notes||'',priority:r.priority||'normal',status:r.status||'planned',createdBy:r.created_by||'admin',createdAt:r.created_at}; }
-function planToDb(p){ return {id:p.id,venue_id:p.venueId,project_id:p.projectId,op_types:[p.opType||p.opTypes&&p.opTypes?.[0]||''],date_from:p.dateFrom,date_to:p.dateTo,time_from:p.timeFrom||'08:00',time_to:p.timeTo||'17:00',notes:p.notes,priority:p.priority,status:p.status,created_by:p.createdBy}; }
-
 // ── LOAD PLANS ──
-async function loadPlans(projectId){
-  const {data,error}=await supa.from('pitchops_plans').select('*').eq('project_id',projectId).order('date_from');
-  if(error){ console.error(error); return []; }
-  return (data||[]).map(dbToPlan);
-}
-
-async function loadVenuePlans(venueId){
-  const {data,error}=await supa.from('pitchops_plans').select('*').eq('venue_id',venueId).order('date_from');
-  if(error){ console.error(error); return []; }
-  return (data||[]).map(dbToPlan);
-}
-
 // ── TAB SWITCHING ──
 function switchProjectTab(tab){
   document.getElementById('ptab-ops').classList.toggle('active', tab==='ops');
@@ -2652,11 +2637,6 @@ async function renderGantt(){
 
 
 // ── PLAN MODAL ──
-function populatePlanTypeSelect(selId){
-  const sel=document.getElementById(selId); if(!sel) return;
-  sel.innerHTML=state.opTypes.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
-}
-
 function openPlanModal(venueId, dateStr, timeStr){
   const pid=state.currentProjectId;
   // populate venue select
@@ -2680,49 +2660,10 @@ function openPlanModal(venueId, dateStr, timeStr){
   openModal('modal-plan');
 }
 
-function openVenuePlanModal(){
-  const vid=state.currentVenueId; if(!vid) return;
-  const venue=state.venues.find(v=>v.id===vid); if(!venue) return;
-  document.getElementById('plan-venue-sel').innerHTML=`<option value="${vid}">${esc(venue.name)}</option>`;
-  populatePlanTypeSelect('plan-op-type');
-  document.getElementById('plan-date-from').value=new Date().toISOString().slice(0,10);
-  document.getElementById('plan-date-to').value=new Date().toISOString().slice(0,10);
-  document.getElementById('plan-time-from').value='08:00';
-  document.getElementById('plan-time-to').value='17:00';
-  document.getElementById('plan-notes').value='';
-  document.getElementById('plan-priority').value='normal';
-  openModal('modal-plan');
-}
-
 function quickAddPlan(venueId, dateStr, timeStr){
   // Don't open if a modal is currently open or was just closed
   if(document.querySelector('.modal-overlay.open')) return;
   openPlanModal(venueId, dateStr, timeStr);
-}
-
-async function savePlan(){
-  const venueId=document.getElementById('plan-venue-sel').value;
-  const opType=document.getElementById('plan-op-type').value;
-  const dateFrom=document.getElementById('plan-date-from').value;
-  const dateTo=document.getElementById('plan-date-to').value;
-  const timeFrom=document.getElementById('plan-time-from').value||'08:00';
-  const timeTo=document.getElementById('plan-time-to').value||'17:00';
-  if(!venueId||!opType||!dateFrom||!dateTo){showToast('Please fill all required fields');return;}
-  if(dateTo<dateFrom){showToast('End date must be after start date');return;}
-  const venue=state.venues.find(v=>v.id===venueId);
-  const pid=state.currentProjectId||venue?.projectIds?.[0]||'';
-  const plan={id:'plan_'+Date.now(),venueId,projectId:pid,
-    opType,opTypes:[opType],
-    dateFrom,dateTo,timeFrom,timeTo,
-    notes:document.getElementById('plan-notes').value.trim(),
-    priority:document.getElementById('plan-priority').value,
-    status:'planned',createdBy:state.currentVenueId?'venue':'admin'};
-  const {error}=await supa.from('pitchops_plans').insert(planToDb(plan));
-  if(error){showToast('Error: '+error.message);return;}
-  closeModal('modal-plan');
-  showToast('Plan entry created!');
-  if(state.currentProjectId) renderGantt();
-  if(state.currentVenueId) renderVenueUpcoming();
 }
 
 // ── EDIT PLAN MODAL ──
@@ -2741,87 +2682,6 @@ async function openEditPlanModal(planId){
   document.getElementById('edit-plan-priority').value=plan.priority;
   document.getElementById('edit-plan-status').value=plan.status;
   openModal('modal-edit-plan');
-}
-
-async function saveEditPlan(){
-  const id=document.getElementById('edit-plan-id').value;
-  const opType=document.getElementById('edit-plan-op-type').value;
-  const newStatus=document.getElementById('edit-plan-status').value;
-  if(!opType){showToast('Please select an operation type');return;}
-
-  // fetch current plan to check previous status
-  const {data:oldData}=await supa.from('pitchops_plans').select('*').eq('id',id).single();
-  const wasCompleted=oldData&&oldData.status==='completed';
-
-  const dateFrom=document.getElementById('edit-plan-from').value;
-  const dateTo=document.getElementById('edit-plan-to').value;
-  const timeFrom=document.getElementById('edit-plan-time-from').value||'08:00';
-  const timeTo=document.getElementById('edit-plan-time-to').value||'17:00';
-  const notes=document.getElementById('edit-plan-notes').value.trim();
-
-  // Block completed status if dateTo is strictly in the future
-  if(newStatus==='completed'){
-    const planDate=new Date(dateTo+'T23:59:59');
-    const now=new Date();
-    if(planDate>now){showToast('Cannot mark as completed — the end date is in the future.');return;}
-  }
-
-  const {error}=await supa.from('pitchops_plans').update({
-    op_types:[opType],
-    date_from:dateFrom,
-    date_to:dateTo,
-    time_from:timeFrom,
-    time_to:timeTo,
-    notes:notes,
-    priority:document.getElementById('edit-plan-priority').value,
-    status:newStatus,
-  }).eq('id',id);
-  if(error){showToast('Error: '+error.message);return;}
-
-  // Auto-create logged operation when status set to completed for first time
-  if(newStatus==='completed' && !wasCompleted){
-    const venueId=oldData.venue_id;
-    const projectId=oldData.project_id;
-    // use dateTo + timeFrom as the operation datetime
-    const opDate=`${dateTo}T${timeFrom}`;
-    const op={
-      id:'op_'+Date.now(),
-      venueId, projectId,
-      type:opType,
-      zone:'Full pitch',
-      equipment:'',weather:'',
-      staff:[],
-      notes:notes||(opType+' — completed from plan'),
-      date:opDate,
-      photos:[],
-      flagged:false,admin_comment:'',
-      createdAt:new Date().toISOString()
-    };
-    const {error:opErr}=await supa.from('pitchops_operations').insert(opToDb(op));
-    if(!opErr){
-      state.operations.unshift(op);
-      showToast('Plan completed — operation logged automatically!');
-    } else {
-      showToast('Plan updated! (Could not auto-log: '+opErr.message+')');
-    }
-  } else {
-    showToast('Plan updated!');
-  }
-
-  closeModal('modal-edit-plan');
-  if(state.currentProjectId) renderGantt();
-  if(state.currentVenueId) await refreshVenueOps(state.currentVenueId, true);
-}
-
-async function deletePlan(){
-  const id=document.getElementById('edit-plan-id').value;
-  if(!confirm('Delete this planning window?')) return;
-  const {error}=await supa.from('pitchops_plans').delete().eq('id',id);
-  if(error){showToast('Error: '+error.message);return;}
-  closeModal('modal-edit-plan');
-  showToast('Plan deleted');
-  if(state.currentProjectId) renderGantt();
-  if(state.currentVenueId) renderVenueUpcoming();
 }
 
 // ── VENUE UPCOMING — uses operations only ──
