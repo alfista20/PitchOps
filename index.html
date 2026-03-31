@@ -2594,7 +2594,6 @@ async function renderGantt(){
 
   // Venue rows
   venues.forEach(v=>{
-    const vPlans=plans.filter(p=>p.venueId===v.id);
     let cells = `<td onclick="openVenueCal('${v.id}')" style="padding:8px 10px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;white-space:nowrap;background:white">
       <div style="font-size:12px;font-weight:600;color:#185FA5">${esc(v.name)}</div>
       <div style="font-size:10px;color:#96a6bb">${v.venueType==='Training Site'?'⬜':'🏟'} ${esc(v.venueType||'Stadium')}</div>
@@ -2604,7 +2603,7 @@ async function renderGantt(){
     days.forEach(d=>{
       const dStr=d.toISOString().slice(0,10);
       const isT=d.getTime()===today.getTime();
-      const dayPlans=vPlans.filter(p=>p.dateFrom<=dStr&&p.dateTo>=dStr&&(ganttStatusFilter==='completed'?p.status==='completed':(p.status!=='completed'&&(ganttStatusFilter==='all'||p.status===ganttStatusFilter))));
+
       const dayOps=state.operations.filter(o=>o.venueId===v.id&&(o.date||'').slice(0,10)===dStr);
       let chips='';
       dayPlans.forEach(p=>{
@@ -2877,18 +2876,11 @@ let unifiedCalOffset = {};
 
 function renderWeekCalendar(venueId, gridId, weekOffset){
   const grid=document.getElementById(gridId); if(!grid) return;
-  const weekStart=ganttWeekStart(weekOffset||0);
-  const days=Array.from({length:7},(_,i)=>{ const d=new Date(weekStart); d.setDate(weekStart.getDate()+i); return d; });
-  const todayLocal=new Date(); const today=new Date(todayLocal.getFullYear(),todayLocal.getMonth(),todayLocal.getDate());
+  const today=new Date(todayStr());
   const dayNames=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   const opts={day:'2-digit',month:'short'};
 
   const labelEl=document.getElementById(gridId.replace('-grid','-label'));
-  if(labelEl) labelEl.textContent=days[0].toLocaleDateString('en-GB',opts)+' — '+days[6].toLocaleDateString('en-GB',opts);
-
-  // Read from state.operations (kept fresh by loadVenueData)
-  const ops=state.operations.filter(o=>o.venueId===venueId)
-    .sort((a,b)=>new Date(a.date)-new Date(b.date));
 
   const chipStyle={
     planned:'background:#FAEEDA;color:#854F0B;border-left:3px solid #EF9F27',
@@ -2897,44 +2889,70 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
     missed:'background:#FCEBEB;color:#A32D2D;border-left:3px solid #A32D2D',
   };
 
-  // Header row
-  let headerCols=`<th style="width:50px;padding:6px 8px;font-size:10px;font-weight:600;color:#5a6a82;border-right:1px solid rgba(0,0,0,0.09);background:#fafbfc"></th>`;
-  days.forEach((d,i)=>{
-    const isT=d.getTime()===today.getTime();
-    headerCols+=`<th style="padding:6px 4px;text-align:center;border-right:1px solid rgba(0,0,0,0.09);background:${isT?'rgba(24,95,165,0.08)':'#fafbfc'};min-width:100px">
-      <div style="font-size:9px;color:#96a6bb;text-transform:uppercase">${dayNames[i]}</div>
-      <div style="font-size:15px;font-weight:700;color:${isT?'#185FA5':'#0C2340'}">${d.getDate()}</div>
+  // Get ALL ops for this venue, sorted by date
+  const ops=state.operations.filter(o=>o.venueId===venueId)
+    .sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+
+  if(!ops.length){
+    if(labelEl) labelEl.textContent='No tasks';
+    grid.innerHTML='<div style="padding:2rem;text-align:center;color:#96a6bb;font-size:13px">No tasks logged yet. Click "+ Add plan" to add one.</div>';
+    return;
+  }
+
+  // Get unique dates from ALL ops (not just current week)
+  const weekStart=ganttWeekStart(weekOffset||0);
+  const weekDays=Array.from({length:7},(_,i)=>{ const d=new Date(weekStart); d.setDate(weekStart.getDate()+i); return d; });
+
+  // Update label
+  if(labelEl) labelEl.textContent=weekDays[0].toLocaleDateString('en-GB',opts)+' — '+weekDays[6].toLocaleDateString('en-GB',opts);
+
+  // Get all unique dates that have tasks (sorted)
+  const allDates=[...new Set(ops.map(o=>(o.date||'').slice(0,10)).filter(Boolean))].sort();
+
+  // Determine which dates to show:
+  // Current week days + any other dates that have tasks
+  const weekDayStrs=weekDays.map(d=>d.toISOString().slice(0,10));
+  const extraDates=allDates.filter(d=>!weekDayStrs.includes(d));
+  const allCols=[...weekDayStrs]; // always show current week
+  // Add dates outside current week that have tasks
+  extraDates.forEach(d=>{ if(!allCols.includes(d)) allCols.push(d); });
+  allCols.sort();
+
+  // Build header
+  let headerCols='<th style="width:50px;padding:6px 8px;font-size:10px;color:#5a6a82;border-right:1px solid rgba(0,0,0,0.09);background:#fafbfc"></th>';
+  allCols.forEach(dStr=>{
+    const d=new Date(dStr+'T12:00:00');
+    const isT=dStr===todayStr();
+    const inWeek=weekDayStrs.includes(dStr);
+    const dayName=dayNames[(d.getDay()+6)%7];
+    headerCols+=`<th style="padding:6px 4px;text-align:center;border-right:1px solid rgba(0,0,0,0.09);background:${isT?'rgba(24,95,165,0.08)':inWeek?'#fafbfc':'#f0f0f8'};min-width:90px;${!inWeek?'opacity:.7':''}">
+      <div style="font-size:9px;color:#96a6bb;text-transform:uppercase">${dayName}</div>
+      <div style="font-size:13px;font-weight:700;color:${isT?'#185FA5':'#0C2340'}">${d.getDate()} ${d.toLocaleDateString('en-GB',{month:'short'})}</div>
     </th>`;
   });
 
-  // Single unified row — all tasks per day shown together
-  let cells=`<td style="padding:6px 8px;border-right:1px solid rgba(0,0,0,0.09);font-size:10px;font-weight:600;color:#5a6a82;background:#fafbfc;white-space:nowrap;vertical-align:top"></td>`;
-
-  days.forEach(d=>{
-    const dStr=d.toISOString().slice(0,10);
-    const isT=d.getTime()===today.getTime();
+  // Build cells
+  let cells='<td style="padding:6px 8px;border-right:1px solid rgba(0,0,0,0.09);font-size:10px;font-weight:600;color:#5a6a82;background:#fafbfc;vertical-align:top;white-space:nowrap"></td>';
+  allCols.forEach(dStr=>{
+    const isT=dStr===todayStr();
+    const inWeek=weekDayStrs.includes(dStr);
     const bg=isT?'rgba(24,95,165,0.04)':'white';
     const dayOps=ops.filter(o=>(o.date||'').slice(0,10)===dStr)
-      .sort((a,b)=>{
-        const order={planned:0,inprogress:1,completed:2,missed:3};
-        return (order[a.status]||0)-(order[b.status]||0);
-      });
-
+      .sort((a,b)=>{ const order={planned:0,inprogress:1,completed:2,missed:3}; return (order[a.status]||0)-(order[b.status]||0); });
     const chips=dayOps.map(o=>{
       const s=chipStyle[o.status]||chipStyle.planned;
       const tl=o.timeFrom&&o.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${o.timeFrom}–${o.timeTo}</span>`:'';
       return `<div onclick="openEditModal('${o.id}')" style="border-radius:4px;padding:3px 6px;font-size:10px;font-weight:600;margin-bottom:3px;cursor:pointer;${s}">${esc(o.type)}${tl}</div>`;
     }).join('');
-
-    cells+=`<td onclick="openNewOpForDate('${dStr}')" style="padding:4px;border-right:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bg};min-height:60px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bg}'">${chips||''}</td>`;
+    cells+=`<td onclick="openNewOpForDate('${dStr}')" style="padding:4px;border-right:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bg};min-height:50px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bg}'">${chips||''}</td>`;
   });
 
-  grid.innerHTML=`<div style="overflow-x:auto;width:100%"><table style="border-collapse:collapse;width:100%;min-width:620px">
+  grid.innerHTML=`<div style="overflow-x:auto;width:100%"><table style="border-collapse:collapse;width:100%;min-width:600px">
     <thead><tr>${headerCols}</tr></thead>
     <tbody><tr>${cells}</tr></tbody>
   </table></div>`;
-
 }
+
 
 
 // ════════════════════════════════════════
