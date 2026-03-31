@@ -647,7 +647,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
           </div>
           <button onclick="venueSchedToday()" style="padding:4px 10px;font-size:11px;background:white;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text-muted)">Today</button>
         </div>
-        <button onclick="openVenuePlanModal()" style="padding:6px 14px;font-size:12px;background:var(--blue);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500">+ Add plan</button>
+        <button onclick="openNewOpForDate(new Date().toISOString().slice(0,10))" style="padding:6px 14px;font-size:12px;background:var(--blue);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500">+ Add plan</button>
       </div>
       <div style="display:flex;gap:8px;padding:.35rem .75rem;border-bottom:1px solid var(--border);flex-wrap:wrap">
         <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:2px;background:var(--amber);display:inline-block"></span>Planned</span>
@@ -2163,17 +2163,16 @@ let venueCalOffset = 0;
 let venueCalViewMode = 'week'; // 'day' | 'week' | 'month'
 
 function openVenueCal(venueId) {
+  if(document.querySelector('.modal-overlay.open')) return;
   state.currentVenueCalId = venueId;
   venueCalOffset = 0;
-  venueCalViewMode = 'week';
   const venue = state.venues.find(v=>v.id===venueId);
   document.getElementById('venue-cal-name').textContent = venue ? venue.name : '';
   document.getElementById('gantt-view').style.display = 'none';
   document.getElementById('venue-cal-view').style.display = 'block';
-  setVenueCalView('week');
-  // scroll to top so calendar is visible
   window.scrollTo({top:0,behavior:'smooth'});
-  document.getElementById('screen-project-detail').scrollTop = 0;
+  // Use unified calendar
+  renderWeekCalendar(venueId, 'venue-cal-grid', venueCalOffset);
 }
 
 function exitVenueCal() {
@@ -2185,8 +2184,8 @@ function exitVenueCal() {
   renderGantt();
 }
 
-function venueCalNav(dir) { venueCalOffset += dir; renderVenueCal(); }
-function venueCalGoToday() { venueCalOffset = 0; renderVenueCal(); }
+function venueCalNav(dir) { venueCalOffset += dir; renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset); }
+function venueCalGoToday() { venueCalOffset = 0; renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',0); }
 
 function setVenueCalView(mode) {
   venueCalViewMode = mode;
@@ -2732,54 +2731,63 @@ async function deletePlan(){
   if(state.currentVenueId) renderVenueUpcoming();
 }
 
-// ── VENUE UPCOMING ──
+// ── VENUE UPCOMING — uses operations only ──
 async function renderVenueUpcoming(){
   const vid=state.currentVenueId; if(!vid) return;
-  const plans=await loadVenuePlans(vid);
-  const today=new Date().toISOString().slice(0,10);
-  const now=new Date(); now.setHours(0,0,0,0);
+  const todayStr=new Date().toISOString().slice(0,10);
 
-  // auto-mark missed
-  for(const p of plans){
-    if(p.status==='planned' && new Date(p.dateTo) < now){
-      p.status='missed';
-      await supa.from('pitchops_plans').update({status:'missed'}).eq('id',p.id);
+  // Load planned/inprogress ops for this venue
+  const {data}=await supa.from('pitchops_operations')
+    .select('*').eq('venue_id',vid)
+    .in('status',['planned','inprogress'])
+    .order('operation_date',{ascending:true});
+  const upcoming=(data||[]).map(dbToOp);
+
+  // Auto-mark missed
+  for(const op of upcoming){
+    const opDate=(op.date||'').slice(0,10);
+    if(op.status==='planned' && opDate < todayStr){
+      op.status='missed';
+      supa.from('pitchops_operations').update({status:'missed'}).eq('id',op.id);
     }
   }
 
-  // show upcoming and active (not missed, not completed from past)
-  const visible=plans.filter(p=>p.status!=='missed' && p.dateTo>=today).slice(0,5);
-
+  const visible=upcoming.filter(o=>o.status!=='missed');
   const section=document.getElementById('venue-upcoming');
   const list=document.getElementById('venue-upcoming-list');
+  const empty=document.getElementById('venue-upcoming-empty');
 
-  if(!visible.length){ section.style.display='none'; return; }
+  if(!visible.length){
+    section.style.display='none';
+    if(empty) empty.style.display='block';
+    return;
+  }
   section.style.display='block';
+  if(empty) empty.style.display='none';
 
-  list.innerHTML=visible.map(p=>{
-    const isToday=p.dateFrom<=today && p.dateTo>=today;
-    const urgent=isToday && p.status==='planned';
-    const badge=`<span class="plan-status-badge psb-${p.status}">${{planned:'Planned',inprogress:'In progress',completed:'Completed'}[p.status]||p.status}</span>`;
-    const typeChips=p.opTypes.map(t=>`<span class="upcoming-type-chip">${esc(t)}</span>`).join('');
-    const dateLabel=p.dateFrom===p.dateTo?formatDateOnly(p.dateFrom):formatDateOnly(p.dateFrom)+' → '+formatDateOnly(p.dateTo);
-    const byLabel=p.createdBy==='admin'?'Set by admin':'Added by you';
-    return `<div class="upcoming-item ${urgent?'urgent':isToday?'today-plan':''}">
+  list.innerHTML=visible.map(op=>{
+    const dStr=(op.date||'').slice(0,10);
+    const isToday=dStr===todayStr;
+    const tl=op.timeFrom&&op.timeTo?`${op.timeFrom}–${op.timeTo}`:'';
+    const statusLabel=op.status==='inprogress'?'In progress':'Planned';
+    const statusStyle=op.status==='inprogress'?'background:#E6F1FB;color:#185FA5':'background:#FAEEDA;color:#854F0B';
+    return `<div class="upcoming-item ${isToday?'today-plan':''}" onclick="openEditModal('${op.id}')" style="cursor:pointer">
       <div class="upcoming-date-col">
-        <div>${dateLabel}</div>
-        ${urgent?'<div class="upcoming-date-label">TODAY</div>':''}
+        <div style="font-size:12px;font-weight:500">${formatDateOnly(dStr)}</div>
+        ${isToday?'<div class="upcoming-date-label">TODAY</div>':''}
+        ${tl?`<div style="font-size:10px;color:var(--text-hint)">${tl}</div>`:''}
       </div>
-      <div class="upcoming-types">
-        <div>${typeChips}</div>
-        <div class="upcoming-note">${byLabel}${p.notes?' · '+esc(p.notes):''}</div>
+      <div class="upcoming-types" style="flex:1">
+        <span class="upcoming-type-chip">${esc(op.type)}</span>
+        ${op.notes?`<div class="upcoming-note">${esc(op.notes)}</div>`:''}
       </div>
       <div class="upcoming-actions">
-        ${badge}
-        ${p.status!=='completed'?`<button class="btn btn-ghost btn-sm" style="font-size:11px" onclick="openEditPlanModal('${p.id}')">✏️</button>`:''}
-        ${isToday && p.status!=='completed'?`<button class="btn btn-blue btn-sm" style="font-size:11px" onclick="openEditModal('${p.id}')">Log →</button>`:''}
+        <span style="font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;${statusStyle}">${statusLabel}</span>
       </div>
     </div>`;
   }).join('');
 }
+
 
 async function prefillFromPlan(opId){
   // Open log modal pre-filled with this planned task's data
@@ -2787,6 +2795,79 @@ async function prefillFromPlan(opId){
   if(!op) return;
   openLogTaskModal(op.date?.slice(0,10), op.timeFrom||'08:00', op.type, 'completed');
   if(op.notes) setTimeout(()=>{ document.getElementById('new-op-notes').value=op.notes; },100);
+}
+
+
+// ════════════════════════════════════════
+// UNIFIED VENUE CALENDAR — one source of truth
+// Used by both venue dashboard Schedule tab and admin Gantt drill-down
+// ════════════════════════════════════════
+let unifiedCalOffset = {};  // keyed by venueId
+
+async function renderWeekCalendar(venueId, gridId, weekOffset){
+  const grid=document.getElementById(gridId); if(!grid) return;
+  const weekStart=ganttWeekStart(weekOffset||0);
+  const days=Array.from({length:7},(_,i)=>{ const d=new Date(weekStart); d.setDate(weekStart.getDate()+i); return d; });
+  const today=new Date(); today.setHours(0,0,0,0);
+  const dayNames=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const opts={day:'2-digit',month:'short'};
+
+  // Update label — find nearest label element
+  const labelId = gridId.replace('-grid','-label');
+  const labelEl=document.getElementById(labelId);
+  if(labelEl) labelEl.textContent=days[0].toLocaleDateString('en-GB',opts)+' — '+days[6].toLocaleDateString('en-GB',opts);
+
+  // Load fresh ops from Supabase
+  const {data}=await supa.from('pitchops_operations')
+    .select('*').eq('venue_id',venueId)
+    .order('operation_date',{ascending:true});
+  const ops=(data||[]).map(dbToOp);
+  // Sync to local cache
+  state.operations=state.operations.filter(o=>o.venueId!==venueId).concat(ops);
+
+  const chipStyle={
+    planned:'background:#FAEEDA;color:#854F0B;border-left:3px solid #EF9F27',
+    inprogress:'background:#E6F1FB;color:#185FA5;border-left:3px solid #378ADD',
+    completed:'background:#EAF3DE;color:#3B6D11;border-left:3px solid #3B6D11',
+    missed:'background:#FCEBEB;color:#A32D2D;border-left:3px solid #A32D2D',
+  };
+
+  let headerCols=`<th style="width:90px;padding:8px 10px;font-size:10px;font-weight:600;color:#5a6a82;border-right:1px solid rgba(0,0,0,0.09);background:#fafbfc"></th>`;
+  days.forEach((d,i)=>{
+    const isT=d.getTime()===today.getTime();
+    headerCols+=`<th style="padding:6px 4px;text-align:center;border-right:1px solid rgba(0,0,0,0.09);background:${isT?'rgba(24,95,165,0.08)':'#fafbfc'};min-width:100px">
+      <div style="font-size:9px;color:#96a6bb;text-transform:uppercase">${dayNames[i]}</div>
+      <div style="font-size:15px;font-weight:700;color:${isT?'#185FA5':'#0C2340'}">${d.getDate()}</div>
+    </th>`;
+  });
+
+  // Planned row
+  let plannedCells=`<td style="padding:8px 10px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);font-size:11px;font-weight:600;color:#854F0B;background:#FAEEDA;white-space:nowrap;vertical-align:middle">📅 Planned</td>`;
+  // Done row
+  let doneCells=`<td style="padding:8px 10px;border-right:1px solid rgba(0,0,0,0.09);font-size:11px;font-weight:600;color:#3B6D11;background:#EAF3DE;white-space:nowrap;vertical-align:middle">✓ Done</td>`;
+
+  days.forEach(d=>{
+    const dStr=d.toISOString().slice(0,10);
+    const isT=d.getTime()===today.getTime();
+    const bg=isT?'rgba(24,95,165,0.04)':'white';
+    const dayOps=ops.filter(o=>(o.date||'').slice(0,10)===dStr);
+    const planned=dayOps.filter(o=>o.status==='planned'||o.status==='inprogress');
+    const done=dayOps.filter(o=>o.status==='completed'||o.status==='missed');
+
+    const makeChip=(o)=>{
+      const s=chipStyle[o.status]||chipStyle.planned;
+      const tl=o.timeFrom&&o.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${o.timeFrom}–${o.timeTo}</span>`:'';
+      return `<div onclick="openEditModal('${o.id}')" style="border-radius:4px;padding:3px 6px;font-size:10px;font-weight:600;margin-bottom:3px;cursor:pointer;${s}">${esc(o.type)}${tl}</div>`;
+    };
+
+    plannedCells+=`<td onclick="openNewOpForDate('${dStr}')" style="padding:4px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bg}" onmouseover="this.style.background='#FAEEDA'" onmouseout="this.style.background='${bg}'">${planned.map(makeChip).join('')||'<div style="min-height:36px"></div>'}</td>`;
+    doneCells+=`<td style="padding:4px;border-right:1px solid rgba(0,0,0,0.09);vertical-align:top;background:${bg}">${done.map(makeChip).join('')||'<div style="min-height:36px"></div>'}</td>`;
+  });
+
+  grid.innerHTML=`<div style="overflow-x:auto;width:100%"><table style="border-collapse:collapse;width:100%;min-width:620px">
+    <thead><tr>${headerCols}</tr></thead>
+    <tbody><tr>${plannedCells}</tr><tr>${doneCells}</tr></tbody>
+  </table></div>`;
 }
 
 // ════════════════════════════════════════
@@ -2858,77 +2939,8 @@ function venueSchedToday(){ venueSchedOffset=0; renderVenueSched(); }
 
 async function renderVenueSched(){
   const vid=state.currentVenueId; if(!vid) return;
-  const grid=document.getElementById('venue-sched-grid'); if(!grid) return;
-
-  const weekStart=ganttWeekStart(venueSchedOffset);
-  const days=Array.from({length:7},(_,i)=>{ const d=new Date(weekStart); d.setDate(weekStart.getDate()+i); return d; });
-  const today=new Date(); today.setHours(0,0,0,0);
-  const dayNames=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  const opts={day:'2-digit',month:'short'};
-  document.getElementById('venue-sched-label').textContent=
-    days[0].toLocaleDateString('en-GB',opts)+' — '+days[6].toLocaleDateString('en-GB',opts);
-
-  // Reload fresh ops from Supabase
-  const {data:freshOps}=await supa.from('pitchops_operations').select('*').eq('venue_id',vid).order('operation_date');
-  const ops=(freshOps||[]).map(dbToOp);
-  // update local cache
-  state.operations=state.operations.filter(o=>o.venueId!==vid).concat(ops);
-
-  const chipStyle={
-    planned:'background:#FAEEDA;color:#854F0B;border-left:3px solid #EF9F27',
-    inprogress:'background:#E6F1FB;color:#185FA5;border-left:3px solid #378ADD',
-    completed:'background:#EAF3DE;color:#3B6D11;border-left:3px solid #3B6D11',
-    missed:'background:#FCEBEB;color:#A32D2D;border-left:3px solid #A32D2D',
-  };
-
-  let headerCols=`<th style="width:100px;padding:8px 10px;font-size:10px;font-weight:600;color:#5a6a82;border-right:1px solid rgba(0,0,0,0.09);background:#fafbfc;text-align:left"></th>`;
-  days.forEach((d,i)=>{
-    const isT=d.getTime()===today.getTime();
-    headerCols+=`<th style="padding:6px 4px;text-align:center;border-right:1px solid rgba(0,0,0,0.09);background:${isT?'rgba(24,95,165,0.08)':'#fafbfc'};min-width:90px">
-      <div style="font-size:9px;color:#96a6bb;text-transform:uppercase">${dayNames[i]}</div>
-      <div style="font-size:15px;font-weight:700;color:${isT?'#185FA5':'#0C2340'}">${d.getDate()}</div>
-    </th>`;
-  });
-
-  // Single row per day — planned on top (future), completed below (past)
-  let rows='';
-  let plannedCells=`<td style="padding:8px 10px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);font-size:11px;font-weight:600;color:#854F0B;background:#FAEEDA;white-space:nowrap">📅 Planned</td>`;
-  let doneCells=`<td style="padding:8px 10px;border-right:1px solid rgba(0,0,0,0.09);font-size:11px;font-weight:600;color:#3B6D11;background:#EAF3DE;white-space:nowrap">✓ Done</td>`;
-
-  days.forEach(d=>{
-    const dStr=d.toISOString().slice(0,10);
-    const isT=d.getTime()===today.getTime();
-    const bg=isT?'rgba(24,95,165,0.04)':'white';
-    const dayOps=ops.filter(o=>(o.date||'').slice(0,10)===dStr);
-    const planned=dayOps.filter(o=>o.status==='planned'||o.status==='inprogress');
-    const done=dayOps.filter(o=>o.status==='completed'||o.status==='missed');
-
-    let planChips='';
-    planned.forEach(o=>{
-      const s=chipStyle[o.status]||chipStyle.planned;
-      const tl=o.timeFrom?`<span style="font-size:8px;opacity:.75;display:block">${o.timeFrom}–${o.timeTo}</span>`:'';
-      planChips+=`<div onclick="openEditModal('${o.id}')" style="border-radius:3px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;cursor:pointer;${s}">${esc(o.type)}${tl}</div>`;
-    });
-
-    let doneChips='';
-    done.forEach(o=>{
-      const b=opBadge(o.type);
-      const tl=o.timeFrom?`<span style="font-size:8px;opacity:.75;display:block">${o.timeFrom}–${o.timeTo}</span>`:'';
-      doneChips+=`<div onclick="openEditModal('${o.id}')" style="border-radius:3px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;cursor:pointer;background:${b.bg};color:${b.fg};border-left:3px solid ${b.fg}">✓ ${esc(o.type)}${tl}</div>`;
-    });
-
-    const isFuture=d>today;
-    plannedCells+=`<td onclick="openNewOpForDate('${dStr}')" style="padding:3px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bg}" onmouseover="this.style.background='#FAEEDA'" onmouseout="this.style.background='${bg}'">${planChips||'<div style="min-height:28px"></div>'}</td>`;
-    doneCells+=`<td onclick="${isFuture?'':''}" style="padding:3px;border-right:1px solid rgba(0,0,0,0.09);vertical-align:top;background:${bg}">${doneChips||'<div style="min-height:28px"></div>'}</td>`;
-  });
-
-  grid.innerHTML=`<div style="overflow-x:auto;width:100%"><table style="border-collapse:collapse;width:100%;min-width:600px">
-    <thead><tr>${headerCols}</tr></thead>
-    <tbody><tr>${plannedCells}</tr><tr>${doneCells}</tr></tbody>
-  </table></div>`;
+  await renderWeekCalendar(vid, 'venue-sched-grid', venueSchedOffset);
 }
 
-init();
-</script>
-</body>
-</html>
+function venueSchedNav(dir){ venueSchedOffset+=dir; renderVenueSched(); }
+function venueSchedToday(){ venueSchedOffset=0; renderVenueSched(); }
