@@ -480,7 +480,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
               <button onclick="ganttFilter('missed',this)" class="sf-pill">Missed</button>
             </div>
           </div>
-          <button onclick="openPlanModal()" style="padding:6px 14px;font-size:12px;background:var(--blue);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500">+ Plan window</button>
+          <button onclick="openNewOpModal()" style="padding:6px 14px;font-size:12px;background:var(--blue);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500">+ Add operation</button>
         </div>
         <div style="display:flex;gap:8px;padding:.35rem .75rem;border-bottom:1px solid var(--border);flex-wrap:wrap">
           <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:2px;background:var(--amber);display:inline-block"></span>Planned</span>
@@ -510,7 +510,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
           </div>
           <div style="display:flex;align-items:center;gap:8px">
             <span id="venue-cal-name" style="font-size:13px;font-weight:600;color:var(--text)"></span>
-            <button onclick="openPlanModal(state.currentVenueCalId)" style="padding:6px 14px;font-size:12px;background:var(--blue);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500">+ Plan</button>
+            <button onclick="openNewOpModal(state.currentVenueCalId)" style="padding:6px 14px;font-size:12px;background:var(--blue);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500">+ Add</button>
           </div>
         </div>
         <div id="venue-cal-grid" style="overflow-x:auto"></div>
@@ -642,6 +642,23 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
         </div>
         <div class="field"><label data-i18n="op_notes">Notes / observations</label><textarea id="new-op-notes" placeholder="Any observations, measurements, remarks..."></textarea></div>
         <div class="field"><label data-i18n="op_date">Date & time</label><input id="new-op-date" type="datetime-local"/></div>
+        <div class="field">
+          <label>Time window</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div><label style="font-size:10px;color:var(--text-hint)">Start</label><input id="new-op-time-from" type="time" value="08:00"/></div>
+            <div><label style="font-size:10px;color:var(--text-hint)">End</label><input id="new-op-time-to" type="time" value="17:00"/></div>
+          </div>
+        </div>
+        <div class="field" id="new-op-status-field">
+          <label>Status</label>
+          <select id="new-op-status">
+            <option value="auto">Auto (future → Planned, today → In progress)</option>
+            <option value="planned">Planned</option>
+            <option value="inprogress">In progress</option>
+            <option value="completed">Completed</option>
+          </select>
+          <p style="font-size:11px;color:var(--text-hint);margin-top:4px">Completed must be set manually by you or admin</p>
+        </div>
         <div class="field">
           <label data-i18n="op_photos">Photos (max 4)</label>
           <div class="photo-upload-area" id="new-photo-drop">
@@ -911,6 +928,22 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       <div class="field"><label>Notes / observations</label><textarea id="edit-op-notes"></textarea></div>
       <div class="field"><label>Date & time</label><input id="edit-op-date" type="datetime-local"/></div>
       <div class="field">
+        <label>Time window</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><label style="font-size:10px;color:var(--text-hint)">Start</label><input id="edit-op-time-from" type="time"/></div>
+          <div><label style="font-size:10px;color:var(--text-hint)">End</label><input id="edit-op-time-to" type="time"/></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Status</label>
+        <select id="edit-op-status">
+          <option value="planned">Planned</option>
+          <option value="inprogress">In progress</option>
+          <option value="completed">Completed</option>
+          <option value="missed">Missed</option>
+        </select>
+      </div>
+      <div class="field">
         <label>Photos (max 4)</label>
         <div class="photo-upload-area">
           <input type="file" accept="image/*" multiple id="edit-photo-input" onchange="handlePhotoSelect(this,'edit')"/>
@@ -999,43 +1032,6 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
   </div>
 </div>
 
-
-<!-- PLAN WINDOW MODAL -->
-<div class="modal-overlay" id="modal-plan">
-  <div class="modal">
-    <div class="modal-header"><span class="modal-title">New plan entry</span><button class="modal-close" onclick="closeModal('modal-plan')">✕</button></div>
-    <div class="modal-body">
-      <div class="field"><label>Venue</label><select id="plan-venue-sel"></select></div>
-      <div class="field"><label>Operation type</label><select id="plan-op-type"></select></div>
-      <div class="field">
-        <label>Date range</label>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <div><label style="font-size:10px;color:var(--text-hint)">From date</label><input id="plan-date-from" type="date"/></div>
-          <div><label style="font-size:10px;color:var(--text-hint)">To date</label><input id="plan-date-to" type="date"/></div>
-        </div>
-      </div>
-      <div class="field">
-        <label>Time of day</label>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <div><label style="font-size:10px;color:var(--text-hint)">Start time</label><input id="plan-time-from" type="time" value="08:00"/></div>
-          <div><label style="font-size:10px;color:var(--text-hint)">End time</label><input id="plan-time-to" type="time" value="17:00"/></div>
-        </div>
-      </div>
-      <div class="field"><label>Notes for venue manager</label><input id="plan-notes" type="text" placeholder="e.g. Use fine sand mix, after aeration..."/></div>
-      <div class="field"><label>Priority</label>
-        <select id="plan-priority">
-          <option value="normal">Normal</option>
-          <option value="high">High</option>
-          <option value="critical">Critical</option>
-        </select>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-plan')">Cancel</button>
-      <button class="btn btn-primary" onclick="savePlan()">Create plan</button>
-    </div>
-  </div>
-</div>
 
 <!-- EDIT PLAN MODAL -->
 <div class="modal-overlay" id="modal-edit-plan">
@@ -1172,11 +1168,15 @@ async function loadVenueData(venueId) {
 // ── DB MAPPERS ──
 function dbToProject(r){ return {id:r.id,code:r.code,name:r.name,country:r.country||'',status:r.status||'planned',color:r.color||'#185FA5',viewerToken:r.viewer_token||'',createdAt:r.created_at}; }
 function dbToVenue(r){ return {id:r.id,name:r.name,city:r.city||'',color:r.color||'#185FA5',venueType:r.venue_type||'Stadium',token:r.token,projectIds:r.project_ids||[],responsiblePerson:r.responsible_person||'',contactPhone:r.contact_phone||'',contactEmail:r.contact_email||'',createdAt:r.created_at}; }
-function dbToOp(r){ return {id:r.id,venueId:r.venue_id,type:r.type,zone:r.zone||'',equipment:r.equipment||'',weather:r.weather||'',staff:r.staff||[],notes:r.notes||'',date:r.operation_date,photos:r.photos||[],flagged:r.flagged||false,adminComment:r.admin_comment||'',createdAt:r.created_at}; }
+function dbToOp(r){
+  const d=r.operation_date;
+  const autoStatus=d&&new Date(d)>new Date()?'planned':'inprogress';
+  return {id:r.id,venueId:r.venue_id,type:r.type,zone:r.zone||'',equipment:r.equipment||'',weather:r.weather||'',staff:r.staff||[],notes:r.notes||'',date:d,timeFrom:r.time_from||'08:00',timeTo:r.time_to||'17:00',status:r.status||autoStatus,photos:r.photos||[],flagged:r.flagged||false,adminComment:r.admin_comment||'',createdAt:r.created_at};
+}
 
 function projectToDb(p){ return {id:p.id,code:p.code,name:p.name,country:p.country,status:p.status,color:p.color,viewer_token:p.viewerToken||null}; }
 function venueToDb(v){ return {id:v.id,name:v.name,city:v.city,color:v.color,token:v.token,project_ids:v.projectIds,venue_type:v.venueType||'Stadium',responsible_person:v.responsiblePerson||null,contact_phone:v.contactPhone||null,contact_email:v.contactEmail||null}; }
-function opToDb(o){ return {id:o.id,venue_id:o.venueId,type:o.type,zone:o.zone,equipment:o.equipment,weather:o.weather,staff:o.staff,notes:o.notes,operation_date:o.date,photos:o.photos,flagged:o.flagged||false,admin_comment:o.adminComment||''}; }
+function opToDb(o){ return {id:o.id,venue_id:o.venueId,type:o.type,zone:o.zone,equipment:o.equipment,weather:o.weather,staff:o.staff,notes:o.notes,operation_date:o.date,time_from:o.timeFrom||'08:00',time_to:o.timeTo||'17:00',status:o.status||'completed',photos:o.photos,flagged:o.flagged||false,admin_comment:o.adminComment||''}; }
 
 // ── LOADING INDICATOR ──
 function showLoading(on){
@@ -1718,7 +1718,6 @@ function enterVenueDashboard(venue){
   if(proj){ ptag.textContent=proj.code; ptag.style.display='inline-flex'; }
   else ptag.style.display='none';
   document.getElementById('new-op-date').value=nowLocal();
-  document.getElementById('new-op-date').max=nowLocal();
   state.currentStaff=[]; currentPhotos.new=[];
   renderStaffTags(); renderPhotoPreviews('new');
   populateOpTypeSelects(); renderVenueStats(); renderVenueHistory();
@@ -1768,14 +1767,16 @@ function renderVenueHistory(){
 // LOG / EDIT / DELETE OPERATION
 // ════════════════════════════════════════
 async function logOperation(){
-  const opDateVal=document.getElementById('new-op-date').value;
-  if(opDateVal){
-    const opDate=new Date(opDateVal);
-    const now=new Date();
-    if(opDate>now){showToast('Cannot log an operation in the future.');return;}
-  }
+
   const zoneEl=document.getElementById('new-op-zone');
   const zone=zoneEl.value==='Custom'?(document.getElementById('new-op-zone-custom').value.trim()||'Custom'):zoneEl.value;
+  const opDateVal = document.getElementById('new-op-date').value||nowLocal();
+  const opTimeFrom = document.getElementById('new-op-time-from')?.value||'08:00';
+  const opTimeTo = document.getElementById('new-op-time-to')?.value||'17:00';
+  const isFutureOp = new Date(opDateVal) > new Date();
+  const selectedStatus = document.getElementById('new-op-status')?.value||'planned';
+  const autoStatus = isFutureOp ? 'planned' : 'inprogress';
+  const manualStatus = selectedStatus === 'auto' ? autoStatus : selectedStatus;
   const op={
     id:'op_'+Date.now(),
     venueId:state.currentVenueId,
@@ -1784,7 +1785,10 @@ async function logOperation(){
     weather:document.getElementById('new-op-weather').value.trim(),
     staff:[...state.currentStaff],
     notes:document.getElementById('new-op-notes').value.trim(),
-    date:document.getElementById('new-op-date').value||nowLocal(),
+    date:opDateVal,
+    timeFrom:opTimeFrom,
+    timeTo:opTimeTo,
+    status:manualStatus,
     photos:currentPhotos.new.map(p=>({dataUrl:p.dataUrl,name:p.name})),
     createdAt:new Date().toISOString()
   };
@@ -1815,6 +1819,13 @@ function openEditModal(opId){
   renderEditStaffTags();
   currentPhotos.edit=op.photos?op.photos.map(p=>({dataUrl:p.dataUrl,name:p.name||'photo'})):[];
   renderPhotoPreviews('edit');
+  // status + time
+  const statusEl=document.getElementById('edit-op-status');
+  if(statusEl) statusEl.value=op.status||(new Date(op.date)>new Date()?'planned':'completed');
+  const tfEl=document.getElementById('edit-op-time-from');
+  const ttEl=document.getElementById('edit-op-time-to');
+  if(tfEl) tfEl.value=op.timeFrom||'08:00';
+  if(ttEl) ttEl.value=op.timeTo||'17:00';
   openModal('modal-edit-op');
 }
 
@@ -1822,10 +1833,10 @@ async function saveEditOperation(){
   const id=document.getElementById('edit-op-id').value;
   const idx=state.operations.findIndex(o=>o.id===id); if(idx===-1) return;
   const editDateVal=document.getElementById('edit-op-date').value;
-  if(editDateVal){
-    const editDate=new Date(editDateVal);
-    const now=new Date();
-    if(editDate>now){showToast('Cannot set a future date for a logged operation.');return;}
+  const editStatus=document.getElementById('edit-op-status')?.value||'completed';
+  // Block completed status if date is in the future
+  if(editStatus==='completed' && editDateVal){
+    if(new Date(editDateVal)>new Date()){showToast('Cannot mark as completed — date is in the future.');return;}
   }
   state.operations[idx]={...state.operations[idx],
     type:document.getElementById('edit-op-type').value,
@@ -1834,7 +1845,10 @@ async function saveEditOperation(){
     weather:document.getElementById('edit-op-weather').value.trim(),
     staff:[...state.editStaff],
     notes:document.getElementById('edit-op-notes').value.trim(),
-    date:document.getElementById('edit-op-date').value,
+    date:editDateVal,
+    timeFrom:document.getElementById('edit-op-time-from')?.value||'08:00',
+    timeTo:document.getElementById('edit-op-time-to')?.value||'17:00',
+    status:editStatus,
     photos:currentPhotos.edit.map(p=>({dataUrl:p.dataUrl,name:p.name||'photo'})),
   };
   const {error} = await supa.from('pitchops_operations').update(opToDb(state.operations[idx])).eq('id',id);
@@ -2447,14 +2461,17 @@ async function renderGantt(){
   const grid=document.getElementById('gantt-grid');
   if(!grid) return;
 
-  const plans=await loadPlans(pid);
+  // Load all operations for this project's venues
+  const vids=projectVenues(pid).map(v=>v.id);
+  let allOps=state.operations.filter(o=>vids.includes(o.venueId));
+  // Auto-mark planned ops as missed if date passed
   const now=new Date(); now.setHours(0,0,0,0);
-  plans.forEach(p=>{
-    if(p.status==='planned' && new Date(p.dateTo)<now){
-      p.status='missed';
-      supa.from('pitchops_plans').update({status:'missed'}).eq('id',p.id);
+  for(const op of allOps){
+    if(op.status==='planned' && new Date(op.date)<now){
+      op.status='missed';
+      supa.from('pitchops_operations').update({status:'missed'}).eq('id',op.id);
     }
-  });
+  }
 
   const chipStyle={
     planned:'background:#FAEEDA;color:#854F0B;border-left:3px solid #EF9F27',
@@ -2488,7 +2505,7 @@ async function renderGantt(){
     days.forEach(d=>{
       const dStr=d.toISOString().slice(0,10);
       const isT=d.getTime()===today.getTime();
-      const dayPlans=vPlans.filter(p=>p.dateFrom<=dStr&&p.dateTo>=dStr&&(ganttStatusFilter==='all'||p.status===ganttStatusFilter));
+      const dayPlans=vPlans.filter(p=>p.dateFrom<=dStr&&p.dateTo>=dStr&&(ganttStatusFilter==='completed'?p.status==='completed':(p.status!=='completed'&&(ganttStatusFilter==='all'||p.status===ganttStatusFilter))));
       const dayOps=state.operations.filter(o=>o.venueId===v.id&&(o.date||'').slice(0,10)===dStr);
       let chips='';
       dayPlans.forEach(p=>{
@@ -2501,7 +2518,7 @@ async function renderGantt(){
         const b=opBadge(o.type);
         chips+=`<div onclick="event.stopPropagation();openEditModal('${o.id}')" style="border-radius:3px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;cursor:pointer;background:${b.bg};color:${b.fg};border-left:3px solid ${b.fg}" title="Click to edit">✓ ${esc(o.type.slice(0,12))}</div>`;
       });
-      cells+=`<td onclick="quickAddPlan('${v.id}','${dStr}')" style="padding:3px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${isT?'rgba(24,95,165,0.04)':'white'}" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${isT?'rgba(24,95,165,0.04)':'white'}'">${chips}</td>`;
+      cells+=`<td onclick="if(!document.querySelector('.modal-overlay.open'))openNewOpModal('${v.id}','${dStr}')" style="padding:3px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${isT?'rgba(24,95,165,0.04)':'white'}" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${isT?'rgba(24,95,165,0.04)':'white'}'">${chips}</td>`;
     });
     rows+=`<tr>${cells}</tr>`;
   });
@@ -2765,6 +2782,40 @@ function switchVenueTab(tab){
   if(tab==='schedule'){ venueSchedOffset=0; renderVenueSched(); }
 }
 
+
+function openNewOpModal(venueId, dateStr, timeStr){
+  if(document.querySelector('.modal-overlay.open')) return;
+  // If called from admin gantt — open edit modal for a new op on that venue/date
+  // For now just show toast directing to venue dashboard
+  if(venueId && venueId !== state.currentVenueId){
+    showToast('Open the venue dashboard to add operations');
+    return;
+  }
+  if(dateStr) document.getElementById('new-op-date').value=dateStr+'T'+(timeStr||'08:00');
+  if(document.getElementById('new-op-status')){
+    document.getElementById('new-op-status').value='planned';
+  }
+  // scroll log form into view
+  const logCard=document.querySelector('#vtab-log-content .card-body');
+  if(logCard) logCard.scrollIntoView({behavior:'smooth'});
+}
+
+function openNewOpForDate(dateStr){
+  if(document.querySelector('.modal-overlay.open')) return;
+  // switch to log tab and pre-fill date
+  switchVenueTab('log');
+  const d = new Date(dateStr+'T08:00');
+  document.getElementById('new-op-date').value = dateStr+'T08:00';
+  // auto-set status
+  const statusEl=document.getElementById('new-op-status');
+  if(statusEl){
+    statusEl.value='planned';
+  }
+  // scroll to form
+  document.getElementById('vtab-log-content').scrollIntoView({behavior:'smooth'});
+  showToast('Date pre-filled — add operation details');
+}
+
 function venueSchedNav(dir){ venueSchedOffset+=dir; renderVenueSched(); }
 function venueSchedToday(){ venueSchedOffset=0; renderVenueSched(); }
 
@@ -2780,8 +2831,11 @@ async function renderVenueSched(){
   document.getElementById('venue-sched-label').textContent=
     days[0].toLocaleDateString('en-GB',opts)+' — '+days[6].toLocaleDateString('en-GB',opts);
 
-  const plans=await loadVenuePlans(vid);
-  const ops=state.operations.filter(o=>o.venueId===vid);
+  // Reload fresh ops from Supabase
+  const {data:freshOps}=await supa.from('pitchops_operations').select('*').eq('venue_id',vid).order('operation_date');
+  const ops=(freshOps||[]).map(dbToOp);
+  // update local cache
+  state.operations=state.operations.filter(o=>o.venueId!==vid).concat(ops);
 
   const chipStyle={
     planned:'background:#FAEEDA;color:#854F0B;border-left:3px solid #EF9F27',
@@ -2793,44 +2847,47 @@ async function renderVenueSched(){
   let headerCols=`<th style="width:100px;padding:8px 10px;font-size:10px;font-weight:600;color:#5a6a82;border-right:1px solid rgba(0,0,0,0.09);background:#fafbfc;text-align:left"></th>`;
   days.forEach((d,i)=>{
     const isT=d.getTime()===today.getTime();
-    headerCols+=`<th style="padding:6px 4px;text-align:center;border-right:1px solid rgba(0,0,0,0.09);background:${isT?'rgba(24,95,165,0.08)':'#fafbfc'};min-width:80px">
+    headerCols+=`<th style="padding:6px 4px;text-align:center;border-right:1px solid rgba(0,0,0,0.09);background:${isT?'rgba(24,95,165,0.08)':'#fafbfc'};min-width:90px">
       <div style="font-size:9px;color:#96a6bb;text-transform:uppercase">${dayNames[i]}</div>
       <div style="font-size:15px;font-weight:700;color:${isT?'#185FA5':'#0C2340'}">${d.getDate()}</div>
     </th>`;
   });
 
-  // Two rows: Plans and Logged ops
-  let planCells=`<td style="padding:8px 10px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);font-size:11px;font-weight:600;color:#5a6a82;background:#fafbfc;white-space:nowrap">📅 Plans</td>`;
-  let opsCells=`<td style="padding:8px 10px;border-right:1px solid rgba(0,0,0,0.09);font-size:11px;font-weight:600;color:#5a6a82;background:#fafbfc;white-space:nowrap">✓ Logged</td>`;
+  // Single row per day — planned on top (future), completed below (past)
+  let rows='';
+  let plannedCells=`<td style="padding:8px 10px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);font-size:11px;font-weight:600;color:#854F0B;background:#FAEEDA;white-space:nowrap">📅 Planned</td>`;
+  let doneCells=`<td style="padding:8px 10px;border-right:1px solid rgba(0,0,0,0.09);font-size:11px;font-weight:600;color:#3B6D11;background:#EAF3DE;white-space:nowrap">✓ Done</td>`;
 
   days.forEach(d=>{
     const dStr=d.toISOString().slice(0,10);
     const isT=d.getTime()===today.getTime();
     const bg=isT?'rgba(24,95,165,0.04)':'white';
-    const dayPlans=plans.filter(p=>p.dateFrom<=dStr&&p.dateTo>=dStr);
     const dayOps=ops.filter(o=>(o.date||'').slice(0,10)===dStr);
+    const planned=dayOps.filter(o=>o.status==='planned'||o.status==='inprogress');
+    const done=dayOps.filter(o=>o.status==='completed'||o.status==='missed');
 
     let planChips='';
-    dayPlans.forEach(p=>{
-      const s=chipStyle[p.status]||chipStyle.planned;
-      const lbl=esc((p.opType||p.opTypes?.[0]||'').slice(0,14));
-      const tl=p.timeFrom?`<span style="font-size:8px;opacity:.75;display:block">${p.timeFrom}–${p.timeTo}</span>`:'';
-      planChips+=`<div onclick="openEditPlanModal('${p.id}')" style="border-radius:3px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;cursor:pointer;${s}">${lbl}${tl}</div>`;
+    planned.forEach(o=>{
+      const s=chipStyle[o.status]||chipStyle.planned;
+      const tl=o.timeFrom?`<span style="font-size:8px;opacity:.75;display:block">${o.timeFrom}–${o.timeTo}</span>`:'';
+      planChips+=`<div onclick="openEditModal('${o.id}')" style="border-radius:3px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;cursor:pointer;${s}">${esc(o.type.slice(0,14))}${tl}</div>`;
     });
 
-    let opChips='';
-    dayOps.forEach(o=>{
+    let doneChips='';
+    done.forEach(o=>{
       const b=opBadge(o.type);
-      opChips+=`<div onclick="openEditModal('${o.id}')" style="border-radius:3px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;cursor:pointer;background:${b.bg};color:${b.fg};border-left:3px solid ${b.fg}" title="Click to edit">✓ ${esc(o.type.slice(0,14))}</div>`;
+      const tl=o.timeFrom?`<span style="font-size:8px;opacity:.75;display:block">${o.timeFrom}–${o.timeTo}</span>`:'';
+      doneChips+=`<div onclick="openEditModal('${o.id}')" style="border-radius:3px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;cursor:pointer;background:${b.bg};color:${b.fg};border-left:3px solid ${b.fg}">✓ ${esc(o.type.slice(0,14))}${tl}</div>`;
     });
 
-    planCells+=`<td onclick="quickAddPlan('${vid}','${dStr}')" style="padding:3px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bg}" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bg}'">${planChips||'<div style="min-height:32px"></div>'}</td>`;
-    opsCells+=`<td style="padding:3px;border-right:1px solid rgba(0,0,0,0.09);vertical-align:top;background:${bg}">${opChips||'<div style="min-height:32px"></div>'}</td>`;
+    const isFuture=d>today;
+    plannedCells+=`<td onclick="openNewOpForDate('${dStr}')" style="padding:3px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bg}" onmouseover="this.style.background='#FAEEDA'" onmouseout="this.style.background='${bg}'">${planChips||'<div style="min-height:28px"></div>'}</td>`;
+    doneCells+=`<td onclick="${isFuture?'':''}" style="padding:3px;border-right:1px solid rgba(0,0,0,0.09);vertical-align:top;background:${bg}">${doneChips||'<div style="min-height:28px"></div>'}</td>`;
   });
 
   grid.innerHTML=`<div style="overflow-x:auto;width:100%"><table style="border-collapse:collapse;width:100%;min-width:600px">
     <thead><tr>${headerCols}</tr></thead>
-    <tbody><tr>${planCells}</tr><tr>${opsCells}</tr></tbody>
+    <tbody><tr>${plannedCells}</tr><tr>${doneCells}</tr></tbody>
   </table></div>`;
 }
 
