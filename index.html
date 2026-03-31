@@ -972,18 +972,22 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 <!-- PLAN WINDOW MODAL -->
 <div class="modal-overlay" id="modal-plan">
   <div class="modal">
-    <div class="modal-header"><span class="modal-title">New planning window</span><button class="modal-close" onclick="closeModal('modal-plan')">✕</button></div>
+    <div class="modal-header"><span class="modal-title">New plan entry</span><button class="modal-close" onclick="closeModal('modal-plan')">✕</button></div>
     <div class="modal-body">
       <div class="field"><label>Venue</label><select id="plan-venue-sel"></select></div>
+      <div class="field"><label>Operation type</label><select id="plan-op-type"></select></div>
       <div class="field">
-        <label>Operation types (select all that apply)</label>
-        <div id="plan-type-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px"></div>
+        <label>Date range</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><label style="font-size:10px;color:var(--text-hint)">From date</label><input id="plan-date-from" type="date"/></div>
+          <div><label style="font-size:10px;color:var(--text-hint)">To date</label><input id="plan-date-to" type="date"/></div>
+        </div>
       </div>
       <div class="field">
-        <label>Date window</label>
+        <label>Time of day</label>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <div><label style="font-size:10px;color:var(--text-hint)">From</label><input id="plan-date-from" type="date"/></div>
-          <div><label style="font-size:10px;color:var(--text-hint)">To</label><input id="plan-date-to" type="date"/></div>
+          <div><label style="font-size:10px;color:var(--text-hint)">Start time</label><input id="plan-time-from" type="time" value="08:00"/></div>
+          <div><label style="font-size:10px;color:var(--text-hint)">End time</label><input id="plan-time-to" type="time" value="17:00"/></div>
         </div>
       </div>
       <div class="field"><label>Notes for venue manager</label><input id="plan-notes" type="text" placeholder="e.g. Use fine sand mix, after aeration..."/></div>
@@ -997,7 +1001,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-plan')">Cancel</button>
-      <button class="btn btn-primary" onclick="savePlan()">Create window</button>
+      <button class="btn btn-primary" onclick="savePlan()">Create plan</button>
     </div>
   </div>
 </div>
@@ -1005,18 +1009,22 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 <!-- EDIT PLAN MODAL -->
 <div class="modal-overlay" id="modal-edit-plan">
   <div class="modal">
-    <div class="modal-header"><span class="modal-title">Edit planning window</span><button class="modal-close" onclick="closeModal('modal-edit-plan')">✕</button></div>
+    <div class="modal-header"><span class="modal-title">Edit plan entry</span><button class="modal-close" onclick="closeModal('modal-edit-plan')">✕</button></div>
     <div class="modal-body">
       <input type="hidden" id="edit-plan-id"/>
+      <div class="field"><label>Operation type</label><select id="edit-plan-op-type"></select></div>
       <div class="field">
-        <label>Operation types</label>
-        <div id="edit-plan-type-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px"></div>
+        <label>Date range</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><label style="font-size:10px;color:var(--text-hint)">From date</label><input id="edit-plan-from" type="date"/></div>
+          <div><label style="font-size:10px;color:var(--text-hint)">To date</label><input id="edit-plan-to" type="date"/></div>
+        </div>
       </div>
       <div class="field">
-        <label>Date window</label>
+        <label>Time of day</label>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <div><label style="font-size:10px;color:var(--text-hint)">From</label><input id="edit-plan-from" type="date"/></div>
-          <div><label style="font-size:10px;color:var(--text-hint)">To</label><input id="edit-plan-to" type="date"/></div>
+          <div><label style="font-size:10px;color:var(--text-hint)">Start time</label><input id="edit-plan-time-from" type="time"/></div>
+          <div><label style="font-size:10px;color:var(--text-hint)">End time</label><input id="edit-plan-time-to" type="time"/></div>
         </div>
       </div>
       <div class="field"><label>Notes</label><input id="edit-plan-notes" type="text"/></div>
@@ -2131,7 +2139,8 @@ function renderVenueCalWeek(plans, ops, today) {
     const dayOps = ops.filter(o=>(o.date||'').slice(0,10)===dStr);
     let cells = '';
     dayPlans.forEach(p => {
-      cells += `<span class="op-chip chip-${p.status}" onclick="openEditPlanModal('${p.id}')" title="${esc(p.opTypes.join(', '))}">${p.opTypes.slice(0,2).join(', ')}</span>`;
+      const tl=p.timeFrom?` ${p.timeFrom}–${p.timeTo}`:'';
+      cells += `<div class="op-chip chip-${p.status}" onclick="event.stopPropagation();openEditPlanModal('${p.id}')" style="display:block" title="${esc(p.opType||p.opTypes?.[0]||'')}${tl}">${esc((p.opType||p.opTypes?.[0]||'').slice(0,10))}<span style="opacity:.65;font-size:8px;display:block">${tl}</span></div>`;
     });
     dayOps.forEach(o => {
       const badge=opBadge(o.type);
@@ -2160,8 +2169,10 @@ function renderVenueCalDay(plans, ops, today) {
     const isNow = (new Date().getHours()===h && d.getTime()===today.getTime());
     // find ops logged in this hour
     const hourOps = dayOps.filter(o=>{ try{ return new Date(o.date).getHours()===h; }catch(e){return false;} });
+    const hourPlans = dayPlans.filter(p=>{ const sf=parseInt((p.timeFrom||'00:00').split(':')[0]); const st=parseInt((p.timeTo||'23:59').split(':')[0]); return h>=sf && h<st; });
     html += `<div style="padding:4px 6px;font-size:10px;color:var(--text-hint);border-bottom:1px solid var(--border);border-right:1px solid var(--border);background:#fafbfc;text-align:right;${isNow?'color:var(--blue);font-weight:700':''}">${hStr}</div>`;
-    html += `<div style="min-height:44px;border-bottom:1px solid var(--border);padding:3px 6px;cursor:pointer;${isNow?'background:rgba(24,95,165,0.04)':''}" onclick="quickAddPlan('${vid}','${dStr}')">`;
+    html += `<div style="min-height:44px;border-bottom:1px solid var(--border);padding:3px 6px;cursor:pointer;${isNow?'background:rgba(24,95,165,0.04)':''}" onclick="quickAddPlan('${vid}','${dStr}','${h.toString().padStart(2,'0')}:00')">`;
+    hourPlans.forEach(p=>{ html+=`<div class="op-chip chip-${p.status}" style="display:block" onclick="event.stopPropagation();openEditPlanModal('${p.id}')">${esc(p.opType||p.opTypes?.[0]||'')}</div>`; });
     hourOps.forEach(o=>{ const b=opBadge(o.type); html+=`<span class="op-chip" style="background:${b.bg};color:${b.fg};border-left:2px solid ${b.fg};display:block">✓ ${esc(o.type)} — ${new Date(o.date).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}</span>`; });
     html += `</div>`;
   }
@@ -2209,7 +2220,7 @@ function renderVenueCalMonth(plans, ops, today) {
       const vid2 = state.currentVenueCalId;
       html += `<div class="vcal-month-day ${isToday?'today-day':''} ${isOtherMonth?'other-month':''}" onclick="quickAddPlan('${vid2}','${dStr}')">
         <div class="vcal-day-num ${isToday?'today-label':''}">${d.getDate()}</div>
-        ${dayPlans.map(p=>`<span class="op-chip chip-${p.status}" onclick="event.stopPropagation();openEditPlanModal('${p.id}')">${p.opTypes[0]||''}</span>`).join('')}
+        ${dayPlans.map(p=>`<span class="op-chip chip-${p.status}" onclick="event.stopPropagation();openEditPlanModal('${p.id}')" title="${esc(p.opType||p.opTypes?.[0]||'')} ${p.timeFrom||''}–${p.timeTo||''}">${esc((p.opType||p.opTypes?.[0]||'').slice(0,8))}</span>`).join('')}
         ${dayOps.map(o=>{ const b=opBadge(o.type); return `<span class="op-chip chip-completed" style="background:${b.bg};color:${b.fg}">✓ ${esc(o.type.slice(0,8))}</span>`; }).join('')}
       </div>`;
     }
@@ -2318,8 +2329,8 @@ let planTypeSelections = [];
 let editPlanTypeSelections = [];
 
 // ── DB MAPPERS ──
-function dbToPlan(r){ return {id:r.id,venueId:r.venue_id,projectId:r.project_id,opTypes:r.op_types||[],dateFrom:r.date_from,dateTo:r.date_to,notes:r.notes||'',priority:r.priority||'normal',status:r.status||'planned',createdBy:r.created_by||'admin',createdAt:r.created_at}; }
-function planToDb(p){ return {id:p.id,venue_id:p.venueId,project_id:p.projectId,op_types:p.opTypes,date_from:p.dateFrom,date_to:p.dateTo,notes:p.notes,priority:p.priority,status:p.status,created_by:p.createdBy}; }
+function dbToPlan(r){ return {id:r.id,venueId:r.venue_id,projectId:r.project_id,opTypes:r.op_types||[],opType:r.op_types&&r.op_types[0]||'',dateFrom:r.date_from,dateTo:r.date_to,timeFrom:r.time_from||'08:00',timeTo:r.time_to||'17:00',notes:r.notes||'',priority:r.priority||'normal',status:r.status||'planned',createdBy:r.created_by||'admin',createdAt:r.created_at}; }
+function planToDb(p){ return {id:p.id,venue_id:p.venueId,project_id:p.projectId,op_types:[p.opType||p.opTypes&&p.opTypes[0]||''],date_from:p.dateFrom,date_to:p.dateTo,time_from:p.timeFrom||'08:00',time_to:p.timeTo||'17:00',notes:p.notes,priority:p.priority,status:p.status,created_by:p.createdBy}; }
 
 // ── LOAD PLANS ──
 async function loadPlans(projectId){
@@ -2432,8 +2443,9 @@ async function renderGantt(){
         let cellContent='';
         dayPlans.forEach(p=>{
           const chipClass='chip-'+p.status;
-          const label=p.opTypes.slice(0,2).join(', ')+(p.opTypes.length>2?'…':'');
-          cellContent+=`<div class="op-chip ${chipClass}" onclick="event.stopPropagation();openEditPlanModal('${p.id}')" title="${esc(p.opTypes.join(', '))}" style="display:block;width:100%;box-sizing:border-box">${label}</div>`;
+          const label=esc(p.opType||p.opTypes?.[0]||'');
+          const timeLabel=p.timeFrom&&p.timeTo?` ${p.timeFrom}–${p.timeTo}`:'';
+          cellContent+=`<div class="op-chip ${chipClass}" onclick="event.stopPropagation();openEditPlanModal('${p.id}')" title="${label}${timeLabel}" style="display:block;width:100%;box-sizing:border-box">${label}<span style="opacity:.7;font-size:8px;display:block">${timeLabel}</span></div>`;
         });
         dayOps.forEach(o=>{
           const badge=opBadge(o.type);
@@ -2453,23 +2465,29 @@ async function renderGantt(){
 }
 
 // ── PLAN MODAL ──
-function openPlanModal(venueId, dateStr){
-  const pid=state.currentProjectId; if(!pid) return;
-  const venues=projectVenues(pid);
+function populatePlanTypeSelect(selId){
+  const sel=document.getElementById(selId); if(!sel) return;
+  sel.innerHTML=state.opTypes.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
+}
+
+function openPlanModal(venueId, dateStr, timeStr){
+  const pid=state.currentProjectId;
+  // populate venue select
+  const venues=pid?projectVenues(pid):state.venues.filter(v=>v.id===venueId);
   const sel=document.getElementById('plan-venue-sel');
-  sel.innerHTML=venues.map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('');
+  if(pid){
+    sel.innerHTML=projectVenues(pid).map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('');
+  } else {
+    const v=state.venues.find(x=>x.id===venueId);
+    sel.innerHTML=v?`<option value="${v.id}">${esc(v.name)}</option>`:'';
+  }
   if(venueId) sel.value=venueId;
-
-  planTypeSelections=[];
-  renderPlanTypeChips('plan-type-chips', planTypeSelections, (t)=>{
-    const idx=planTypeSelections.indexOf(t);
-    if(idx===-1) planTypeSelections.push(t); else planTypeSelections.splice(idx,1);
-    renderPlanTypeChips('plan-type-chips', planTypeSelections, arguments.callee);
-  });
-
+  populatePlanTypeSelect('plan-op-type');
   const today=new Date().toISOString().slice(0,10);
   document.getElementById('plan-date-from').value=dateStr||today;
   document.getElementById('plan-date-to').value=dateStr||today;
+  document.getElementById('plan-time-from').value=timeStr||'08:00';
+  document.getElementById('plan-time-to').value='17:00';
   document.getElementById('plan-notes').value='';
   document.getElementById('plan-priority').value='normal';
   openModal('modal-plan');
@@ -2478,59 +2496,40 @@ function openPlanModal(venueId, dateStr){
 function openVenuePlanModal(){
   const vid=state.currentVenueId; if(!vid) return;
   const venue=state.venues.find(v=>v.id===vid); if(!venue) return;
-  const pid=venue.projectIds&&venue.projectIds[0]||'';
-  planTypeSelections=[];
-  renderPlanTypeChips('plan-type-chips', planTypeSelections, (t)=>{
-    const idx=planTypeSelections.indexOf(t);
-    if(idx===-1) planTypeSelections.push(t); else planTypeSelections.splice(idx,1);
-    renderPlanTypeChips('plan-type-chips', planTypeSelections, arguments.callee);
-  });
   document.getElementById('plan-venue-sel').innerHTML=`<option value="${vid}">${esc(venue.name)}</option>`;
+  populatePlanTypeSelect('plan-op-type');
   document.getElementById('plan-date-from').value=new Date().toISOString().slice(0,10);
   document.getElementById('plan-date-to').value=new Date().toISOString().slice(0,10);
+  document.getElementById('plan-time-from').value='08:00';
+  document.getElementById('plan-time-to').value='17:00';
   document.getElementById('plan-notes').value='';
   document.getElementById('plan-priority').value='normal';
   openModal('modal-plan');
 }
 
-function quickAddPlan(venueId, dateStr){ openPlanModal(venueId, dateStr); }
-
-function renderPlanTypeChips(containerId, selected, onToggle){
-  const container=document.getElementById(containerId); if(!container) return;
-  container.innerHTML=state.opTypes.map(t=>{
-    const isSel=selected.includes(t);
-    return `<div class="btn btn-ghost btn-sm" style="font-size:11px;${isSel?'background:var(--blue-pale);color:var(--blue);border-color:var(--blue);':''}" onclick="togglePlanChip('${containerId}','${esc(t)}')">${esc(t)}</div>`;
-  }).join('');
-}
-
-function togglePlanChip(containerId, type){
-  if(containerId==='plan-type-chips'){
-    const idx=planTypeSelections.indexOf(type);
-    if(idx===-1) planTypeSelections.push(type); else planTypeSelections.splice(idx,1);
-    renderPlanTypeChips('plan-type-chips', planTypeSelections, null);
-  } else {
-    const idx=editPlanTypeSelections.indexOf(type);
-    if(idx===-1) editPlanTypeSelections.push(type); else editPlanTypeSelections.splice(idx,1);
-    renderPlanTypeChips('edit-plan-type-chips', editPlanTypeSelections, null);
-  }
-}
+function quickAddPlan(venueId, dateStr, timeStr){ openPlanModal(venueId, dateStr, timeStr); }
 
 async function savePlan(){
   const venueId=document.getElementById('plan-venue-sel').value;
+  const opType=document.getElementById('plan-op-type').value;
   const dateFrom=document.getElementById('plan-date-from').value;
   const dateTo=document.getElementById('plan-date-to').value;
-  if(!venueId||!dateFrom||!dateTo){showToast('Please fill all required fields');return;}
-  if(planTypeSelections.length===0){showToast('Select at least one operation type');return;}
+  const timeFrom=document.getElementById('plan-time-from').value||'08:00';
+  const timeTo=document.getElementById('plan-time-to').value||'17:00';
+  if(!venueId||!opType||!dateFrom||!dateTo){showToast('Please fill all required fields');return;}
   if(dateTo<dateFrom){showToast('End date must be after start date');return;}
   const venue=state.venues.find(v=>v.id===venueId);
   const pid=state.currentProjectId||venue?.projectIds?.[0]||'';
-  const plan={id:'plan_'+Date.now(),venueId,projectId:pid,opTypes:[...planTypeSelections],
-    dateFrom,dateTo,notes:document.getElementById('plan-notes').value.trim(),
-    priority:document.getElementById('plan-priority').value,status:'planned',createdBy:'admin'};
+  const plan={id:'plan_'+Date.now(),venueId,projectId:pid,
+    opType,opTypes:[opType],
+    dateFrom,dateTo,timeFrom,timeTo,
+    notes:document.getElementById('plan-notes').value.trim(),
+    priority:document.getElementById('plan-priority').value,
+    status:'planned',createdBy:state.currentVenueId?'venue':'admin'};
   const {error}=await supa.from('pitchops_plans').insert(planToDb(plan));
   if(error){showToast('Error: '+error.message);return;}
   closeModal('modal-plan');
-  showToast('Planning window created!');
+  showToast('Plan entry created!');
   if(state.currentProjectId) renderGantt();
   if(state.currentVenueId) renderVenueUpcoming();
 }
@@ -2540,11 +2539,13 @@ async function openEditPlanModal(planId){
   const {data}=await supa.from('pitchops_plans').select('*').eq('id',planId).single();
   if(!data) return;
   const plan=dbToPlan(data);
+  populatePlanTypeSelect('edit-plan-op-type');
   document.getElementById('edit-plan-id').value=planId;
-  editPlanTypeSelections=[...plan.opTypes];
-  renderPlanTypeChips('edit-plan-type-chips', editPlanTypeSelections, null);
+  document.getElementById('edit-plan-op-type').value=plan.opType||plan.opTypes?.[0]||'';
   document.getElementById('edit-plan-from').value=plan.dateFrom;
   document.getElementById('edit-plan-to').value=plan.dateTo;
+  document.getElementById('edit-plan-time-from').value=plan.timeFrom||'08:00';
+  document.getElementById('edit-plan-time-to').value=plan.timeTo||'17:00';
   document.getElementById('edit-plan-notes').value=plan.notes;
   document.getElementById('edit-plan-priority').value=plan.priority;
   document.getElementById('edit-plan-status').value=plan.status;
@@ -2553,11 +2554,14 @@ async function openEditPlanModal(planId){
 
 async function saveEditPlan(){
   const id=document.getElementById('edit-plan-id').value;
-  if(editPlanTypeSelections.length===0){showToast('Select at least one operation type');return;}
+  const opType=document.getElementById('edit-plan-op-type').value;
+  if(!opType){showToast('Please select an operation type');return;}
   const {error}=await supa.from('pitchops_plans').update({
-    op_types:editPlanTypeSelections,
+    op_types:[opType],
     date_from:document.getElementById('edit-plan-from').value,
     date_to:document.getElementById('edit-plan-to').value,
+    time_from:document.getElementById('edit-plan-time-from').value||'08:00',
+    time_to:document.getElementById('edit-plan-time-to').value||'17:00',
     notes:document.getElementById('edit-plan-notes').value.trim(),
     priority:document.getElementById('edit-plan-priority').value,
     status:document.getElementById('edit-plan-status').value,
@@ -2635,7 +2639,7 @@ async function prefillFromPlan(planId){
   const plan=dbToPlan(data);
   // pre-fill the form with first op type
   const typeEl=document.getElementById('new-op-type');
-  if(typeEl && plan.opTypes.length) typeEl.value=plan.opTypes[0];
+  if(typeEl && (plan.opType||plan.opTypes?.length)) typeEl.value=plan.opType||plan.opTypes[0];
   if(plan.notes) document.getElementById('new-op-notes').value=plan.notes;
   // scroll to form
   document.querySelector('.card-body').scrollIntoView({behavior:'smooth'});
