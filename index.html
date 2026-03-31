@@ -1236,7 +1236,7 @@ function dbToProject(r){ return {id:r.id,code:r.code,name:r.name,country:r.count
 function dbToVenue(r){ return {id:r.id,name:r.name,city:r.city||'',color:r.color||'#185FA5',venueType:r.venue_type||'Stadium',token:r.token,projectIds:r.project_ids||[],responsiblePerson:r.responsible_person||'',contactPhone:r.contact_phone||'',contactEmail:r.contact_email||'',createdAt:r.created_at}; }
 function dbToOp(r){
   const d=(r.operation_date||'').slice(0,10); // always date-only YYYY-MM-DD
-  const today=new Date().toISOString().slice(0,10);
+  const today=todayStr();
   const autoStatus=d>today?'planned':'inprogress'; // never auto-completed
   return {id:r.id,venueId:r.venue_id,type:r.type,zone:r.zone||'',equipment:r.equipment||'',weather:r.weather||'',staff:r.staff||[],notes:r.notes||'',date:d,timeFrom:r.time_from||'08:00',timeTo:r.time_to||'17:00',status:r.status||autoStatus,photos:r.photos||[],flagged:r.flagged||false,adminComment:r.admin_comment||'',createdAt:r.created_at};
 }
@@ -1856,7 +1856,7 @@ async function logOperation(){
   const opTimeFrom = document.getElementById('new-op-time-from')?.value||'08:00';
   const opTimeTo = document.getElementById('new-op-time-to')?.value||'17:00';
   const opDateVal = opDateOnly; // store date only, time stored separately in time_from/time_to
-  const isFutureOp = new Date(opDateOnly) > new Date();
+  const isFutureOp = opDateOnly > todayStr();
   const selectedStatus = document.getElementById('new-op-status')?.value||'planned';
   const autoStatus = isFutureOp ? 'planned' : 'inprogress';
   const manualStatus = selectedStatus === 'auto' ? autoStatus : selectedStatus;
@@ -1910,7 +1910,7 @@ function openEditModal(opId){
   renderPhotoPreviews('edit');
   // status + time
   const statusEl=document.getElementById('edit-op-status');
-  if(statusEl) statusEl.value=op.status||(new Date(op.date)>new Date()?'planned':'completed');
+  if(statusEl) statusEl.value=op.status||(op.date>todayStr()?'planned':'inprogress');
   const tfEl=document.getElementById('edit-op-time-from');
   const ttEl=document.getElementById('edit-op-time-to');
   if(tfEl) tfEl.value=op.timeFrom||'08:00';
@@ -1924,9 +1924,7 @@ async function saveEditOperation(){
   const editDateVal=(document.getElementById('edit-op-date').value||'').slice(0,10);
   const editStatus=document.getElementById('edit-op-status')?.value||'completed';
   // Block completed status if date is in the future
-  if(editStatus==='completed' && editDateVal){
-    if(new Date(editDateVal)>new Date()){showToast('Cannot mark as completed — date is in the future.');return;}
-  }
+  if(editStatus==='completed' && editDateVal>todayStr()){showToast('Cannot mark as completed — date is in the future.');return;}
   state.operations[idx]={...state.operations[idx],
     type:document.getElementById('edit-op-type').value,
     zone:document.getElementById('edit-op-zone').value,
@@ -2178,8 +2176,15 @@ async function deleteVenue(){
 function toggleCustomZone(){ document.getElementById('zone-custom-wrap').style.display=document.getElementById('new-op-zone').value==='Custom'?'block':'none'; }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function nowLocal(){ return new Date().toISOString().slice(0,16); }
+function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function formatDate(dt){ if(!dt) return '—'; const d=new Date(dt); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); }
-function formatDateOnly(dt){ if(!dt) return '—'; return new Date(dt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
+function formatDateOnly(dt){
+  if(!dt) return '—';
+  const s=(dt+'').slice(0,10);
+  const p=s.split('-');
+  if(p.length===3){ const d=new Date(+p[0],+p[1]-1,+p[2]); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
+  return new Date(dt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+}
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id,e){
   if(e) e.stopPropagation();
@@ -2557,9 +2562,8 @@ async function renderGantt(){
   const vids=projectVenues(pid).map(v=>v.id);
   let allOps=state.operations.filter(o=>vids.includes(o.venueId));
   // Auto-mark planned ops as missed if date passed
-  const now=new Date(); now.setHours(0,0,0,0);
   for(const op of allOps){
-    if(op.status==='planned' && new Date(op.date)<now){
+    if(op.status==='planned' && op.date<todayStr()){
       op.status='missed';
       supa.from('pitchops_operations').update({status:'missed'}).eq('id',op.id);
     }
@@ -2810,7 +2814,7 @@ function renderVenueUpcoming(){
   // Auto-mark missed (update DB silently, update state)
   allVenueOps.forEach(op=>{
     const opDate=(op.date||'').slice(0,10);
-    if(op.status==='planned' && opDate < todayStr){
+    if(op.status==='planned' && opDate < todayStr()){
       op.status='missed';
       supa.from('pitchops_operations').update({status:'missed'}).eq('id',op.id);
     }
@@ -2952,7 +2956,7 @@ function openNewOpModal(venueId, dateStr, timeStr){
   // Temporarily set currentVenueId if called from admin gantt
   const prevVenueId = state.currentVenueId;
   if(venueId) state.currentVenueId = venueId;
-  const isFuture = dateStr && new Date(dateStr) > new Date();
+  const isFuture = dateStr && dateStr > todayStr();
   openLogTaskModal(dateStr, timeStr||'08:00', null, isFuture?'planned':'auto');
   // Restore after modal opens
   if(!prevVenueId) state.currentVenueId = venueId;
