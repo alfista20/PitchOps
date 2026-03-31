@@ -423,7 +423,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
   <!-- PROJECT TABS -->
   <div style="background:white;border-bottom:2px solid var(--border);padding:0 1rem;display:flex;gap:0;flex-shrink:0;position:sticky;top:0;z-index:10">
     <button class="tab-btn active" id="ptab-ops" onclick="switchProjectTab('ops')">📋 Operations</button>
-    <button class="tab-btn" id="ptab-calendar" onclick="switchProjectTab('calendar')">📅 Calendar</button>
+    <button class="tab-btn" id="ptab-calendar" onclick="switchProjectTab('calendar')">📅 Schedule</button>
   </div>
 
   <!-- OPS TAB -->
@@ -460,68 +460,63 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
   </div><!-- end ptab-ops-content -->
 
   <!-- CALENDAR TAB -->
-  <div id="ptab-calendar-content" style="display:none;padding:.75rem;width:100%;max-width:1200px;margin:0 auto">
+  <div id="ptab-calendar-content" style="display:none;padding:.75rem;box-sizing:border-box">
 
-    <!-- GANTT VIEW (all venues) -->
-    <div id="gantt-view">
-      <div class="gantt-wrap">
-        <div class="gantt-topbar">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-            <div class="week-nav">
-              <button onclick="ganttNav(-1)">←</button>
-              <span id="gantt-week-label">Loading...</span>
-              <button onclick="ganttNav(1)">→</button>
-            </div>
-            <button class="btn btn-ghost btn-sm" onclick="ganttGoToday()">Today</button>
-            <div class="status-filter-bar">
-              <div class="sf-pill sf-active" onclick="ganttFilter('all',this)">All</div>
-              <div class="sf-pill" onclick="ganttFilter('planned',this)">Planned</div>
-              <div class="sf-pill" onclick="ganttFilter('inprogress',this)">In progress</div>
-              <div class="sf-pill" onclick="ganttFilter('completed',this)">Completed</div>
-              <div class="sf-pill" onclick="ganttFilter('missed',this)">Missed</div>
-            </div>
+    <!-- GANTT: all venues overview -->
+    <div id="gantt-view" class="gantt-wrap">
+      <div class="gantt-topbar">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <div class="week-nav">
+            <button onclick="ganttNav(-1)">←</button>
+            <span id="gantt-week-label">—</span>
+            <button onclick="ganttNav(1)">→</button>
           </div>
-          <div style="display:flex;gap:6px">
-            <span style="font-size:11px;color:var(--text-hint);align-self:center">Click venue to drill in →</span>
-            <button class="btn btn-blue btn-sm" onclick="openPlanModal()">+ Plan window</button>
+          <button class="btn btn-ghost btn-sm" onclick="ganttGoToday()">Today</button>
+          <div class="status-filter-bar">
+            <div class="sf-pill sf-active" onclick="ganttFilter('all',this)">All</div>
+            <div class="sf-pill" onclick="ganttFilter('planned',this)">Planned</div>
+            <div class="sf-pill" onclick="ganttFilter('inprogress',this)">In progress</div>
+            <div class="sf-pill" onclick="ganttFilter('completed',this)">Completed</div>
+            <div class="sf-pill" onclick="ganttFilter('missed',this)">Missed</div>
           </div>
         </div>
-        <div class="gantt-legend" style="padding:.4rem .75rem;border-bottom:1px solid var(--border);display:flex;gap:12px;flex-wrap:wrap">
-          <div class="gantt-legend-item"><div class="gantt-legend-dot" style="background:var(--amber)"></div>Planned</div>
-          <div class="gantt-legend-item"><div class="gantt-legend-dot" style="background:var(--blue)"></div>In progress</div>
-          <div class="gantt-legend-item"><div class="gantt-legend-dot" style="background:var(--green)"></div>Completed</div>
-          <div class="gantt-legend-item"><div class="gantt-legend-dot" style="background:var(--red)"></div>Missed</div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <span style="font-size:11px;color:var(--text-hint)">Tap venue name →</span>
+          <button class="btn btn-blue btn-sm" onclick="openPlanModal()">+ Plan window</button>
         </div>
-        <div id="gantt-grid" style="overflow-x:auto"></div>
       </div>
+      <div style="display:flex;gap:10px;padding:.4rem .75rem;border-bottom:1px solid var(--border);flex-wrap:wrap">
+        <div class="gantt-legend-item"><div class="gantt-legend-dot" style="background:var(--amber)"></div>Planned</div>
+        <div class="gantt-legend-item"><div class="gantt-legend-dot" style="background:var(--blue)"></div>In progress</div>
+        <div class="gantt-legend-item"><div class="gantt-legend-dot" style="background:var(--green)"></div>Completed</div>
+        <div class="gantt-legend-item"><div class="gantt-legend-dot" style="background:var(--red)"></div>Missed</div>
+      </div>
+      <div id="gantt-grid" style="overflow-x:auto;min-height:100px"></div>
     </div>
 
-    <!-- VENUE DRILL-DOWN VIEW -->
-    <div id="venue-cal-view" style="display:none">
-      <div class="gantt-wrap">
-        <div class="gantt-topbar">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-            <button class="btn btn-ghost btn-sm" onclick="exitVenueCal()">← All venues</button>
-            <div class="week-nav">
-              <button onclick="venueCalNav(-1)">←</button>
-              <span id="venue-cal-label">Loading...</span>
-              <button onclick="venueCalNav(1)">→</button>
-            </div>
-            <button class="btn btn-ghost btn-sm" onclick="venueCalGoToday()">Today</button>
-            <!-- Day / Week / Month switcher -->
-            <div style="display:flex;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">
-              <button id="vcv-day" class="btn btn-ghost btn-sm" style="border:none;border-radius:0;border-right:1px solid var(--border)" onclick="setVenueCalView('day')">Day</button>
-              <button id="vcv-week" class="btn btn-primary btn-sm" style="border:none;border-radius:0;border-right:1px solid var(--border)" onclick="setVenueCalView('week')">Week</button>
-              <button id="vcv-month" class="btn btn-ghost btn-sm" style="border:none;border-radius:0" onclick="setVenueCalView('month')">Month</button>
-            </div>
+    <!-- VENUE DRILL-DOWN -->
+    <div id="venue-cal-view" class="gantt-wrap" style="display:none">
+      <div class="gantt-topbar">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-sm" onclick="exitVenueCal()">← All venues</button>
+          <div class="week-nav">
+            <button onclick="venueCalNav(-1)">←</button>
+            <span id="venue-cal-label">—</span>
+            <button onclick="venueCalNav(1)">→</button>
           </div>
-          <div style="display:flex;gap:6px;align-items:center">
-            <span id="venue-cal-name" style="font-size:13px;font-weight:600;color:var(--text)"></span>
-            <button class="btn btn-blue btn-sm" onclick="openPlanModal(state.currentVenueCalId)">+ Plan</button>
+          <button class="btn btn-ghost btn-sm" onclick="venueCalGoToday()">Today</button>
+          <div style="display:flex;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">
+            <button id="vcv-day" onclick="setVenueCalView('day')" style="padding:5px 12px;font-size:12px;border:none;background:white;cursor:pointer;color:var(--text-muted);font-family:'DM Sans',sans-serif">Day</button>
+            <button id="vcv-week" onclick="setVenueCalView('week')" style="padding:5px 12px;font-size:12px;border:none;background:var(--navy);color:white;cursor:pointer;font-family:'DM Sans',sans-serif;border-left:1px solid var(--border);border-right:1px solid var(--border)">Week</button>
+            <button id="vcv-month" onclick="setVenueCalView('month')" style="padding:5px 12px;font-size:12px;border:none;background:white;cursor:pointer;color:var(--text-muted);font-family:'DM Sans',sans-serif">Month</button>
           </div>
         </div>
-        <div id="venue-cal-grid"></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span id="venue-cal-name" style="font-size:13px;font-weight:600;color:var(--text)"></span>
+          <button class="btn btn-blue btn-sm" onclick="openPlanModal(state.currentVenueCalId)">+ Plan</button>
+        </div>
       </div>
+      <div id="venue-cal-grid" style="min-height:200px;overflow-x:auto"></div>
     </div>
   </div>
 </div>
@@ -2096,10 +2091,10 @@ function setVenueCalView(mode) {
   venueCalOffset = 0;
   ['day','week','month'].forEach(m => {
     const btn = document.getElementById('vcv-'+m);
-    if(btn) {
-      btn.className = m===mode ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm';
-      btn.style.cssText = 'border:none;border-radius:0;' + (m!=='month'?'border-right:1px solid var(--border)':'');
-    }
+    if(!btn) return;
+    const active = m===mode;
+    btn.style.background = active ? 'var(--navy)' : 'white';
+    btn.style.color = active ? 'white' : 'var(--text-muted)';
   });
   renderVenueCal();
 }
