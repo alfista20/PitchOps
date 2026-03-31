@@ -146,8 +146,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 .venue-hero-left h2{font-size:22px;color:white;margin-bottom:2px;font-family:'Syne',sans-serif}
 .venue-hero-left p{font-size:13px;color:var(--blue-mid)}
 .venue-hero-project{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);border-radius:20px;padding:3px 12px;font-size:12px;color:rgba(255,255,255,.9);margin-bottom:6px}
-.venue-body{padding:1.5rem;display:grid;grid-template-columns:1fr 1.5fr;gap:1.25rem;max-width:1100px;margin:0 auto;width:100%}
-@media(max-width:720px){.venue-body{grid-template-columns:1fr}}
+.venue-body{padding:1rem;display:grid;grid-template-columns:1fr;gap:1rem;max-width:800px;margin:0 auto;width:100%}
 
 /* op badge */
 .op-badge{width:36px;height:36px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;letter-spacing:.5px;flex-shrink:0}
@@ -416,14 +415,14 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     </div>
     <div class="hero-stats">
       <div class="hero-stat"><div class="val" id="pd-stat-venues">0</div><div class="lbl">Venues</div></div>
-      <div class="hero-stat"><div class="val" id="pd-stat-ops">0</div><div class="lbl">Total ops</div></div>
+      <div class="hero-stat"><div class="val" id="pd-stat-ops">0</div><div class="lbl">Total tasks</div></div>
       <div class="hero-stat"><div class="val" id="pd-stat-today">0</div><div class="lbl">Today</div></div>
       <div class="hero-stat"><div class="val" id="pd-stat-week">0</div><div class="lbl">This week</div></div>
     </div>
   </div>
   <!-- PROJECT TABS -->
   <div style="background:white;border-bottom:2px solid var(--border);padding:0 1rem;display:flex;gap:0;flex-shrink:0">
-    <button class="tab-btn active" id="ptab-ops" onclick="switchProjectTab('ops')">📋 Operations</button>
+    <button class="tab-btn active" id="ptab-ops" onclick="switchProjectTab('ops')">📋 Tasks</button>
     <button class="tab-btn" id="ptab-calendar" onclick="switchProjectTab('calendar')">📅 Schedule</button>
   </div>
 
@@ -433,7 +432,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     <div class="card">
       <div class="card-header">
         <span class="card-title">Venues</span>
-        <button class="btn btn-ghost btn-sm" onclick="openManageTypesModal()">⚙ Op types</button>
+        <button class="btn btn-ghost btn-sm" onclick="openManageTypesModal()">⚙ Task types</button>
       </div>
       <div id="detail-venue-list"></div>
     </div>
@@ -455,7 +454,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
           <tbody id="detail-ops-tbody"></tbody>
         </table>
       </div>
-      <div id="detail-ops-empty" class="empty-state" style="display:none"><div class="ico">📋</div><div>No operations found</div></div>
+      <div id="detail-ops-empty" class="empty-state" style="display:none"><div class="ico">📋</div><div>No tasks found</div></div>
     </div>
   </div>
   </div><!-- end ptab-ops-content -->
@@ -540,7 +539,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     </div>
     <div class="hero-stats">
       <div class="hero-stat"><div class="val" id="vw-stat-venues">0</div><div class="lbl">Venues</div></div>
-      <div class="hero-stat"><div class="val" id="vw-stat-ops">0</div><div class="lbl">Total ops</div></div>
+      <div class="hero-stat"><div class="val" id="vw-stat-ops">0</div><div class="lbl">Total tasks</div></div>
     </div>
   </div>
   <div class="project-body">
@@ -566,7 +565,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
           <tbody id="viewer-ops-tbody"></tbody>
         </table>
       </div>
-      <div id="viewer-ops-empty" class="empty-state" style="display:none"><div class="ico">📋</div><div>No operations found</div></div>
+      <div id="viewer-ops-empty" class="empty-state" style="display:none"><div class="ico">📋</div><div>No tasks found</div></div>
     </div>
   </div>
 </div>
@@ -599,83 +598,37 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
   </div>
   <!-- VENUE TABS -->
   <div style="background:white;border-bottom:2px solid var(--border);padding:0 1rem;display:flex;gap:0;flex-shrink:0">
-    <button class="tab-btn active" id="vtab-log" onclick="switchVenueTab('log')">📋 Log operation</button>
+    <button class="tab-btn active" id="vtab-log" onclick="switchVenueTab('log')">📋 Log task</button>
     <button class="tab-btn" id="vtab-schedule" onclick="switchVenueTab('schedule')">📅 Schedule</button>
   </div>
 
   <div id="vtab-log-content" class="venue-body">
-    <!-- LOG FORM -->
+    <!-- LOG FORM — now a modal trigger -->
     <div class="card">
       <div class="card-header">
-        <span class="card-title" data-i18n="log_op">Log new operation</span>
-        <button class="btn btn-ghost btn-sm" onclick="openManageTypesModal()" style="font-size:11px">⚙ Types</button>
+        <span class="card-title">Upcoming tasks</span>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" onclick="openManageTypesModal()" style="font-size:11px">⚙ Types</button>
+          <button class="btn btn-blue btn-sm" onclick="openLogTaskModal()">+ Log new task</button>
+        </div>
       </div>
       <!-- UPCOMING PLANS -->
       <div id="venue-upcoming" class="upcoming-section" style="padding:0 1.25rem;display:none">
         <div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem 0 .5rem">
-          <span style="font-size:12px;font-weight:600;color:var(--text);font-family:'Syne',sans-serif">📅 Upcoming plans</span>
-          <button class="btn btn-ghost btn-sm" style="font-size:11px" onclick="openVenuePlanModal()">+ Add plan</button>
+          <span style="font-size:12px;font-weight:600;color:var(--text);font-family:'Syne',sans-serif">📅 Upcoming</span>
         </div>
         <div id="venue-upcoming-list"></div>
         <div style="height:1px;background:var(--border);margin:.75rem 0"></div>
       </div>
-      <div class="card-body">
-        <div class="field"><label data-i18n="op_type">Operation type</label><select id="new-op-type"></select></div>
-        <div class="field">
-          <label data-i18n="op_zone">Pitch area / zone</label>
-          <select id="new-op-zone" onchange="toggleCustomZone()">
-            <option>Full pitch</option><option>Goal mouth (N)</option><option>Goal mouth (S)</option>
-            <option>Centre circle</option><option>Penalty areas</option><option>Wings</option><option value="Custom">Custom...</option>
-          </select>
-        </div>
-        <div class="field" id="zone-custom-wrap" style="display:none"><label data-i18n="op_zone_custom">Custom zone</label><input id="new-op-zone-custom" type="text" placeholder="Describe area..."/></div>
-        <div class="field"><label data-i18n="op_equipment">Equipment used</label><input id="new-op-equipment" type="text" placeholder="e.g. Toro 3550, solid tine..."/></div>
-        <div class="field"><label data-i18n="op_weather">Weather conditions</label><input id="new-op-weather" type="text" placeholder="e.g. Sunny, 14°C, light wind"/></div>
-        <div class="field">
-          <label data-i18n="op_staff">Done by (staff)</label>
-          <div class="staff-tags" id="staff-tags"></div>
-          <div class="staff-input-row" style="margin-top:8px">
-            <input id="staff-name-input" type="text" placeholder="Add staff name..."/>
-            <button class="btn btn-ghost btn-sm" onclick="addStaff()">Add</button>
-          </div>
-          <p style="font-size:11px;color:var(--text-hint);margin-top:4px" data-i18n="op_staff_hint">You can add multiple staff members</p>
-        </div>
-        <div class="field"><label data-i18n="op_notes">Notes / observations</label><textarea id="new-op-notes" placeholder="Any observations, measurements, remarks..."></textarea></div>
-        <div class="field"><label data-i18n="op_date">Date & time</label><input id="new-op-date" type="datetime-local"/></div>
-        <div class="field">
-          <label>Time window</label>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-            <div><label style="font-size:10px;color:var(--text-hint)">Start</label><input id="new-op-time-from" type="time" value="08:00"/></div>
-            <div><label style="font-size:10px;color:var(--text-hint)">End</label><input id="new-op-time-to" type="time" value="17:00"/></div>
-          </div>
-        </div>
-        <div class="field" id="new-op-status-field">
-          <label>Status</label>
-          <select id="new-op-status">
-            <option value="auto">Auto (future → Planned, today → In progress)</option>
-            <option value="planned">Planned</option>
-            <option value="inprogress">In progress</option>
-            <option value="completed">Completed</option>
-          </select>
-          <p style="font-size:11px;color:var(--text-hint);margin-top:4px">Completed must be set manually by you or admin</p>
-        </div>
-        <div class="field">
-          <label data-i18n="op_photos">Photos (max 4)</label>
-          <div class="photo-upload-area" id="new-photo-drop">
-            <input type="file" accept="image/*" multiple id="new-photo-input" onchange="handlePhotoSelect(this,'new')"/>
-            <div class="photo-upload-icon">📷</div>
-            <div class="photo-upload-text" data-i18n="photo_tap">Tap to add photos</div>
-            <div class="photo-upload-hint" data-i18n="photo_hint">JPG, PNG · max 4 photos</div>
-          </div>
-          <div class="photo-previews" id="new-photo-previews"></div>
-        </div>
-        <button class="btn btn-blue btn-full" onclick="logOperation()" data-i18n="btn_log">Log operation</button>
+      <div id="venue-upcoming-empty" style="padding:1.5rem;text-align:center;color:var(--text-hint);font-size:13px;display:none">
+        <div style="font-size:24px;margin-bottom:6px">📋</div>
+        No upcoming tasks. Click "+ Log new task" to add one.
       </div>
     </div>
     <!-- HISTORY -->
     <div class="card">
       <div class="card-header">
-        <span class="card-title" data-i18n="history">Operation history</span>
+        <span class="card-title">Task history</span>
         <input type="text" id="venue-hist-search" placeholder="Search..." oninput="renderVenueHistory()" style="padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;outline:none;width:130px"/>
       </div>
       <div id="venue-history-list" style="padding:0 1.25rem;max-height:560px;overflow-y:auto"></div>
@@ -913,7 +866,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     <div class="modal-header"><span class="modal-title">Edit operation</span><button class="modal-close" onclick="closeModal('modal-edit-op')">✕</button></div>
     <div class="modal-body">
       <input type="hidden" id="edit-op-id"/>
-      <div class="field"><label>Operation type</label><select id="edit-op-type"></select></div>
+      <div class="field"><label>Task type</label><select id="edit-op-type"></select></div>
       <div class="field"><label>Pitch area / zone</label><input id="edit-op-zone" type="text"/></div>
       <div class="field"><label>Equipment used</label><input id="edit-op-equipment" type="text"/></div>
       <div class="field"><label>Weather conditions</label><input id="edit-op-weather" type="text"/></div>
@@ -965,7 +918,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 <!-- MANAGE OP TYPES -->
 <div class="modal-overlay" id="modal-op-types">
   <div class="modal">
-    <div class="modal-header"><span class="modal-title">Manage operation types</span><button class="modal-close" onclick="closeModal('modal-op-types')">✕</button></div>
+    <div class="modal-header"><span class="modal-title">Manage task types</span><button class="modal-close" onclick="closeModal('modal-op-types')">✕</button></div>
     <div class="modal-body">
       <div id="op-types-list" style="margin-bottom:1rem"></div>
       <div style="display:flex;gap:8px">
@@ -974,6 +927,73 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       </div>
     </div>
     <div class="modal-footer"><button class="btn btn-primary" onclick="closeModal('modal-op-types')">Done</button></div>
+  </div>
+</div>
+
+
+<!-- LOG TASK MODAL -->
+<div class="modal-overlay" id="modal-log-task">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <span class="modal-title">Log new task</span>
+      <button class="modal-close" onclick="closeModal('modal-log-task')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="modal-venue-indicator" style="display:none;padding:6px 10px;background:var(--blue-pale);border-radius:var(--radius-sm);font-size:12px;color:var(--blue);font-weight:500;margin-bottom:.75rem"></div>
+      <div class="field"><label data-i18n="op_type">Task type</label><select id="new-op-type"></select></div>
+      <div class="field">
+        <label data-i18n="op_zone">Pitch area / zone</label>
+        <select id="new-op-zone" onchange="toggleCustomZone()">
+          <option>Full pitch</option><option>Goal mouth (N)</option><option>Goal mouth (S)</option>
+          <option>Centre circle</option><option>Penalty areas</option><option>Wings</option><option value="Custom">Custom...</option>
+        </select>
+      </div>
+      <div class="field" id="zone-custom-wrap" style="display:none"><label data-i18n="op_zone_custom">Custom zone</label><input id="new-op-zone-custom" type="text" placeholder="Describe area..."/></div>
+      <div class="field"><label data-i18n="op_equipment">Equipment used</label><input id="new-op-equipment" type="text" placeholder="e.g. Toro 3550, solid tine..."/></div>
+      <div class="field"><label data-i18n="op_weather">Weather conditions</label><input id="new-op-weather" type="text" placeholder="e.g. Sunny, 14°C, light wind"/></div>
+      <div class="field">
+        <label data-i18n="op_staff">Done by (staff)</label>
+        <div class="staff-tags" id="staff-tags"></div>
+        <div class="staff-input-row" style="margin-top:8px">
+          <input id="staff-name-input" type="text" placeholder="Add staff name..."/>
+          <button class="btn btn-ghost btn-sm" onclick="addStaff()">Add</button>
+        </div>
+        <p style="font-size:11px;color:var(--text-hint);margin-top:4px" data-i18n="op_staff_hint">You can add multiple staff members</p>
+      </div>
+      <div class="field"><label data-i18n="op_notes">Notes / observations</label><textarea id="new-op-notes" placeholder="Any observations, measurements, remarks..."></textarea></div>
+      <div class="field"><label data-i18n="op_date">Date & time</label><input id="new-op-date" type="datetime-local"/></div>
+      <div class="field">
+        <label>Time window</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><label style="font-size:10px;color:var(--text-hint)">Start</label><input id="new-op-time-from" type="time" value="08:00"/></div>
+          <div><label style="font-size:10px;color:var(--text-hint)">End</label><input id="new-op-time-to" type="time" value="17:00"/></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Status</label>
+        <select id="new-op-status">
+          <option value="auto">Auto (future → Planned, today → In progress)</option>
+          <option value="planned">Planned</option>
+          <option value="inprogress">In progress</option>
+          <option value="completed">Completed</option>
+        </select>
+        <p style="font-size:11px;color:var(--text-hint);margin-top:4px">Completed must be set manually by you or admin</p>
+      </div>
+      <div class="field">
+        <label data-i18n="op_photos">Photos (max 4)</label>
+        <div class="photo-upload-area" id="new-photo-drop">
+          <input type="file" accept="image/*" multiple id="new-photo-input" onchange="handlePhotoSelect(this,'new')"/>
+          <div class="photo-upload-icon">📷</div>
+          <div class="photo-upload-text" data-i18n="photo_tap">Tap to add photos</div>
+          <div class="photo-upload-hint" data-i18n="photo_hint">JPG, PNG · max 4 photos</div>
+        </div>
+        <div class="photo-previews" id="new-photo-previews"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-log-task')">Cancel</button>
+      <button class="btn btn-blue" onclick="logOperation()" data-i18n="btn_log">Log task</button>
+    </div>
   </div>
 </div>
 
@@ -1039,7 +1059,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     <div class="modal-header"><span class="modal-title">Edit plan entry</span><button class="modal-close" onclick="closeModal('modal-edit-plan')">✕</button></div>
     <div class="modal-body">
       <input type="hidden" id="edit-plan-id"/>
-      <div class="field"><label>Operation type</label><select id="edit-plan-op-type"></select></div>
+      <div class="field"><label>Task type</label><select id="edit-plan-op-type"></select></div>
       <div class="field">
         <label>Date range</label>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
@@ -1189,12 +1209,12 @@ function showLoading(on){
 // I18N
 // ════════════════════════════════════════
 const i18n = {
-  en:{ stat_total:'This month',stat_last:'Last op',stat_common:'Top type',log_op:'Log new operation',op_type:'Operation type',op_zone:'Pitch area / zone',op_zone_custom:'Custom zone',op_equipment:'Equipment used',op_weather:'Weather conditions',op_staff:'Done by (staff)',op_staff_hint:'You can add multiple staff members',op_notes:'Notes / observations',op_date:'Date & time',btn_log:'Log operation',history:'Operation history',op_photos:'Photos (max 4)',photo_tap:'Tap to add photos',photo_hint:'JPG, PNG · max 4 photos' },
-  pl:{ stat_total:'Ten miesiąc',stat_last:'Ostatnia op.',stat_common:'Dominuje',log_op:'Dodaj operację',op_type:'Typ operacji',op_zone:'Strefa boiska',op_zone_custom:'Własna strefa',op_equipment:'Sprzęt',op_weather:'Pogoda',op_staff:'Wykonał/a',op_staff_hint:'Możesz dodać kilka osób',op_notes:'Notatki',op_date:'Data i godzina',btn_log:'Zapisz operację',history:'Historia operacji',op_photos:'Zdjęcia (max 4)',photo_tap:'Dotknij aby dodać zdjęcia',photo_hint:'JPG, PNG · max 4 zdjęcia' },
-  es:{ stat_total:'Este mes',stat_last:'Última op.',stat_common:'Más común',log_op:'Registrar operación',op_type:'Tipo de operación',op_zone:'Zona del terreno',op_zone_custom:'Zona personalizada',op_equipment:'Equipo utilizado',op_weather:'Condiciones meteorológicas',op_staff:'Realizado por',op_staff_hint:'Puedes añadir varios empleados',op_notes:'Notas / observaciones',op_date:'Fecha y hora',btn_log:'Registrar',history:'Historial',op_photos:'Fotos (máx 4)',photo_tap:'Toca para añadir fotos',photo_hint:'JPG, PNG · máx 4 fotos' },
-  fr:{ stat_total:'Ce mois',stat_last:'Dernière op.',stat_common:'Plus fréquent',log_op:"Ajouter opération",op_type:"Type d'opération",op_zone:'Zone du terrain',op_zone_custom:'Zone personnalisée',op_equipment:'Équipement utilisé',op_weather:'Météo',op_staff:'Réalisé par',op_staff_hint:'Vous pouvez ajouter plusieurs agents',op_notes:'Notes / observations',op_date:'Date et heure',btn_log:'Enregistrer',history:'Historique',op_photos:'Photos (max 4)',photo_tap:'Appuyer pour ajouter des photos',photo_hint:'JPG, PNG · max 4 photos' },
-  de:{ stat_total:'Diesen Monat',stat_last:'Letzte Op.',stat_common:'Häufigste',log_op:'Neue Maßnahme',op_type:'Maßnahmentyp',op_zone:'Bereich',op_zone_custom:'Benutzerdefinierter Bereich',op_equipment:'Geräte',op_weather:'Wetterbedingungen',op_staff:'Durchgeführt von',op_staff_hint:'Mehrere Mitarbeiter möglich',op_notes:'Notizen',op_date:'Datum und Uhrzeit',btn_log:'Maßnahme speichern',history:'Maßnahmenhistorie',op_photos:'Fotos (max 4)',photo_tap:'Tippen um Fotos hinzuzufügen',photo_hint:'JPG, PNG · max 4 Fotos' },
-  pt:{ stat_total:'Este mês',stat_last:'Última op.',stat_common:'Mais comum',log_op:'Registar operação',op_type:'Tipo de operação',op_zone:'Zona do relvado',op_zone_custom:'Zona personalizada',op_equipment:'Equipamento',op_weather:'Condições meteorológicas',op_staff:'Realizado por',op_staff_hint:'Pode adicionar vários trabalhadores',op_notes:'Notas / observações',op_date:'Data e hora',btn_log:'Registar',history:'Histórico',op_photos:'Fotos (máx 4)',photo_tap:'Toque para adicionar fotos',photo_hint:'JPG, PNG · máx 4 fotos' },
+  en:{ stat_total:'This month',stat_last:'Last op',stat_common:'Top type',log_op:'Log new task',op_type:'Task type',op_zone:'Pitch area / zone',op_zone_custom:'Custom zone',op_equipment:'Equipment used',op_weather:'Weather conditions',op_staff:'Done by (staff)',op_staff_hint:'You can add multiple staff members',op_notes:'Notes / observations',op_date:'Date & time',btn_log:'Log task',history:'Task history',op_photos:'Photos (max 4)',photo_tap:'Tap to add photos',photo_hint:'JPG, PNG · max 4 photos' },
+  pl:{ stat_total:'Ten miesiąc',stat_last:'Ostatnia op.',stat_common:'Dominuje',log_op:'Dodaj zadanie',op_type:'Typ zadania',op_zone:'Strefa boiska',op_zone_custom:'Własna strefa',op_equipment:'Sprzęt',op_weather:'Pogoda',op_staff:'Wykonał/a',op_staff_hint:'Możesz dodać kilka osób',op_notes:'Notatki',op_date:'Data i godzina',btn_log:'Zapisz zadanie',history:'Historia zadań',op_photos:'Zdjęcia (max 4)',photo_tap:'Dotknij aby dodać zdjęcia',photo_hint:'JPG, PNG · max 4 zdjęcia' },
+  es:{ stat_total:'Este mes',stat_last:'Última op.',stat_common:'Más común',log_op:'Registrar tarea',op_type:'Tipo de tarea',op_zone:'Zona del terreno',op_zone_custom:'Zona personalizada',op_equipment:'Equipo utilizado',op_weather:'Condiciones meteorológicas',op_staff:'Realizado por',op_staff_hint:'Puedes añadir varios empleados',op_notes:'Notas / observaciones',op_date:'Fecha y hora',btn_log:'Registrar',history:'Historial',op_photos:'Fotos (máx 4)',photo_tap:'Toca para añadir fotos',photo_hint:'JPG, PNG · máx 4 fotos' },
+  fr:{ stat_total:'Ce mois',stat_last:'Dernière op.',stat_common:'Plus fréquent',log_op:'Ajouter tâche',op_type:'Type de tâche',op_zone:'Zone du terrain',op_zone_custom:'Zone personnalisée',op_equipment:'Équipement utilisé',op_weather:'Météo',op_staff:'Réalisé par',op_staff_hint:'Vous pouvez ajouter plusieurs agents',op_notes:'Notes / observations',op_date:'Date et heure',btn_log:'Enregistrer',history:'Historique',op_photos:'Photos (max 4)',photo_tap:'Appuyer pour ajouter des photos',photo_hint:'JPG, PNG · max 4 photos' },
+  de:{ stat_total:'Diesen Monat',stat_last:'Letzte Op.',stat_common:'Häufigste',log_op:'Neue Aufgabe',op_type:'Aufgabentyp',op_zone:'Bereich',op_zone_custom:'Benutzerdefinierter Bereich',op_equipment:'Geräte',op_weather:'Wetterbedingungen',op_staff:'Durchgeführt von',op_staff_hint:'Mehrere Mitarbeiter möglich',op_notes:'Notizen',op_date:'Datum und Uhrzeit',btn_log:'Aufgabe speichern',history:'Aufgabenhistorie',op_photos:'Fotos (max 4)',photo_tap:'Tippen um Fotos hinzuzufügen',photo_hint:'JPG, PNG · max 4 Fotos' },
+  pt:{ stat_total:'Este mês',stat_last:'Última op.',stat_common:'Mais comum',log_op:'Registar tarefa',op_type:'Tipo de tarefa',op_zone:'Zona do relvado',op_zone_custom:'Zona personalizada',op_equipment:'Equipamento',op_weather:'Condições meteorológicas',op_staff:'Realizado por',op_staff_hint:'Pode adicionar vários trabalhadores',op_notes:'Notas / observações',op_date:'Data e hora',btn_log:'Registar',history:'Histórico',op_photos:'Fotos (máx 4)',photo_tap:'Toque para adicionar fotos',photo_hint:'JPG, PNG · máx 4 fotos' },
 };
 function t(k){ return (i18n[state.lang]||i18n.en)[k]||k; }
 function setLang(l){
@@ -1278,7 +1298,7 @@ async function enterViewerDashboard(proj){
         <div class="venue-dot">${venueTypeDot(v.venueType,v.color)}</div>
         <div style="flex:1;min-width:0">
           <div class="venue-item-name">${esc(v.name)}</div>
-          <div class="venue-item-city">${cityShort?esc(cityShort)+' · ':''}${vc} op${vc!==1?'s':''}</div>
+          <div class="venue-item-city">${cityShort?esc(cityShort)+' · ':''}${vc} task${vc!==1?'s':''}</div>
           ${v.responsiblePerson||v.contactPhone?`<div class="venue-item-contact">${v.responsiblePerson?`<span>👤 ${esc(v.responsiblePerson)}</span>`:''}${v.contactPhone?`<span>📞 ${esc(v.contactPhone)}</span>`:''}</div>`:''}
           <div class="venue-item-actions">
             <button class="btn btn-ghost btn-sm" title="Copy venue link" onclick="copyVenueViewerLink(event,'${v.token}')">🔗 Copy venue link</button>
@@ -1552,7 +1572,7 @@ function renderProjectDetail(pid){
         <div class="venue-dot">${venueTypeDot(v.venueType, v.color)}</div>
         <div style="flex:1;min-width:0">
           <div class="venue-item-name">${esc(v.name)}</div>
-          <div class="venue-item-city">${cityShort ? esc(cityShort)+' · ' : ''}${vc} op${vc!==1?'s':''}</div>
+          <div class="venue-item-city">${cityShort ? esc(cityShort)+' · ' : ''}${vc} task${vc!==1?'s':''}</div>
           ${v.responsiblePerson||v.contactPhone ? `<div class="venue-item-contact">
             ${v.responsiblePerson?`<span>👤 ${esc(v.responsiblePerson)}</span>`:''}
             ${v.contactPhone?`<span>📞 ${esc(v.contactPhone)}</span>`:''}
@@ -1741,9 +1761,11 @@ function renderVenueStats(){
 
 function renderVenueHistory(){
   const search=(document.getElementById('venue-hist-search')?.value||'').toLowerCase();
-  const ops=venueOps().filter(o=>!search||o.type.toLowerCase().includes(search)||(o.notes||'').toLowerCase().includes(search)||(o.staff||[]).join(' ').toLowerCase().includes(search));
+  const ops=venueOps()
+    .filter(o=>o.status!=='planned') // planned tasks shown in Schedule, not history
+    .filter(o=>!search||o.type.toLowerCase().includes(search)||(o.notes||'').toLowerCase().includes(search)||(o.staff||[]).join(' ').toLowerCase().includes(search));
   const container=document.getElementById('venue-history-list');
-  if(!ops.length){ container.innerHTML=`<div class="empty-state"><div class="ico">📋</div><div>No operations logged yet.</div></div>`; return; }
+  if(!ops.length){ container.innerHTML=`<div class="empty-state"><div class="ico">📋</div><div>No tasks logged yet.</div></div>`; return; }
   container.innerHTML=ops.map(op=>{
     const badge=opBadge(op.type);
     const staffStr=(op.staff&&op.staff.length)?op.staff.join(', '):'—';
@@ -1801,8 +1823,11 @@ async function logOperation(){
   document.getElementById('new-op-date').value=nowLocal();
   state.currentStaff=[]; currentPhotos.new=[];
   renderStaffTags(); renderPhotoPreviews('new');
-  renderVenueStats(); renderVenueHistory();
-  showToast('Operation logged!');
+  if(state.currentVenueId){ renderVenueStats(); renderVenueHistory(); renderVenueUpcoming(); }
+  if(document.getElementById('vtab-schedule-content')?.style.display==='block') renderVenueSched();
+  if(document.getElementById('ptab-calendar-content')?.style.display==='block') renderGantt();
+  closeModal('modal-log-task');
+  showToast('Task logged!');
 }
 
 function openEditModal(opId){
@@ -1855,7 +1880,7 @@ async function saveEditOperation(){
   if(error){ showToast('Error: '+error.message); return; }
   closeModal('modal-edit-op');
   renderVenueHistory(); renderVenueStats(); renderDetailOps();
-  showToast('Operation updated');
+  showToast('Task updated');
 }
 
 async function deleteOperation(){
@@ -1868,7 +1893,7 @@ async function deleteOperation(){
   renderVenueHistory(); renderVenueStats(); renderDetailOps();
   if(document.getElementById('vtab-schedule-content')?.style.display==='block') renderVenueSched();
   if(document.getElementById('ptab-calendar-content')?.style.display==='block') renderGantt();
-  showToast('Operation deleted');
+  showToast('Task deleted');
 }
 
 // ════════════════════════════════════════
@@ -2214,7 +2239,7 @@ function renderVenueCalWeek(plans, ops, today) {
     });
     dayOps.forEach(o => {
       const badge=opBadge(o.type);
-      cells += `<span class="op-chip chip-completed" style="background:${badge.bg};color:${badge.fg};border-color:${badge.fg}">✓ ${esc(o.type.slice(0,10))}</span>`;
+      cells += `<span class="op-chip chip-completed" style="background:${badge.bg};color:${badge.fg};border-color:${badge.fg}">✓ ${esc(o.type)}</span>`;
     });
     html += `<div class="vcal-week-cell ${isToday?'today-col':''}" onclick="quickAddPlan('${vid}','${dStr}')">${cells}</div>`;
   });
@@ -2291,7 +2316,7 @@ function renderVenueCalMonth(plans, ops, today) {
       html += `<div class="vcal-month-day ${isToday?'today-day':''} ${isOtherMonth?'other-month':''}" onclick="quickAddPlan('${vid2}','${dStr}')">
         <div class="vcal-day-num ${isToday?'today-label':''}">${d.getDate()}</div>
         ${dayPlans.map(p=>`<span class="op-chip chip-${p.status}" onclick="event.stopPropagation();openEditPlanModal('${p.id}')" title="${esc(p.opType||p.opTypes?.[0]||'')} ${p.timeFrom||''}–${p.timeTo||''}">${esc((p.opType||p.opTypes?.[0]||'').slice(0,8))}</span>`).join('')}
-        ${dayOps.map(o=>{ const b=opBadge(o.type); return `<span class="op-chip chip-completed" style="background:${b.bg};color:${b.fg}">✓ ${esc(o.type.slice(0,8))}</span>`; }).join('')}
+        ${dayOps.map(o=>{ const b=opBadge(o.type); return `<span class="op-chip chip-completed" style="background:${b.bg};color:${b.fg}">✓ ${esc(o.type)}</span>`; }).join('')}
       </div>`;
     }
   }
@@ -2400,7 +2425,7 @@ let editPlanTypeSelections = [];
 
 // ── DB MAPPERS ──
 function dbToPlan(r){ return {id:r.id,venueId:r.venue_id,projectId:r.project_id,opTypes:r.op_types||[],opType:r.op_types&&r.op_types[0]||'',dateFrom:r.date_from,dateTo:r.date_to,timeFrom:r.time_from||'08:00',timeTo:r.time_to||'17:00',notes:r.notes||'',priority:r.priority||'normal',status:r.status||'planned',createdBy:r.created_by||'admin',createdAt:r.created_at}; }
-function planToDb(p){ return {id:p.id,venue_id:p.venueId,project_id:p.projectId,op_types:[p.opType||p.opTypes&&p.opTypes[0]||''],date_from:p.dateFrom,date_to:p.dateTo,time_from:p.timeFrom||'08:00',time_to:p.timeTo||'17:00',notes:p.notes,priority:p.priority,status:p.status,created_by:p.createdBy}; }
+function planToDb(p){ return {id:p.id,venue_id:p.venueId,project_id:p.projectId,op_types:[p.opType||p.opTypes&&p.opTypes?.[0]||''],date_from:p.dateFrom,date_to:p.dateTo,time_from:p.timeFrom||'08:00',time_to:p.timeTo||'17:00',notes:p.notes,priority:p.priority,status:p.status,created_by:p.createdBy}; }
 
 // ── LOAD PLANS ──
 async function loadPlans(projectId){
@@ -2510,13 +2535,13 @@ async function renderGantt(){
       let chips='';
       dayPlans.forEach(p=>{
         const s=chipStyle[p.status]||chipStyle.planned;
-        const lbl=esc((p.opType||p.opTypes?.[0]||'').slice(0,12));
+        const lbl=esc((p.opType||p.opTypes?.[0]||''));
         const tl=p.timeFrom?`<span style="font-size:8px;opacity:.75;display:block">${p.timeFrom}–${p.timeTo}</span>`:'';
         chips+=`<div onclick="event.stopPropagation();openEditPlanModal('${p.id}')" style="border-radius:3px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;cursor:pointer;${s}">${lbl}${tl}</div>`;
       });
       dayOps.forEach(o=>{
         const b=opBadge(o.type);
-        chips+=`<div onclick="event.stopPropagation();openEditModal('${o.id}')" style="border-radius:3px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;cursor:pointer;background:${b.bg};color:${b.fg};border-left:3px solid ${b.fg}" title="Click to edit">✓ ${esc(o.type.slice(0,12))}</div>`;
+        chips+=`<div onclick="event.stopPropagation();openEditModal('${o.id}')" style="border-radius:3px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;cursor:pointer;background:${b.bg};color:${b.fg};border-left:3px solid ${b.fg}" title="Click to edit">✓ ${esc(o.type)}</div>`;
       });
       cells+=`<td onclick="if(!document.querySelector('.modal-overlay.open'))openNewOpModal('${v.id}','${dStr}')" style="padding:3px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${isT?'rgba(24,95,165,0.04)':'white'}" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${isT?'rgba(24,95,165,0.04)':'white'}'">${chips}</td>`;
     });
@@ -2750,23 +2775,18 @@ async function renderVenueUpcoming(){
       <div class="upcoming-actions">
         ${badge}
         ${p.status!=='completed'?`<button class="btn btn-ghost btn-sm" style="font-size:11px" onclick="openEditPlanModal('${p.id}')">✏️</button>`:''}
-        ${isToday && p.status!=='completed'?`<button class="btn btn-blue btn-sm" style="font-size:11px" onclick="prefillFromPlan('${p.id}')">Log →</button>`:''}
+        ${isToday && p.status!=='completed'?`<button class="btn btn-blue btn-sm" style="font-size:11px" onclick="openEditModal('${p.id}')">Log →</button>`:''}
       </div>
     </div>`;
   }).join('');
 }
 
-async function prefillFromPlan(planId){
-  const {data}=await supa.from('pitchops_plans').select('*').eq('id',planId).single();
-  if(!data) return;
-  const plan=dbToPlan(data);
-  // pre-fill the form with first op type
-  const typeEl=document.getElementById('new-op-type');
-  if(typeEl && (plan.opType||plan.opTypes?.length)) typeEl.value=plan.opType||plan.opTypes[0];
-  if(plan.notes) document.getElementById('new-op-notes').value=plan.notes;
-  // scroll to form
-  document.querySelector('.card-body').scrollIntoView({behavior:'smooth'});
-  showToast('Form pre-filled from plan — add details and log!');
+async function prefillFromPlan(opId){
+  // Open log modal pre-filled with this planned task's data
+  const op=state.operations.find(o=>o.id===opId);
+  if(!op) return;
+  openLogTaskModal(op.date?.slice(0,10), op.timeFrom||'08:00', op.type, 'completed');
+  if(op.notes) setTimeout(()=>{ document.getElementById('new-op-notes').value=op.notes; },100);
 }
 
 // ════════════════════════════════════════
@@ -2785,19 +2805,36 @@ function switchVenueTab(tab){
 
 function openNewOpModal(venueId, dateStr, timeStr){
   if(document.querySelector('.modal-overlay.open')) return;
-  // If called from admin gantt — open edit modal for a new op on that venue/date
-  // For now just show toast directing to venue dashboard
-  if(venueId && venueId !== state.currentVenueId){
-    showToast('Open the venue dashboard to add operations');
-    return;
+  // Works from both admin and venue dashboard
+  // Temporarily set currentVenueId if called from admin gantt
+  const prevVenueId = state.currentVenueId;
+  if(venueId) state.currentVenueId = venueId;
+  const isFuture = dateStr && new Date(dateStr) > new Date();
+  openLogTaskModal(dateStr, timeStr||'08:00', null, isFuture?'planned':'auto');
+  // Restore after modal opens
+  if(!prevVenueId) state.currentVenueId = venueId;
+}
+
+function openLogTaskModal(dateStr, timeStr, prefillType, prefillStatus){
+  populateOpTypeSelects();
+  document.getElementById('new-op-date').value = dateStr ? dateStr+'T'+(timeStr||'08:00') : nowLocal();
+  document.getElementById('new-op-time-from').value = timeStr||'08:00';
+  document.getElementById('new-op-time-to').value = '17:00';
+  document.getElementById('new-op-status').value = prefillStatus||'auto';
+  if(prefillType){ setTimeout(()=>{ document.getElementById('new-op-type').value=prefillType; },50); }
+  document.getElementById('new-op-equipment').value='';
+  document.getElementById('new-op-weather').value='';
+  document.getElementById('new-op-notes').value='';
+  state.currentStaff=[]; currentPhotos.new=[];
+  renderStaffTags(); renderPhotoPreviews('new');
+  // Show venue name if opened from admin
+  const vind = document.getElementById('modal-venue-indicator');
+  if(vind){
+    const v = state.venues.find(x=>x.id===state.currentVenueId);
+    if(v){ vind.textContent='📍 '+v.name; vind.style.display='block'; }
+    else { vind.style.display='none'; }
   }
-  if(dateStr) document.getElementById('new-op-date').value=dateStr+'T'+(timeStr||'08:00');
-  if(document.getElementById('new-op-status')){
-    document.getElementById('new-op-status').value='planned';
-  }
-  // scroll log form into view
-  const logCard=document.querySelector('#vtab-log-content .card-body');
-  if(logCard) logCard.scrollIntoView({behavior:'smooth'});
+  openModal('modal-log-task');
 }
 
 function openNewOpForDate(dateStr){
@@ -2870,14 +2907,14 @@ async function renderVenueSched(){
     planned.forEach(o=>{
       const s=chipStyle[o.status]||chipStyle.planned;
       const tl=o.timeFrom?`<span style="font-size:8px;opacity:.75;display:block">${o.timeFrom}–${o.timeTo}</span>`:'';
-      planChips+=`<div onclick="openEditModal('${o.id}')" style="border-radius:3px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;cursor:pointer;${s}">${esc(o.type.slice(0,14))}${tl}</div>`;
+      planChips+=`<div onclick="openEditModal('${o.id}')" style="border-radius:3px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;cursor:pointer;${s}">${esc(o.type)}${tl}</div>`;
     });
 
     let doneChips='';
     done.forEach(o=>{
       const b=opBadge(o.type);
       const tl=o.timeFrom?`<span style="font-size:8px;opacity:.75;display:block">${o.timeFrom}–${o.timeTo}</span>`:'';
-      doneChips+=`<div onclick="openEditModal('${o.id}')" style="border-radius:3px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;cursor:pointer;background:${b.bg};color:${b.fg};border-left:3px solid ${b.fg}">✓ ${esc(o.type.slice(0,14))}${tl}</div>`;
+      doneChips+=`<div onclick="openEditModal('${o.id}')" style="border-radius:3px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;cursor:pointer;background:${b.bg};color:${b.fg};border-left:3px solid ${b.fg}">✓ ${esc(o.type)}${tl}</div>`;
     });
 
     const isFuture=d>today;
