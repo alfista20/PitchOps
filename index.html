@@ -460,10 +460,10 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
   </div><!-- end ptab-ops-content -->
 
   <!-- CALENDAR TAB -->
-  <div id="ptab-calendar-content" style="display:none;flex:1;flex-direction:column;overflow:hidden">
+  <div id="ptab-calendar-content" style="display:none;padding:.75rem;width:100%;max-width:1200px;margin:0 auto">
 
     <!-- GANTT VIEW (all venues) -->
-    <div id="gantt-view" style="flex:1;overflow:auto;padding:.75rem">
+    <div id="gantt-view">
       <div class="gantt-wrap">
         <div class="gantt-topbar">
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
@@ -497,7 +497,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     </div>
 
     <!-- VENUE DRILL-DOWN VIEW -->
-    <div id="venue-cal-view" style="display:none;flex:1;overflow:auto;padding:.75rem">
+    <div id="venue-cal-view" style="display:none">
       <div class="gantt-wrap">
         <div class="gantt-topbar">
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
@@ -2337,7 +2337,7 @@ function switchProjectTab(tab){
   document.getElementById('ptab-calendar').classList.toggle('active', tab==='calendar');
   document.getElementById('ptab-ops-content').style.display = tab==='ops' ? '' : 'none';
   const calEl=document.getElementById('ptab-calendar-content');
-  calEl.style.display = tab==='calendar' ? 'flex' : 'none';
+  calEl.style.display = tab==='calendar' ? 'block' : 'none';
   if(tab==='calendar') renderGantt();
 }
 
@@ -2366,24 +2366,27 @@ async function renderGantt(){
   const days=Array.from({length:7},(_,i)=>{ const d=new Date(weekStart); d.setDate(weekStart.getDate()+i); return d; });
   const today=new Date(); today.setHours(0,0,0,0);
 
-  // update label
   const opts={day:'2-digit',month:'short'};
   document.getElementById('gantt-week-label').textContent=
     days[0].toLocaleDateString('en-GB',opts)+' — '+days[6].toLocaleDateString('en-GB',opts)+' '+days[0].getFullYear();
 
   const venues=projectVenues(pid);
+  const grid=document.getElementById('gantt-grid');
+
+  // Show loading skeleton immediately
+  if(!grid) return;
+  grid.innerHTML=`<div style="padding:1.5rem;text-align:center;color:var(--text-hint);font-size:13px">Loading calendar...</div>`;
+
   const plans=await loadPlans(pid);
 
-  // auto-mark missed plans
+  // auto-mark missed plans (background)
   const now=new Date(); now.setHours(0,0,0,0);
-  for(const plan of plans){
+  plans.forEach(plan=>{
     if(plan.status==='planned' && new Date(plan.dateTo) < now){
       plan.status='missed';
-      await supa.from('pitchops_plans').update({status:'missed'}).eq('id',plan.id);
+      supa.from('pitchops_plans').update({status:'missed'}).eq('id',plan.id);
     }
-  }
-
-  const grid=document.getElementById('gantt-grid');
+  });
   const dayNames=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
   let html=`<div class="gantt-header">
@@ -2403,9 +2406,10 @@ async function renderGantt(){
     html+=venues.map(v=>{
       const vPlans=plans.filter(p=>p.venueId===v.id);
       let rowHtml=`<div class="gantt-row">
-        <div class="gantt-venue-cell">
-          <div class="g-venue-name">${esc(v.name)}</div>
+        <div class="gantt-venue-cell" onclick="openVenueCal('${v.id}')" style="cursor:pointer" title="Open ${esc(v.name)} calendar">
+          <div class="g-venue-name" style="color:var(--blue)">${esc(v.name)}</div>
           <div class="g-venue-type">${v.venueType==='Training Site'?'⬜':'🏟'} ${esc(v.venueType||'Stadium')}</div>
+          <div style="font-size:9px;color:var(--text-hint);margin-top:2px">tap to drill in →</div>
         </div>`;
 
       days.forEach(d=>{
