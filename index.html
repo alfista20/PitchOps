@@ -1192,10 +1192,10 @@ async function refreshProjectOps(projectId, silent=false){
   } catch(e) { showToast('Error loading data: '+e.message); }
   if(!silent) showLoading(false);
 
-  // Re-render all admin views from fresh state
+  // Re-render admin views without resetting tabs
   if(document.getElementById('screen-project-detail')?.classList.contains('active')){
     updateDetailStats();
-    renderProjectDetail(projectId);  // refreshes venue list + ops table
+    renderDetailOps();
     if(document.getElementById('ptab-calendar-content')?.style.display==='block') renderGantt();
   }
 }
@@ -2517,11 +2517,12 @@ function switchProjectTab(tab){
     document.getElementById('ptab-calendar-content').style.display='block';
     document.getElementById('gantt-view').style.display='block';
     document.getElementById('venue-cal-view').style.display='none';
-    // Always load fresh data then render
     const pid=state.currentProjectId;
     if(pid){
-      document.getElementById('gantt-grid').innerHTML='<div style="padding:2rem;text-align:center;color:#96a6bb;font-size:13px">Loading schedule...</div>';
-      refreshProjectOps(pid, true).then(()=>renderGantt());
+      document.getElementById('gantt-grid').innerHTML='<div style="padding:2rem;text-align:center;color:#96a6bb;font-size:13px">Loading...</div>';
+      // Render from cached state immediately, then refresh
+      renderGantt();
+      refreshProjectOps(pid, true);
     }
   }
 }
@@ -2808,15 +2809,14 @@ async function deletePlan(){
 // ── VENUE UPCOMING — uses operations only ──
 function renderVenueUpcoming(){
   const vid=state.currentVenueId; if(!vid) return;
-  const todayStr=new Date().toISOString().slice(0,10);
+  const today=todayStr();
 
-  // Read from state.operations only
   const allVenueOps=state.operations.filter(o=>o.venueId===vid);
 
-  // Auto-mark missed (update DB silently, update state)
+  // Auto-mark missed
   allVenueOps.forEach(op=>{
     const opDate=(op.date||'').slice(0,10);
-    if(op.status==='planned' && opDate < todayStr()){
+    if(op.status==='planned' && opDate < today){
       op.status='missed';
       supa.from('pitchops_operations').update({status:'missed'}).eq('id',op.id);
     }
@@ -2824,7 +2824,7 @@ function renderVenueUpcoming(){
 
   const visible=allVenueOps
     .filter(o=>o.status==='planned'||o.status==='inprogress')
-    .sort((a,b)=>new Date(a.date)-new Date(b.date));
+    .sort((a,b)=>(a.date||'').localeCompare(b.date||''));
   const section=document.getElementById('venue-upcoming');
   const list=document.getElementById('venue-upcoming-list');
   const empty=document.getElementById('venue-upcoming-empty');
@@ -2839,7 +2839,7 @@ function renderVenueUpcoming(){
 
   list.innerHTML=visible.map(op=>{
     const dStr=(op.date||'').slice(0,10);
-    const isToday=dStr===todayStr;
+    const isToday=dStr===today;
     const tl=op.timeFrom&&op.timeTo?`${op.timeFrom}–${op.timeTo}`:'';
     const statusLabel=op.status==='inprogress'?'In progress':'Planned';
     const statusStyle=op.status==='inprogress'?'background:#E6F1FB;color:#185FA5':'background:#FAEEDA;color:#854F0B';
