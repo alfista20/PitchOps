@@ -284,6 +284,31 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 .psb-completed{background:var(--green-pale);color:var(--green)}
 .psb-missed{background:var(--red-pale);color:var(--red)}
 
+
+/* VENUE CALENDAR DRILL-DOWN */
+.vcal-day-view{display:grid;grid-template-columns:60px 1fr;border-top:1px solid var(--border)}
+.vcal-hour{padding:4px 8px;font-size:10px;color:var(--text-hint);border-bottom:1px solid var(--border);border-right:1px solid var(--border);text-align:right;background:#fafbfc}
+.vcal-slot{min-height:44px;border-bottom:1px solid var(--border);padding:2px 4px;position:relative;cursor:pointer}
+.vcal-slot:hover{background:var(--blue-pale)}
+.vcal-month{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid var(--border)}
+.vcal-month-header{padding:6px 4px;text-align:center;font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;background:#fafbfc;border-bottom:1px solid var(--border);border-right:1px solid var(--border)}
+.vcal-month-header:last-child{border-right:none}
+.vcal-month-day{min-height:80px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);padding:4px;cursor:pointer;transition:background .12s}
+.vcal-month-day:nth-child(7n){border-right:none}
+.vcal-month-day:hover{background:var(--blue-pale)}
+.vcal-month-day.today-day{background:rgba(24,95,165,0.06)}
+.vcal-month-day.other-month{opacity:.4;background:var(--surface)}
+.vcal-day-num{font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:3px}
+.vcal-day-num.today-label{color:var(--blue);background:var(--blue-pale);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center}
+.vcal-week{display:grid;grid-template-columns:50px repeat(7,1fr);border-top:1px solid var(--border)}
+.vcal-week-venue-col{background:#fafbfc;border-right:1px solid var(--border)}
+.vcal-week-header{padding:6px 4px;text-align:center;font-size:10px;font-weight:600;color:var(--text-muted);border-bottom:1px solid var(--border);border-right:1px solid var(--border);background:#fafbfc}
+.vcal-week-header.today-col-h{background:var(--blue-pale);color:var(--blue)}
+.vcal-week-cell{min-height:60px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);padding:3px;cursor:pointer;transition:background .12s}
+.vcal-week-cell:last-child{border-right:none}
+.vcal-week-cell.today-col{background:rgba(24,95,165,0.04)}
+.vcal-week-cell:hover{background:var(--blue-pale)}
+
 </style>
 </head>
 <body>
@@ -435,33 +460,68 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
   </div><!-- end ptab-ops-content -->
 
   <!-- CALENDAR TAB -->
-  <div id="ptab-calendar-content" style="display:none;padding:1rem;max-width:1200px;margin:0 auto;width:100%">
-    <div class="gantt-wrap">
-      <div class="gantt-topbar">
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <div class="week-nav">
-            <button onclick="ganttNav(-1)">←</button>
-            <span id="gantt-week-label">Loading...</span>
-            <button onclick="ganttNav(1)">→</button>
+  <div id="ptab-calendar-content" style="display:none;flex:1;flex-direction:column;overflow:hidden">
+
+    <!-- GANTT VIEW (all venues) -->
+    <div id="gantt-view" style="flex:1;overflow:auto;padding:.75rem">
+      <div class="gantt-wrap">
+        <div class="gantt-topbar">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <div class="week-nav">
+              <button onclick="ganttNav(-1)">←</button>
+              <span id="gantt-week-label">Loading...</span>
+              <button onclick="ganttNav(1)">→</button>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="ganttGoToday()">Today</button>
+            <div class="status-filter-bar">
+              <div class="sf-pill sf-active" onclick="ganttFilter('all',this)">All</div>
+              <div class="sf-pill" onclick="ganttFilter('planned',this)">Planned</div>
+              <div class="sf-pill" onclick="ganttFilter('inprogress',this)">In progress</div>
+              <div class="sf-pill" onclick="ganttFilter('completed',this)">Completed</div>
+              <div class="sf-pill" onclick="ganttFilter('missed',this)">Missed</div>
+            </div>
           </div>
-          <button class="btn btn-ghost btn-sm" onclick="ganttGoToday()">Today</button>
-          <div class="status-filter-bar">
-            <div class="sf-pill sf-active" onclick="ganttFilter('all',this)">All</div>
-            <div class="sf-pill" onclick="ganttFilter('planned',this)">Planned</div>
-            <div class="sf-pill" onclick="ganttFilter('inprogress',this)">In progress</div>
-            <div class="sf-pill" onclick="ganttFilter('completed',this)">Completed</div>
-            <div class="sf-pill" onclick="ganttFilter('missed',this)">Missed</div>
+          <div style="display:flex;gap:6px">
+            <span style="font-size:11px;color:var(--text-hint);align-self:center">Click venue to drill in →</span>
+            <button class="btn btn-blue btn-sm" onclick="openPlanModal()">+ Plan window</button>
           </div>
         </div>
-        <button class="btn btn-blue btn-sm" onclick="openPlanModal()">+ Plan window</button>
+        <div class="gantt-legend" style="padding:.4rem .75rem;border-bottom:1px solid var(--border);display:flex;gap:12px;flex-wrap:wrap">
+          <div class="gantt-legend-item"><div class="gantt-legend-dot" style="background:var(--amber)"></div>Planned</div>
+          <div class="gantt-legend-item"><div class="gantt-legend-dot" style="background:var(--blue)"></div>In progress</div>
+          <div class="gantt-legend-item"><div class="gantt-legend-dot" style="background:var(--green)"></div>Completed</div>
+          <div class="gantt-legend-item"><div class="gantt-legend-dot" style="background:var(--red)"></div>Missed</div>
+        </div>
+        <div id="gantt-grid" style="overflow-x:auto"></div>
       </div>
-      <div class="gantt-legend" style="padding:.5rem 1rem;border-bottom:1px solid var(--border)">
-        <div class="gantt-legend-item"><div class="gantt-legend-dot" style="background:var(--amber)"></div>Planned</div>
-        <div class="gantt-legend-item"><div class="gantt-legend-dot" style="background:var(--blue)"></div>In progress</div>
-        <div class="gantt-legend-item"><div class="gantt-legend-dot" style="background:var(--green)"></div>Completed</div>
-        <div class="gantt-legend-item"><div class="gantt-legend-dot" style="background:var(--red)"></div>Missed</div>
+    </div>
+
+    <!-- VENUE DRILL-DOWN VIEW -->
+    <div id="venue-cal-view" style="display:none;flex:1;overflow:auto;padding:.75rem">
+      <div class="gantt-wrap">
+        <div class="gantt-topbar">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-ghost btn-sm" onclick="exitVenueCal()">← All venues</button>
+            <div class="week-nav">
+              <button onclick="venueCalNav(-1)">←</button>
+              <span id="venue-cal-label">Loading...</span>
+              <button onclick="venueCalNav(1)">→</button>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="venueCalGoToday()">Today</button>
+            <!-- Day / Week / Month switcher -->
+            <div style="display:flex;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">
+              <button id="vcv-day" class="btn btn-ghost btn-sm" style="border:none;border-radius:0;border-right:1px solid var(--border)" onclick="setVenueCalView('day')">Day</button>
+              <button id="vcv-week" class="btn btn-primary btn-sm" style="border:none;border-radius:0;border-right:1px solid var(--border)" onclick="setVenueCalView('week')">Week</button>
+              <button id="vcv-month" class="btn btn-ghost btn-sm" style="border:none;border-radius:0" onclick="setVenueCalView('month')">Month</button>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <span id="venue-cal-name" style="font-size:13px;font-weight:600;color:var(--text)"></span>
+            <button class="btn btn-blue btn-sm" onclick="openPlanModal(state.currentVenueCalId)">+ Plan</button>
+          </div>
+        </div>
+        <div id="venue-cal-grid"></div>
       </div>
-      <div id="gantt-grid"></div>
     </div>
   </div>
 </div>
@@ -1029,6 +1089,7 @@ let state = {
   currentVenueId: null,
   currentProjectId: null,
   currentViewerProjectId: null,
+  currentVenueCalId: null,
   currentStaff: [],
   editStaff: [],
   selectedProjColor: '#185FA5',
@@ -2005,6 +2066,155 @@ function renderVenueContactInfo(){
   } else { el.style.display='none'; }
 }
 
+// ════════════════════════════════════════
+// VENUE CALENDAR DRILL-DOWN
+// ════════════════════════════════════════
+let venueCalOffset = 0;
+let venueCalViewMode = 'week'; // 'day' | 'week' | 'month'
+
+function openVenueCal(venueId) {
+  state.currentVenueCalId = venueId;
+  venueCalOffset = 0;
+  const venue = state.venues.find(v=>v.id===venueId);
+  document.getElementById('venue-cal-name').textContent = venue ? venue.name : '';
+  document.getElementById('gantt-view').style.display = 'none';
+  document.getElementById('venue-cal-view').style.display = 'block';
+  setVenueCalView('week');
+}
+
+function exitVenueCal() {
+  state.currentVenueCalId = null;
+  document.getElementById('venue-cal-view').style.display = 'none';
+  document.getElementById('gantt-view').style.display = 'block';
+}
+
+function venueCalNav(dir) { venueCalOffset += dir; renderVenueCal(); }
+function venueCalGoToday() { venueCalOffset = 0; renderVenueCal(); }
+
+function setVenueCalView(mode) {
+  venueCalViewMode = mode;
+  venueCalOffset = 0;
+  ['day','week','month'].forEach(m => {
+    const btn = document.getElementById('vcv-'+m);
+    if(btn) {
+      btn.className = m===mode ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm';
+      btn.style.cssText = 'border:none;border-radius:0;' + (m!=='month'?'border-right:1px solid var(--border)':'');
+    }
+  });
+  renderVenueCal();
+}
+
+async function renderVenueCal() {
+  const vid = state.currentVenueCalId; if(!vid) return;
+  const plans = await loadVenuePlans(vid);
+  const ops = state.operations.filter(o=>o.venueId===vid);
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  if(venueCalViewMode==='week') renderVenueCalWeek(plans, ops, today);
+  else if(venueCalViewMode==='day') renderVenueCalDay(plans, ops, today);
+  else renderVenueCalMonth(plans, ops, today);
+}
+
+function renderVenueCalWeek(plans, ops, today) {
+  const weekStart = new Date(today);
+  const day = weekStart.getDay()||7;
+  weekStart.setDate(weekStart.getDate() - day + 1 + venueCalOffset*7);
+  const days = Array.from({length:7},(_,i)=>{ const d=new Date(weekStart); d.setDate(weekStart.getDate()+i); return d; });
+  const dayNames=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const opts={day:'2-digit',month:'short'};
+  document.getElementById('venue-cal-label').textContent = days[0].toLocaleDateString('en-GB',opts)+' — '+days[6].toLocaleDateString('en-GB',opts);
+
+  let html = `<div class="vcal-week">
+    <div class="vcal-week-header" style="padding:6px 4px;font-size:10px;background:#fafbfc;border-bottom:1px solid var(--border)"></div>
+    ${days.map((d,i)=>{ const isT=d.getTime()===today.getTime(); return `<div class="vcal-week-header ${isT?'today-col-h':''}">${dayNames[i]}<br/><span style="font-size:13px;font-weight:700">${d.getDate()}</span></div>`; }).join('')}`;
+
+  // single row of cells
+  html += `<div class="vcal-week-venue-col" style="border-bottom:1px solid var(--border)"></div>`;
+  days.forEach(d => {
+    const dStr = d.toISOString().slice(0,10);
+    const isToday = d.getTime()===today.getTime();
+    const dayPlans = plans.filter(p=>p.dateFrom<=dStr && p.dateTo>=dStr);
+    const dayOps = ops.filter(o=>(o.date||'').slice(0,10)===dStr);
+    let cells = '';
+    dayPlans.forEach(p => {
+      cells += `<span class="op-chip chip-${p.status}" onclick="openEditPlanModal('${p.id}')" title="${esc(p.opTypes.join(', '))}">${p.opTypes.slice(0,2).join(', ')}</span>`;
+    });
+    dayOps.forEach(o => {
+      const badge=opBadge(o.type);
+      cells += `<span class="op-chip chip-completed" style="background:${badge.bg};color:${badge.fg};border-color:${badge.fg}">✓ ${esc(o.type.slice(0,10))}</span>`;
+    });
+    html += `<div class="vcal-week-cell ${isToday?'today-col':''}" onclick="quickAddPlan('${vid}','${dStr}')">${cells}</div>`;
+  });
+  html += `</div>`;
+  document.getElementById('venue-cal-grid').innerHTML = html;
+}
+
+function renderVenueCalDay(plans, ops, today) {
+  const d = new Date(today);
+  d.setDate(today.getDate() + venueCalOffset);
+  const dStr = d.toISOString().slice(0,10);
+  document.getElementById('venue-cal-label').textContent = d.toLocaleDateString('en-GB',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+
+  const dayPlans = plans.filter(p=>p.dateFrom<=dStr && p.dateTo>=dStr);
+  const dayOps = ops.filter(o=>(o.date||'').slice(0,10)===dStr);
+
+  let html = `<div style="padding:.75rem;display:flex;flex-direction:column;gap:6px">`;
+  if(!dayPlans.length && !dayOps.length) {
+    html += `<div class="empty-state"><div class="ico">📅</div><div>Nothing planned or logged for this day.</div><button class="btn btn-blue btn-sm" style="margin-top:8px" onclick="quickAddPlan('${vid}','${dStr}')">+ Add plan</button></div>`;
+  }
+  dayPlans.forEach(p => {
+    html += `<div class="upcoming-item ${p.status==='planned'?'':''}" style="cursor:pointer" onclick="openEditPlanModal('${p.id}')">
+      <div class="upcoming-date-col"><span class="plan-status-badge psb-${p.status}">${p.status}</span></div>
+      <div class="upcoming-types"><div>${p.opTypes.map(t=>`<span class="upcoming-type-chip">${esc(t)}</span>`).join('')}</div>${p.notes?`<div class="upcoming-note">${esc(p.notes)}</div>`:''}</div>
+    </div>`;
+  });
+  dayOps.forEach(o => {
+    const badge=opBadge(o.type);
+    html += `<div class="upcoming-item" style="border-color:${badge.fg}">
+      <div class="upcoming-date-col"><span class="plan-status-badge psb-completed">✓ Logged</span></div>
+      <div class="upcoming-types"><span class="upcoming-type-chip" style="background:${badge.bg};color:${badge.fg}">${esc(o.type)}</span>${o.notes?`<div class="upcoming-note">${esc(o.notes)}</div>`:''}</div>
+    </div>`;
+  });
+  html += `<button class="btn btn-ghost btn-sm" style="align-self:flex-start;margin-top:4px" onclick="quickAddPlan('${vid}','${dStr}')">+ Add plan for this day</button>`;
+  html += `</div>`;
+
+  const vid = state.currentVenueCalId;
+  document.getElementById('venue-cal-grid').innerHTML = html;
+}
+
+function renderVenueCalMonth(plans, ops, today) {
+  const anchor = new Date(today.getFullYear(), today.getMonth() + venueCalOffset, 1);
+  document.getElementById('venue-cal-label').textContent = anchor.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+
+  const firstDay = new Date(anchor);
+  const startDow = firstDay.getDay()||7;
+  firstDay.setDate(firstDay.getDate() - startDow + 1);
+
+  const dayNames=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  let html = `<div class="vcal-month">`;
+  dayNames.forEach(n => { html += `<div class="vcal-month-header">${n}</div>`; });
+
+  for(let week=0; week<6; week++) {
+    for(let dow=0; dow<7; dow++) {
+      const d = new Date(firstDay);
+      d.setDate(firstDay.getDate() + week*7 + dow);
+      const dStr = d.toISOString().slice(0,10);
+      const isToday = d.getTime()===today.getTime();
+      const isOtherMonth = d.getMonth()!==anchor.getMonth();
+      const dayPlans = plans.filter(p=>p.dateFrom<=dStr && p.dateTo>=dStr);
+      const dayOps = ops.filter(o=>(o.date||'').slice(0,10)===dStr);
+      const vid2 = state.currentVenueCalId;
+      html += `<div class="vcal-month-day ${isToday?'today-day':''} ${isOtherMonth?'other-month':''}" onclick="quickAddPlan('${vid2}','${dStr}')">
+        <div class="vcal-day-num ${isToday?'today-label':''}">${d.getDate()}</div>
+        ${dayPlans.map(p=>`<span class="op-chip chip-${p.status}" onclick="event.stopPropagation();openEditPlanModal('${p.id}')">${p.opTypes[0]||''}</span>`).join('')}
+        ${dayOps.map(o=>{ const b=opBadge(o.type); return `<span class="op-chip chip-completed" style="background:${b.bg};color:${b.fg}">✓ ${esc(o.type.slice(0,8))}</span>`; }).join('')}
+      </div>`;
+    }
+  }
+  html += `</div>`;
+  document.getElementById('venue-cal-grid').innerHTML = html;
+}
+
 function venueTypeDot(type, color){
   const c = color||'#185FA5';
   if(type==='Training Site'){
@@ -2126,7 +2336,8 @@ function switchProjectTab(tab){
   document.getElementById('ptab-ops').classList.toggle('active', tab==='ops');
   document.getElementById('ptab-calendar').classList.toggle('active', tab==='calendar');
   document.getElementById('ptab-ops-content').style.display = tab==='ops' ? '' : 'none';
-  document.getElementById('ptab-calendar-content').style.display = tab==='calendar' ? 'block' : 'none';
+  const calEl=document.getElementById('ptab-calendar-content');
+  calEl.style.display = tab==='calendar' ? 'flex' : 'none';
   if(tab==='calendar') renderGantt();
 }
 
