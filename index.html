@@ -571,7 +571,8 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
           </div>
           <div style="display:flex;align-items:center;gap:8px">
             <span id="venue-cal-name" style="font-size:13px;font-weight:600;color:var(--text)"></span>
-            <button onclick="openAdminLogTaskModal()" style="padding:6px 14px;font-size:12px;background:var(--blue);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500">+ Add</button>
+            <button onclick="openAdminLogTaskModal()" style="padding:6px 14px;font-size:12px;background:var(--blue);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500">+ Add task</button>
+            <button onclick="openAdminLogUsageModal()" style="padding:6px 14px;font-size:12px;background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500">+ Add usage</button>
           </div>
         </div>
         <div id="venue-cal-grid" style="overflow-x:auto"></div>
@@ -764,6 +765,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
           </div>
         </div>
         <button onclick="openLogTaskModal()" style="padding:7px 16px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 2px 8px rgba(24,95,165,.3)">+ Log task</button>
+        <button onclick="openLogUsageModal()" style="padding:7px 16px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 2px 8px rgba(124,58,237,.3)">+ Log usage</button>
       </div>
       <div id="venue-sched-grid" style="overflow-x:auto;width:100%"></div>
     </div>
@@ -2658,8 +2660,8 @@ async function renderGantt(){
         return `<div draggable="true" ondragstart="onDragStart(event,'usage','${u.id}','${dStr}','${v.id}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditUsageModal('${u.id}')" style="border-radius:3px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;cursor:grab;${cs}">⚽ ${esc(u.usageType)}${tl}</div>`;
       }).join('');
 
-      cells+=`<td onclick="if(!document.querySelector('.modal-overlay.open'))openAdminLogTaskModal()" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px;border-right:1px dashed rgba(0,0,0,0.06);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgT};min-height:40px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsChips}</td>
-      <td onclick="if(!document.querySelector('.modal-overlay.open'))openAdminLogUsageModal()" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:40px;min-width:65px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageChips}</td>`;
+      cells+=`<td onclick="if(!document.querySelector('.modal-overlay.open'))openAdminLogTaskModal('${dStr}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px;border-right:1px dashed rgba(0,0,0,0.06);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgT};min-height:40px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsChips}</td>
+      <td onclick="if(!document.querySelector('.modal-overlay.open'))openAdminLogUsageModal('${dStr}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:40px;min-width:65px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageChips}</td>`;
     });
     rows+=`<tr>${cells}</tr>`;
   });
@@ -2836,8 +2838,8 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
       return `<div draggable="true" ondragstart="onDragStart(event,'usage','${u.id}','${dStr}','${venueId}')" ondragend="onDragEnd(event)" onclick="openEditUsageModal('${u.id}')" style="border-radius:4px;padding:3px 6px;font-size:10px;font-weight:600;margin-bottom:3px;cursor:grab;${cs}">⚽ ${esc(u.usageType)}${tl}</div>`;
     }).join('');
 
-    cells+=`<td onclick="openLogTaskModal()" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${venueId}')" style="padding:4px;border-right:1px dashed rgba(0,0,0,0.07);vertical-align:top;cursor:pointer;background:${bgT};min-height:50px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsChips||''}</td>
-    <td onclick="openLogUsageModal()" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${venueId}')" style="padding:4px;border-right:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:50px;min-width:65px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageChips||''}</td>`;
+    cells+=`<td onclick="openLogTaskModal('${dStr}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${venueId}')" style="padding:4px;border-right:1px dashed rgba(0,0,0,0.07);vertical-align:top;cursor:pointer;background:${bgT};min-height:50px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsChips||''}</td>
+    <td onclick="openLogUsageModal('${dStr}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${venueId}')" style="padding:4px;border-right:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:50px;min-width:65px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageChips||''}</td>`;
   });
 
   grid.innerHTML=`<div style="overflow-x:auto;width:100%"><table style="border-collapse:collapse;width:100%;min-width:600px">
@@ -3051,8 +3053,8 @@ function renderVenueUsageHistory(){
 }
 
 // ── LOG USAGE MODAL ──
-function openLogUsageModal(){
-  document.getElementById('usage-date').value=todayStr();
+function openLogUsageModal(dateStr){
+  document.getElementById('usage-date').value=dateStr||todayStr();
   document.getElementById('usage-time-from').value='08:00';
   document.getElementById('usage-time-to').value='17:00';
   document.getElementById('usage-type-select').value='Training Session';
@@ -3325,14 +3327,14 @@ function openLightboxFromUsage(id, i){
 }
 
 // ── ADMIN LOG TASK MODAL ──
-function openAdminLogTaskModal(){
+function openAdminLogTaskModal(dateStr){
   const pid=state.currentProjectId; if(!pid) return;
   const venues=projectVenues(pid);
   const vsel=document.getElementById('admin-task-venue');
   vsel.innerHTML=venues.map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('');
   const tsel=document.getElementById('admin-task-type');
   tsel.innerHTML=state.opTypes.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
-  document.getElementById('admin-task-date').value=todayStr();
+  document.getElementById('admin-task-date').value=dateStr||todayStr();
   document.getElementById('admin-task-time-from').value='08:00';
   document.getElementById('admin-task-time-to').value='17:00';
   document.getElementById('admin-task-zone').value='';
@@ -3383,12 +3385,12 @@ async function adminLogTask(){
 }
 
 // ── ADMIN LOG USAGE MODAL ──
-function openAdminLogUsageModal(){
+function openAdminLogUsageModal(dateStr){
   const pid=state.currentProjectId; if(!pid) return;
   const venues=projectVenues(pid);
   const vsel=document.getElementById('admin-usage-venue');
   vsel.innerHTML=venues.map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('');
-  document.getElementById('admin-usage-date').value=todayStr();
+  document.getElementById('admin-usage-date').value=dateStr||todayStr();
   document.getElementById('admin-usage-time-from').value='08:00';
   document.getElementById('admin-usage-time-to').value='17:00';
   document.getElementById('admin-usage-type').value='Training Session';
