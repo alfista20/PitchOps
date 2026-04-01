@@ -2266,16 +2266,9 @@ async function saveVenueContact(){
 }
 
 function renderVenueContactInfo(){
-  const v=state.venues.find(x=>x.id===state.currentVenueId); if(!v) return;
-  const el=document.getElementById('venue-contact-info'); if(!el) return;
-  if(v.responsiblePerson||v.contactPhone||v.contactEmail){
-    el.style.display='block';
-    el.innerHTML=[
-      v.responsiblePerson?'👤 '+v.responsiblePerson:'',
-      v.contactPhone?'📞 '+v.contactPhone:'',
-      v.contactEmail?'✉️ '+v.contactEmail:''
-    ].filter(Boolean).join('&nbsp;&nbsp;·&nbsp;&nbsp;');
-  } else { el.style.display='none'; }
+  // Contact info is NEVER shown in the hero — only via hamburger menu
+  const el=document.getElementById('venue-contact-info');
+  if(el) el.style.display='none';
 }
 
 // ════════════════════════════════════════
