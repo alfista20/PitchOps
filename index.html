@@ -743,8 +743,9 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     <button id="vtab-usage" onclick="switchVenueTab('usage')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif">⏱ Log usage</button>
     <button id="vtab-schedule" onclick="switchVenueTab('schedule')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif">📅 Schedule</button>
     <button id="vtab-stats" onclick="switchVenueTab('stats')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif">📊 Stats</button>
-    <button id="vtab-stats" onclick="switchVenueTab('stats')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif">📊 Stats</button>
-    <button id="vtab-stats" onclick="switchVenueTab('stats')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif">📊 Stats</button>
+
+
+
   </div>
 
   <!-- LOG TASK TAB -->
@@ -803,71 +804,10 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     </div>
   </div>
   <!-- VENUE STATS TAB -->
-  <div id="vtab-stats-content" style="display:none;padding:1rem;max-width:960px;margin:0 auto;width:100%;box-sizing:border-box">
-    <!-- FILTERS -->
-    <div style="background:white;border-radius:12px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);padding:1rem 1.25rem;margin-bottom:1rem;display:flex;flex-wrap:wrap;align-items:center;gap:.75rem">
-      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-        <span style="font-size:12px;font-weight:600;color:var(--text-muted)">Period:</span>
-        <button onclick="setVenueStatsPeriod('week',this)" class="stats-period-btn">Week</button>
-        <button onclick="setVenueStatsPeriod('month',this)" class="stats-period-btn stats-period-active">Month</button>
-        <button onclick="setVenueStatsPeriod('quarter',this)" class="stats-period-btn">Quarter</button>
-        <button onclick="setVenueStatsPeriod('custom',this)" class="stats-period-btn">Custom</button>
-      </div>
-      <div id="vstats-custom-dates" style="display:none;gap:6px;align-items:center">
-        <input type="date" id="vstats-from" onchange="renderVenueStats_tab()" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif"/>
-        <span style="font-size:12px;color:var(--text-muted)">→</span>
-        <input type="date" id="vstats-to" onchange="renderVenueStats_tab()" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif"/>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span style="font-size:12px;font-weight:600;color:var(--text-muted)">Show:</span>
-        <select id="vstats-data-filter" onchange="renderVenueStats_tab()" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif">
-          <option value="both">Tasks & Usage</option>
-          <option value="tasks">Tasks only</option>
-          <option value="usage">Usage only</option>
-        </select>
-      </div>
-      <button onclick="exportVenueStatsPDF()" style="margin-left:auto;padding:7px 16px;background:linear-gradient(135deg,#0C2340,#185FA5);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">⬇ Export PDF</button>
-    </div>
-    <!-- SUMMARY -->
-    <div id="vstats-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;margin-bottom:1rem"></div>
-    <!-- CHARTS -->
-    <div id="vstats-charts" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:1rem"></div>
-  </div>
+  
 
   <!-- VENUE STATS TAB -->
-  <div id="vtab-stats-content" style="display:none;padding:1rem;max-width:1100px;margin:0 auto;width:100%;box-sizing:border-box">
-
-    <!-- FILTERS -->
-    <div style="background:white;border-radius:12px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);padding:1rem 1.25rem;margin-bottom:1rem;display:flex;flex-wrap:wrap;align-items:center;gap:.75rem">
-      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-        <span style="font-size:12px;font-weight:600;color:var(--text-muted)">Period:</span>
-        <button onclick="setVenueStatsPeriod('week',this)" class="stats-period-btn">Week</button>
-        <button onclick="setVenueStatsPeriod('month',this)" class="stats-period-btn stats-period-active">Month</button>
-        <button onclick="setVenueStatsPeriod('quarter',this)" class="stats-period-btn">Quarter</button>
-        <button onclick="setVenueStatsPeriod('custom',this)" class="stats-period-btn">Custom</button>
-      </div>
-      <div id="vstats-custom-dates" style="display:none;gap:6px;align-items:center">
-        <input type="date" id="vstats-from" onchange="renderVenueStats_tab()" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif"/>
-        <span style="font-size:12px;color:var(--text-muted)">→</span>
-        <input type="date" id="vstats-to" onchange="renderVenueStats_tab()" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif"/>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span style="font-size:12px;font-weight:600;color:var(--text-muted)">Show:</span>
-        <select id="vstats-data-filter" onchange="renderVenueStats_tab()" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif">
-          <option value="both">Tasks & Usage</option>
-          <option value="tasks">Tasks only</option>
-          <option value="usage">Usage only</option>
-        </select>
-      </div>
-      <button onclick="exportVenueStatsPDF()" style="margin-left:auto;padding:7px 16px;background:linear-gradient(135deg,#0C2340,#185FA5);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">⬇ Export PDF</button>
-    </div>
-
-    <!-- SUMMARY CARDS -->
-    <div id="vstats-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.75rem;margin-bottom:1rem"></div>
-
-    <!-- CHARTS -->
-    <div id="vstats-charts" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:1rem"></div>
-  </div>
+  
   <!-- VENUE STATS TAB -->
   <div id="vtab-stats-content" style="display:none;padding:1rem;max-width:1000px;margin:0 auto;width:100%;box-sizing:border-box">
 
