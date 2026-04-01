@@ -632,7 +632,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     <!-- UPCOMING -->
     <div style="background:white;border-radius:16px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);margin-bottom:1rem;overflow:hidden">
       <div style="padding:1rem 1.25rem .75rem;display:flex;align-items:center;justify-content:space-between">
-        <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif">Today</div>
+        <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif">Planned</div>
         <div style="display:flex;gap:6px">
           <button onclick="openManageTypesModal()" style="background:#f1f5f9;border:none;border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif">⚙ Types</button>
           <button onclick="openLogTaskModal()" style="background:linear-gradient(135deg,#185FA5,#1d4ed8);border:none;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;color:white;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 3px 10px rgba(24,95,165,.35)">+ Log task</button>
@@ -1815,6 +1815,9 @@ async function enterVenueDashboard(venue){
   const ptag=document.getElementById('venue-project-tag');
   if(proj){ ptag.textContent='📋 '+proj.name; ptag.style.display='block'; }
   else ptag.style.display='none';
+  // Always hide contact info from hero — shown only via menu
+  const ci=document.getElementById('venue-contact-info');
+  if(ci) ci.style.display='none';
   document.getElementById('new-op-date').value=todayStr();
   state.currentStaff=[]; currentPhotos.new=[];
   renderStaffTags(); renderPhotoPreviews('new');
@@ -2554,7 +2557,8 @@ function renderVenueUpcoming(){
 
   const visible=allVenueOps
     .filter(o=>o.status==='planned'||o.status==='inprogress')
-    .sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+    .sort((a,b)=>(a.date||'').localeCompare(b.date||''))
+    .slice(0,5);
   const section=document.getElementById('venue-upcoming');
   const list=document.getElementById('venue-upcoming-list');
   const empty=document.getElementById('venue-upcoming-empty');
