@@ -540,7 +540,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
               <button onclick="ganttFilter('missed',this)" class="sf-pill">Missed</button>
             </div>
           </div>
-          <button onclick="openNewOpModal()" style="padding:6px 14px;font-size:12px;background:var(--blue);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500">+ Add operation</button>
+          <button onclick="openAdminLogTaskModal()" style="padding:6px 14px;font-size:12px;background:var(--blue);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500">+ Add task</button>
         </div>
         <div style="display:flex;gap:8px;padding:.35rem .75rem;border-bottom:1px solid var(--border);flex-wrap:wrap">
           <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:2px;background:var(--amber);display:inline-block"></span>Planned</span>
@@ -570,7 +570,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
           </div>
           <div style="display:flex;align-items:center;gap:8px">
             <span id="venue-cal-name" style="font-size:13px;font-weight:600;color:var(--text)"></span>
-            <button onclick="openNewOpModal(state.currentVenueCalId)" style="padding:6px 14px;font-size:12px;background:var(--blue);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500">+ Add</button>
+            <button onclick="openAdminLogTaskModal()" style="padding:6px 14px;font-size:12px;background:var(--blue);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500">+ Add</button>
           </div>
         </div>
         <div id="venue-cal-grid" style="overflow-x:auto"></div>
@@ -3478,10 +3478,9 @@ async function executeDrop(dragData, newDate, newVenueId, copy){
     const op = state.operations[idx];
     if(copy){
       const newOp = {...op, id:'op_'+Date.now(), date:newDate, venueId:targetVenueId, createdAt:new Date().toISOString()};
-      const dbObj = opToDb(newOp); delete dbObj.id; // let DB generate UUID
-      const {data, error} = await supa.from('pitchops_operations').insert(dbObj).select();
+      const {error} = await supa.from('pitchops_operations').insert(opToDb(newOp));
       if(error){ showToast('Error: '+error.message); return; }
-      if(data&&data[0]) state.operations.push({...newOp, id:data[0].id});
+      state.operations.push(newOp);
       showToast('✅ Task copied to '+formatDateOnly(newDate));
     } else {
       const {error} = await supa.from('pitchops_operations').update({operation_date:newDate, venue_id:targetVenueId}).eq('id',id);
@@ -3500,10 +3499,9 @@ async function executeDrop(dragData, newDate, newVenueId, copy){
     if(!found){ showToast('Usage not found'); return; }
     if(copy){
       const newU = {...found, id:'u_'+Date.now(), date:newDate, venueId:targetVenueId, createdAt:new Date().toISOString()};
-      const dbObj = usageToDb(newU); delete dbObj.id;
-      const {data, error} = await supa.from('pitchops_usage').insert(dbObj).select();
+      const {error} = await supa.from('pitchops_usage').insert(usageToDb(newU));
       if(error){ showToast('Error: '+error.message); return; }
-      if(data&&data[0]) foundArr.push({...newU, id:data[0].id});
+      foundArr.push(newU);
       showToast('✅ Usage copied to '+formatDateOnly(newDate));
     } else {
       const {error} = await supa.from('pitchops_usage').update({usage_date:newDate, venue_id:targetVenueId}).eq('id',id);
