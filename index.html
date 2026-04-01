@@ -694,7 +694,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     <!-- UPCOMING -->
     <div style="background:white;border-radius:16px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);margin-bottom:1rem;overflow:hidden">
       <div style="padding:1rem 1.25rem .75rem;display:flex;align-items:center;justify-content:space-between">
-        <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif">Planned</div>
+        <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif">Today</div>
         <div style="display:flex;gap:6px">
           <button onclick="openLogTaskModal()" style="background:linear-gradient(135deg,#185FA5,#1d4ed8);border:none;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;color:white;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 3px 10px rgba(24,95,165,.35)">+ Log task</button>
         </div>
@@ -1975,7 +1975,7 @@ async function logOperation(){
 
   const zoneEl=document.getElementById('new-op-zone');
   const zone=zoneEl.value==='Custom'?(document.getElementById('new-op-zone-custom').value.trim()||'Custom'):zoneEl.value;
-  const opDateOnly = document.getElementById('new-op-date').value||new Date().toISOString().slice(0,10);
+  const opDateOnly = document.getElementById('new-op-date').value||todayStr();
   const opTimeFrom = document.getElementById('new-op-time-from')?.value||'08:00';
   const opTimeTo = document.getElementById('new-op-time-to')?.value||'17:00';
   const opDateVal = opDateOnly; // store date only, time stored separately in time_from/time_to
@@ -2004,7 +2004,7 @@ async function logOperation(){
   document.getElementById('new-op-equipment').value='';
   document.getElementById('new-op-weather').value='';
   document.getElementById('new-op-notes').value='';
-  document.getElementById('new-op-date').value=new Date().toISOString().slice(0,10);
+  document.getElementById('new-op-date').value=todayStr();
   state.currentStaff=[]; currentPhotos.new=[];
   renderStaffTags(); renderPhotoPreviews('new');
   if(state.currentVenueId){
@@ -2686,7 +2686,7 @@ function renderVenueUpcoming(){
 
 
   const visible=allVenueOps
-    .filter(o=>(o.status==='planned'||o.status==='inprogress')&&(o.date||'').slice(0,10)===today)
+    .filter(o=>(o.status==='planned'||o.status==='inprogress'||o.status==='completed')&&(o.date||'').slice(0,10)===today)
     .sort((a,b)=>(a.timeFrom||'').localeCompare(b.timeFrom||''));
   const section=document.getElementById('venue-upcoming');
   const list=document.getElementById('venue-upcoming-list');
@@ -2703,6 +2703,7 @@ function renderVenueUpcoming(){
   const statusConfig={
     planned:{color:'#854F0B',bg:'#FAEEDA',bar:'#EF9F27',label:'Planned',icon:'🕐'},
     inprogress:{color:'#185FA5',bg:'#E6F1FB',bar:'#378ADD',label:'In progress',icon:'⚡'},
+    completed:{color:'#3B6D11',bg:'#EAF3DE',bar:'#3B6D11',label:'Completed',icon:'✓'},
   };
   list.innerHTML=visible.map(op=>{
     const dStr=(op.date||'').slice(0,10);
@@ -2877,7 +2878,7 @@ function switchVenueTab(tab){
 
 function openLogTaskModal(dateStr, timeStr, prefillType, prefillStatus){
   populateOpTypeSelects();
-  document.getElementById('new-op-date').value = dateStr||new Date().toISOString().slice(0,10);
+  document.getElementById('new-op-date').value = dateStr||todayStr();
   document.getElementById('new-op-time-from').value = timeStr||'08:00';
   document.getElementById('new-op-time-to').value = '17:00';
   document.getElementById('new-op-status').value = prefillStatus||'auto';
