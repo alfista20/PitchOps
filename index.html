@@ -2398,8 +2398,11 @@ function openVenueCal(venueId) {
   document.getElementById('gantt-view').style.display = 'none';
   document.getElementById('venue-cal-view').style.display = 'block';
   window.scrollTo({top:0,behavior:'smooth'});
-  // Use unified calendar
   renderWeekCalendar(venueId, 'venue-cal-grid', venueCalOffset);
+  // Ensure admin_usage is loaded for this venue
+  if(typeof state_admin_usage!=='undefined' && state.currentProjectId){
+    refreshProjectUsage(state.currentProjectId, true);
+  }
 }
 
 function exitVenueCal() {
@@ -2755,7 +2758,9 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
   if(labelEl) labelEl.textContent=weekDays[0].toLocaleDateString('en-GB',{day:'2-digit',month:'short'})+' — '+weekDays[6].toLocaleDateString('en-GB',{day:'2-digit',month:'short'});
 
   const ops=state.operations.filter(o=>o.venueId===venueId);
-  const usage=state_usage.filter(u=>u.venueId===venueId);
+  // Merge venue usage + admin usage (for admin drill-down view)
+  const allUsageSrc=[...state_usage, ...(typeof state_admin_usage!=='undefined'?state_admin_usage:[])];
+  const usage=allUsageSrc.filter((u,i,arr)=>u.venueId===venueId&&arr.findIndex(x=>x.id===u.id)===i);
 
   const allDates=[...new Set([
     ...ops.map(o=>(o.date||'').slice(0,10)),
@@ -3522,7 +3527,13 @@ async function executeDrop(dragData, newDate, newVenueId, copy){
   if(pid){
     renderDetailOps(); renderDetailUsage();
     if(document.getElementById('ptab-calendar-content')?.style.display==='block') renderGantt();
+    // Admin drill-down venue calendar
+    if(document.getElementById('venue-cal-view')?.style.display==='block' && state.currentVenueCalId)
+      renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
   }
+  // Also handle case where admin is in drill-down but pid not set (shouldn't happen but safety)
+  if(!pid && state.currentVenueCalId && document.getElementById('venue-cal-view')?.style.display==='block')
+    renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
 }
 
 init();
