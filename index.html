@@ -390,6 +390,31 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 
 <!-- ══ PROJECT DETAIL ══ -->
 <div id="screen-project-detail" class="screen">
+  <!-- ADMIN HAMBURGER MENU -->
+  <div id="admin-menu" style="display:none;position:fixed;top:52px;right:0;width:230px;background:white;border-radius:0 0 0 16px;box-shadow:0 8px 32px rgba(0,0,0,.18);z-index:200;overflow:hidden">
+    <div style="padding:.5rem 0">
+      <div style="padding:.5rem 1rem;font-size:10px;font-weight:700;color:var(--text-hint);text-transform:uppercase;letter-spacing:.5px">Language</div>
+      <div style="padding:.25rem 1rem .75rem">
+        <select class="lang-select" onchange="setLang(this.value)" id="lang-select-detail" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#f8fafc;color:var(--text)"><option value="en">🌐 English</option><option value="pl">🌐 Polski</option><option value="es">🌐 Español</option><option value="fr">🌐 Français</option><option value="de">🌐 Deutsch</option><option value="pt">🌐 Português</option></select>
+      </div>
+      <div style="height:1px;background:var(--border)"></div>
+      <button onclick="openViewerLinkModal();toggleAdminMenu()" style="display:flex;align-items:center;gap:10px;width:100%;padding:.75rem 1rem;background:none;border:none;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);cursor:pointer" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='none'">
+        <span>🔗</span> Share
+      </button>
+      <button onclick="openAddVenueModal();toggleAdminMenu()" style="display:flex;align-items:center;gap:10px;width:100%;padding:.75rem 1rem;background:none;border:none;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);cursor:pointer" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='none'">
+        <span>➕</span> Add venue
+      </button>
+      <button onclick="openManageTypesModal();toggleAdminMenu()" style="display:flex;align-items:center;gap:10px;width:100%;padding:.75rem 1rem;background:none;border:none;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);cursor:pointer" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='none'">
+        <span>⚙️</span> Tasks bank
+      </button>
+      <div style="height:1px;background:var(--border)"></div>
+      <button onclick="logout()" style="display:flex;align-items:center;gap:10px;width:100%;padding:.75rem 1rem;background:none;border:none;font-size:14px;font-family:'DM Sans',sans-serif;color:#dc2626;cursor:pointer" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'">
+        <span>🚪</span> Sign out
+      </button>
+    </div>
+  </div>
+  <div id="admin-menu-overlay" onclick="toggleAdminMenu()" style="display:none;position:fixed;inset:0;z-index:199"></div>
+
   <div class="topnav">
     <div class="topnav-brand">
       <span class="brand-name" style="color:white">Pitch<span style="color:var(--blue-light)">Ops</span></span>
@@ -401,10 +426,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       </div>
     </div>
     <div class="topnav-right">
-      <select class="lang-select" onchange="setLang(this.value)" id="lang-select-detail"><option value="en">EN</option><option value="pl">PL</option><option value="es">ES</option><option value="fr">FR</option><option value="de">DE</option><option value="pt">PT</option></select>
-      <button class="btn btn-ghost btn-sm" style="color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.2)" onclick="openViewerLinkModal()">🔗 Share</button>
-      <button class="btn btn-blue btn-sm" onclick="openAddVenueModal()">+ Add venue</button>
-      <button class="btn btn-ghost btn-sm" style="color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.2)" onclick="logout()">Sign out</button>
+      <button onclick="toggleAdminMenu()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;font-size:18px;line-height:1">☰</button>
     </div>
   </div>
   <div id="project-hero" class="project-hero">
@@ -634,7 +656,6 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       <div style="padding:1rem 1.25rem .75rem;display:flex;align-items:center;justify-content:space-between">
         <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif">Planned</div>
         <div style="display:flex;gap:6px">
-          <button onclick="openManageTypesModal()" style="background:#f1f5f9;border:none;border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif">⚙ Types</button>
           <button onclick="openLogTaskModal()" style="background:linear-gradient(135deg,#185FA5,#1d4ed8);border:none;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;color:white;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 3px 10px rgba(24,95,165,.35)">+ Log task</button>
         </div>
       </div>
@@ -644,7 +665,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       <div id="venue-upcoming-empty" style="padding:2.5rem 1rem;text-align:center;display:none">
         <div style="font-size:36px;margin-bottom:8px">🌱</div>
         <div style="font-size:15px;font-weight:600;color:var(--text-muted)">No upcoming tasks</div>
-        <div style="font-size:13px;color:var(--text-hint);margin-top:4px">Tap "+ Log task" to add one</div>
+        <div style="font-size:13px;color:var(--text-hint);margin-top:4px">No tasks for today. Tap "+ Log task" to add one</div>
       </div>
     </div>
     <!-- HISTORY -->
@@ -675,7 +696,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
             <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:50%;background:#A32D2D;display:inline-block"></span>Missed</span>
           </div>
         </div>
-        <button onclick="openNewOpForDate(todayStr())" style="padding:7px 16px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 2px 8px rgba(24,95,165,.3)">+ Add plan</button>
+        <button onclick="openLogTaskModal()" style="padding:7px 16px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 2px 8px rgba(24,95,165,.3)">+ Log task</button>
       </div>
       <div id="venue-sched-grid" style="overflow-x:auto;width:100%"></div>
     </div>
@@ -2574,9 +2595,8 @@ function renderVenueUpcoming(){
   });
 
   const visible=allVenueOps
-    .filter(o=>o.status==='planned'||o.status==='inprogress')
-    .sort((a,b)=>(a.date||'').localeCompare(b.date||''))
-    .slice(0,5);
+    .filter(o=>(o.status==='planned'||o.status==='inprogress')&&(o.date||'').slice(0,10)===today)
+    .sort((a,b)=>(a.timeFrom||'').localeCompare(b.timeFrom||''));
   const section=document.getElementById('venue-upcoming');
   const list=document.getElementById('venue-upcoming-list');
   const empty=document.getElementById('venue-upcoming-empty');
@@ -2654,7 +2674,7 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
 
   if(!ops.length){
     if(labelEl) labelEl.textContent='No tasks';
-    grid.innerHTML='<div style="padding:2rem;text-align:center;color:#96a6bb;font-size:13px">No tasks logged yet. Click "+ Add plan" to add one.</div>';
+    grid.innerHTML='<div style="padding:2rem;text-align:center;color:#96a6bb;font-size:13px">No tasks logged yet. Click "+ Log task" to add one.</div>';
     return;
   }
 
@@ -2782,6 +2802,14 @@ function venueSchedToday(){ venueSchedOffset=0; renderVenueSched(); }
 function renderVenueSched(){
   const vid=state.currentVenueId; if(!vid) return;
   renderWeekCalendar(vid, 'venue-sched-grid', venueSchedOffset);
+}
+
+function toggleAdminMenu(){
+  const menu=document.getElementById('admin-menu');
+  const overlay=document.getElementById('admin-menu-overlay');
+  const open=menu.style.display==='none'||!menu.style.display;
+  menu.style.display=open?'block':'none';
+  overlay.style.display=open?'block':'none';
 }
 
 function toggleVenueMenu(){
