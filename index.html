@@ -2689,7 +2689,6 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
   const weekDays=Array.from({length:7},(_,i)=>{ const d=new Date(weekStart); d.setDate(weekStart.getDate()+i); return d; });
   if(labelEl) labelEl.textContent=weekDays[0].toLocaleDateString('en-GB',{day:'2-digit',month:'short'})+' — '+weekDays[6].toLocaleDateString('en-GB',{day:'2-digit',month:'short'});
 
-  // Get all ops and usage for this venue
   const ops=state.operations.filter(o=>o.venueId===venueId);
   const usage=state_usage.filter(u=>u.venueId===venueId);
 
@@ -2698,11 +2697,12 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
     ...usage.map(u=>(u.date||'').slice(0,10))
   ].filter(Boolean))].sort();
 
-  const weekDayStrs=weekDays.map(d=>{ const ld=new Date(d.getFullYear(),d.getMonth(),d.getDate()); return ld.getFullYear()+'-'+String(ld.getMonth()+1).padStart(2,'0')+'-'+String(ld.getDate()).padStart(2,'0'); });
+  const weekDayStrs=weekDays.map(d=>{
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  });
   const allCols=[...new Set([...weekDayStrs,...allDates])].sort();
 
   if(!allCols.length){
-    if(labelEl) labelEl.textContent='No tasks';
     grid.innerHTML='<div style="padding:2rem;text-align:center;color:#96a6bb;font-size:13px">No tasks logged yet. Click "+ Log task" to add one.</div>';
     return;
   }
@@ -2721,8 +2721,8 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
   };
   const dayNames=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
-  // Build header
-  let headerCols='<th style="width:16px;min-width:16px;padding:6px 4px;background:#fafbfc;border-right:1px solid rgba(0,0,0,0.09)"></th>';
+  // Header row — each date spans 2 cols (Tasks + Usage)
+  let headerCols='';
   allCols.forEach(dStr=>{
     const d=new Date(dStr+'T12:00:00');
     const isT=dStr===today;
@@ -2735,47 +2735,50 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
   });
 
   // Sub-header: Tasks | Usage per date
-  let subHeaderCols='<th style="width:16px;background:#fafbfc;border-right:1px solid rgba(0,0,0,0.09)"></th>';
+  let subHeaderCols='';
   allCols.forEach(()=>{
-    subHeaderCols+=`<th style="padding:3px 4px;text-align:center;font-size:9px;font-weight:600;color:#96a6bb;text-transform:uppercase;background:#fafbfc;border-right:1px dashed rgba(0,0,0,0.06)">Tasks</th>
-    <th style="padding:3px 4px;text-align:center;font-size:9px;font-weight:600;color:#A855F7;text-transform:uppercase;background:#fafbfc;border-right:1px solid rgba(0,0,0,0.09)">Usage</th>`;
+    subHeaderCols+=`<th style="padding:3px 6px;text-align:center;font-size:9px;font-weight:700;color:#5a6a82;text-transform:uppercase;background:#f4f6f8;border-right:1px dashed rgba(0,0,0,0.08)">Tasks</th>
+    <th style="padding:3px 6px;text-align:center;font-size:9px;font-weight:700;color:#7C3AED;text-transform:uppercase;background:#faf5ff;border-right:1px solid rgba(0,0,0,0.09)">Usage</th>`;
   });
 
-  // Build time rows (hourly 06:00–22:00)
-  let bodyRows='';
-  for(let h=6;h<=22;h++){
-    const hStr=String(h).padStart(2,'0')+':00';
-    const hNext=String(h+1).padStart(2,'0')+':00';
-    let cells=`<td style="padding:2px 6px;font-size:10px;color:#96a6bb;border-right:1px solid rgba(0,0,0,0.09);background:#fafbfc;white-space:nowrap;vertical-align:top">${hStr}</td>`;
-    allCols.forEach(dStr=>{
-      const isT=dStr===today;
-      const bg=isT?'rgba(24,95,165,0.02)':'white';
-      // Tasks in this hour
-      const dayOps=ops.filter(o=>(o.date||'').slice(0,10)===dStr&&(o.timeFrom||'08:00')<=hStr&&(o.timeTo||'17:00')>hStr);
-      const opsChips=dayOps.map(o=>{
-        const cs=chipStyle[o.status]||chipStyle.planned;
-        return `<div onclick="openEditModal('${o.id}')" style="border-radius:4px;padding:2px 5px;font-size:10px;font-weight:600;margin-bottom:2px;cursor:pointer;${cs};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px">${esc(o.type)}</div>`;
-      }).join('');
-      // Usage in this hour
-      const dayUsage=usage.filter(u=>(u.date||'').slice(0,10)===dStr&&(u.timeFrom||'08:00')<=hStr&&(u.timeTo||'17:00')>hStr);
-      const usageChips=dayUsage.map(u=>{
-        const cs=usageChipStyle[u.status]||usageChipStyle.planned;
-        return `<div onclick="openEditUsageModal('${u.id}')" style="border-radius:4px;padding:2px 5px;font-size:10px;font-weight:600;margin-bottom:2px;cursor:pointer;${cs};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px">⚽ ${esc(u.usageType)}</div>`;
-      }).join('');
-      cells+=`<td onclick="openLogTaskModal()" style="padding:3px;border-right:1px dashed rgba(0,0,0,0.06);vertical-align:top;cursor:pointer;background:${bg};min-height:28px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bg}'">${opsChips}</td>
-      <td onclick="openLogUsageModal()" style="padding:3px;border-right:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${isT?'rgba(168,85,247,0.02)':'#fdf8ff'};min-height:28px;min-width:65px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${isT?'rgba(168,85,247,0.02)':'#fdf8ff'}'"}>${usageChips}</td>`;
-    });
-    bodyRows+=`<tr style="border-bottom:1px solid rgba(0,0,0,0.05)">${cells}</tr>`;
-  }
+  // Data row — one row with Tasks | Usage cells per date
+  let cells='';
+  allCols.forEach(dStr=>{
+    const isT=dStr===today;
+    const bgT=isT?'rgba(24,95,165,0.03)':'white';
+    const bgU=isT?'rgba(168,85,247,0.03)':'#fdfbff';
 
-  grid.innerHTML=`<div style="overflow-x:auto;width:100%"><table style="border-collapse:collapse;width:100%;min-width:600px;table-layout:auto">
+    const dayOps=ops.filter(o=>(o.date||'').slice(0,10)===dStr)
+      .sort((a,b)=>{ const order={planned:0,inprogress:1,completed:2,missed:3}; return (order[a.status]||0)-(order[b.status]||0); });
+    const dayUsage=usage.filter(u=>(u.date||'').slice(0,10)===dStr)
+      .sort((a,b)=>(a.timeFrom||'').localeCompare(b.timeFrom||''));
+
+    const opsChips=dayOps.map(o=>{
+      const cs=chipStyle[o.status]||chipStyle.planned;
+      const tl=o.timeFrom&&o.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${o.timeFrom}–${o.timeTo}</span>`:'';
+      return `<div onclick="openEditModal('${o.id}')" style="border-radius:4px;padding:3px 6px;font-size:10px;font-weight:600;margin-bottom:3px;cursor:pointer;${cs}">${esc(o.type)}${tl}</div>`;
+    }).join('');
+
+    const usageChips=dayUsage.map(u=>{
+      const cs=usageChipStyle[u.status]||usageChipStyle.planned;
+      const tl=u.timeFrom&&u.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${u.timeFrom}–${u.timeTo}</span>`:'';
+      return `<div onclick="openEditUsageModal('${u.id}')" style="border-radius:4px;padding:3px 6px;font-size:10px;font-weight:600;margin-bottom:3px;cursor:pointer;${cs}">⚽ ${esc(u.usageType)}${tl}</div>`;
+    }).join('');
+
+    cells+=`<td onclick="openLogTaskModal()" style="padding:4px;border-right:1px dashed rgba(0,0,0,0.07);vertical-align:top;cursor:pointer;background:${bgT};min-height:50px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsChips||''}</td>
+    <td onclick="openLogUsageModal()" style="padding:4px;border-right:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:50px;min-width:65px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageChips||''}</td>`;
+  });
+
+  grid.innerHTML=`<div style="overflow-x:auto;width:100%"><table style="border-collapse:collapse;width:100%;min-width:600px">
     <thead>
       <tr>${headerCols}</tr>
       <tr>${subHeaderCols}</tr>
     </thead>
-    <tbody>${bodyRows}</tbody>
+    <tbody><tr>${cells}</tr></tbody>
   </table></div>`;
 }
+
+
 
 
 
