@@ -2290,130 +2290,7 @@ function setVenueCalView(mode) {
     btn.style.background = active ? 'var(--navy)' : 'white';
     btn.style.color = active ? 'white' : 'var(--text-muted)';
   });
-  renderVenueCal();
-}
-
-async function renderVenueCal() {
-  const vid = state.currentVenueCalId; if(!vid) return;
-  const plans = await loadVenuePlans(vid);
-  const ops = state.operations.filter(o=>o.venueId===vid);
-  const today = new Date(); today.setHours(0,0,0,0);
-
-  if(venueCalViewMode==='week') renderVenueCalWeek(plans, ops, today);
-  else if(venueCalViewMode==='day') renderVenueCalDay(plans, ops, today);
-  else renderVenueCalMonth(plans, ops, today);
-}
-
-function renderVenueCalWeek(plans, ops, today) {
-  const weekStart = new Date(today);
-  const day = weekStart.getDay()||7;
-  weekStart.setDate(weekStart.getDate() - day + 1 + venueCalOffset*7);
-  const days = Array.from({length:7},(_,i)=>{ const d=new Date(weekStart); d.setDate(weekStart.getDate()+i); return d; });
-  const dayNames=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  const opts={day:'2-digit',month:'short'};
-  document.getElementById('venue-cal-label').textContent = days[0].toLocaleDateString('en-GB',opts)+' — '+days[6].toLocaleDateString('en-GB',opts);
-
-  let html = `<div class="vcal-week">
-    <div class="vcal-week-header" style="padding:6px 4px;font-size:10px;background:#fafbfc;border-bottom:1px solid var(--border)"></div>
-    ${days.map((d,i)=>{ const isT=d.getTime()===today.getTime(); return `<div class="vcal-week-header ${isT?'today-col-h':''}">${dayNames[i]}<br/><span style="font-size:13px;font-weight:700">${d.getDate()}</span></div>`; }).join('')}`;
-
-  // single row of cells
-  html += `<div class="vcal-week-venue-col" style="border-bottom:1px solid var(--border)"></div>`;
-  days.forEach(d => {
-    const dStr = d.toISOString().slice(0,10);
-    const isToday = d.getTime()===today.getTime();
-    const dayPlans = plans.filter(p=>p.dateFrom<=dStr && p.dateTo>=dStr);
-    const dayOps = ops.filter(o=>(o.date||'').slice(0,10)===dStr);
-    let cells = '';
-    dayPlans.forEach(p => {
-      const tl=p.timeFrom?` ${p.timeFrom}–${p.timeTo}`:'';
-      cells += `<div class="op-chip chip-${p.status}" onclick="event.stopPropagation();openEditPlanModal('${p.id}')" style="display:block" title="${esc(p.opType||p.opTypes?.[0]||'')}${tl}">${esc((p.opType||p.opTypes?.[0]||'').slice(0,10))}<span style="opacity:.65;font-size:8px;display:block">${tl}</span></div>`;
-    });
-    dayOps.forEach(o => {
-      const badge=opBadge(o.type);
-      cells += `<span class="op-chip chip-completed" style="background:${badge.bg};color:${badge.fg};border-color:${badge.fg}">✓ ${esc(o.type)}</span>`;
-    });
-    html += `<div class="vcal-week-cell ${isToday?'today-col':''}" onclick="quickAddPlan('${vid}','${dStr}')">${cells}</div>`;
-  });
-  html += `</div>`;
-  document.getElementById('venue-cal-grid').innerHTML = html;
-}
-
-function renderVenueCalDay(plans, ops, today) {
-  const vid = state.currentVenueCalId;
-  const d = new Date(today);
-  d.setDate(today.getDate() + venueCalOffset);
-  const dStr = d.toISOString().slice(0,10);
-  document.getElementById('venue-cal-label').textContent = d.toLocaleDateString('en-GB',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
-
-  const dayPlans = plans.filter(p=>p.dateFrom<=dStr && p.dateTo>=dStr);
-  const dayOps = ops.filter(o=>(o.date||'').slice(0,10)===dStr);
-
-  // Build hourly timeline 06:00 — 22:00
-  let html = `<div style="display:grid;grid-template-columns:52px 1fr;border-top:1px solid var(--border)">`;
-  for(let h=6; h<=22; h++){
-    const hStr = h.toString().padStart(2,'0')+':00';
-    const isNow = (new Date().getHours()===h && d.getTime()===today.getTime());
-    // find ops logged in this hour
-    const hourOps = dayOps.filter(o=>{ try{ return new Date(o.date).getHours()===h; }catch(e){return false;} });
-    const hourPlans = dayPlans.filter(p=>{ const sf=parseInt((p.timeFrom||'00:00').split(':')[0]); const st=parseInt((p.timeTo||'23:59').split(':')[0]); return h>=sf && h<st; });
-    html += `<div style="padding:4px 6px;font-size:10px;color:var(--text-hint);border-bottom:1px solid var(--border);border-right:1px solid var(--border);background:#fafbfc;text-align:right;${isNow?'color:var(--blue);font-weight:700':''}">${hStr}</div>`;
-    html += `<div style="min-height:44px;border-bottom:1px solid var(--border);padding:3px 6px;cursor:pointer;${isNow?'background:rgba(24,95,165,0.04)':''}" onclick="quickAddPlan('${vid}','${dStr}','${h.toString().padStart(2,'0')}:00')">`;
-    hourPlans.forEach(p=>{ html+=`<div class="op-chip chip-${p.status}" style="display:block" onclick="event.stopPropagation();openEditPlanModal('${p.id}')">${esc(p.opType||p.opTypes?.[0]||'')}</div>`; });
-    hourOps.forEach(o=>{ const b=opBadge(o.type); html+=`<span class="op-chip" style="background:${b.bg};color:${b.fg};border-left:2px solid ${b.fg};display:block">✓ ${esc(o.type)} — ${new Date(o.date).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}</span>`; });
-    html += `</div>`;
-  }
-  html += `</div>`;
-
-  // Plans for this day shown above the timeline
-  let planHtml = '';
-  if(dayPlans.length){
-    planHtml = `<div style="padding:.75rem;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:6px">
-      <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Planned for this day</div>`;
-    dayPlans.forEach(p => {
-      planHtml += `<div class="upcoming-item" style="cursor:pointer;margin-bottom:0" onclick="openEditPlanModal('${p.id}')">
-        <div class="upcoming-date-col"><span class="plan-status-badge psb-${p.status}">${p.status}</span></div>
-        <div class="upcoming-types"><div>${p.opTypes.map(t=>`<span class="upcoming-type-chip">${esc(t)}</span>`).join('')}</div>${p.notes?`<div class="upcoming-note">${esc(p.notes)}</div>`:''}</div>
-        <div><button class="btn btn-ghost btn-sm" style="font-size:10px">Edit</button></div>
-      </div>`;
-    });
-    planHtml += `</div>`;
-  }
-
-  document.getElementById('venue-cal-grid').innerHTML = planHtml + html;
-}
-
-function renderVenueCalMonth(plans, ops, today) {
-  const anchor = new Date(today.getFullYear(), today.getMonth() + venueCalOffset, 1);
-  document.getElementById('venue-cal-label').textContent = anchor.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
-
-  const firstDay = new Date(anchor);
-  const startDow = firstDay.getDay()||7;
-  firstDay.setDate(firstDay.getDate() - startDow + 1);
-
-  const dayNames=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  let html = `<div class="vcal-month">`;
-  dayNames.forEach(n => { html += `<div class="vcal-month-header">${n}</div>`; });
-
-  for(let week=0; week<6; week++) {
-    for(let dow=0; dow<7; dow++) {
-      const d = new Date(firstDay);
-      d.setDate(firstDay.getDate() + week*7 + dow);
-      const dStr = d.toISOString().slice(0,10);
-      const isToday = d.getTime()===today.getTime();
-      const isOtherMonth = d.getMonth()!==anchor.getMonth();
-      const dayPlans = plans.filter(p=>p.dateFrom<=dStr && p.dateTo>=dStr);
-      const dayOps = ops.filter(o=>(o.date||'').slice(0,10)===dStr);
-      const vid2 = state.currentVenueCalId;
-      html += `<div class="vcal-month-day ${isToday?'today-day':''} ${isOtherMonth?'other-month':''}" onclick="quickAddPlan('${vid2}','${dStr}')">
-        <div class="vcal-day-num ${isToday?'today-label':''}">${d.getDate()}</div>
-        ${dayPlans.map(p=>`<span class="op-chip chip-${p.status}" onclick="event.stopPropagation();openEditPlanModal('${p.id}')" title="${esc(p.opType||p.opTypes?.[0]||'')} ${p.timeFrom||''}–${p.timeTo||''}">${esc((p.opType||p.opTypes?.[0]||'').slice(0,8))}</span>`).join('')}
-        ${dayOps.map(o=>{ const b=opBadge(o.type); return `<span class="op-chip chip-completed" style="background:${b.bg};color:${b.fg}">✓ ${esc(o.type)}</span>`; }).join('')}
-      </div>`;
-    }
-  }
-  html += `</div>`;
-  document.getElementById('venue-cal-grid').innerHTML = html;
+  if(state.currentVenueCalId) renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
 }
 
 function venueTypeDot(type, color){
@@ -2608,17 +2485,12 @@ async function renderGantt(){
       const dStr=d.toISOString().slice(0,10);
       const isT=d.getTime()===today.getTime();
 
-      const dayOps=state.operations.filter(o=>o.venueId===v.id&&(o.date||'').slice(0,10)===dStr);
+      const dayOps=allOps.filter(o=>o.venueId===v.id&&(o.date||'').slice(0,10)===dStr&&(ganttStatusFilter==='all'||o.status===ganttStatusFilter));
       let chips='';
-      dayPlans.forEach(p=>{
-        const s=chipStyle[p.status]||chipStyle.planned;
-        const lbl=esc((p.opType||p.opTypes?.[0]||''));
-        const tl=p.timeFrom?`<span style="font-size:8px;opacity:.75;display:block">${p.timeFrom}–${p.timeTo}</span>`:'';
-        chips+=`<div onclick="event.stopPropagation();openEditPlanModal('${p.id}')" style="border-radius:3px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;cursor:pointer;${s}">${lbl}${tl}</div>`;
-      });
       dayOps.forEach(o=>{
-        const b=opBadge(o.type);
-        chips+=`<div onclick="event.stopPropagation();openEditModal('${o.id}')" style="border-radius:3px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;cursor:pointer;background:${b.bg};color:${b.fg};border-left:3px solid ${b.fg}" title="Click to edit">✓ ${esc(o.type)}</div>`;
+        const cs=chipStyle[o.status]||chipStyle.planned;
+        const tl=o.timeFrom?`<span style="font-size:8px;opacity:.75;display:block">${o.timeFrom}–${o.timeTo}</span>`:'';
+        chips+=`<div onclick="event.stopPropagation();openEditModal('${o.id}')" style="border-radius:3px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;cursor:pointer;${cs}">${esc(o.type)}${tl}</div>`;
       });
       cells+=`<td onclick="if(!document.querySelector('.modal-overlay.open'))openNewOpModal('${v.id}','${dStr}')" style="padding:3px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${isT?'rgba(24,95,165,0.04)':'white'}" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${isT?'rgba(24,95,165,0.04)':'white'}'">${chips}</td>`;
     });
@@ -2637,53 +2509,7 @@ async function renderGantt(){
 
 
 // ── PLAN MODAL ──
-function openPlanModal(venueId, dateStr, timeStr){
-  const pid=state.currentProjectId;
-  // populate venue select
-  const venues=pid?projectVenues(pid):state.venues.filter(v=>v.id===venueId);
-  const sel=document.getElementById('plan-venue-sel');
-  if(pid){
-    sel.innerHTML=projectVenues(pid).map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('');
-  } else {
-    const v=state.venues.find(x=>x.id===venueId);
-    sel.innerHTML=v?`<option value="${v.id}">${esc(v.name)}</option>`:'';
-  }
-  if(venueId) sel.value=venueId;
-  populatePlanTypeSelect('plan-op-type');
-  const today=new Date().toISOString().slice(0,10);
-  document.getElementById('plan-date-from').value=dateStr||today;
-  document.getElementById('plan-date-to').value=dateStr||today;
-  document.getElementById('plan-time-from').value=timeStr||'08:00';
-  document.getElementById('plan-time-to').value='17:00';
-  document.getElementById('plan-notes').value='';
-  document.getElementById('plan-priority').value='normal';
-  openModal('modal-plan');
-}
-
-function quickAddPlan(venueId, dateStr, timeStr){
-  // Don't open if a modal is currently open or was just closed
-  if(document.querySelector('.modal-overlay.open')) return;
-  openPlanModal(venueId, dateStr, timeStr);
-}
-
 // ── EDIT PLAN MODAL ──
-async function openEditPlanModal(planId){
-  const {data}=await supa.from('pitchops_plans').select('*').eq('id',planId).single();
-  if(!data) return;
-  const plan=dbToPlan(data);
-  populatePlanTypeSelect('edit-plan-op-type');
-  document.getElementById('edit-plan-id').value=planId;
-  document.getElementById('edit-plan-op-type').value=plan.opType||plan.opTypes?.[0]||'';
-  document.getElementById('edit-plan-from').value=plan.dateFrom;
-  document.getElementById('edit-plan-to').value=plan.dateTo;
-  document.getElementById('edit-plan-time-from').value=plan.timeFrom||'08:00';
-  document.getElementById('edit-plan-time-to').value=plan.timeTo||'17:00';
-  document.getElementById('edit-plan-notes').value=plan.notes;
-  document.getElementById('edit-plan-priority').value=plan.priority;
-  document.getElementById('edit-plan-status').value=plan.status;
-  openModal('modal-edit-plan');
-}
-
 // ── VENUE UPCOMING — uses operations only ──
 function renderVenueUpcoming(){
   const vid=state.currentVenueId; if(!vid) return;
@@ -2856,18 +2682,6 @@ function switchVenueTab(tab){
   }
 }
 
-
-function openNewOpModal(venueId, dateStr, timeStr){
-  if(document.querySelector('.modal-overlay.open')) return;
-  // Works from both admin and venue dashboard
-  // Temporarily set currentVenueId if called from admin gantt
-  const prevVenueId = state.currentVenueId;
-  if(venueId) state.currentVenueId = venueId;
-  const isFuture = dateStr && dateStr > todayStr();
-  openLogTaskModal(dateStr, timeStr||'08:00', null, isFuture?'planned':'auto');
-  // Restore after modal opens
-  if(!prevVenueId) state.currentVenueId = venueId;
-}
 
 function openLogTaskModal(dateStr, timeStr, prefillType, prefillStatus){
   populateOpTypeSelects();
