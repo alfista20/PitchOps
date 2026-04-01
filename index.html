@@ -3381,6 +3381,8 @@ async function adminLogTask(){
   closeModal('modal-admin-log-task');
   renderDetailOps(); updateDetailStats();
   if(document.getElementById('ptab-calendar-content')?.style.display==='block') renderGantt();
+  if(document.getElementById('venue-cal-view')?.style.display==='block' && state.currentVenueCalId)
+    renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
   showToast('Task logged!');
 }
 
@@ -3422,6 +3424,9 @@ async function adminLogUsage(){
   state_admin_usage.unshift(u);
   closeModal('modal-admin-log-usage');
   renderDetailUsage();
+  if(document.getElementById('ptab-calendar-content')?.style.display==='block') renderGantt();
+  if(document.getElementById('venue-cal-view')?.style.display==='block' && state.currentVenueCalId)
+    renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
   showToast('Usage logged!');
 }
 
