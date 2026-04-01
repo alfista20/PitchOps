@@ -445,6 +445,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
   <!-- PROJECT TABS -->
   <div style="background:white;border-bottom:2px solid var(--border);padding:0 1rem;display:flex;gap:0;flex-shrink:0">
     <button class="tab-btn active" id="ptab-ops" onclick="switchProjectTab('ops')">📋 Tasks</button>
+    <button class="tab-btn" id="ptab-usage" onclick="switchProjectTab('usage')">⏱ Usage</button>
     <button class="tab-btn" id="ptab-calendar" onclick="switchProjectTab('calendar')">📅 Schedule</button>
   </div>
 
@@ -467,6 +468,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
         <input type="date" id="filter-to" onchange="renderDetailOps()"/>
         <button class="btn btn-ghost btn-sm" onclick="clearDetailFilters()">Clear</button>
         <button class="btn btn-blue btn-sm" onclick="exportCSV()">CSV</button>
+        <button class="btn btn-primary btn-sm" onclick="openAdminLogTaskModal()" style="background:linear-gradient(135deg,#185FA5,#1d4ed8);border:none">+ Add task</button>
       </div>
       <div style="overflow-x:auto">
         <table class="ops-table">
@@ -481,6 +483,43 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
   </div>
   </div><!-- end ptab-ops-content -->
 
+
+  <!-- USAGE TAB -->
+  <div id="ptab-usage-content" style="display:none" class="project-body">
+    <!-- venues sidebar -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Venues</span>
+      </div>
+      <div id="detail-usage-venue-list"></div>
+    </div>
+    <!-- usage panel -->
+    <div class="card">
+      <div class="filter-bar">
+        <select id="filter-usage-venue" onchange="renderDetailUsage()"><option value="">All venues</option></select>
+        <select id="filter-usage-type" onchange="renderDetailUsage()">
+          <option value="">All types</option>
+          <option value="Match Day">Match Day</option>
+          <option value="Training Session">Training Session</option>
+          <option value="Other">Other</option>
+        </select>
+        <input type="date" id="filter-usage-from" onchange="renderDetailUsage()"/>
+        <input type="date" id="filter-usage-to" onchange="renderDetailUsage()"/>
+        <button class="btn btn-ghost btn-sm" onclick="clearUsageFilters()">Clear</button>
+        <button class="btn btn-blue btn-sm" onclick="exportUsageCSV()">CSV</button>
+        <button class="btn btn-primary btn-sm" onclick="openAdminLogUsageModal()" style="background:linear-gradient(135deg,#7C3AED,#6D28D9);border:none">+ Add usage</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="ops-table">
+          <thead><tr>
+            <th>Date</th><th>Venue</th><th>Usage type</th><th>Team</th><th>Zone</th><th>Weather</th><th>Notes</th><th>Photos</th><th>Flag</th>
+          </tr></thead>
+          <tbody id="detail-usage-tbody"></tbody>
+        </table>
+      </div>
+      <div id="detail-usage-empty" class="empty-state" style="display:none"><div class="ico">⚽</div><div>No usage found</div></div>
+    </div>
+  </div>
   <!-- CALENDAR TAB -->
   <div id="ptab-calendar-content" style="display:none;padding:.75rem 1rem;width:100%;box-sizing:border-box;align-self:stretch">
     <div id="gantt-view">
@@ -1656,8 +1695,8 @@ function openProject(pid){
   state.currentProjectId=pid;
   renderProjectDetail(pid);
   showScreen('screen-project-detail');
-  // Silently refresh ops in background to ensure fresh data
   refreshProjectOps(pid, true);
+  refreshProjectUsage(pid, true);
 }
 
 function updateDetailStats(pid){
@@ -2485,20 +2524,29 @@ let ganttStatusFilter = 'all';
 // ── LOAD PLANS ──
 // ── TAB SWITCHING ──
 function switchProjectTab(tab){
-  document.getElementById('ptab-ops').classList.toggle('active', tab==='ops');
-  document.getElementById('ptab-calendar').classList.toggle('active', tab==='calendar');
-  document.getElementById('ptab-ops-content').style.display = tab==='ops' ? '' : 'none';
-  document.getElementById('ptab-calendar-content').style.display = tab==='calendar' ? 'block' : 'none';
+  ['ops','usage','calendar'].forEach(t=>{
+    const btn=document.getElementById('ptab-'+t);
+    const content=document.getElementById('ptab-'+t+'-content');
+    if(btn) btn.classList.toggle('active', t===tab);
+    if(content) content.style.display = t===tab ? (t==='calendar'?'block':'') : 'none';
+  });
   if(tab==='calendar'){
-    document.getElementById('ptab-calendar-content').style.display='block';
     document.getElementById('gantt-view').style.display='block';
     document.getElementById('venue-cal-view').style.display='none';
     const pid=state.currentProjectId;
     if(pid){
       document.getElementById('gantt-grid').innerHTML='<div style="padding:2rem;text-align:center;color:#96a6bb;font-size:13px">Loading...</div>';
-      // Render from cached state immediately, then refresh
       renderGantt();
       refreshProjectOps(pid, true);
+    }
+  }
+  if(tab==='usage'){
+    const pid=state.currentProjectId;
+    if(pid){
+      const venues=projectVenues(pid);
+      const fv=document.getElementById('filter-usage-venue');
+      if(fv) fv.innerHTML='<option value="">All venues</option>'+venues.map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('');
+      refreshProjectUsage(pid, true);
     }
   }
 }
@@ -3099,6 +3147,246 @@ async function deleteUsage(){
   showToast('Deleted');
 }
 
+// ════════════════════════════════════════
+// ADMIN USAGE — STATE
+// ════════════════════════════════════════
+let state_admin_usage = []; // usage for current project
+let adminTaskStaff = [];
+
+function dbToAdminUsage(r){
+  return {
+    id:r.id, venueId:r.venue_id, usageType:r.usage_type||'Training Session',
+    teamName:r.team_name||'', zone:r.zone||'', weather:r.weather||'',
+    notes:r.notes||'', date:(r.usage_date||'').slice(0,10),
+    timeFrom:r.time_from||'08:00', timeTo:r.time_to||'17:00',
+    status:r.status||'planned', photos:r.photos||[], flagged:r.flagged||false,
+    adminComment:r.admin_comment||'', createdAt:r.created_at
+  };
+}
+
+async function refreshProjectUsage(projectId, silent=false){
+  if(!projectId) return;
+  const vids=projectVenues(projectId).map(v=>v.id);
+  if(!vids.length){ state_admin_usage=[]; return; }
+  if(!silent) showLoading(true);
+  try {
+    const {data}=await supa.from('pitchops_usage').select('*').in('venue_id',vids).order('usage_date',{ascending:false});
+    state_admin_usage=(data||[]).map(dbToAdminUsage);
+  } catch(e){ showToast('Error loading usage: '+e.message); }
+  if(!silent) showLoading(false);
+  renderDetailUsage();
+}
+
+// ── RENDER USAGE TABLE ──
+function renderDetailUsage(){
+  const pid=state.currentProjectId; if(!pid) return;
+  const fVenue=document.getElementById('filter-usage-venue')?.value||'';
+  const fType=document.getElementById('filter-usage-type')?.value||'';
+  const fFrom=document.getElementById('filter-usage-from')?.value;
+  const fTo=document.getElementById('filter-usage-to')?.value;
+
+  let items=[...state_admin_usage].sort((a,b)=>b.date.localeCompare(a.date));
+  if(fVenue) items=items.filter(u=>u.venueId===fVenue);
+  if(fType) items=items.filter(u=>u.usageType===fType);
+  if(fFrom) items=items.filter(u=>u.date>=fFrom);
+  if(fTo) items=items.filter(u=>u.date<=fTo);
+
+  const tbody=document.getElementById('detail-usage-tbody');
+  const empty=document.getElementById('detail-usage-empty');
+  if(!tbody) return;
+  if(!items.length){ tbody.innerHTML=''; if(empty) empty.style.display='block'; return; }
+  if(empty) empty.style.display='none';
+
+  const usageColors={'Match Day':'#7C3AED','Training Session':'#065F46','Other':'#854F0B'};
+  const usageBg={'Match Day':'#F3E8FF','Training Session':'#ECFDF5','Other':'#FAEEDA'};
+
+  tbody.innerHTML=items.map(u=>{
+    const venue=state.venues.find(v=>v.id===u.venueId);
+    const color=usageColors[u.usageType]||'#5a6a82';
+    const bg=usageBg[u.usageType]||'#f1f5f9';
+    return `<tr>
+      <td style="white-space:nowrap;font-size:12px">${formatDateOnly(u.date)}</td>
+      <td><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:${venue?.color||'#888'};flex-shrink:0"></span>${esc(venue?.name||'Unknown')}</span></td>
+      <td><span style="background:${bg};color:${color};padding:3px 8px;border-radius:6px;font-size:12px;font-weight:600">⚽ ${esc(u.usageType)}</span></td>
+      <td style="font-size:12px">${esc(u.teamName||'—')}</td>
+      <td style="font-size:12px">${esc(u.zone||'—')}</td>
+      <td style="font-size:12px">${esc(u.weather||'—')}</td>
+      <td style="font-size:12px;max-width:220px">
+        ${u.notes?`<div style="white-space:pre-wrap;word-break:break-word;line-height:1.4;margin-bottom:4px">${esc(u.notes)}</div>`:''}
+        <input type="text" placeholder="Comment..." value="${esc(u.adminComment||'')}" onchange="saveUsageComment('${u.id}',this.value)" style="width:100%;font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:5px;font-family:'DM Sans',sans-serif;outline:none"/>
+      </td>
+      <td>${u.photos&&u.photos.length?`<div class="admin-photo-strip">${u.photos.map((p,i)=>`<img src="${p.dataUrl}" onclick="openLightboxFromUsage('${u.id}',${i})">`).join('')}</div>`:'<span style="color:var(--text-hint);font-size:12px">—</span>'}</td>
+      <td><button class="flag-btn ${u.flagged?'flagged':''}" onclick="toggleUsageFlag('${u.id}',this)">🚩</button></td>
+    </tr>`;
+  }).join('');
+
+  // Update venue sidebar for usage
+  renderDetailUsageVenueList(pid);
+}
+
+function renderDetailUsageVenueList(pid){
+  const venues=projectVenues(pid);
+  const vlist=document.getElementById('detail-usage-venue-list');
+  if(!vlist) return;
+  vlist.innerHTML=venues.map(v=>{
+    const vc=state_admin_usage.filter(u=>u.venueId===v.id).length;
+    return `<div class="venue-item" onclick="focusUsageVenue('${v.id}')">
+      <div class="venue-dot">${venueTypeDot(v.venueType, v.color)}</div>
+      <div style="flex:1;min-width:0">
+        <div class="venue-item-name">${esc(v.name)}</div>
+        <div class="venue-item-city">${(v.city||'').split(',')[0].trim()||''} · ${vc} usage${vc!==1?'s':''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function focusUsageVenue(vid){
+  const fv=document.getElementById('filter-usage-venue');
+  if(fv){ fv.value=vid; renderDetailUsage(); }
+  document.querySelectorAll('#detail-usage-venue-list .venue-item').forEach(el=>el.classList.remove('selected'));
+  event.currentTarget?.classList.add('selected');
+}
+
+function clearUsageFilters(){
+  ['filter-usage-venue','filter-usage-type','filter-usage-from','filter-usage-to'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  document.querySelectorAll('#detail-usage-venue-list .venue-item').forEach(el=>el.classList.remove('selected'));
+  renderDetailUsage();
+}
+
+async function toggleUsageFlag(id, btn){
+  const u=state_admin_usage.find(x=>x.id===id); if(!u) return;
+  u.flagged=!u.flagged;
+  btn.classList.toggle('flagged', u.flagged);
+  await supa.from('pitchops_usage').update({flagged:u.flagged}).eq('id',id);
+}
+
+async function saveUsageComment(id, val){
+  const u=state_admin_usage.find(x=>x.id===id); if(!u) return;
+  u.adminComment=val;
+  await supa.from('pitchops_usage').update({admin_comment:val}).eq('id',id);
+}
+
+function exportUsageCSV(){
+  const pid=state.currentProjectId; if(!pid) return;
+  const proj=state.projects.find(p=>p.id===pid);
+  const rows=[['Date','Venue','Usage type','Team','Zone','Weather','Notes','Photos','Flagged']];
+  state_admin_usage.forEach(u=>{
+    const venue=state.venues.find(v=>v.id===u.venueId);
+    rows.push([u.date,venue?.name||'',u.usageType,u.teamName||'',u.zone||'',u.weather||'',u.notes||'',(u.photos||[]).length,u.flagged?'Yes':'No']);
+  });
+  const NL='\n'; const csv=rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join(NL);
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download=(proj?.code||'project')+'_usage.csv';
+  a.click();
+}
+
+function openLightboxFromUsage(id, i){
+  const u=state_admin_usage.find(x=>x.id===id); if(!u||!u.photos) return;
+  openLightbox(u.photos.map(p=>p.dataUrl), i);
+}
+
+// ── ADMIN LOG TASK MODAL ──
+function openAdminLogTaskModal(){
+  const pid=state.currentProjectId; if(!pid) return;
+  const venues=projectVenues(pid);
+  const vsel=document.getElementById('admin-task-venue');
+  vsel.innerHTML=venues.map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('');
+  const tsel=document.getElementById('admin-task-type');
+  tsel.innerHTML=state.opTypes.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
+  document.getElementById('admin-task-date').value=todayStr();
+  document.getElementById('admin-task-time-from').value='08:00';
+  document.getElementById('admin-task-time-to').value='17:00';
+  document.getElementById('admin-task-zone').value='';
+  document.getElementById('admin-task-equipment').value='';
+  document.getElementById('admin-task-weather').value='';
+  document.getElementById('admin-task-notes').value='';
+  document.getElementById('admin-task-status').value='planned';
+  adminTaskStaff=[];
+  renderAdminTaskStaffTags();
+  openModal('modal-admin-log-task');
+}
+
+function addAdminTaskStaff(){
+  const inp=document.getElementById('admin-task-staff-input');
+  const name=inp.value.trim(); if(!name) return;
+  if(!adminTaskStaff.includes(name)) adminTaskStaff.push(name);
+  renderAdminTaskStaffTags(); inp.value='';
+}
+function removeAdminTaskStaff(name){ adminTaskStaff=adminTaskStaff.filter(n=>n!==name); renderAdminTaskStaffTags(); }
+function renderAdminTaskStaffTags(){
+  document.getElementById('admin-task-staff-tags').innerHTML=adminTaskStaff.map(n=>`
+    <div class="staff-tag"><span>${esc(n)}</span><button class="staff-tag-remove" onclick="removeAdminTaskStaff('${esc(n)}')">×</button></div>`).join('');
+}
+
+async function adminLogTask(){
+  const venueId=document.getElementById('admin-task-venue').value; if(!venueId) return;
+  const op={
+    id:'op_'+Date.now(), venueId,
+    type:document.getElementById('admin-task-type').value,
+    zone:document.getElementById('admin-task-zone').value.trim()||'Full pitch',
+    equipment:document.getElementById('admin-task-equipment').value.trim(),
+    weather:document.getElementById('admin-task-weather').value.trim(),
+    staff:[...adminTaskStaff],
+    notes:document.getElementById('admin-task-notes').value.trim(),
+    date:document.getElementById('admin-task-date').value||todayStr(),
+    timeFrom:document.getElementById('admin-task-time-from').value||'08:00',
+    timeTo:document.getElementById('admin-task-time-to').value||'17:00',
+    status:document.getElementById('admin-task-status').value||'planned',
+    photos:[], flagged:false, adminComment:'', createdAt:new Date().toISOString()
+  };
+  const {error}=await supa.from('pitchops_operations').insert(opToDb(op));
+  if(error){ showToast('Error: '+error.message); return; }
+  state.operations.unshift(op);
+  closeModal('modal-admin-log-task');
+  renderDetailOps(); updateDetailStats();
+  if(document.getElementById('ptab-calendar-content')?.style.display==='block') renderGantt();
+  showToast('Task logged!');
+}
+
+// ── ADMIN LOG USAGE MODAL ──
+function openAdminLogUsageModal(){
+  const pid=state.currentProjectId; if(!pid) return;
+  const venues=projectVenues(pid);
+  const vsel=document.getElementById('admin-usage-venue');
+  vsel.innerHTML=venues.map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('');
+  document.getElementById('admin-usage-date').value=todayStr();
+  document.getElementById('admin-usage-time-from').value='08:00';
+  document.getElementById('admin-usage-time-to').value='17:00';
+  document.getElementById('admin-usage-type').value='Training Session';
+  document.getElementById('admin-usage-team').value='';
+  document.getElementById('admin-usage-zone').value='';
+  document.getElementById('admin-usage-weather').value='';
+  document.getElementById('admin-usage-notes').value='';
+  document.getElementById('admin-usage-status').value='planned';
+  openModal('modal-admin-log-usage');
+}
+
+async function adminLogUsage(){
+  const venueId=document.getElementById('admin-usage-venue').value; if(!venueId) return;
+  const u={
+    id:'u_'+Date.now(), venueId,
+    usageType:document.getElementById('admin-usage-type').value,
+    teamName:document.getElementById('admin-usage-team').value.trim(),
+    zone:document.getElementById('admin-usage-zone').value.trim(),
+    weather:document.getElementById('admin-usage-weather').value.trim(),
+    notes:document.getElementById('admin-usage-notes').value.trim(),
+    date:document.getElementById('admin-usage-date').value||todayStr(),
+    timeFrom:document.getElementById('admin-usage-time-from').value||'08:00',
+    timeTo:document.getElementById('admin-usage-time-to').value||'17:00',
+    status:document.getElementById('admin-usage-status').value||'planned',
+    photos:[], flagged:false, adminComment:'', createdAt:new Date().toISOString()
+  };
+  const {error}=await supa.from('pitchops_usage').insert(usageToDb(u));
+  if(error){ showToast('Error: '+error.message); return; }
+  state_admin_usage.unshift(u);
+  closeModal('modal-admin-log-usage');
+  renderDetailUsage();
+  showToast('Usage logged!');
+}
+
 init();
 </script>
 
@@ -3243,6 +3531,96 @@ init();
       <button class="btn btn-danger" onclick="deleteUsage()">Delete</button>
       <button class="btn btn-ghost" onclick="closeModal('modal-edit-usage')">Cancel</button>
       <button class="btn btn-primary" onclick="saveEditUsage()">Save changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN LOG TASK MODAL -->
+<div class="modal-overlay" id="modal-admin-log-task">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Log task</span>
+      <button class="modal-close" onclick="closeModal('modal-admin-log-task')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Venue</label>
+        <select id="admin-task-venue" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px"></select>
+      </div>
+      <div class="field">
+        <label>Task type</label>
+        <select id="admin-task-type" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px"></select>
+      </div>
+      <div class="field"><label>Pitch area / zone</label><input id="admin-task-zone" type="text" placeholder="e.g. Full pitch"/></div>
+      <div class="field"><label>Equipment used</label><input id="admin-task-equipment" type="text" placeholder="e.g. Pedestrian spreader"/></div>
+      <div class="field"><label>Weather conditions</label><input id="admin-task-weather" type="text" placeholder="e.g. sunny, 18°C"/></div>
+      <div class="field"><label>Done by (staff)</label>
+        <div style="display:flex;gap:6px;margin-bottom:6px">
+          <input id="admin-task-staff-input" type="text" placeholder="Add name..." style="flex:1"/>
+          <button class="btn btn-ghost btn-sm" onclick="addAdminTaskStaff()">Add</button>
+        </div>
+        <div id="admin-task-staff-tags" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+      </div>
+      <div class="field"><label>Notes</label><textarea id="admin-task-notes" rows="2" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;resize:vertical;box-sizing:border-box"></textarea></div>
+      <div class="field"><label>Task date</label><input id="admin-task-date" type="date"/></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="field"><label>Time from</label><input id="admin-task-time-from" type="time" value="08:00"/></div>
+        <div class="field"><label>Time to</label><input id="admin-task-time-to" type="time" value="17:00"/></div>
+      </div>
+      <div class="field"><label>Status</label>
+        <select id="admin-task-status">
+          <option value="planned">Planned</option>
+          <option value="inprogress">In progress</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-admin-log-task')">Cancel</button>
+      <button class="btn btn-primary" onclick="adminLogTask()">Save task</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN LOG USAGE MODAL -->
+<div class="modal-overlay" id="modal-admin-log-usage">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Log pitch usage</span>
+      <button class="modal-close" onclick="closeModal('modal-admin-log-usage')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Venue</label>
+        <select id="admin-usage-venue" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px"></select>
+      </div>
+      <div class="field"><label>Usage type</label>
+        <select id="admin-usage-type" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px">
+          <option value="Match Day">Match Day</option>
+          <option value="Training Session">Training Session</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="field"><label>Team name</label><input id="admin-usage-team" type="text" placeholder="e.g. FC Barcelona U20"/></div>
+      <div class="field"><label>Pitch area / zone</label><input id="admin-usage-zone" type="text" placeholder="e.g. Full pitch"/></div>
+      <div class="field"><label>Weather conditions</label><input id="admin-usage-weather" type="text" placeholder="e.g. sunny, 18°C"/></div>
+      <div class="field"><label>Notes</label><textarea id="admin-usage-notes" rows="2" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;resize:vertical;box-sizing:border-box"></textarea></div>
+      <div class="field"><label>Usage date</label><input id="admin-usage-date" type="date"/></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="field"><label>Time from</label><input id="admin-usage-time-from" type="time" value="08:00"/></div>
+        <div class="field"><label>Time to</label><input id="admin-usage-time-to" type="time" value="17:00"/></div>
+      </div>
+      <div class="field"><label>Status</label>
+        <select id="admin-usage-status">
+          <option value="planned">Planned</option>
+          <option value="inprogress">In progress</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-admin-log-usage')">Cancel</button>
+      <button class="btn btn-primary" onclick="adminLogUsage()" style="background:linear-gradient(135deg,#7C3AED,#6D28D9);border:none">Save usage</button>
     </div>
   </div>
 </div>
