@@ -2645,17 +2645,17 @@ async function renderGantt(){
       const opsChips=dayOps.map(o=>{
         const cs=chipStyle[o.status]||chipStyle.planned;
         const tl=o.timeFrom&&o.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${o.timeFrom}–${o.timeTo}</span>`:'';
-        return `<div onclick="event.stopPropagation();openEditModal('${o.id}')" style="border-radius:3px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;cursor:pointer;${cs}">${esc(o.type)}${tl}</div>`;
+        return `<div draggable="true" ondragstart="onDragStart(event,'op','${o.id}','${dStr}','${v.id}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditModal('${o.id}')" style="border-radius:3px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;cursor:grab;${cs}">${esc(o.type)}${tl}</div>`;
       }).join('');
 
       const usageChips=dayUsage.map(u=>{
         const cs=usageChipStyle[u.status]||usageChipStyle.planned;
         const tl=u.timeFrom&&u.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${u.timeFrom}–${u.timeTo}</span>`:'';
-        return `<div onclick="event.stopPropagation();openEditUsageModal('${u.id}')" style="border-radius:3px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;cursor:pointer;${cs}">⚽ ${esc(u.usageType)}${tl}</div>`;
+        return `<div draggable="true" ondragstart="onDragStart(event,'usage','${u.id}','${dStr}','${v.id}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditUsageModal('${u.id}')" style="border-radius:3px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;cursor:grab;${cs}">⚽ ${esc(u.usageType)}${tl}</div>`;
       }).join('');
 
-      cells+=`<td onclick="if(!document.querySelector('.modal-overlay.open'))openAdminLogTaskModal()" style="padding:3px;border-right:1px dashed rgba(0,0,0,0.06);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgT};min-height:40px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsChips}</td>
-      <td onclick="if(!document.querySelector('.modal-overlay.open'))openAdminLogUsageModal()" style="padding:3px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:40px;min-width:65px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageChips}</td>`;
+      cells+=`<td onclick="if(!document.querySelector('.modal-overlay.open'))openAdminLogTaskModal()" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px;border-right:1px dashed rgba(0,0,0,0.06);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgT};min-height:40px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsChips}</td>
+      <td onclick="if(!document.querySelector('.modal-overlay.open'))openAdminLogUsageModal()" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:40px;min-width:65px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageChips}</td>`;
     });
     rows+=`<tr>${cells}</tr>`;
   });
@@ -2821,17 +2821,17 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
     const opsChips=dayOps.map(o=>{
       const cs=chipStyle[o.status]||chipStyle.planned;
       const tl=o.timeFrom&&o.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${o.timeFrom}–${o.timeTo}</span>`:'';
-      return `<div onclick="openEditModal('${o.id}')" style="border-radius:4px;padding:3px 6px;font-size:10px;font-weight:600;margin-bottom:3px;cursor:pointer;${cs}">${esc(o.type)}${tl}</div>`;
+      return `<div draggable="true" ondragstart="onDragStart(event,'op','${o.id}','${dStr}','${venueId}')" ondragend="onDragEnd(event)" onclick="openEditModal('${o.id}')" style="border-radius:4px;padding:3px 6px;font-size:10px;font-weight:600;margin-bottom:3px;cursor:grab;${cs}">${esc(o.type)}${tl}</div>`;
     }).join('');
 
     const usageChips=dayUsage.map(u=>{
       const cs=usageChipStyle[u.status]||usageChipStyle.planned;
       const tl=u.timeFrom&&u.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${u.timeFrom}–${u.timeTo}</span>`:'';
-      return `<div onclick="openEditUsageModal('${u.id}')" style="border-radius:4px;padding:3px 6px;font-size:10px;font-weight:600;margin-bottom:3px;cursor:pointer;${cs}">⚽ ${esc(u.usageType)}${tl}</div>`;
+      return `<div draggable="true" ondragstart="onDragStart(event,'usage','${u.id}','${dStr}','${venueId}')" ondragend="onDragEnd(event)" onclick="openEditUsageModal('${u.id}')" style="border-radius:4px;padding:3px 6px;font-size:10px;font-weight:600;margin-bottom:3px;cursor:grab;${cs}">⚽ ${esc(u.usageType)}${tl}</div>`;
     }).join('');
 
-    cells+=`<td onclick="openLogTaskModal()" style="padding:4px;border-right:1px dashed rgba(0,0,0,0.07);vertical-align:top;cursor:pointer;background:${bgT};min-height:50px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsChips||''}</td>
-    <td onclick="openLogUsageModal()" style="padding:4px;border-right:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:50px;min-width:65px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageChips||''}</td>`;
+    cells+=`<td onclick="openLogTaskModal()" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${venueId}')" style="padding:4px;border-right:1px dashed rgba(0,0,0,0.07);vertical-align:top;cursor:pointer;background:${bgT};min-height:50px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsChips||''}</td>
+    <td onclick="openLogUsageModal()" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${venueId}')" style="padding:4px;border-right:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:50px;min-width:65px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageChips||''}</td>`;
   });
 
   grid.innerHTML=`<div style="overflow-x:auto;width:100%"><table style="border-collapse:collapse;width:100%;min-width:600px">
@@ -3417,6 +3417,116 @@ async function adminLogUsage(){
   showToast('Usage logged!');
 }
 
+// ════════════════════════════════════════
+// DRAG & DROP — TASKS & USAGE
+// ════════════════════════════════════════
+let _dragData = null; // {type:'op'|'usage', id, srcDate, srcVenueId}
+
+function onDragStart(e, type, id, srcDate, srcVenueId){
+  _dragData = {type, id, srcDate, srcVenueId};
+  e.dataTransfer.effectAllowed = 'copyMove';
+  e.currentTarget.style.opacity = '0.5';
+}
+function onDragEnd(e){
+  e.currentTarget.style.opacity = '1';
+  _dragData = null;
+}
+function onDragOver(e){
+  e.preventDefault();
+  e.dataTransfer.dropEffect = e.ctrlKey ? 'copy' : 'move';
+  e.currentTarget.style.outline = '2px solid #185FA5';
+}
+function onDragLeave(e){
+  e.currentTarget.style.outline = '';
+}
+async function onDrop(e, newDate, newVenueId){
+  e.preventDefault();
+  e.currentTarget.style.outline = '';
+  if(!_dragData) return;
+  const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+  const copy = !isMobile && e.ctrlKey;
+
+  if(isMobile){
+    // On mobile: always ask Move or Copy
+    _pendingDrop = {e, newDate, newVenueId};
+    document.getElementById('dnd-new-date').textContent = newDate;
+    openModal('modal-dnd-choice');
+  } else {
+    await executeDrop(newDate, newVenueId, copy);
+  }
+}
+
+let _pendingDrop = null;
+
+async function dndChoose(copy){
+  closeModal('modal-dnd-choice');
+  if(!_pendingDrop) return;
+  const {newDate, newVenueId} = _pendingDrop;
+  _pendingDrop = null;
+  await executeDrop(newDate, newVenueId, copy);
+}
+
+async function executeDrop(newDate, newVenueId, copy){
+  if(!_dragData) return;
+  const {type, id, srcDate, srcVenueId} = _dragData;
+  const targetVenueId = newVenueId || srcVenueId;
+
+  if(type === 'op'){
+    const idx = state.operations.findIndex(o=>o.id===id);
+    if(idx === -1) return;
+    const op = state.operations[idx];
+    if(copy){
+      const newOp = {...op, id:'op_'+Date.now(), date:newDate, venueId:targetVenueId, createdAt:new Date().toISOString()};
+      const {error} = await supa.from('pitchops_operations').insert(opToDb(newOp));
+      if(error){ showToast('Error: '+error.message); return; }
+      state.operations.push(newOp);
+      showToast('Task copied to '+formatDateOnly(newDate));
+    } else {
+      const updated = {...op, date:newDate, venueId:targetVenueId};
+      const {error} = await supa.from('pitchops_operations').update({operation_date:newDate, venue_id:targetVenueId}).eq('id',id);
+      if(error){ showToast('Error: '+error.message); return; }
+      state.operations[idx] = updated;
+      showToast('Task moved to '+formatDateOnly(newDate));
+    }
+  } else if(type === 'usage'){
+    const arrays = [state_usage];
+    if(typeof state_admin_usage !== 'undefined') arrays.push(state_admin_usage);
+    let found = null, foundArr = null, foundIdx = -1;
+    for(const arr of arrays){
+      const i = arr.findIndex(u=>u.id===id);
+      if(i>-1){ found=arr[i]; foundArr=arr; foundIdx=i; break; }
+    }
+    if(!found) return;
+    if(copy){
+      const newU = {...found, id:'u_'+Date.now(), date:newDate, venueId:targetVenueId, createdAt:new Date().toISOString()};
+      const {error} = await supa.from('pitchops_usage').insert(usageToDb(newU));
+      if(error){ showToast('Error: '+error.message); return; }
+      foundArr.push(newU);
+      showToast('Usage copied to '+formatDateOnly(newDate));
+    } else {
+      const updated = {...found, date:newDate, venueId:targetVenueId};
+      const {error} = await supa.from('pitchops_usage').update({usage_date:newDate, venue_id:targetVenueId}).eq('id',id);
+      if(error){ showToast('Error: '+error.message); return; }
+      foundArr[foundIdx] = updated;
+      showToast('Usage moved to '+formatDateOnly(newDate));
+    }
+  }
+
+  _dragData = null;
+  // Re-render all visible views
+  const vid = state.currentVenueId;
+  const pid = state.currentProjectId;
+  if(vid){
+    renderVenueUpcoming(); renderVenueHistory(); renderVenueStats();
+    if(document.getElementById('vtab-schedule-content')?.style.display==='block')
+      renderWeekCalendar(vid,'venue-sched-grid',venueSchedOffset);
+  }
+  if(pid){
+    renderDetailOps(); renderDetailUsage();
+    if(document.getElementById('ptab-calendar-content')?.style.display==='block') renderGantt();
+  }
+}
+
 init();
 </script>
 
@@ -3651,6 +3761,27 @@ init();
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-admin-log-usage')">Cancel</button>
       <button class="btn btn-primary" onclick="adminLogUsage()" style="background:linear-gradient(135deg,#7C3AED,#6D28D9);border:none">Save usage</button>
+    </div>
+  </div>
+</div>
+
+<!-- DRAG & DROP CHOICE MODAL -->
+<div class="modal-overlay" id="modal-dnd-choice">
+  <div class="modal" style="max-width:320px;text-align:center">
+    <div class="modal-header">
+      <span class="modal-title">Move or Copy?</span>
+      <button class="modal-close" onclick="closeModal('modal-dnd-choice');_pendingDrop=null">✕</button>
+    </div>
+    <div class="modal-body" style="padding:1rem 1.5rem">
+      <p style="font-size:14px;color:var(--text-muted);margin-bottom:1.25rem">Target date: <strong id="dnd-new-date"></strong></p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <button onclick="dndChoose(false)" style="padding:12px;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">
+          ✂️ Move
+        </button>
+        <button onclick="dndChoose(true)" style="padding:12px;background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">
+          📋 Copy
+        </button>
+      </div>
     </div>
   </div>
 </div>
