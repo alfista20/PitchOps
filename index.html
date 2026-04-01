@@ -2031,10 +2031,29 @@ function populateOpTypeSelects(){
 function openManageTypesModal(){ renderOpTypesList(); openModal('modal-op-types'); }
 function renderOpTypesList(){
   document.getElementById('op-types-list').innerHTML=state.opTypes.map((t,i)=>`
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
-      <span style="font-size:13px">${esc(t)}</span>
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+      <input value="${esc(t)}" data-orig="${esc(t)}"
+        style="flex:1;font-size:13px;padding:5px 8px;border:1px solid transparent;border-radius:6px;font-family:'DM Sans',sans-serif;background:transparent;outline:none"
+        onfocus="this.style.border='1px solid var(--blue)';this.style.background='white'"
+        onblur="renameOpType(${i},this)"
+        onkeydown="if(event.key==='Enter')this.blur()"
+      />
       <button class="btn btn-danger btn-sm" onclick="removeOpType(${i})">Remove</button>
     </div>`).join('');
+}
+async function renameOpType(i, input){
+  input.style.border='1px solid transparent';
+  input.style.background='transparent';
+  const oldName=input.dataset.orig;
+  const newName=input.value.trim();
+  if(!newName||newName===oldName){ input.value=oldName; return; }
+  if(state.opTypes.includes(newName)){ showToast('Type already exists'); input.value=oldName; return; }
+  const {error}=await supa.from('pitchops_op_types').update({name:newName}).eq('name',oldName);
+  if(error){ showToast(error.message); input.value=oldName; return; }
+  state.opTypes[i]=newName;
+  input.dataset.orig=newName;
+  populateOpTypeSelects();
+  showToast('Renamed');
 }
 async function addOpType(){
   const val=document.getElementById('new-op-type-input').value.trim();
