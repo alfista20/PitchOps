@@ -646,6 +646,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
   <!-- TABS -->
   <div style="background:white;border-bottom:1px solid var(--border);padding:0 1.25rem;display:flex;flex-shrink:0">
     <button id="vtab-log" onclick="switchVenueTab('log')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid var(--blue);background:white;color:var(--blue);cursor:pointer;font-family:'DM Sans',sans-serif">🗒 Log task</button>
+    <button id="vtab-usage" onclick="switchVenueTab('usage')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif">⏱ Log usage</button>
     <button id="vtab-schedule" onclick="switchVenueTab('schedule')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif">📅 Schedule</button>
   </div>
 
@@ -678,6 +679,32 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     </div>
   </div>
 
+  <!-- LOG USAGE TAB -->
+  <div id="vtab-usage-content" style="display:none;padding:1rem;max-width:860px;margin:0 auto;width:100%;box-sizing:border-box">
+    <!-- TODAY'S USAGE -->
+    <div style="background:white;border-radius:16px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);margin-bottom:1rem;overflow:hidden">
+      <div style="padding:1rem 1.25rem .75rem;display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif">Today</div>
+        <button onclick="openLogUsageModal()" style="background:linear-gradient(135deg,#185FA5,#1d4ed8);border:none;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;color:white;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 3px 10px rgba(24,95,165,.35)">+ Log usage</button>
+      </div>
+      <div id="venue-usage-today" style="display:none">
+        <div id="venue-usage-today-list" style="padding:0 .75rem .75rem"></div>
+      </div>
+      <div id="venue-usage-today-empty" style="padding:2.5rem 1rem;text-align:center;display:none">
+        <div style="font-size:36px;margin-bottom:8px">⚽</div>
+        <div style="font-size:15px;font-weight:600;color:var(--text-muted)">No usage logged today</div>
+        <div style="font-size:13px;color:var(--text-hint);margin-top:4px">Tap "+ Log usage" to add one</div>
+      </div>
+    </div>
+    <!-- USAGE HISTORY -->
+    <div style="background:white;border-radius:16px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);overflow:hidden">
+      <div style="padding:1rem 1.25rem .75rem;display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif">Usage history</div>
+        <input type="text" id="venue-usage-search" placeholder="🔍 Search..." oninput="renderVenueUsageHistory()" style="padding:7px 12px;border:1px solid rgba(0,0,0,.1);border-radius:10px;font-size:12px;outline:none;width:140px;font-family:'DM Sans',sans-serif;background:#f8fafc"/>
+      </div>
+      <div id="venue-usage-history-list" style="max-height:520px;overflow-y:auto"></div>
+    </div>
+  </div>
   <!-- SCHEDULE TAB -->
   <div id="vtab-schedule-content" style="display:none;padding:.75rem">
     <div style="background:white;border:1px solid rgba(0,0,0,.06);border-radius:16px;box-shadow:0 2px 12px rgba(12,35,64,.08);overflow:hidden">
@@ -1850,7 +1877,7 @@ async function enterVenueDashboard(venue){
   renderStaffTags(); renderPhotoPreviews('new');
   showScreen('screen-venue');
   // Load data then render
-  await refreshVenueOps(venue.id, true);
+  await Promise.all([refreshVenueOps(venue.id, true), refreshVenueUsage(venue.id, true)]);
   populateOpTypeSelects();
   renderVenueContactInfo();
   switchVenueTab('log');
@@ -2655,11 +2682,30 @@ let unifiedCalOffset = {};
 
 function renderWeekCalendar(venueId, gridId, weekOffset){
   const grid=document.getElementById(gridId); if(!grid) return;
-  const today=new Date(todayStr());
-  const dayNames=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  const opts={day:'2-digit',month:'short'};
-
   const labelEl=document.getElementById(gridId.replace('-grid','-label'));
+  const today=todayStr();
+
+  const weekStart=ganttWeekStart(weekOffset||0);
+  const weekDays=Array.from({length:7},(_,i)=>{ const d=new Date(weekStart); d.setDate(weekStart.getDate()+i); return d; });
+  if(labelEl) labelEl.textContent=weekDays[0].toLocaleDateString('en-GB',{day:'2-digit',month:'short'})+' — '+weekDays[6].toLocaleDateString('en-GB',{day:'2-digit',month:'short'});
+
+  // Get all ops and usage for this venue
+  const ops=state.operations.filter(o=>o.venueId===venueId);
+  const usage=state_usage.filter(u=>u.venueId===venueId);
+
+  const allDates=[...new Set([
+    ...ops.map(o=>(o.date||'').slice(0,10)),
+    ...usage.map(u=>(u.date||'').slice(0,10))
+  ].filter(Boolean))].sort();
+
+  const weekDayStrs=weekDays.map(d=>{ const ld=new Date(d.getFullYear(),d.getMonth(),d.getDate()); return ld.getFullYear()+'-'+String(ld.getMonth()+1).padStart(2,'0')+'-'+String(ld.getDate()).padStart(2,'0'); });
+  const allCols=[...new Set([...weekDayStrs,...allDates])].sort();
+
+  if(!allCols.length){
+    if(labelEl) labelEl.textContent='No tasks';
+    grid.innerHTML='<div style="padding:2rem;text-align:center;color:#96a6bb;font-size:13px">No tasks logged yet. Click "+ Log task" to add one.</div>';
+    return;
+  }
 
   const chipStyle={
     planned:'background:#FAEEDA;color:#854F0B;border-left:3px solid #EF9F27',
@@ -2667,68 +2713,67 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
     completed:'background:#EAF3DE;color:#3B6D11;border-left:3px solid #3B6D11',
     missed:'background:#FCEBEB;color:#A32D2D;border-left:3px solid #A32D2D',
   };
-
-  // Get ALL ops for this venue, sorted by date
-  const ops=state.operations.filter(o=>o.venueId===venueId)
-    .sort((a,b)=>(a.date||'').localeCompare(b.date||''));
-
-  if(!ops.length){
-    if(labelEl) labelEl.textContent='No tasks';
-    grid.innerHTML='<div style="padding:2rem;text-align:center;color:#96a6bb;font-size:13px">No tasks logged yet. Click "+ Log task" to add one.</div>';
-    return;
-  }
-
-  // Get unique dates from ALL ops (not just current week)
-  const weekStart=ganttWeekStart(weekOffset||0);
-  const weekDays=Array.from({length:7},(_,i)=>{ const d=new Date(weekStart); d.setDate(weekStart.getDate()+i); return d; });
-
-  // Update label
-  if(labelEl) labelEl.textContent=weekDays[0].toLocaleDateString('en-GB',opts)+' — '+weekDays[6].toLocaleDateString('en-GB',opts);
-
-  // Get all unique dates that have tasks (sorted)
-  const allDates=[...new Set(ops.map(o=>(o.date||'').slice(0,10)).filter(Boolean))].sort();
-
-  // Determine which dates to show:
-  // Current week days + any other dates that have tasks
-  const weekDayStrs=weekDays.map(d=>d.toISOString().slice(0,10));
-  const extraDates=allDates.filter(d=>!weekDayStrs.includes(d));
-  const allCols=[...weekDayStrs]; // always show current week
-  // Add dates outside current week that have tasks
-  extraDates.forEach(d=>{ if(!allCols.includes(d)) allCols.push(d); });
-  allCols.sort();
+  const usageChipStyle={
+    planned:'background:#F3E8FF;color:#6B21A8;border-left:3px solid #A855F7',
+    inprogress:'background:#ECFDF5;color:#065F46;border-left:3px solid #10B981',
+    completed:'background:#F0FDF4;color:#14532D;border-left:3px solid #16A34A',
+    missed:'background:#FCEBEB;color:#A32D2D;border-left:3px solid #A32D2D',
+  };
+  const dayNames=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
   // Build header
-  let headerCols='<th style="width:50px;padding:6px 8px;font-size:10px;color:#5a6a82;border-right:1px solid rgba(0,0,0,0.09);background:#fafbfc"></th>';
+  let headerCols='<th style="width:16px;min-width:16px;padding:6px 4px;background:#fafbfc;border-right:1px solid rgba(0,0,0,0.09)"></th>';
   allCols.forEach(dStr=>{
     const d=new Date(dStr+'T12:00:00');
-    const isT=dStr===todayStr();
+    const isT=dStr===today;
     const inWeek=weekDayStrs.includes(dStr);
     const dayName=dayNames[(d.getDay()+6)%7];
-    headerCols+=`<th style="padding:6px 4px;text-align:center;border-right:1px solid rgba(0,0,0,0.09);background:${isT?'rgba(24,95,165,0.08)':inWeek?'#fafbfc':'#f0f0f8'};min-width:90px;${!inWeek?'opacity:.7':''}">
+    headerCols+=`<th colspan="2" style="padding:6px 4px;text-align:center;border-right:1px solid rgba(0,0,0,0.09);background:${isT?'rgba(24,95,165,0.08)':'#fafbfc'};min-width:130px;${!inWeek?'opacity:.7':''}">
       <div style="font-size:9px;color:#96a6bb;text-transform:uppercase">${dayName}</div>
       <div style="font-size:13px;font-weight:700;color:${isT?'#185FA5':'#0C2340'}">${d.getDate()} ${d.toLocaleDateString('en-GB',{month:'short'})}</div>
     </th>`;
   });
 
-  // Build cells
-  let cells='<td style="padding:6px 8px;border-right:1px solid rgba(0,0,0,0.09);font-size:10px;font-weight:600;color:#5a6a82;background:#fafbfc;vertical-align:top;white-space:nowrap"></td>';
-  allCols.forEach(dStr=>{
-    const isT=dStr===todayStr();
-    const inWeek=weekDayStrs.includes(dStr);
-    const bg=isT?'rgba(24,95,165,0.04)':'white';
-    const dayOps=ops.filter(o=>(o.date||'').slice(0,10)===dStr)
-      .sort((a,b)=>{ const order={planned:0,inprogress:1,completed:2,missed:3}; return (order[a.status]||0)-(order[b.status]||0); });
-    const chips=dayOps.map(o=>{
-      const s=chipStyle[o.status]||chipStyle.planned;
-      const tl=o.timeFrom&&o.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${o.timeFrom}–${o.timeTo}</span>`:'';
-      return `<div onclick="openEditModal('${o.id}')" style="border-radius:4px;padding:3px 6px;font-size:10px;font-weight:600;margin-bottom:3px;cursor:pointer;${s}">${esc(o.type)}${tl}</div>`;
-    }).join('');
-    cells+=`<td onclick="openNewOpForDate('${dStr}')" style="padding:4px;border-right:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bg};min-height:50px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bg}'">${chips||''}</td>`;
+  // Sub-header: Tasks | Usage per date
+  let subHeaderCols='<th style="width:16px;background:#fafbfc;border-right:1px solid rgba(0,0,0,0.09)"></th>';
+  allCols.forEach(()=>{
+    subHeaderCols+=`<th style="padding:3px 4px;text-align:center;font-size:9px;font-weight:600;color:#96a6bb;text-transform:uppercase;background:#fafbfc;border-right:1px dashed rgba(0,0,0,0.06)">Tasks</th>
+    <th style="padding:3px 4px;text-align:center;font-size:9px;font-weight:600;color:#A855F7;text-transform:uppercase;background:#fafbfc;border-right:1px solid rgba(0,0,0,0.09)">Usage</th>`;
   });
 
-  grid.innerHTML=`<div style="overflow-x:auto;width:100%"><table style="border-collapse:collapse;width:100%;min-width:600px">
-    <thead><tr>${headerCols}</tr></thead>
-    <tbody><tr>${cells}</tr></tbody>
+  // Build time rows (hourly 06:00–22:00)
+  let bodyRows='';
+  for(let h=6;h<=22;h++){
+    const hStr=String(h).padStart(2,'0')+':00';
+    const hNext=String(h+1).padStart(2,'0')+':00';
+    let cells=`<td style="padding:2px 6px;font-size:10px;color:#96a6bb;border-right:1px solid rgba(0,0,0,0.09);background:#fafbfc;white-space:nowrap;vertical-align:top">${hStr}</td>`;
+    allCols.forEach(dStr=>{
+      const isT=dStr===today;
+      const bg=isT?'rgba(24,95,165,0.02)':'white';
+      // Tasks in this hour
+      const dayOps=ops.filter(o=>(o.date||'').slice(0,10)===dStr&&(o.timeFrom||'08:00')<=hStr&&(o.timeTo||'17:00')>hStr);
+      const opsChips=dayOps.map(o=>{
+        const cs=chipStyle[o.status]||chipStyle.planned;
+        return `<div onclick="openEditModal('${o.id}')" style="border-radius:4px;padding:2px 5px;font-size:10px;font-weight:600;margin-bottom:2px;cursor:pointer;${cs};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px">${esc(o.type)}</div>`;
+      }).join('');
+      // Usage in this hour
+      const dayUsage=usage.filter(u=>(u.date||'').slice(0,10)===dStr&&(u.timeFrom||'08:00')<=hStr&&(u.timeTo||'17:00')>hStr);
+      const usageChips=dayUsage.map(u=>{
+        const cs=usageChipStyle[u.status]||usageChipStyle.planned;
+        return `<div onclick="openEditUsageModal('${u.id}')" style="border-radius:4px;padding:2px 5px;font-size:10px;font-weight:600;margin-bottom:2px;cursor:pointer;${cs};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px">⚽ ${esc(u.usageType)}</div>`;
+      }).join('');
+      cells+=`<td onclick="openLogTaskModal()" style="padding:3px;border-right:1px dashed rgba(0,0,0,0.06);vertical-align:top;cursor:pointer;background:${bg};min-height:28px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bg}'">${opsChips}</td>
+      <td onclick="openLogUsageModal()" style="padding:3px;border-right:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${isT?'rgba(168,85,247,0.02)':'#fdf8ff'};min-height:28px;min-width:65px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${isT?'rgba(168,85,247,0.02)':'#fdf8ff'}'"}>${usageChips}</td>`;
+    });
+    bodyRows+=`<tr style="border-bottom:1px solid rgba(0,0,0,0.05)">${cells}</tr>`;
+  }
+
+  grid.innerHTML=`<div style="overflow-x:auto;width:100%"><table style="border-collapse:collapse;width:100%;min-width:600px;table-layout:auto">
+    <thead>
+      <tr>${headerCols}</tr>
+      <tr>${subHeaderCols}</tr>
+    </thead>
+    <tbody>${bodyRows}</tbody>
   </table></div>`;
 }
 
@@ -2740,20 +2785,25 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
 let venueSchedOffset = 0;
 
 function switchVenueTab(tab){
-  // Update tab button styles
-  const btnLog=document.getElementById('vtab-log');
-  const btnSched=document.getElementById('vtab-schedule');
-  if(btnLog){ btnLog.style.background=tab==='log'?'white':'transparent'; btnLog.style.color=tab==='log'?'var(--blue)':'var(--text-muted)'; btnLog.style.borderBottom=tab==='log'?'3px solid var(--blue)':'3px solid transparent'; }
-  if(btnSched){ btnSched.style.background=tab==='schedule'?'white':'transparent'; btnSched.style.color=tab==='schedule'?'var(--blue)':'var(--text-muted)'; btnSched.style.borderBottom=tab==='schedule'?'3px solid var(--blue)':'3px solid transparent'; }
-  document.getElementById('vtab-log-content').style.display = tab==='log' ? 'block' : 'none';
-  document.getElementById('vtab-schedule-content').style.display = tab==='schedule' ? 'block' : 'none';
+  const tabs=['log','usage','schedule'];
+  tabs.forEach(t=>{
+    const btn=document.getElementById('vtab-'+t);
+    const content=document.getElementById('vtab-'+t+'-content');
+    const active=t===tab;
+    if(btn){ btn.style.background=active?'white':'transparent'; btn.style.color=active?'var(--blue)':'var(--text-muted)'; btn.style.borderBottom=active?'3px solid var(--blue)':'3px solid transparent'; }
+    if(content) content.style.display=active?'block':'none';
+  });
   if(tab==='schedule'){
     venueSchedOffset=0;
     const vid=state.currentVenueId;
     if(vid){
       renderWeekCalendar(vid,'venue-sched-grid',0);
-      refreshVenueOps(vid,true).then(()=>renderWeekCalendar(vid,'venue-sched-grid',0));
+      Promise.all([refreshVenueOps(vid,true), refreshVenueUsage(vid,true)]).then(()=>renderWeekCalendar(vid,'venue-sched-grid',0));
     }
+  }
+  if(tab==='usage'){
+    const vid=state.currentVenueId;
+    if(vid) refreshVenueUsage(vid,true);
   }
 }
 
@@ -2820,7 +2870,391 @@ function toggleVenueMenu(){
   overlay.style.display=open?'block':'none';
 }
 
+// ════════════════════════════════════════
+// USAGE — STATE & DB
+// ════════════════════════════════════════
+let currentUsagePhotos = { new: [], edit: [] };
+let state_usage = []; // all usage for current venue
+
+function dbToUsage(r){
+  const d=(r.usage_date||'').slice(0,10);
+  const today=todayStr();
+  const autoStatus=d>today?'planned':'inprogress';
+  return {
+    id:r.id, venueId:r.venue_id, usageType:r.usage_type||'Training Session',
+    teamName:r.team_name||'', zone:r.zone||'', weather:r.weather||'',
+    notes:r.notes||'', date:d, timeFrom:r.time_from||'08:00',
+    timeTo:r.time_to||'17:00', status:r.status||autoStatus,
+    photos:r.photos||[], createdAt:r.created_at
+  };
+}
+function usageToDb(u){
+  return {
+    id:u.id, venue_id:u.venueId, usage_type:u.usageType,
+    team_name:u.teamName, zone:u.zone, weather:u.weather,
+    notes:u.notes, usage_date:u.date, time_from:u.timeFrom,
+    time_to:u.timeTo, status:u.status, photos:u.photos
+  };
+}
+
+async function refreshVenueUsage(venueId, silent=false){
+  if(!silent) showLoading(true);
+  try {
+    const {data} = await supa.from('pitchops_usage').select('*').eq('venue_id',venueId).order('usage_date',{ascending:false});
+    state_usage = (data||[]).map(dbToUsage);
+  } catch(e){ showToast('Error loading usage: '+e.message); }
+  if(!silent) showLoading(false);
+  renderVenueUsageToday();
+  renderVenueUsageHistory();
+  // Re-render calendar if visible
+  if(document.getElementById('vtab-schedule-content')?.style.display==='block'){
+    renderWeekCalendar(venueId,'venue-sched-grid',venueSchedOffset);
+  }
+}
+
+// ── RENDER TODAY ──
+function renderVenueUsageToday(){
+  const today=todayStr();
+  const visible=state_usage
+    .filter(u=>(u.status==='planned'||u.status==='inprogress')&&u.date===today)
+    .sort((a,b)=>(a.timeFrom||'').localeCompare(b.timeFrom||''));
+  const section=document.getElementById('venue-usage-today');
+  const list=document.getElementById('venue-usage-today-list');
+  const empty=document.getElementById('venue-usage-today-empty');
+  if(!section||!list||!empty) return;
+  if(!visible.length){ section.style.display='none'; empty.style.display='block'; return; }
+  section.style.display='block'; empty.style.display='none';
+  const scColors={planned:{bar:'#EF9F27',bg:'#FAEEDA',color:'#854F0B',icon:'🕐',label:'Planned'},inprogress:{bar:'#378ADD',bg:'#E6F1FB',color:'#185FA5',icon:'⚡',label:'In progress'}};
+  list.innerHTML=visible.map(u=>{
+    const sc=scColors[u.status]||scColors.planned;
+    const tl=u.timeFrom&&u.timeTo?`${u.timeFrom} – ${u.timeTo}`:'';
+    return `<div onclick="openEditUsageModal('${u.id}')" style="display:flex;align-items:stretch;border-radius:10px;overflow:hidden;margin-bottom:8px;cursor:pointer;border:1px solid ${sc.bar};transition:box-shadow .15s" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,.1)'" onmouseout="this.style.boxShadow='none'">
+      <div style="width:4px;background:${sc.bar};flex-shrink:0"></div>
+      <div style="flex:1;padding:10px 12px;background:${sc.bg}">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <div style="font-size:14px;font-weight:600;color:var(--navy)">⚽ ${esc(u.usageType)}</div>
+          <span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:${sc.bg};color:${sc.color};flex-shrink:0">${sc.icon} ${sc.label}</span>
+        </div>
+        ${u.teamName?`<div style="font-size:12px;color:var(--text-muted);margin-top:3px">👕 ${esc(u.teamName)}</div>`:''}
+        ${tl?`<div style="font-size:12px;color:var(--text-muted);margin-top:2px">🕐 ${tl}</div>`:''}
+        ${u.notes?`<div style="font-size:11px;color:var(--text-hint);margin-top:3px;font-style:italic">${esc(u.notes)}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── RENDER HISTORY ──
+function renderVenueUsageHistory(){
+  const search=(document.getElementById('venue-usage-search')?.value||'').toLowerCase();
+  const items=state_usage
+    .filter(u=>u.status==='completed'||u.status==='missed')
+    .filter(u=>!search||u.usageType.toLowerCase().includes(search)||(u.teamName||'').toLowerCase().includes(search)||(u.notes||'').toLowerCase().includes(search));
+  const container=document.getElementById('venue-usage-history-list');
+  if(!container) return;
+  const statusBar={completed:'#3B6D11',missed:'#A32D2D',inprogress:'#378ADD',planned:'#EF9F27'};
+  if(!items.length){ container.innerHTML=`<div style="padding:2rem;text-align:center;color:var(--text-hint);font-size:13px">No usage history yet</div>`; return; }
+  container.innerHTML=items.map(u=>{
+    const bar=statusBar[u.status]||'#888';
+    return `<div style="display:flex;align-items:stretch;border-bottom:1px solid rgba(0,0,0,.06);background:white;transition:background .12s" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+      <div style="width:3px;background:${bar};flex-shrink:0"></div>
+      <div style="flex:1;padding:10px 12px;display:flex;align-items:flex-start;gap:10px">
+        <div style="width:36px;height:36px;border-radius:8px;background:#E6F1FB;color:#185FA5;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">⚽</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:600;color:var(--navy)">${esc(u.usageType)}</div>
+          ${u.teamName?`<div style="font-size:11px;color:var(--text-muted);margin-top:1px">👕 ${esc(u.teamName)}</div>`:''}
+          ${u.notes?`<div style="font-size:11px;color:var(--text-hint);font-style:italic;margin-top:2px">${esc(u.notes)}</div>`:''}
+          ${u.photos&&u.photos.length?`<div class="admin-photo-strip" style="margin-top:6px">${u.photos.map((p,i)=>`<img src="${p.dataUrl}" style="border-radius:6px">`).join('')}</div>`:''}
+        </div>
+        <div style="flex-shrink:0;text-align:right;min-width:90px">
+          <div style="font-size:12px;font-weight:500;color:var(--text)">${formatDateOnly(u.date)}</div>
+          <div style="font-size:10px;color:var(--text-hint);margin-top:1px">${u.timeFrom}–${u.timeTo}</div>
+          <div style="font-size:10px;color:var(--text-hint);margin-top:1px">logged ${formatDate(u.createdAt||u.date)}</div>
+          <button onclick="openEditUsageModal('${u.id}')" style="margin-top:5px;background:#f1f5f9;border:none;border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text-muted)">Edit</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── LOG USAGE MODAL ──
+function openLogUsageModal(){
+  document.getElementById('usage-date').value=todayStr();
+  document.getElementById('usage-time-from').value='08:00';
+  document.getElementById('usage-time-to').value='17:00';
+  document.getElementById('usage-type-select').value='Training Session';
+  document.getElementById('usage-team').value='';
+  document.getElementById('usage-zone-select').value='';
+  document.getElementById('usage-zone-custom').value='';
+  document.getElementById('usage-zone-custom-wrap').style.display='none';
+  document.getElementById('usage-weather').value='';
+  document.getElementById('usage-notes').value='';
+  document.getElementById('usage-status').value='planned';
+  currentUsagePhotos.new=[];
+  renderUsagePhotoPreviews('new');
+  openModal('modal-log-usage');
+}
+
+function renderUsagePhotoPreviews(mode){
+  const id=mode==='new'?'usage-photo-previews':'edit-usage-photo-previews';
+  const el=document.getElementById(id); if(!el) return;
+  el.innerHTML=(currentUsagePhotos[mode]||[]).map((p,i)=>`
+    <div style="position:relative">
+      <img src="${p.dataUrl}" style="width:56px;height:56px;object-fit:cover;border-radius:8px;border:1px solid var(--border)"/>
+      <button onclick="removeUsagePhoto('${mode}',${i})" style="position:absolute;top:-4px;right:-4px;background:#dc2626;color:white;border:none;border-radius:50%;width:16px;height:16px;font-size:10px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center">×</button>
+    </div>`).join('');
+}
+function removeUsagePhoto(mode,i){ currentUsagePhotos[mode].splice(i,1); renderUsagePhotoPreviews(mode); }
+async function handleUsagePhotos(input){
+  const files=Array.from(input.files);
+  const remaining=4-(currentUsagePhotos.new||[]).length;
+  for(const f of files.slice(0,remaining)){
+    const dataUrl=await new Promise(res=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.readAsDataURL(f);});
+    currentUsagePhotos.new.push({dataUrl,name:f.name});
+  }
+  renderUsagePhotoPreviews('new'); input.value='';
+}
+async function handleEditUsagePhotos(input){
+  const files=Array.from(input.files);
+  const remaining=4-(currentUsagePhotos.edit||[]).length;
+  for(const f of files.slice(0,remaining)){
+    const dataUrl=await new Promise(res=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.readAsDataURL(f);});
+    currentUsagePhotos.edit.push({dataUrl,name:f.name});
+  }
+  renderUsagePhotoPreviews('edit'); input.value='';
+}
+
+async function logUsage(){
+  const venueId=state.currentVenueId; if(!venueId) return;
+  const zone=document.getElementById('usage-zone-select').value==='Custom'
+    ?document.getElementById('usage-zone-custom').value.trim()
+    :document.getElementById('usage-zone-select').value;
+  const u={
+    id:'u_'+Date.now(),
+    venueId, usageType:document.getElementById('usage-type-select').value,
+    teamName:document.getElementById('usage-team').value.trim(),
+    zone, weather:document.getElementById('usage-weather').value.trim(),
+    notes:document.getElementById('usage-notes').value.trim(),
+    date:document.getElementById('usage-date').value||todayStr(),
+    timeFrom:document.getElementById('usage-time-from').value||'08:00',
+    timeTo:document.getElementById('usage-time-to').value||'17:00',
+    status:document.getElementById('usage-status').value||'planned',
+    photos:currentUsagePhotos.new.map(p=>({dataUrl:p.dataUrl,name:p.name||'photo'})),
+    createdAt:new Date().toISOString()
+  };
+  const {error}=await supa.from('pitchops_usage').insert(usageToDb(u));
+  if(error){ showToast('Error: '+error.message); return; }
+  state_usage.unshift(u);
+  closeModal('modal-log-usage');
+  renderVenueUsageToday(); renderVenueUsageHistory();
+  if(document.getElementById('vtab-schedule-content')?.style.display==='block'){
+    renderWeekCalendar(venueId,'venue-sched-grid',venueSchedOffset);
+  }
+  showToast('Usage logged!');
+}
+
+// ── EDIT USAGE ──
+function openEditUsageModal(id){
+  const u=state_usage.find(x=>x.id===id); if(!u) return;
+  document.getElementById('edit-usage-id').value=u.id;
+  document.getElementById('edit-usage-type').value=u.usageType;
+  document.getElementById('edit-usage-team').value=u.teamName||'';
+  document.getElementById('edit-usage-zone').value=u.zone||'';
+  document.getElementById('edit-usage-weather').value=u.weather||'';
+  document.getElementById('edit-usage-notes').value=u.notes||'';
+  document.getElementById('edit-usage-date').value=u.date||'';
+  document.getElementById('edit-usage-time-from').value=u.timeFrom||'08:00';
+  document.getElementById('edit-usage-time-to').value=u.timeTo||'17:00';
+  document.getElementById('edit-usage-status').value=u.status||'planned';
+  currentUsagePhotos.edit=[...(u.photos||[])];
+  renderUsagePhotoPreviews('edit');
+  openModal('modal-edit-usage');
+}
+
+async function saveEditUsage(){
+  const id=document.getElementById('edit-usage-id').value;
+  const idx=state_usage.findIndex(u=>u.id===id); if(idx===-1) return;
+  state_usage[idx]={...state_usage[idx],
+    usageType:document.getElementById('edit-usage-type').value,
+    teamName:document.getElementById('edit-usage-team').value.trim(),
+    zone:document.getElementById('edit-usage-zone').value.trim(),
+    weather:document.getElementById('edit-usage-weather').value.trim(),
+    notes:document.getElementById('edit-usage-notes').value.trim(),
+    date:document.getElementById('edit-usage-date').value,
+    timeFrom:document.getElementById('edit-usage-time-from').value||'08:00',
+    timeTo:document.getElementById('edit-usage-time-to').value||'17:00',
+    status:document.getElementById('edit-usage-status').value,
+    photos:currentUsagePhotos.edit.map(p=>({dataUrl:p.dataUrl,name:p.name||'photo'})),
+  };
+  const {error}=await supa.from('pitchops_usage').update(usageToDb(state_usage[idx])).eq('id',id);
+  if(error){ showToast('Error: '+error.message); return; }
+  closeModal('modal-edit-usage');
+  renderVenueUsageToday(); renderVenueUsageHistory();
+  if(document.getElementById('vtab-schedule-content')?.style.display==='block'){
+    renderWeekCalendar(state.currentVenueId,'venue-sched-grid',venueSchedOffset);
+  }
+  showToast('Usage updated');
+}
+
+async function deleteUsage(){
+  const id=document.getElementById('edit-usage-id').value;
+  if(!confirm('Delete this usage entry?')) return;
+  const {error}=await supa.from('pitchops_usage').delete().eq('id',id);
+  if(error){ showToast('Error: '+error.message); return; }
+  state_usage=state_usage.filter(u=>u.id!==id);
+  closeModal('modal-edit-usage');
+  renderVenueUsageToday(); renderVenueUsageHistory();
+  if(document.getElementById('vtab-schedule-content')?.style.display==='block'){
+    renderWeekCalendar(state.currentVenueId,'venue-sched-grid',venueSchedOffset);
+  }
+  showToast('Deleted');
+}
+
 init();
 </script>
+
+<!-- LOG USAGE MODAL -->
+<div class="modal-overlay" id="modal-log-usage">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Log pitch usage</span>
+      <button class="modal-close" onclick="closeModal('modal-log-usage')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Usage type</label>
+        <select id="usage-type-select" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px">
+          <option value="Match Day">Match Day</option>
+          <option value="Training Session">Training Session</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Team name</label>
+        <input id="usage-team" type="text" placeholder="e.g. FC Barcelona U20"/>
+      </div>
+      <div class="field">
+        <label>Pitch area / zone</label>
+        <select id="usage-zone-select" onchange="document.getElementById('usage-zone-custom-wrap').style.display=this.value==='Custom'?'block':'none'">
+          <option value="">Full pitch</option>
+          <option value="Half A">Half A</option>
+          <option value="Half B">Half B</option>
+          <option value="Third A">Third A</option>
+          <option value="Third B">Third B</option>
+          <option value="Third C">Third C</option>
+          <option value="Custom">Custom...</option>
+        </select>
+        <div id="usage-zone-custom-wrap" style="display:none;margin-top:6px">
+          <input id="usage-zone-custom" type="text" placeholder="Describe zone..."/>
+        </div>
+      </div>
+      <div class="field">
+        <label>Weather conditions</label>
+        <input id="usage-weather" type="text" placeholder="e.g. sunny, 18°C"/>
+      </div>
+      <div class="field">
+        <label>Notes / observations</label>
+        <textarea id="usage-notes" rows="2" placeholder="Any notes..." style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;resize:vertical;box-sizing:border-box"></textarea>
+      </div>
+      <div class="field">
+        <label>Usage date</label>
+        <input id="usage-date" type="date"/>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="field">
+          <label>Time from</label>
+          <input id="usage-time-from" type="time" value="08:00"/>
+        </div>
+        <div class="field">
+          <label>Time to</label>
+          <input id="usage-time-to" type="time" value="17:00"/>
+        </div>
+      </div>
+      <div class="field">
+        <label>Status</label>
+        <select id="usage-status">
+          <option value="planned">Planned</option>
+          <option value="inprogress">In progress</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Photos (max 4)</label>
+        <div id="usage-photo-previews" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"></div>
+        <label style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#f1f5f9;border-radius:8px;cursor:pointer;font-size:12px;color:var(--text-muted)">
+          📷 Add photos <input type="file" accept="image/*" multiple style="display:none" onchange="handleUsagePhotos(this)"/>
+        </label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-log-usage')">Cancel</button>
+      <button class="btn btn-primary" onclick="logUsage()">Save usage</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT USAGE MODAL -->
+<div class="modal-overlay" id="modal-edit-usage">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Edit usage</span>
+      <button class="modal-close" onclick="closeModal('modal-edit-usage')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-usage-id"/>
+      <div class="field">
+        <label>Usage type</label>
+        <select id="edit-usage-type">
+          <option value="Match Day">Match Day</option>
+          <option value="Training Session">Training Session</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Team name</label>
+        <input id="edit-usage-team" type="text"/>
+      </div>
+      <div class="field">
+        <label>Pitch area / zone</label>
+        <input id="edit-usage-zone" type="text"/>
+      </div>
+      <div class="field">
+        <label>Weather conditions</label>
+        <input id="edit-usage-weather" type="text"/>
+      </div>
+      <div class="field">
+        <label>Notes</label>
+        <textarea id="edit-usage-notes" rows="2" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;resize:vertical;box-sizing:border-box"></textarea>
+      </div>
+      <div class="field">
+        <label>Usage date</label>
+        <input id="edit-usage-date" type="date"/>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="field"><label>Time from</label><input id="edit-usage-time-from" type="time"/></div>
+        <div class="field"><label>Time to</label><input id="edit-usage-time-to" type="time"/></div>
+      </div>
+      <div class="field">
+        <label>Status</label>
+        <select id="edit-usage-status">
+          <option value="planned">Planned</option>
+          <option value="inprogress">In progress</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Photos (max 4)</label>
+        <div id="edit-usage-photo-previews" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"></div>
+        <label style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#f1f5f9;border-radius:8px;cursor:pointer;font-size:12px;color:var(--text-muted)">
+          📷 Add photos <input type="file" accept="image/*" multiple style="display:none" onchange="handleEditUsagePhotos(this)"/>
+        </label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="deleteUsage()">Delete</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-edit-usage')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditUsage()">Save changes</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
