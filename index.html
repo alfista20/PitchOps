@@ -2540,13 +2540,7 @@ async function renderGantt(){
   // Load all operations for this project's venues
   const vids=projectVenues(pid).map(v=>v.id);
   let allOps=state.operations.filter(o=>vids.includes(o.venueId));
-  // Auto-mark planned ops as missed if date passed
-  for(const op of allOps){
-    if(op.status==='planned' && op.date<todayStr()){
-      op.status='missed';
-      supa.from('pitchops_operations').update({status:'missed'}).eq('id',op.id);
-    }
-  }
+
 
   const chipStyle={
     planned:'background:#FAEEDA;color:#854F0B;border-left:3px solid #EF9F27',
@@ -2612,14 +2606,7 @@ function renderVenueUpcoming(){
 
   const allVenueOps=state.operations.filter(o=>o.venueId===vid);
 
-  // Auto-mark missed
-  allVenueOps.forEach(op=>{
-    const opDate=(op.date||'').slice(0,10);
-    if(op.status==='planned' && opDate < today){
-      op.status='missed';
-      supa.from('pitchops_operations').update({status:'missed'}).eq('id',op.id);
-    }
-  });
+
 
   const visible=allVenueOps
     .filter(o=>(o.status==='planned'||o.status==='inprogress')&&(o.date||'').slice(0,10)===today)
