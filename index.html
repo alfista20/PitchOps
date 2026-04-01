@@ -742,6 +742,9 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     <button id="vtab-log" onclick="switchVenueTab('log')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid var(--blue);background:white;color:var(--blue);cursor:pointer;font-family:'DM Sans',sans-serif">🗒 Log task</button>
     <button id="vtab-usage" onclick="switchVenueTab('usage')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif">⏱ Log usage</button>
     <button id="vtab-schedule" onclick="switchVenueTab('schedule')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif">📅 Schedule</button>
+    <button id="vtab-stats" onclick="switchVenueTab('stats')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif">📊 Stats</button>
+    <button id="vtab-stats" onclick="switchVenueTab('stats')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif">📊 Stats</button>
+    <button id="vtab-stats" onclick="switchVenueTab('stats')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif">📊 Stats</button>
   </div>
 
   <!-- LOG TASK TAB -->
@@ -798,6 +801,106 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       </div>
       <div id="venue-usage-history-list" style="max-height:520px;overflow-y:auto"></div>
     </div>
+  </div>
+  <!-- VENUE STATS TAB -->
+  <div id="vtab-stats-content" style="display:none;padding:1rem;max-width:960px;margin:0 auto;width:100%;box-sizing:border-box">
+    <!-- FILTERS -->
+    <div style="background:white;border-radius:12px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);padding:1rem 1.25rem;margin-bottom:1rem;display:flex;flex-wrap:wrap;align-items:center;gap:.75rem">
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+        <span style="font-size:12px;font-weight:600;color:var(--text-muted)">Period:</span>
+        <button onclick="setVenueStatsPeriod('week',this)" class="stats-period-btn">Week</button>
+        <button onclick="setVenueStatsPeriod('month',this)" class="stats-period-btn stats-period-active">Month</button>
+        <button onclick="setVenueStatsPeriod('quarter',this)" class="stats-period-btn">Quarter</button>
+        <button onclick="setVenueStatsPeriod('custom',this)" class="stats-period-btn">Custom</button>
+      </div>
+      <div id="vstats-custom-dates" style="display:none;gap:6px;align-items:center">
+        <input type="date" id="vstats-from" onchange="renderVenueStats_tab()" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif"/>
+        <span style="font-size:12px;color:var(--text-muted)">→</span>
+        <input type="date" id="vstats-to" onchange="renderVenueStats_tab()" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif"/>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:12px;font-weight:600;color:var(--text-muted)">Show:</span>
+        <select id="vstats-data-filter" onchange="renderVenueStats_tab()" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif">
+          <option value="both">Tasks & Usage</option>
+          <option value="tasks">Tasks only</option>
+          <option value="usage">Usage only</option>
+        </select>
+      </div>
+      <button onclick="exportVenueStatsPDF()" style="margin-left:auto;padding:7px 16px;background:linear-gradient(135deg,#0C2340,#185FA5);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">⬇ Export PDF</button>
+    </div>
+    <!-- SUMMARY -->
+    <div id="vstats-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;margin-bottom:1rem"></div>
+    <!-- CHARTS -->
+    <div id="vstats-charts" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:1rem"></div>
+  </div>
+
+  <!-- VENUE STATS TAB -->
+  <div id="vtab-stats-content" style="display:none;padding:1rem;max-width:1100px;margin:0 auto;width:100%;box-sizing:border-box">
+
+    <!-- FILTERS -->
+    <div style="background:white;border-radius:12px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);padding:1rem 1.25rem;margin-bottom:1rem;display:flex;flex-wrap:wrap;align-items:center;gap:.75rem">
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+        <span style="font-size:12px;font-weight:600;color:var(--text-muted)">Period:</span>
+        <button onclick="setVenueStatsPeriod('week',this)" class="stats-period-btn">Week</button>
+        <button onclick="setVenueStatsPeriod('month',this)" class="stats-period-btn stats-period-active">Month</button>
+        <button onclick="setVenueStatsPeriod('quarter',this)" class="stats-period-btn">Quarter</button>
+        <button onclick="setVenueStatsPeriod('custom',this)" class="stats-period-btn">Custom</button>
+      </div>
+      <div id="vstats-custom-dates" style="display:none;gap:6px;align-items:center">
+        <input type="date" id="vstats-from" onchange="renderVenueStats_tab()" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif"/>
+        <span style="font-size:12px;color:var(--text-muted)">→</span>
+        <input type="date" id="vstats-to" onchange="renderVenueStats_tab()" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif"/>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:12px;font-weight:600;color:var(--text-muted)">Show:</span>
+        <select id="vstats-data-filter" onchange="renderVenueStats_tab()" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif">
+          <option value="both">Tasks & Usage</option>
+          <option value="tasks">Tasks only</option>
+          <option value="usage">Usage only</option>
+        </select>
+      </div>
+      <button onclick="exportVenueStatsPDF()" style="margin-left:auto;padding:7px 16px;background:linear-gradient(135deg,#0C2340,#185FA5);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">⬇ Export PDF</button>
+    </div>
+
+    <!-- SUMMARY CARDS -->
+    <div id="vstats-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.75rem;margin-bottom:1rem"></div>
+
+    <!-- CHARTS -->
+    <div id="vstats-charts" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:1rem"></div>
+  </div>
+  <!-- VENUE STATS TAB -->
+  <div id="vtab-stats-content" style="display:none;padding:1rem;max-width:1000px;margin:0 auto;width:100%;box-sizing:border-box">
+
+    <!-- FILTERS -->
+    <div style="background:white;border-radius:14px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);padding:1rem 1.25rem;margin-bottom:1rem;display:flex;flex-wrap:wrap;align-items:center;gap:.75rem">
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+        <span style="font-size:12px;font-weight:600;color:var(--text-muted)">Period:</span>
+        <button onclick="setVenueStatsPeriod('week',this)" class="stats-period-btn">Week</button>
+        <button onclick="setVenueStatsPeriod('month',this)" class="stats-period-btn stats-period-active">Month</button>
+        <button onclick="setVenueStatsPeriod('quarter',this)" class="stats-period-btn">Quarter</button>
+        <button onclick="setVenueStatsPeriod('custom',this)" class="stats-period-btn">Custom</button>
+      </div>
+      <div id="vstats-custom-dates" style="display:none;gap:6px;align-items:center">
+        <input type="date" id="vstats-from" onchange="renderVenueStats_tab()" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif"/>
+        <span style="font-size:12px;color:var(--text-muted)">→</span>
+        <input type="date" id="vstats-to" onchange="renderVenueStats_tab()" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif"/>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:12px;font-weight:600;color:var(--text-muted)">Show:</span>
+        <select id="vstats-data-filter" onchange="renderVenueStats_tab()" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif">
+          <option value="both">Tasks & Usage</option>
+          <option value="tasks">Tasks only</option>
+          <option value="usage">Usage only</option>
+        </select>
+      </div>
+      <button onclick="exportVenueStatsPDF()" style="margin-left:auto;padding:7px 16px;background:linear-gradient(135deg,#0C2340,#185FA5);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">⬇ Export PDF</button>
+    </div>
+
+    <!-- SUMMARY CARDS -->
+    <div id="vstats-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;margin-bottom:1rem"></div>
+
+    <!-- CHARTS -->
+    <div id="vstats-charts" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:1rem"></div>
   </div>
   <!-- SCHEDULE TAB -->
   <div id="vtab-schedule-content" style="display:none;padding:.75rem">
@@ -2925,7 +3028,7 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
 let venueSchedOffset = 0;
 
 function switchVenueTab(tab){
-  const tabs=['log','usage','schedule'];
+  const tabs=['log','usage','schedule','stats'];
   tabs.forEach(t=>{
     const btn=document.getElementById('vtab-'+t);
     const content=document.getElementById('vtab-'+t+'-content');
@@ -2933,6 +3036,14 @@ function switchVenueTab(tab){
     if(btn){ btn.style.background=active?'white':'transparent'; btn.style.color=active?'var(--blue)':'var(--text-muted)'; btn.style.borderBottom=active?'3px solid var(--blue)':'3px solid transparent'; }
     if(content) content.style.display=active?'block':'none';
   });
+  if(tab==='stats'){
+    const vid=state.currentVenueId;
+    if(vid) Promise.all([refreshVenueOps(vid,true), refreshVenueUsage(vid,true)]).then(()=>renderVenueStats_tab());
+  }
+  if(tab==='stats'){
+    const vid=state.currentVenueId;
+    if(vid) Promise.all([refreshVenueOps(vid,true), refreshVenueUsage(vid,true)]).then(()=>renderVenueStats_tab());
+  }
   if(tab==='schedule'){
     venueSchedOffset=0;
     const vid=state.currentVenueId;
@@ -2944,6 +3055,10 @@ function switchVenueTab(tab){
   if(tab==='usage'){
     const vid=state.currentVenueId;
     if(vid) refreshVenueUsage(vid,true);
+  }
+  if(tab==='stats'){
+    const vid=state.currentVenueId;
+    if(vid) Promise.all([refreshVenueOps(vid,true),refreshVenueUsage(vid,true)]).then(()=>renderVenueStats_tab());
   }
 }
 
@@ -3399,6 +3514,9 @@ function openAdminLogTaskModal(dateStr){
   const tsel=document.getElementById('admin-task-type');
   tsel.innerHTML=state.opTypes.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
   document.getElementById('admin-task-date').value=dateStr||todayStr();
+  document.getElementById('admin-task-zone-select').value='Full pitch';
+  document.getElementById('admin-task-zone-custom-wrap').style.display='none';
+  document.getElementById('admin-task-zone-custom').value='';
   document.getElementById('admin-task-time-from').value='08:00';
   document.getElementById('admin-task-time-to').value='17:00';
   document.getElementById('admin-task-zone').value='';
@@ -3457,6 +3575,8 @@ function openAdminLogUsageModal(dateStr){
   const vsel=document.getElementById('admin-usage-venue');
   vsel.innerHTML=venues.map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('');
   document.getElementById('admin-usage-date').value=dateStr||todayStr();
+  document.getElementById('admin-usage-zone-select').value='Full pitch';
+  document.getElementById('admin-usage-zone-custom-wrap').style.display='none';
   document.getElementById('admin-usage-time-from').value='08:00';
   document.getElementById('admin-usage-time-to').value='17:00';
   document.getElementById('admin-usage-type').value='Training Session';
@@ -3474,7 +3594,9 @@ async function adminLogUsage(){
     id:'u_'+Date.now(), venueId,
     usageType:document.getElementById('admin-usage-type').value,
     teamName:document.getElementById('admin-usage-team').value.trim(),
-    zone:document.getElementById('admin-usage-zone').value.trim(),
+    zone:(document.getElementById('admin-usage-zone-select').value==='Custom'
+      ?document.getElementById('admin-usage-zone-custom').value.trim()
+      :document.getElementById('admin-usage-zone-select').value)||'Full pitch',
     weather:document.getElementById('admin-usage-weather').value.trim(),
     notes:document.getElementById('admin-usage-notes').value.trim(),
     date:document.getElementById('admin-usage-date').value||todayStr(),
@@ -3899,6 +4021,195 @@ async function exportStatsPDF(){
   setTimeout(()=>win.print(), 500);
 }
 
+// ════════════════════════════════════════
+// VENUE STATS TAB
+// ════════════════════════════════════════
+let venueStatsPeriod = 'month';
+let venueStatsCharts = {};
+
+function getVenueStatsDates(){
+  const now = new Date();
+  let from, to = todayStr();
+  if(venueStatsPeriod==='week'){
+    const d=new Date(now); d.setDate(now.getDate()-now.getDay()+1);
+    from=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  } else if(venueStatsPeriod==='month'){
+    from=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-01';
+  } else if(venueStatsPeriod==='quarter'){
+    const q=new Date(now.getFullYear(),Math.floor(now.getMonth()/3)*3,1);
+    from=q.getFullYear()+'-'+String(q.getMonth()+1).padStart(2,'0')+'-01';
+  } else {
+    from=document.getElementById('vstats-from')?.value||'';
+    to=document.getElementById('vstats-to')?.value||todayStr();
+  }
+  return {from, to};
+}
+
+function setVenueStatsPeriod(period, btn){
+  venueStatsPeriod=period;
+  document.querySelectorAll('#vtab-stats-content .stats-period-btn').forEach(b=>b.classList.remove('stats-period-active'));
+  btn.classList.add('stats-period-active');
+  const el=document.getElementById('vstats-custom-dates');
+  if(el) el.style.display=period==='custom'?'flex':'none';
+  renderVenueStats_tab();
+}
+
+function renderVenueStats_tab(){
+  const vid=state.currentVenueId; if(!vid) return;
+  const {from,to}=getVenueStatsDates();
+  const dataFilter=document.getElementById('vstats-data-filter')?.value||'both';
+
+  const ops=state.operations.filter(o=>o.venueId===vid&&(!from||o.date>=from)&&(!to||o.date<=to));
+  const usage=state_usage.filter(u=>u.venueId===vid&&(!from||u.date>=from)&&(!to||u.date<=to));
+
+  const totalTaskHours=ops.reduce((s,o)=>s+calcHours(o.timeFrom,o.timeTo),0);
+  const totalUsageHours=usage.reduce((s,u)=>s+calcHours(u.timeFrom,u.timeTo),0);
+
+  // Summary cards
+  const summaryEl=document.getElementById('vstats-summary');
+  if(summaryEl) summaryEl.innerHTML=[
+    {label:'Total tasks',val:ops.length,color:'#185FA5',icon:'📋'},
+    {label:'Task hours',val:totalTaskHours.toFixed(1)+'h',color:'#185FA5',icon:'⏱'},
+    {label:'Total usage',val:usage.length,color:'#7C3AED',icon:'⚽'},
+    {label:'Usage hours',val:totalUsageHours.toFixed(1)+'h',color:'#7C3AED',icon:'🕐'},
+    {label:'Completed tasks',val:ops.filter(o=>o.status==='completed').length,color:'#3B6D11',icon:'✅'},
+    {label:'Tasks/Usage ratio',val:totalUsageHours>0?(totalTaskHours/totalUsageHours).toFixed(1)+'x':'—',color:'#854F0B',icon:'📊'},
+  ].map(s=>`<div style="background:white;border-radius:12px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);padding:1rem;text-align:center">
+    <div style="font-size:20px;margin-bottom:4px">${s.icon}</div>
+    <div style="font-size:22px;font-weight:700;color:${s.color};font-family:'Syne',sans-serif">${s.val}</div>
+    <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px">${s.label}</div>
+  </div>`).join('');
+
+  // Destroy old charts
+  Object.values(venueStatsCharts).forEach(ch=>{try{ch.destroy();}catch(e){}});
+  venueStatsCharts={};
+
+  const chartsEl=document.getElementById('vstats-charts');
+  if(!chartsEl) return;
+
+  const charts=[];
+
+  if(dataFilter!=='usage'){
+    // Task hours per type
+    const typeHours={};
+    ops.forEach(o=>{typeHours[o.type]=(typeHours[o.type]||0)+calcHours(o.timeFrom,o.timeTo);});
+    const sorted=Object.entries(typeHours).sort((a,b)=>b[1]-a[1]).slice(0,10);
+    if(sorted.length) charts.push({id:'vch-task-types',title:'Task hours by type',type:'bar',
+      data:{labels:sorted.map(t=>t[0]),datasets:[{label:'Hours',data:sorted.map(t=>+t[1].toFixed(1)),backgroundColor:'#185FA5cc',borderRadius:4}]},
+      opts:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Hours'}}}}});
+
+    // Activity over time
+    if(ops.length){
+      const byDate={};
+      ops.forEach(o=>{byDate[o.date]=(byDate[o.date]||0)+1;});
+      const dates=Object.keys(byDate).sort();
+      charts.push({id:'vch-activity',title:'Task activity over time',type:'line',
+        data:{labels:dates.map(d=>formatDateOnly(d)),datasets:[{label:'Tasks',data:dates.map(d=>byDate[d]),borderColor:'#185FA5',backgroundColor:'#185FA520',tension:.3,fill:true,pointRadius:3}]},
+        opts:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
+    }
+
+    // Status breakdown
+    if(ops.length){
+      const sc={planned:0,inprogress:0,completed:0,missed:0};
+      ops.forEach(o=>{if(sc[o.status]!==undefined)sc[o.status]++;});
+      charts.push({id:'vch-status',title:'Tasks by status',type:'doughnut',
+        data:{labels:['Planned','In progress','Completed','Missed'],datasets:[{data:[sc.planned,sc.inprogress,sc.completed,sc.missed],backgroundColor:['#EF9F27','#378ADD','#3B6D11','#A32D2D'],borderWidth:2}]},
+        opts:{plugins:{legend:{position:'bottom'}}}});
+    }
+  }
+
+  if(dataFilter!=='tasks'){
+    // Usage hours per type
+    if(usage.length){
+      const uh={'Match Day':0,'Training Session':0,'Other':0};
+      usage.forEach(u=>{uh[u.usageType]=(uh[u.usageType]||0)+calcHours(u.timeFrom,u.timeTo);});
+      charts.push({id:'vch-usage-types',title:'Usage hours by type',type:'bar',
+        data:{labels:Object.keys(uh),datasets:[{label:'Hours',data:Object.values(uh).map(v=>+v.toFixed(1)),backgroundColor:['#7C3AED','#10B981','#F59E0B'],borderRadius:4}]},
+        opts:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,title:{display:true,text:'Hours'}}}}});
+
+      // Usage over time
+      const byDate={};
+      usage.forEach(u=>{byDate[u.date]=(byDate[u.date]||0)+calcHours(u.timeFrom,u.timeTo);});
+      const dates=Object.keys(byDate).sort();
+      charts.push({id:'vch-usage-time',title:'Pitch usage hours over time',type:'line',
+        data:{labels:dates.map(d=>formatDateOnly(d)),datasets:[{label:'Hours',data:dates.map(d=>+byDate[d].toFixed(1)),borderColor:'#7C3AED',backgroundColor:'#7C3AED20',tension:.3,fill:true,pointRadius:3}]},
+        opts:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,title:{display:true,text:'Hours'}}}}});
+    }
+  }
+
+  // Tasks vs Usage ratio
+  if(dataFilter==='both'&&(totalTaskHours>0||totalUsageHours>0)){
+    charts.push({id:'vch-ratio',title:'Pitch time: Tasks vs Usage',type:'doughnut',
+      data:{labels:['Maintenance (Tasks)','Playing (Usage)'],datasets:[{data:[+totalTaskHours.toFixed(1),+totalUsageHours.toFixed(1)],backgroundColor:['#185FA5','#7C3AED'],borderWidth:2}]},
+      opts:{plugins:{legend:{position:'bottom'}}}});
+  }
+
+  if(!charts.length){
+    chartsEl.innerHTML='<div style="grid-column:1/-1;padding:3rem;text-align:center;color:var(--text-hint);font-size:14px">No data for the selected period.</div>';
+    return;
+  }
+
+  chartsEl.innerHTML=charts.map(ch=>`<div class="stats-card"><div class="stats-card-title">${ch.title}</div><canvas id="${ch.id}"></canvas></div>`).join('');
+
+  setTimeout(()=>{
+    charts.forEach(ch=>{
+      const canvas=document.getElementById(ch.id); if(!canvas) return;
+      venueStatsCharts[ch.id]=new Chart(canvas,{type:ch.type,data:ch.data,options:{responsive:true,maintainAspectRatio:true,...ch.opts}});
+    });
+  },50);
+}
+
+async function exportVenueStatsPDF(){
+  const vid=state.currentVenueId; if(!vid) return;
+  const venue=state.venues.find(v=>v.id===vid);
+  const {from,to}=getVenueStatsDates();
+  const chartEntries=Object.entries(venueStatsCharts);
+  if(!chartEntries.length){showToast('No charts to export');return;}
+
+  const chartsHTML=chartEntries.map(([id])=>{
+    const canvas=document.getElementById(id); if(!canvas) return '';
+    const img=canvas.toDataURL('image/png');
+    const title=canvas.closest('.stats-card')?.querySelector('.stats-card-title')?.textContent||'';
+    return `<div class="chart-block"><h3>${title}</h3><img src="${img}" style="width:100%;max-height:280px;object-fit:contain"/></div>`;
+  }).join('');
+
+  const periodLabel=venueStatsPeriod==='custom'?(from||'')+(to?' — '+to:''):venueStatsPeriod.charAt(0).toUpperCase()+venueStatsPeriod.slice(1);
+
+  const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Pitch Operations Report</title>
+  <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;color:#0C2340;padding:32px}
+  .report-header{border-bottom:2px solid #0C2340;padding-bottom:16px;margin-bottom:24px}
+  .report-title{font-size:24px;font-weight:700;color:#0C2340;margin-bottom:4px}
+  .report-meta{font-size:12px;color:#5a6a82;display:flex;gap:24px;flex-wrap:wrap;margin-top:8px}
+  .charts-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px}
+  .chart-block{background:#f8fafc;border-radius:8px;padding:16px;break-inside:avoid}
+  .chart-block h3{font-size:13px;font-weight:700;color:#0C2340;margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px}
+  @media print{body{padding:16px}.chart-block{break-inside:avoid}}</style></head><body>
+  <div class="report-header">
+    <div class="report-title">Pitch Operations Report</div>
+    <div class="report-meta">
+      <span>🏟 ${esc(venue?.name||'')}</span>
+      <span>📍 ${esc(venue?.city||'')}</span>
+      <span>📅 ${periodLabel}</span>
+      <span>🕐 Generated: ${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</span>
+    </div>
+  </div>
+  <div class="charts-grid">${chartsHTML}</div>
+  </body></html>`;
+
+  const win=window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
+  setTimeout(()=>win.print(),500);
+}
+
+// ════════════════════════════════════════
+// VENUE STATS TAB
+// ════════════════════════════════════════
+
+// ════════════════════════════════════════
+// VENUE STATS TAB
+// ════════════════════════════════════════
+
 init();
 </script>
 
@@ -4063,7 +4374,18 @@ init();
         <label>Task type</label>
         <select id="admin-task-type" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px"></select>
       </div>
-      <div class="field"><label>Pitch area / zone</label><input id="admin-task-zone" type="text" placeholder="e.g. Full pitch"/></div>
+      <div class="field"><label>Pitch area / zone</label><select id="admin-task-zone-select" onchange="document.getElementById('admin-task-zone-custom-wrap').style.display=this.value==='Custom'?'block':'none'" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px">
+          <option value="Full pitch">Full pitch</option>
+          <option value="Goal mouth (N)">Goal mouth (N)</option>
+          <option value="Goal mouth (S)">Goal mouth (S)</option>
+          <option value="Centre circle">Centre circle</option>
+          <option value="Penalty areas">Penalty areas</option>
+          <option value="Wings">Wings</option>
+          <option value="Custom">Custom...</option>
+        </select>
+        <div id="admin-task-zone-custom-wrap" style="display:none;margin-top:6px">
+          <input id="admin-task-zone-custom" type="text" placeholder="Describe zone..."/>
+        </div></div>
       <div class="field"><label>Equipment used</label><input id="admin-task-equipment" type="text" placeholder="e.g. Pedestrian spreader"/></div>
       <div class="field"><label>Weather conditions</label><input id="admin-task-weather" type="text" placeholder="e.g. sunny, 18°C"/></div>
       <div class="field"><label>Done by (staff)</label>
@@ -4114,7 +4436,18 @@ init();
         </select>
       </div>
       <div class="field"><label>Team name</label><input id="admin-usage-team" type="text" placeholder="e.g. FC Barcelona U20"/></div>
-      <div class="field"><label>Pitch area / zone</label><input id="admin-usage-zone" type="text" placeholder="e.g. Full pitch"/></div>
+      <div class="field"><label>Pitch area / zone</label><select id="admin-usage-zone-select" onchange="document.getElementById('admin-usage-zone-custom-wrap').style.display=this.value==='Custom'?'block':'none'" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px">
+          <option value="Full pitch">Full pitch</option>
+          <option value="Goal mouth (N)">Goal mouth (N)</option>
+          <option value="Goal mouth (S)">Goal mouth (S)</option>
+          <option value="Centre circle">Centre circle</option>
+          <option value="Penalty areas">Penalty areas</option>
+          <option value="Wings">Wings</option>
+          <option value="Custom">Custom...</option>
+        </select>
+        <div id="admin-usage-zone-custom-wrap" style="display:none;margin-top:6px">
+          <input id="admin-usage-zone-custom" type="text" placeholder="Describe zone..."/>
+        </div></div>
       <div class="field"><label>Weather conditions</label><input id="admin-usage-weather" type="text" placeholder="e.g. sunny, 18°C"/></div>
       <div class="field"><label>Notes</label><textarea id="admin-usage-notes" rows="2" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;resize:vertical;box-sizing:border-box"></textarea></div>
       <div class="field"><label>Usage date</label><input id="admin-usage-date" type="date"/></div>
