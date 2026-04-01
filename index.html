@@ -3420,16 +3420,16 @@ async function adminLogUsage(){
 // ════════════════════════════════════════
 // DRAG & DROP — TASKS & USAGE
 // ════════════════════════════════════════
-let _dragData = null; // {type:'op'|'usage', id, srcDate, srcVenueId}
+let _pendingDrop = null;
 
 function onDragStart(e, type, id, srcDate, srcVenueId){
-  _dragData = {type, id, srcDate, srcVenueId};
+  // Use dataTransfer as source of truth — survives async timing
   e.dataTransfer.effectAllowed = 'copyMove';
+  e.dataTransfer.setData('text/plain', JSON.stringify({type, id, srcDate, srcVenueId}));
   e.currentTarget.style.opacity = '0.5';
 }
 function onDragEnd(e){
   e.currentTarget.style.opacity = '1';
-  _dragData = null;
 }
 function onDragOver(e){
   e.preventDefault();
@@ -3441,78 +3441,78 @@ function onDragLeave(e){
 }
 async function onDrop(e, newDate, newVenueId){
   e.preventDefault();
+  e.stopPropagation();
   e.currentTarget.style.outline = '';
-  if(!_dragData) return;
+  let dragData;
+  try { dragData = JSON.parse(e.dataTransfer.getData('text/plain')); } catch(err){ return; }
+  if(!dragData || !dragData.id) return;
+
   const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
   const copy = !isMobile && e.ctrlKey;
 
   if(isMobile){
-    // On mobile: always ask Move or Copy
-    _pendingDrop = {e, newDate, newVenueId};
-    document.getElementById('dnd-new-date').textContent = newDate;
+    _pendingDrop = {dragData, newDate, newVenueId};
+    document.getElementById('dnd-new-date').textContent = formatDateOnly(newDate);
     openModal('modal-dnd-choice');
   } else {
-    await executeDrop(newDate, newVenueId, copy);
+    await executeDrop(dragData, newDate, newVenueId, copy);
   }
 }
-
-let _pendingDrop = null;
 
 async function dndChoose(copy){
   closeModal('modal-dnd-choice');
   if(!_pendingDrop) return;
-  const {newDate, newVenueId} = _pendingDrop;
+  const {dragData, newDate, newVenueId} = _pendingDrop;
   _pendingDrop = null;
-  await executeDrop(newDate, newVenueId, copy);
+  await executeDrop(dragData, newDate, newVenueId, copy);
 }
 
-async function executeDrop(newDate, newVenueId, copy){
-  if(!_dragData) return;
-  const {type, id, srcDate, srcVenueId} = _dragData;
+async function executeDrop(dragData, newDate, newVenueId, copy){
+  if(!dragData) return;
+  const {type, id, srcVenueId} = dragData;
   const targetVenueId = newVenueId || srcVenueId;
 
   if(type === 'op'){
     const idx = state.operations.findIndex(o=>o.id===id);
-    if(idx === -1) return;
+    if(idx === -1){ showToast('Task not found'); return; }
     const op = state.operations[idx];
     if(copy){
       const newOp = {...op, id:'op_'+Date.now(), date:newDate, venueId:targetVenueId, createdAt:new Date().toISOString()};
-      const {error} = await supa.from('pitchops_operations').insert(opToDb(newOp));
+      const dbObj = opToDb(newOp); delete dbObj.id; // let DB generate UUID
+      const {data, error} = await supa.from('pitchops_operations').insert(dbObj).select();
       if(error){ showToast('Error: '+error.message); return; }
-      state.operations.push(newOp);
-      showToast('Task copied to '+formatDateOnly(newDate));
+      if(data&&data[0]) state.operations.push({...newOp, id:data[0].id});
+      showToast('✅ Task copied to '+formatDateOnly(newDate));
     } else {
-      const updated = {...op, date:newDate, venueId:targetVenueId};
       const {error} = await supa.from('pitchops_operations').update({operation_date:newDate, venue_id:targetVenueId}).eq('id',id);
       if(error){ showToast('Error: '+error.message); return; }
-      state.operations[idx] = updated;
-      showToast('Task moved to '+formatDateOnly(newDate));
+      state.operations[idx] = {...op, date:newDate, venueId:targetVenueId};
+      showToast('✅ Task moved to '+formatDateOnly(newDate));
     }
   } else if(type === 'usage'){
     const arrays = [state_usage];
     if(typeof state_admin_usage !== 'undefined') arrays.push(state_admin_usage);
-    let found = null, foundArr = null, foundIdx = -1;
+    let found=null, foundArr=null, foundIdx=-1;
     for(const arr of arrays){
       const i = arr.findIndex(u=>u.id===id);
       if(i>-1){ found=arr[i]; foundArr=arr; foundIdx=i; break; }
     }
-    if(!found) return;
+    if(!found){ showToast('Usage not found'); return; }
     if(copy){
       const newU = {...found, id:'u_'+Date.now(), date:newDate, venueId:targetVenueId, createdAt:new Date().toISOString()};
-      const {error} = await supa.from('pitchops_usage').insert(usageToDb(newU));
+      const dbObj = usageToDb(newU); delete dbObj.id;
+      const {data, error} = await supa.from('pitchops_usage').insert(dbObj).select();
       if(error){ showToast('Error: '+error.message); return; }
-      foundArr.push(newU);
-      showToast('Usage copied to '+formatDateOnly(newDate));
+      if(data&&data[0]) foundArr.push({...newU, id:data[0].id});
+      showToast('✅ Usage copied to '+formatDateOnly(newDate));
     } else {
-      const updated = {...found, date:newDate, venueId:targetVenueId};
       const {error} = await supa.from('pitchops_usage').update({usage_date:newDate, venue_id:targetVenueId}).eq('id',id);
       if(error){ showToast('Error: '+error.message); return; }
-      foundArr[foundIdx] = updated;
-      showToast('Usage moved to '+formatDateOnly(newDate));
+      foundArr[foundIdx] = {...found, date:newDate, venueId:targetVenueId};
+      showToast('✅ Usage moved to '+formatDateOnly(newDate));
     }
   }
 
-  _dragData = null;
   // Re-render all visible views
   const vid = state.currentVenueId;
   const pid = state.currentProjectId;
