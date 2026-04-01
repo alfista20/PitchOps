@@ -1808,11 +1808,17 @@ async function removeVenueFromProject(e,vid){
 // ════════════════════════════════════════
 async function enterVenueDashboard(venue){
   state.currentVenueId = venue.id;
-  const proj=state.projects.find(p=>venue.projectIds&&venue.projectIds.includes(p.id));
   document.getElementById('venue-hero-name').textContent=venue.name;
   document.getElementById('venue-hero-sub').textContent=venue.city||'';
   document.getElementById('venue-badge').textContent=venue.name;
   const ptag=document.getElementById('venue-project-tag');
+  // Try from state.projects first, then load from Supabase if needed
+  let proj=state.projects.find(p=>venue.projectIds&&venue.projectIds.includes(p.id));
+  if(!proj && venue.projectIds && venue.projectIds.length){
+    // Venue manager — projects not loaded yet, fetch the project
+    const {data:projs}=await supa.from('pitchops_projects').select('*').in('id',venue.projectIds);
+    if(projs&&projs.length){ proj={name:projs[0].name,code:projs[0].code}; }
+  }
   if(proj){ ptag.textContent='📋 '+proj.name; ptag.style.display='block'; }
   else ptag.style.display='none';
   // Always hide contact info from hero — shown only via menu
