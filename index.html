@@ -3976,33 +3976,6 @@ function renderVenueStats_tab(){
 // ADMIN STATS — FULL REBUILD
 // ════════════════════════════════════════
 
-function getStatsDates(){
-  const now = new Date();
-  let from, to = todayStr();
-  if(statsPeriod==='week'){
-    const d=new Date(now); d.setDate(now.getDate()-now.getDay()+1);
-    from=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-  } else if(statsPeriod==='month'){
-    from=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-01';
-  } else if(statsPeriod==='quarter'){
-    const q=new Date(now.getFullYear(),Math.floor(now.getMonth()/3)*3,1);
-    from=q.getFullYear()+'-'+String(q.getMonth()+1).padStart(2,'0')+'-01';
-  } else {
-    from=document.getElementById('stats-from')?.value||'';
-    to=document.getElementById('stats-to')?.value||todayStr();
-  }
-  return {from,to};
-}
-
-function setStatsPeriod(period,btn){
-  statsPeriod=period;
-  document.querySelectorAll('#ptab-stats-content .stats-period-btn').forEach(b=>b.classList.remove('stats-period-active'));
-  btn.classList.add('stats-period-active');
-  const customEl=document.getElementById('stats-custom-dates');
-  if(customEl) customEl.style.display=period==='custom'?'flex':'none';
-  renderStats();
-}
-
 // ── DRAG & DROP for stats cards ──
 // ── PDF EXPORT with checkbox selection ──
 // ════════════════════════════════════════
