@@ -562,7 +562,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
         </select>
       </div>
       <div style="margin-left:auto;display:flex;gap:8px">
-        <button onclick="openStatsPDFModal()" style="padding:7px 16px;background:linear-gradient(135deg,#0C2340,#185FA5);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">⬇ Export PDF</button>
+        <button id="stats-pdf-btn" onclick="toggleStatsPDFSelect(false)" style="padding:7px 16px;background:linear-gradient(135deg,#0C2340,#185FA5);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">⬇ Export PDF</button>
       </div>
     </div>
     <div style="font-size:12px;color:var(--text-muted);margin-bottom:.5rem;padding:0 2px">💡 Drag cards to rearrange</div>
@@ -847,7 +847,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
           <option value="usage">Usage only</option>
         </select>
       </div>
-      <button onclick="exportVenueStatsPDF()" style="margin-left:auto;padding:7px 16px;background:linear-gradient(135deg,#0C2340,#185FA5);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">⬇ Export PDF</button>
+      <button id="vstats-pdf-btn" onclick="toggleStatsPDFSelect(true)" style="margin-left:auto;padding:7px 16px;background:linear-gradient(135deg,#0C2340,#185FA5);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">⬇ Export PDF</button>
     </div>
 
     <!-- SUMMARY CARDS -->
@@ -3770,9 +3770,15 @@ function renderVenueStats_tab(){
     const typeHours={};
     ops.forEach(o=>{typeHours[o.type]=(typeHours[o.type]||0)+calcHours(o.timeFrom,o.timeTo);});
     const sorted=Object.entries(typeHours).sort((a,b)=>b[1]-a[1]).slice(0,10);
-    if(sorted.length) charts.push({id:'vch-task-types',title:'Task hours by type',type:'bar',
-      data:{labels:sorted.map(t=>t[0]),datasets:[{label:'Hours',data:sorted.map(t=>+t[1].toFixed(1)),backgroundColor:'#185FA5cc',borderRadius:4}]},
-      opts:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Hours'}}}}});
+    if(sorted.length){
+      charts.push({id:'vch-task-types',title:'Task hours by type',type:'bar',
+        data:{labels:sorted.map(t=>t[0]),datasets:[{label:'Hours',data:sorted.map(t=>+t[1].toFixed(1)),backgroundColor:'#185FA5cc',borderRadius:4}]},
+        opts:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Hours'}}}}});
+      const totalH=sorted.reduce((s,t)=>s+t[1],0);
+      charts.push({id:'vch-task-pie',title:'Task hours by type — share',type:'pie',
+        data:{labels:sorted.map(t=>t[0]+' ('+((t[1]/totalH)*100).toFixed(1)+'%)'),datasets:[{data:sorted.map(t=>+t[1].toFixed(1)),backgroundColor:['#185FA5','#378ADD','#60A5FA','#93C5FD','#3B6D11','#10B981','#F59E0B','#EF9F27','#7C3AED','#A855F7','#A32D2D','#854F0B'],borderWidth:2}]},
+        opts:{plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:ctx=>{const total=ctx.dataset.data.reduce((a,b)=>a+b,0);const pct=((ctx.raw/total)*100).toFixed(1);return ctx.label.split(' (')[0]+': '+ctx.raw+'h ('+pct+'%)';}}}}}});
+    }
 
     // Activity over time
     if(ops.length){
@@ -3848,76 +3854,6 @@ function renderVenueStats_tab(){
       venueStatsCharts[ch.id]=new Chart(canvas,{type:ch.type,data:ch.data,options:{responsive:true,maintainAspectRatio:true,...ch.opts,plugins:{...(ch.opts?.plugins||{}),tooltip:{callbacks:{label:ctx=>{const v=ctx.parsed?.y??ctx.parsed??ctx.raw;return typeof v==='number'?v+'h':String(v);}}}}}});
     });
   },50);
-}
-
-async function exportVenueStatsPDF(){
-  const vid=state.currentVenueId; if(!vid) return;
-  const venue=state.venues.find(v=>v.id===vid);
-  const {from,to}=getVenueStatsDates();
-  const grid=document.getElementById('vstats-charts');
-  if(!grid||!grid.children.length){showToast('No charts to export');return;}
-  // Show checklist modal for venue too
-  const checklist=document.getElementById('vstats-pdf-checklist');
-  if(checklist){
-    checklist.innerHTML=[...grid.children].map(card=>{
-      const id=card.id.replace('vcard-','');
-      const title=card.querySelector('.stats-card-title')?.textContent||id;
-      return `<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;background:#f8fafc"><input type="checkbox" value="${id}" checked style="width:16px;height:16px;accent-color:var(--blue)"/><span>${title}</span></label>`;
-    }).join('');
-    openModal('modal-vstats-pdf');
-    return;
-  }
-  const selected=Object.keys(venueStatsCharts);
-  const chartsHTML=[...grid.children].map(card=>{
-    const id=card.id.replace('vcard-','');
-    const canvas=document.getElementById(id); if(!canvas) return '';
-    const img=canvas.toDataURL('image/png');
-    const title=card.querySelector('.stats-card-title')?.textContent||'';
-    return `<div class="chart-block"><h3>${title}</h3><img src="${img}" style="width:100%;max-height:280px;object-fit:contain"/></div>`;
-  }).join('');
-
-  const periodLabel=venueStatsPeriod==='custom'?(from||'')+(to?' — '+to:''):venueStatsPeriod.charAt(0).toUpperCase()+venueStatsPeriod.slice(1);
-
-  const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Pitch Operations Report</title>
-  <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;color:#0C2340;padding:32px}
-  .report-header{border-bottom:2px solid #0C2340;padding-bottom:16px;margin-bottom:24px}
-  .report-title{font-size:24px;font-weight:700;color:#0C2340;margin-bottom:4px}
-  .report-meta{font-size:12px;color:#5a6a82;display:flex;gap:24px;flex-wrap:wrap;margin-top:8px}
-  .charts-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px}
-  .chart-block{background:#f8fafc;border-radius:8px;padding:16px;break-inside:avoid}
-  .chart-block h3{font-size:13px;font-weight:700;color:#0C2340;margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px}
-  @media print{body{padding:16px}.chart-block{break-inside:avoid}}</style></head><body>
-  <div class="report-header">
-    <div class="report-title">Pitch Operations Report</div>
-    <div class="report-meta">
-      <span>🏟 ${esc(venue?.name||'')}</span>
-      <span>📍 ${esc(venue?.city||'')}</span>
-      <span>📅 ${periodLabel}</span>
-      <span>🕐 Generated: ${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</span>
-    </div>
-  </div>
-  <div class="charts-grid">${chartsHTML}</div>
-  
-<!-- VENUE STATS PDF MODAL -->
-<div class="modal-overlay" id="modal-vstats-pdf">
-  <div class="modal" style="max-width:480px">
-    <div class="modal-header"><span class="modal-title">Export PDF — select charts</span><button class="modal-close" onclick="closeModal('modal-vstats-pdf')">✕</button></div>
-    <div class="modal-body">
-      <div style="font-size:13px;color:var(--text-muted);margin-bottom:1rem">Select which charts to include:</div>
-      <div id="vstats-pdf-checklist" style="display:flex;flex-direction:column;gap:8px"></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-vstats-pdf')">Cancel</button>
-      <button class="btn btn-primary" onclick="doExportVenueStatsPDF()" style="background:linear-gradient(135deg,#0C2340,#185FA5);border:none">⬇ Export PDF</button>
-    </div>
-  </div>
-</div>
-</body></html>`;
-
-  const win=window.open('','_blank');
-  win.document.write(html);
-  win.document.close();
-  setTimeout(()=>win.print(),500);
 }
 
 // ════════════════════════════════════════
@@ -4013,9 +3949,10 @@ function renderStats(){
           data:{labels:sorted.map(t=>t[0]),datasets:[{label:'Hours',data:sorted.map(t=>+t[1].toFixed(1)),backgroundColor:'#185FA5cc',borderRadius:4}]},
           opts:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Hours'}}}}});
         // Pizza chart — same data
-        charts.push({id:'sc-task-pie',title:'Task hours by type (share)',type:'pie',
-          data:{labels:sorted.map(t=>t[0]),datasets:[{data:sorted.map(t=>+t[1].toFixed(1)),backgroundColor:['#185FA5','#378ADD','#60A5FA','#93C5FD','#3B6D11','#10B981','#F59E0B','#EF9F27','#7C3AED','#A855F7','#A32D2D','#854F0B'],borderWidth:2}]},
-          opts:{plugins:{legend:{position:'bottom'}}}});
+        const totalHs=sorted.reduce((s,t)=>s+t[1],0);
+        charts.push({id:'sc-task-pie',title:'Task hours by type — share',type:'pie',
+          data:{labels:sorted.map(t=>t[0]+' ('+((t[1]/totalHs)*100).toFixed(1)+'%)'),datasets:[{data:sorted.map(t=>+t[1].toFixed(1)),backgroundColor:['#185FA5','#378ADD','#60A5FA','#93C5FD','#3B6D11','#10B981','#F59E0B','#EF9F27','#7C3AED','#A855F7','#A32D2D','#854F0B'],borderWidth:2}]},
+          opts:{plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:ctx=>{const total=ctx.dataset.data.reduce((a,b)=>a+b,0);const pct=((ctx.raw/total)*100).toFixed(1);return ctx.label.split(' (')[0]+': '+ctx.raw+'h ('+pct+'%)';}}}}}});
       }
       // Activity over time
       const bd={};
@@ -4074,9 +4011,10 @@ function renderStats(){
         charts.push({id:'sc-type-h',title:'Task hours by type (all venues)',type:'bar',
           data:{labels:sortedTh.map(t=>t[0]),datasets:[{label:'Hours',data:sortedTh.map(t=>+t[1].toFixed(1)),backgroundColor:'#185FA5cc',borderRadius:4}]},
           opts:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Hours'}}}}});
+        const totalAllH=sortedTh.reduce((s,t)=>s+t[1],0);
         charts.push({id:'sc-type-pie',title:'Task hours by type — share',type:'pie',
-          data:{labels:sortedTh.map(t=>t[0]),datasets:[{data:sortedTh.map(t=>+t[1].toFixed(1)),backgroundColor:['#185FA5','#378ADD','#60A5FA','#93C5FD','#3B6D11','#10B981','#F59E0B','#EF9F27','#7C3AED','#A855F7','#A32D2D','#854F0B'],borderWidth:2}]},
-          opts:{plugins:{legend:{position:'right'}}}});
+          data:{labels:sortedTh.map(t=>t[0]+' ('+((t[1]/totalAllH)*100).toFixed(1)+'%)'),datasets:[{data:sortedTh.map(t=>+t[1].toFixed(1)),backgroundColor:['#185FA5','#378ADD','#60A5FA','#93C5FD','#3B6D11','#10B981','#F59E0B','#EF9F27','#7C3AED','#A855F7','#A32D2D','#854F0B'],borderWidth:2}]},
+          opts:{plugins:{legend:{position:'right'},tooltip:{callbacks:{label:ctx=>{const total=ctx.dataset.data.reduce((a,b)=>a+b,0);const pct=((ctx.raw/total)*100).toFixed(1);return ctx.label.split(' (')[0]+': '+ctx.raw+'h ('+pct+'%)';}}}}}});
       }
     }
     if(dataFilter!=='tasks'){
@@ -4152,75 +4090,6 @@ function renderStats(){
 
 // ── DRAG & DROP for stats cards ──
 // ── PDF EXPORT with checkbox selection ──
-function openStatsPDFModal(){
-  const checklist=document.getElementById('stats-pdf-checklist');
-  if(!checklist) return;
-  const grid=document.getElementById('stats-charts');
-  if(!grid||!grid.children.length){showToast('No charts to export');return;}
-  checklist.innerHTML=[...grid.children].map(card=>{
-    const id=card.id.replace('card-','');
-    const title=card.querySelector('.stats-card-title')?.textContent||id;
-    return `<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;background:#f8fafc">
-      <input type="checkbox" value="${id}" checked style="width:16px;height:16px;accent-color:var(--blue)"/>
-      <span>${title}</span>
-    </label>`;
-  }).join('');
-  openModal('modal-stats-pdf');
-}
-
-async function exportStatsPDF(){
-  closeModal('modal-stats-pdf');
-  const pid=state.currentProjectId; if(!pid) return;
-  const proj=state.projects.find(p=>p.id===pid);
-  const venueFilter=document.getElementById('stats-venue-filter')?.value||'';
-  const venues=projectVenues(pid);
-  const venueName=venueFilter?venues.find(v=>v.id===venueFilter)?.name:'All venues';
-  const {from,to}=getStatsDates();
-  const periodLabel=statsPeriod==='custom'?(from||'')+(to?' — '+to:''):statsPeriod.charAt(0).toUpperCase()+statsPeriod.slice(1);
-
-  // Get selected chart ids
-  const selected=[...document.querySelectorAll('#stats-pdf-checklist input:checked')].map(i=>i.value);
-  if(!selected.length){showToast('Select at least one chart');return;}
-
-  // Get current card order from DOM
-  const grid=document.getElementById('stats-charts');
-  const chartsHTML=[...grid.children]
-    .filter(card=>selected.includes(card.id.replace('card-','')))
-    .map(card=>{
-      const id=card.id.replace('card-','');
-      const canvas=document.getElementById(id); if(!canvas) return '';
-      const img=canvas.toDataURL('image/png');
-      const title=card.querySelector('.stats-card-title')?.textContent||'';
-      return `<div class="chart-block"><h3>${title}</h3><img src="${img}" style="width:100%;max-height:260px;object-fit:contain"/></div>`;
-    }).join('');
-
-  const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Pitch Operations Report</title>
-  <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;color:#0C2340;padding:32px}
-  .report-header{border-bottom:2px solid #0C2340;padding-bottom:16px;margin-bottom:24px}
-  .report-title{font-size:24px;font-weight:700;margin-bottom:4px}
-  .report-meta{font-size:12px;color:#5a6a82;display:flex;gap:24px;flex-wrap:wrap;margin-top:8px}
-  .charts-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
-  .chart-block{background:#f8fafc;border-radius:8px;padding:16px;break-inside:avoid}
-  .chart-block h3{font-size:12px;font-weight:700;color:#0C2340;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
-  @media print{body{padding:16px}.chart-block{break-inside:avoid}}</style>
-  </head><body>
-  <div class="report-header">
-    <div class="report-title">Pitch Operations Report</div>
-    <div class="report-meta">
-      <span>📍 ${esc(venueName)}</span>
-      <span>📅 ${periodLabel}</span>
-      <span>🕐 ${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</span>
-    </div>
-  </div>
-  <div class="charts-grid">${chartsHTML}</div>
-  </body></html>`;
-
-  const win=window.open('','_blank');
-  win.document.write(html);
-  win.document.close();
-  setTimeout(()=>win.print(),500);
-}
-
 // ════════════════════════════════════════
 // STATS CARDS DRAG & DROP (desktop + touch + localStorage)
 // ════════════════════════════════════════
@@ -4367,38 +4236,113 @@ function statsTouchEnd(e){
   _statsTouchDrag = null;
 }
 
-async function doExportVenueStatsPDF(){
-  closeModal('modal-vstats-pdf');
-  const vid=state.currentVenueId; if(!vid) return;
-  const venue=state.venues.find(v=>v.id===vid);
-  const {from,to}=getVenueStatsDates();
-  const periodLabel=venueStatsPeriod==='custom'?(from||'')+(to?' — '+to:''):venueStatsPeriod.charAt(0).toUpperCase()+venueStatsPeriod.slice(1);
-  const selected=[...document.querySelectorAll('#vstats-pdf-checklist input:checked')].map(i=>i.value);
-  if(!selected.length){showToast('Select at least one chart');return;}
-  const grid=document.getElementById('vstats-charts');
-  const chartsHTML=[...grid.children].filter(card=>selected.includes(card.id.replace('vcard-',''))).map(card=>{
-    const id=card.id.replace('vcard-','');
-    const canvas=document.getElementById(id); if(!canvas) return '';
-    const img=canvas.toDataURL('image/png');
-    const title=card.querySelector('.stats-card-title')?.textContent||'';
+// ════════════════════════════════════════
+// STATS PDF EXPORT — select cards visually
+// ════════════════════════════════════════
+let statsSelectMode = false;
+let vstatsSelectMode = false;
+
+function toggleStatsPDFSelect(isVenue){
+  if(isVenue){
+    vstatsSelectMode = !vstatsSelectMode;
+    const btn = document.getElementById('vstats-pdf-btn');
+    const grid = document.getElementById('vstats-charts');
+    if(!grid) return;
+    if(vstatsSelectMode){
+      btn.textContent = '⬇ Export selected';
+      btn.style.background = 'linear-gradient(135deg,#3B6D11,#16a34a)';
+      // Add checkboxes to all cards
+      [...grid.children].forEach(card=>{
+        if(!card.querySelector('.stats-select-cb')){
+          const cb = document.createElement('input');
+          cb.type='checkbox'; cb.checked=true; cb.className='stats-select-cb';
+          cb.style.cssText='position:absolute;top:10px;left:10px;width:18px;height:18px;accent-color:var(--blue);z-index:10;cursor:pointer';
+          card.appendChild(cb);
+        }
+      });
+    } else {
+      btn.textContent = '⬇ Export PDF';
+      btn.style.background = 'linear-gradient(135deg,#0C2340,#185FA5)';
+      [...grid.querySelectorAll('.stats-select-cb')].forEach(cb=>cb.remove());
+      doExportPDF('vstats-charts', true);
+    }
+  } else {
+    statsSelectMode = !statsSelectMode;
+    const btn = document.getElementById('stats-pdf-btn');
+    const grid = document.getElementById('stats-charts');
+    if(!grid) return;
+    if(statsSelectMode){
+      btn.textContent = '⬇ Export selected';
+      btn.style.background = 'linear-gradient(135deg,#3B6D11,#16a34a)';
+      [...grid.children].forEach(card=>{
+        if(!card.querySelector('.stats-select-cb')){
+          const cb = document.createElement('input');
+          cb.type='checkbox'; cb.checked=true; cb.className='stats-select-cb';
+          cb.style.cssText='position:absolute;top:10px;left:10px;width:18px;height:18px;accent-color:var(--blue);z-index:10;cursor:pointer';
+          card.appendChild(cb);
+        }
+      });
+    } else {
+      btn.textContent = '⬇ Export PDF';
+      btn.style.background = 'linear-gradient(135deg,#0C2340,#185FA5)';
+      [...grid.querySelectorAll('.stats-select-cb')].forEach(cb=>cb.remove());
+      doExportPDF('stats-charts', false);
+    }
+  }
+}
+
+function doExportPDF(gridId, isVenue){
+  const grid = document.getElementById(gridId); if(!grid) return;
+  const pfx = isVenue ? 'vcard-' : 'card-';
+
+  // Get selected cards (or all if no checkboxes)
+  const cards = [...grid.children].filter(card=>{
+    const cb = card.querySelector('.stats-select-cb');
+    return !cb || cb.checked;
+  });
+  if(!cards.length){ showToast('Select at least one chart'); return; }
+
+  const chartsHTML = cards.map(card=>{
+    const id = card.id.replace(pfx,'');
+    const canvas = document.getElementById(id); if(!canvas) return '';
+    const img = canvas.toDataURL('image/png');
+    const title = card.querySelector('.stats-card-title')?.textContent||'';
     return `<div class="chart-block"><h3>${title}</h3><img src="${img}" style="width:100%;max-height:260px;object-fit:contain"/></div>`;
   }).join('');
-  const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Pitch Operations Report</title>
+
+  // Header info
+  let headerLine1, headerLine2;
+  if(isVenue){
+    const venue = state.venues.find(v=>v.id===state.currentVenueId);
+    headerLine1 = '🏟 ' + esc(venue?.name||'');
+    const {from,to} = getVenueStatsDates();
+    headerLine2 = venueStatsPeriod==='custom'?(from||'')+(to?' — '+to:''):venueStatsPeriod.charAt(0).toUpperCase()+venueStatsPeriod.slice(1);
+  } else {
+    const venueFilter = document.getElementById('stats-venue-filter')?.value||'';
+    const venues = projectVenues(state.currentProjectId||'');
+    headerLine1 = '📍 ' + esc(venueFilter ? venues.find(v=>v.id===venueFilter)?.name||'' : 'All venues');
+    const {from,to} = getStatsDates();
+    headerLine2 = statsPeriod==='custom'?(from||'')+(to?' — '+to:''):statsPeriod.charAt(0).toUpperCase()+statsPeriod.slice(1);
+  }
+
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Pitch Operations Report</title>
   <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;color:#0C2340;padding:32px}
-  .report-header{border-bottom:2px solid #0C2340;padding-bottom:16px;margin-bottom:24px}
-  .report-title{font-size:24px;font-weight:700;margin-bottom:4px}
-  .report-meta{font-size:12px;color:#5a6a82;display:flex;gap:24px;flex-wrap:wrap;margin-top:8px}
-  .charts-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
-  .chart-block{background:#f8fafc;border-radius:8px;padding:16px;break-inside:avoid}
-  .chart-block h3{font-size:12px;font-weight:700;color:#0C2340;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
-  @media print{body{padding:16px}.chart-block{break-inside:avoid}}</style></head><body>
-  <div class="report-header"><div class="report-title">Pitch Operations Report</div>
-  <div class="report-meta"><span>🏟 ${esc(venue?.name||'')}</span><span>📅 ${periodLabel}</span><span>🕐 ${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</span></div></div>
-  <div class="charts-grid">${chartsHTML}</div></body></html>`;
-  const win=window.open('','_blank');
+  .rh{border-bottom:2px solid #0C2340;padding-bottom:16px;margin-bottom:24px}
+  .rt{font-size:24px;font-weight:700;margin-bottom:4px}
+  .rm{font-size:12px;color:#5a6a82;display:flex;gap:24px;flex-wrap:wrap;margin-top:8px}
+  .cg{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+  .cb{background:#f8fafc;border-radius:8px;padding:16px;break-inside:avoid}
+  .cb h3{font-size:12px;font-weight:700;color:#0C2340;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
+  @media print{body{padding:16px}.cb{break-inside:avoid}}</style>
+  </head><body>
+  <div class="rh"><div class="rt">Pitch Operations Report</div>
+  <div class="rm"><span>${headerLine1}</span><span>📅 ${headerLine2}</span><span>🕐 ${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</span></div></div>
+  <div class="cg">${chartsHTML}</div></body></html>`;
+
+  const win = window.open('','_blank');
   win.document.write(html);
   win.document.close();
-  setTimeout(()=>win.print(),500);
+  setTimeout(()=>win.print(), 500);
 }
 
 init();
