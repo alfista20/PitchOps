@@ -3825,12 +3825,27 @@ function renderVenueStats_tab(){
     return;
   }
 
-  chartsEl.innerHTML=charts.map(ch=>`<div class="stats-card"><div class="stats-card-title">${ch.title}</div><canvas id="${ch.id}"></canvas></div>`).join('');
+  chartsEl.innerHTML=charts.map(ch=>`
+    <div class="stats-card" id="vcard-${ch.id}" draggable="true"
+      ondragstart="vstatsCardDragStart(event,'${ch.id}')"
+      ondragover="vstatsCardDragOver(event)"
+      ondrop="vstatsCardDrop(event,'${ch.id}')"
+      ondragleave="vstatsCardDragLeave(event)"
+      ontouchstart="statsTouchStart(event,'${ch.id}','vstats-charts')"
+      ontouchmove="statsTouchMove(event)"
+      ontouchend="statsTouchEnd(event)"
+      style="cursor:grab;position:relative;touch-action:none">
+      <div style="position:absolute;top:8px;right:8px;font-size:16px;opacity:.25;pointer-events:none">⠿</div>
+      <div class="stats-card-title">${ch.title}</div>
+      <canvas id="${ch.id}"></canvas>
+    </div>`).join('');
+
+  loadCardOrder(getVenueStatsStorageKey(), 'vstats-charts');
 
   setTimeout(()=>{
     charts.forEach(ch=>{
       const canvas=document.getElementById(ch.id); if(!canvas) return;
-      venueStatsCharts[ch.id]=new Chart(canvas,{type:ch.type,data:ch.data,options:{responsive:true,maintainAspectRatio:true,...ch.opts}});
+      venueStatsCharts[ch.id]=new Chart(canvas,{type:ch.type,data:ch.data,options:{responsive:true,maintainAspectRatio:true,...ch.opts,plugins:{...(ch.opts?.plugins||{}),tooltip:{callbacks:{label:ctx=>{const v=ctx.parsed?.y??ctx.parsed??ctx.raw;return typeof v==='number'?v+'h':String(v);}}}}}});
     });
   },50);
 }
@@ -3839,13 +3854,25 @@ async function exportVenueStatsPDF(){
   const vid=state.currentVenueId; if(!vid) return;
   const venue=state.venues.find(v=>v.id===vid);
   const {from,to}=getVenueStatsDates();
-  const chartEntries=Object.entries(venueStatsCharts);
-  if(!chartEntries.length){showToast('No charts to export');return;}
-
-  const chartsHTML=chartEntries.map(([id])=>{
+  const grid=document.getElementById('vstats-charts');
+  if(!grid||!grid.children.length){showToast('No charts to export');return;}
+  // Show checklist modal for venue too
+  const checklist=document.getElementById('vstats-pdf-checklist');
+  if(checklist){
+    checklist.innerHTML=[...grid.children].map(card=>{
+      const id=card.id.replace('vcard-','');
+      const title=card.querySelector('.stats-card-title')?.textContent||id;
+      return `<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;background:#f8fafc"><input type="checkbox" value="${id}" checked style="width:16px;height:16px;accent-color:var(--blue)"/><span>${title}</span></label>`;
+    }).join('');
+    openModal('modal-vstats-pdf');
+    return;
+  }
+  const selected=Object.keys(venueStatsCharts);
+  const chartsHTML=[...grid.children].map(card=>{
+    const id=card.id.replace('vcard-','');
     const canvas=document.getElementById(id); if(!canvas) return '';
     const img=canvas.toDataURL('image/png');
-    const title=canvas.closest('.stats-card')?.querySelector('.stats-card-title')?.textContent||'';
+    const title=card.querySelector('.stats-card-title')?.textContent||'';
     return `<div class="chart-block"><h3>${title}</h3><img src="${img}" style="width:100%;max-height:280px;object-fit:contain"/></div>`;
   }).join('');
 
@@ -3870,7 +3897,22 @@ async function exportVenueStatsPDF(){
     </div>
   </div>
   <div class="charts-grid">${chartsHTML}</div>
-  </body></html>`;
+  
+<!-- VENUE STATS PDF MODAL -->
+<div class="modal-overlay" id="modal-vstats-pdf">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header"><span class="modal-title">Export PDF — select charts</span><button class="modal-close" onclick="closeModal('modal-vstats-pdf')">✕</button></div>
+    <div class="modal-body">
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:1rem">Select which charts to include:</div>
+      <div id="vstats-pdf-checklist" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-vstats-pdf')">Cancel</button>
+      <button class="btn btn-primary" onclick="doExportVenueStatsPDF()" style="background:linear-gradient(135deg,#0C2340,#185FA5);border:none">⬇ Export PDF</button>
+    </div>
+  </div>
+</div>
+</body></html>`;
 
   const win=window.open('','_blank');
   win.document.write(html);
@@ -3891,7 +3933,6 @@ async function exportVenueStatsPDF(){
 // ════════════════════════════════════════
 let statsPeriod = 'month';
 let statsChartInstances = {};
-let statsCardOrder = []; // tracks draggable order
 
 function getStatsDates(){
   const now = new Date();
@@ -4072,19 +4113,24 @@ function renderStats(){
     return;
   }
 
-  // Render draggable cards
-  statsCardOrder = charts.map(c=>c.id);
+  // Render draggable cards (desktop + touch)
   chartsEl.innerHTML=charts.map(ch=>`
     <div class="stats-card" id="card-${ch.id}" draggable="true"
       ondragstart="statsCardDragStart(event,'${ch.id}')"
       ondragover="statsCardDragOver(event)"
       ondrop="statsCardDrop(event,'${ch.id}')"
       ondragleave="statsCardDragLeave(event)"
-      style="cursor:grab;position:relative">
-      <div style="position:absolute;top:8px;right:8px;font-size:14px;opacity:.3;pointer-events:none">⠿</div>
+      ontouchstart="statsTouchStart(event,'${ch.id}','stats-charts')"
+      ontouchmove="statsTouchMove(event)"
+      ontouchend="statsTouchEnd(event)"
+      style="cursor:grab;position:relative;touch-action:none">
+      <div style="position:absolute;top:8px;right:8px;font-size:16px;opacity:.25;pointer-events:none">⠿</div>
       <div class="stats-card-title">${ch.title}</div>
       <canvas id="${ch.id}"></canvas>
     </div>`).join('');
+
+  // Restore saved order
+  loadCardOrder(getStatsStorageKey(), 'stats-charts');
 
   setTimeout(()=>{
     charts.forEach(ch=>{
@@ -4105,33 +4151,6 @@ function renderStats(){
 }
 
 // ── DRAG & DROP for stats cards ──
-let _statsDragId = null;
-function statsCardDragStart(e,id){
-  _statsDragId=id;
-  e.dataTransfer.effectAllowed='move';
-  e.currentTarget.style.opacity='.5';
-}
-function statsCardDragOver(e){
-  e.preventDefault();
-  e.currentTarget.style.outline='2px solid var(--blue)';
-}
-function statsCardDragLeave(e){ e.currentTarget.style.outline=''; }
-function statsCardDrop(e,targetId){
-  e.preventDefault();
-  e.currentTarget.style.outline='';
-  if(!_statsDragId||_statsDragId===targetId) return;
-  const grid=document.getElementById('stats-charts');
-  const src=document.getElementById('card-'+_statsDragId);
-  const tgt=document.getElementById('card-'+targetId);
-  if(!src||!tgt||!grid) return;
-  const children=[...grid.children];
-  const si=children.indexOf(src), ti=children.indexOf(tgt);
-  if(si<ti) grid.insertBefore(src,tgt.nextSibling);
-  else grid.insertBefore(src,tgt);
-  src.style.opacity='1';
-  _statsDragId=null;
-}
-
 // ── PDF EXPORT with checkbox selection ──
 function openStatsPDFModal(){
   const checklist=document.getElementById('stats-pdf-checklist');
@@ -4196,6 +4215,186 @@ async function exportStatsPDF(){
   <div class="charts-grid">${chartsHTML}</div>
   </body></html>`;
 
+  const win=window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
+  setTimeout(()=>win.print(),500);
+}
+
+// ════════════════════════════════════════
+// STATS CARDS DRAG & DROP (desktop + touch + localStorage)
+// ════════════════════════════════════════
+let _statsDragId = null;
+let _statsTouchDrag = null; // {id, clone, origX, origY}
+
+function saveCardOrder(storageKey, gridId){
+  const grid = document.getElementById(gridId); if(!grid) return;
+  const order = [...grid.children].map(c=>c.id);
+  try{ localStorage.setItem(storageKey, JSON.stringify(order)); } catch(e){}
+}
+
+function loadCardOrder(storageKey, gridId){
+  try{
+    const saved = JSON.parse(localStorage.getItem(storageKey)||'null');
+    if(!saved||!saved.length) return;
+    const grid = document.getElementById(gridId); if(!grid) return;
+    saved.forEach(id=>{
+      const el = document.getElementById(id);
+      if(el) grid.appendChild(el);
+    });
+  } catch(e){}
+}
+
+function getStatsStorageKey(){
+  const pid = state.currentProjectId||'';
+  const venueFilter = document.getElementById('stats-venue-filter')?.value||'all';
+  return 'pitchops_stats_order_'+pid+'_'+venueFilter;
+}
+
+function getVenueStatsStorageKey(){
+  const vid = state.currentVenueId||'';
+  return 'pitchops_vstats_order_'+vid;
+}
+
+// ── Mouse drag ──
+function statsCardDragStart(e, id){
+  _statsDragId = id;
+  e.dataTransfer.effectAllowed = 'move';
+  e.currentTarget.style.opacity = '.5';
+}
+function statsCardDragOver(e){ e.preventDefault(); e.currentTarget.style.outline = '2px solid var(--blue)'; }
+function statsCardDragLeave(e){ e.currentTarget.style.outline = ''; }
+function statsCardDrop(e, targetId){
+  e.preventDefault();
+  e.currentTarget.style.outline = '';
+  if(!_statsDragId || _statsDragId===targetId) return;
+  const grid = document.getElementById('stats-charts');
+  const src = document.getElementById('card-'+_statsDragId);
+  const tgt = document.getElementById('card-'+targetId);
+  if(!src||!tgt||!grid) return;
+  const children = [...grid.children];
+  const si = children.indexOf(src), ti = children.indexOf(tgt);
+  if(si < ti) grid.insertBefore(src, tgt.nextSibling);
+  else grid.insertBefore(src, tgt);
+  src.style.opacity = '1';
+  _statsDragId = null;
+  saveCardOrder(getStatsStorageKey(), 'stats-charts');
+}
+
+function vstatsCardDragStart(e, id){
+  _statsDragId = id;
+  e.dataTransfer.effectAllowed = 'move';
+  e.currentTarget.style.opacity = '.5';
+}
+function vstatsCardDragOver(e){ e.preventDefault(); e.currentTarget.style.outline = '2px solid var(--blue)'; }
+function vstatsCardDragLeave(e){ e.currentTarget.style.outline = ''; }
+function vstatsCardDrop(e, targetId){
+  e.preventDefault();
+  e.currentTarget.style.outline = '';
+  if(!_statsDragId || _statsDragId===targetId) return;
+  const grid = document.getElementById('vstats-charts');
+  const src = document.getElementById('vcard-'+_statsDragId);
+  const tgt = document.getElementById('vcard-'+targetId);
+  if(!src||!tgt||!grid) return;
+  const children = [...grid.children];
+  const si = children.indexOf(src), ti = children.indexOf(tgt);
+  if(si < ti) grid.insertBefore(src, tgt.nextSibling);
+  else grid.insertBefore(src, tgt);
+  src.style.opacity = '1';
+  _statsDragId = null;
+  saveCardOrder(getVenueStatsStorageKey(), 'vstats-charts');
+}
+
+// ── Touch drag (mobile) ──
+function statsTouchStart(e, id, gridId){
+  const touch = e.touches[0];
+  const card = document.getElementById((gridId==='stats-charts'?'card-':'vcard-')+id);
+  if(!card) return;
+  const rect = card.getBoundingClientRect();
+  const clone = card.cloneNode(true);
+  clone.style.cssText = `position:fixed;left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;opacity:.8;z-index:9999;pointer-events:none;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.2)`;
+  clone.id = 'stats-drag-clone';
+  document.body.appendChild(clone);
+  card.style.opacity = '.3';
+  _statsTouchDrag = {id, gridId, clone, startX:touch.clientX, startY:touch.clientY, origLeft:rect.left, origTop:rect.top};
+  e.preventDefault();
+}
+
+function statsTouchMove(e){
+  if(!_statsTouchDrag) return;
+  e.preventDefault();
+  const touch = e.touches[0];
+  const {clone, origLeft, origTop, startX, startY} = _statsTouchDrag;
+  clone.style.left = (origLeft + touch.clientX - startX) + 'px';
+  clone.style.top = (origTop + touch.clientY - startY) + 'px';
+  // Highlight drop target
+  clone.style.display = 'none';
+  const el = document.elementFromPoint(touch.clientX, touch.clientY);
+  clone.style.display = '';
+  const targetCard = el?.closest('.stats-card');
+  document.querySelectorAll('.stats-card').forEach(c=>c.style.outline='');
+  if(targetCard && targetCard.id !== ('card-'+_statsTouchDrag.id) && targetCard.id !== ('vcard-'+_statsTouchDrag.id))
+    targetCard.style.outline = '2px solid var(--blue)';
+}
+
+function statsTouchEnd(e){
+  if(!_statsTouchDrag) return;
+  const {id, gridId, clone} = _statsTouchDrag;
+  const touch = e.changedTouches[0];
+  clone.style.display = 'none';
+  const el = document.elementFromPoint(touch.clientX, touch.clientY);
+  clone.style.display = '';
+  clone.remove();
+  document.querySelectorAll('.stats-card').forEach(c=>{ c.style.outline=''; c.style.opacity='1'; });
+
+  const pfx = gridId==='stats-charts'?'card-':'vcard-';
+  const targetCard = el?.closest('.stats-card');
+  const targetId = targetCard?.id?.replace(pfx,'');
+
+  if(targetId && targetId !== id){
+    const grid = document.getElementById(gridId);
+    const src = document.getElementById(pfx+id);
+    const tgt = document.getElementById(pfx+targetId);
+    if(src&&tgt&&grid){
+      const children=[...grid.children];
+      const si=children.indexOf(src), ti=children.indexOf(tgt);
+      if(si<ti) grid.insertBefore(src,tgt.nextSibling);
+      else grid.insertBefore(src,tgt);
+    }
+    const key = gridId==='stats-charts'?getStatsStorageKey():getVenueStatsStorageKey();
+    saveCardOrder(key, gridId);
+  }
+  _statsTouchDrag = null;
+}
+
+async function doExportVenueStatsPDF(){
+  closeModal('modal-vstats-pdf');
+  const vid=state.currentVenueId; if(!vid) return;
+  const venue=state.venues.find(v=>v.id===vid);
+  const {from,to}=getVenueStatsDates();
+  const periodLabel=venueStatsPeriod==='custom'?(from||'')+(to?' — '+to:''):venueStatsPeriod.charAt(0).toUpperCase()+venueStatsPeriod.slice(1);
+  const selected=[...document.querySelectorAll('#vstats-pdf-checklist input:checked')].map(i=>i.value);
+  if(!selected.length){showToast('Select at least one chart');return;}
+  const grid=document.getElementById('vstats-charts');
+  const chartsHTML=[...grid.children].filter(card=>selected.includes(card.id.replace('vcard-',''))).map(card=>{
+    const id=card.id.replace('vcard-','');
+    const canvas=document.getElementById(id); if(!canvas) return '';
+    const img=canvas.toDataURL('image/png');
+    const title=card.querySelector('.stats-card-title')?.textContent||'';
+    return `<div class="chart-block"><h3>${title}</h3><img src="${img}" style="width:100%;max-height:260px;object-fit:contain"/></div>`;
+  }).join('');
+  const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Pitch Operations Report</title>
+  <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;color:#0C2340;padding:32px}
+  .report-header{border-bottom:2px solid #0C2340;padding-bottom:16px;margin-bottom:24px}
+  .report-title{font-size:24px;font-weight:700;margin-bottom:4px}
+  .report-meta{font-size:12px;color:#5a6a82;display:flex;gap:24px;flex-wrap:wrap;margin-top:8px}
+  .charts-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+  .chart-block{background:#f8fafc;border-radius:8px;padding:16px;break-inside:avoid}
+  .chart-block h3{font-size:12px;font-weight:700;color:#0C2340;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
+  @media print{body{padding:16px}.chart-block{break-inside:avoid}}</style></head><body>
+  <div class="report-header"><div class="report-title">Pitch Operations Report</div>
+  <div class="report-meta"><span>🏟 ${esc(venue?.name||'')}</span><span>📅 ${periodLabel}</span><span>🕐 ${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</span></div></div>
+  <div class="charts-grid">${chartsHTML}</div></body></html>`;
   const win=window.open('','_blank');
   win.document.write(html);
   win.document.close();
