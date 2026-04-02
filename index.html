@@ -2626,11 +2626,11 @@ let ganttStatusFilter = 'all';
 // ── LOAD PLANS ──
 // ── TAB SWITCHING ──
 function switchProjectTab(tab){
-  ['ops','usage','calendar'].forEach(t=>{
+  ['ops','usage','calendar','stats'].forEach(t=>{
     const btn=document.getElementById('ptab-'+t);
     const content=document.getElementById('ptab-'+t+'-content');
     if(btn) btn.classList.toggle('active', t===tab);
-    if(content) content.style.display = t===tab ? (t==='calendar'?'block':'') : 'none';
+    if(content) content.style.display = t===tab ? (t==='calendar'||t==='stats'?'block':'') : 'none';
   });
   if(tab==='calendar'){
     document.getElementById('gantt-view').style.display='block';
