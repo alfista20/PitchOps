@@ -3925,7 +3925,7 @@ function renderVenueStats_tab(){
       ontouchstart="statsTouchStart(event,'${ch.id}','vstats-charts')"
       ontouchmove="statsTouchMove(event)"
       ontouchend="statsTouchEnd(event)"
-      style="cursor:grab;position:relative;touch-action:none">
+      style="cursor:grab;position:relative">
       <div style="position:absolute;top:8px;right:8px;font-size:16px;opacity:.25;pointer-events:none">⠿</div>
       <div class="stats-card-title">${ch.title}</div>
       <canvas id="${ch.id}"></canvas>
@@ -3959,7 +3959,6 @@ function renderVenueStats_tab(){
 // STATS CARDS DRAG & DROP (desktop + touch + localStorage)
 // ════════════════════════════════════════
 let _statsDragId = null;
-let _statsTouchDrag = null; // {id, clone, origX, origY}
 
 function saveCardOrder(storageKey, gridId){
   const grid = document.getElementById(gridId); if(!grid) return;
@@ -4039,68 +4038,107 @@ function vstatsCardDrop(e, targetId){
   saveCardOrder(getVenueStatsStorageKey(), 'vstats-charts');
 }
 
-// ── Touch drag (mobile) ──
+
+// ── Touch drag with long-press (400ms) — allows normal scroll on short touch ──
+let _statsTouchDrag = null;
+let _statsTouchTimer = null;
+const STATS_LONG_PRESS_MS = 400;
+
 function statsTouchStart(e, id, gridId){
-  const touch = e.touches[0];
-  const card = document.getElementById((gridId==='stats-charts'?'card-':'vcard-')+id);
-  if(!card) return;
-  const rect = card.getBoundingClientRect();
-  const clone = card.cloneNode(true);
-  clone.style.cssText = `position:fixed;left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;opacity:.8;z-index:9999;pointer-events:none;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.2)`;
-  clone.id = 'stats-drag-clone';
-  document.body.appendChild(clone);
-  card.style.opacity = '.3';
-  _statsTouchDrag = {id, gridId, clone, startX:touch.clientX, startY:touch.clientY, origLeft:rect.left, origTop:rect.top};
-  e.preventDefault();
+  // Don't block scroll immediately — wait for long press
+  _statsTouchTimer = setTimeout(function(){
+    // Long press confirmed — activate drag mode
+    const touch = e.touches[0];
+    const pfx = gridId==='stats-charts' ? 'card-' : 'vcard-';
+    const card = document.getElementById(pfx + id);
+    if(!card) return;
+    const rect = card.getBoundingClientRect();
+    // Visual feedback — card lifts
+    card.style.opacity = '0.6';
+    card.style.transform = 'scale(1.02)';
+    card.style.boxShadow = '0 12px 32px rgba(0,0,0,.25)';
+    card.style.zIndex = '999';
+    card.style.transition = 'none';
+    // Create clone for dragging
+    const clone = card.cloneNode(true);
+    clone.style.cssText = 'position:fixed;left:'+rect.left+'px;top:'+rect.top+'px;width:'+rect.width+'px;opacity:0.85;z-index:9999;pointer-events:none;border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.3);transition:none';
+    clone.id = 'stats-drag-clone';
+    document.body.appendChild(clone);
+    _statsTouchDrag = {id, gridId, clone, startX:touch.clientX, startY:touch.clientY, origLeft:rect.left, origTop:rect.top, card};
+    // Vibrate for haptic feedback if available
+    if(navigator.vibrate) navigator.vibrate(30);
+    // Now prevent scroll
+    document.body.style.overflow = 'hidden';
+  }, STATS_LONG_PRESS_MS);
 }
 
 function statsTouchMove(e){
+  if(_statsTouchTimer && !_statsTouchDrag){
+    // Still waiting for long press — if finger moved too much, cancel timer (user is scrolling)
+    clearTimeout(_statsTouchTimer);
+    _statsTouchTimer = null;
+    return;
+  }
   if(!_statsTouchDrag) return;
   e.preventDefault();
   const touch = e.touches[0];
   const {clone, origLeft, origTop, startX, startY} = _statsTouchDrag;
   clone.style.left = (origLeft + touch.clientX - startX) + 'px';
-  clone.style.top = (origTop + touch.clientY - startY) + 'px';
+  clone.style.top  = (origTop  + touch.clientY - startY) + 'px';
   // Highlight drop target
   clone.style.display = 'none';
   const el = document.elementFromPoint(touch.clientX, touch.clientY);
   clone.style.display = '';
-  const targetCard = el?.closest('.stats-card');
-  document.querySelectorAll('.stats-card').forEach(c=>c.style.outline='');
-  if(targetCard && targetCard.id !== ('card-'+_statsTouchDrag.id) && targetCard.id !== ('vcard-'+_statsTouchDrag.id))
+  document.querySelectorAll('.stats-card').forEach(c => c.style.outline = '');
+  const targetCard = el && el.closest('.stats-card');
+  const srcPfx = _statsTouchDrag.gridId==='stats-charts' ? 'card-' : 'vcard-';
+  if(targetCard && targetCard.id !== srcPfx + _statsTouchDrag.id)
     targetCard.style.outline = '2px solid var(--blue)';
 }
 
 function statsTouchEnd(e){
+  // Cancel long press timer if it hasn't fired yet
+  if(_statsTouchTimer){ clearTimeout(_statsTouchTimer); _statsTouchTimer = null; }
   if(!_statsTouchDrag) return;
-  const {id, gridId, clone} = _statsTouchDrag;
+
+  const {id, gridId, clone, card} = _statsTouchDrag;
   const touch = e.changedTouches[0];
+
+  // Restore scroll and card style
+  document.body.style.overflow = '';
+  card.style.opacity = '';
+  card.style.transform = '';
+  card.style.boxShadow = '';
+  card.style.zIndex = '';
+  document.querySelectorAll('.stats-card').forEach(c => c.style.outline = '');
+
   clone.style.display = 'none';
   const el = document.elementFromPoint(touch.clientX, touch.clientY);
-  clone.style.display = '';
   clone.remove();
-  document.querySelectorAll('.stats-card').forEach(c=>{ c.style.outline=''; c.style.opacity='1'; });
 
-  const pfx = gridId==='stats-charts'?'card-':'vcard-';
-  const targetCard = el?.closest('.stats-card');
-  const targetId = targetCard?.id?.replace(pfx,'');
+  const pfx = gridId==='stats-charts' ? 'card-' : 'vcard-';
+  const targetCard = el && el.closest('.stats-card');
+  const targetId = targetCard && targetCard.id && targetCard.id.replace(pfx, '');
 
   if(targetId && targetId !== id){
     const grid = document.getElementById(gridId);
-    const src = document.getElementById(pfx+id);
-    const tgt = document.getElementById(pfx+targetId);
-    if(src&&tgt&&grid){
-      const children=[...grid.children];
-      const si=children.indexOf(src), ti=children.indexOf(tgt);
-      if(si<ti) grid.insertBefore(src,tgt.nextSibling);
-      else grid.insertBefore(src,tgt);
+    const src  = document.getElementById(pfx + id);
+    const tgt  = document.getElementById(pfx + targetId);
+    if(src && tgt && grid){
+      const children = [...grid.children];
+      const si = children.indexOf(src);
+      const ti = children.indexOf(tgt);
+      if(si < ti) grid.insertBefore(src, tgt.nextSibling);
+      else         grid.insertBefore(src, tgt);
     }
-    const key = gridId==='stats-charts'?getStatsStorageKey():getVenueStatsStorageKey();
+    const key = gridId==='stats-charts' ? getStatsStorageKey() : getVenueStatsStorageKey();
     saveCardOrder(key, gridId);
   }
   _statsTouchDrag = null;
 }
 
+// ── Touch drag (mobile) ──
+// (replaced by long-press version above)
 // ════════════════════════════════════════
 // STATS PDF EXPORT — select cards visually
 // ════════════════════════════════════════
@@ -4387,7 +4425,7 @@ function renderStatsSingle(){
       ondragleave="statsCardDragLeave(event)"
       ontouchstart="statsTouchStart(event,'${ch.id}','stats-charts')"
       ontouchmove="statsTouchMove(event)" ontouchend="statsTouchEnd(event)"
-      style="cursor:grab;position:relative;touch-action:none">
+      style="cursor:grab;position:relative">
       <div style="position:absolute;top:8px;right:8px;font-size:16px;opacity:.25;pointer-events:none">⠿</div>
       <div class="stats-card-title">${ch.title}</div>
       <canvas id="${ch.id}"></canvas>
