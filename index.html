@@ -315,6 +315,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 .stats-period-active{background:var(--blue)!important;color:white!important;border-color:var(--blue)!important}
 .stats-card{background:white;border-radius:12px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);padding:1.25rem;position:relative;overflow:hidden}
 .stats-card canvas{max-height:280px}
+.chart-type-btn{transition:all .15s}
 .stats-card-title{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:1rem;font-family:'Syne',sans-serif}
 
 </style>
@@ -533,44 +534,149 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 
   <!-- STATS TAB -->
   <div id="ptab-stats-content" style="display:none;padding:1rem;width:100%;box-sizing:border-box">
-    <!-- FILTERS -->
-    <div style="background:white;border-radius:12px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);padding:1rem 1.25rem;margin-bottom:1rem;display:flex;flex-wrap:wrap;align-items:center;gap:.75rem">
-      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-        <span style="font-size:12px;font-weight:600;color:var(--text-muted)">Period:</span>
-        <button onclick="setStatsPeriod('week',this)" class="stats-period-btn">Week</button>
-        <button onclick="setStatsPeriod('month',this)" class="stats-period-btn stats-period-active">Month</button>
-        <button onclick="setStatsPeriod('quarter',this)" class="stats-period-btn">Quarter</button>
-        <button onclick="setStatsPeriod('custom',this)" class="stats-period-btn">Custom</button>
-      </div>
-      <div id="stats-custom-dates" style="display:none;gap:6px;align-items:center">
-        <input type="date" id="stats-from" onchange="renderStats()" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif"/>
-        <span style="font-size:12px;color:var(--text-muted)">→</span>
-        <input type="date" id="stats-to" onchange="renderStats()" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif"/>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span style="font-size:12px;font-weight:600;color:var(--text-muted)">Venue:</span>
-        <select id="stats-venue-filter" onchange="renderStats()" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif;min-width:160px">
-          <option value="">All venues</option>
-        </select>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span style="font-size:12px;font-weight:600;color:var(--text-muted)">Show:</span>
-        <select id="stats-data-filter" onchange="renderStats()" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif">
-          <option value="both">Tasks & Usage</option>
-          <option value="tasks">Tasks only</option>
-          <option value="usage">Usage only</option>
-        </select>
-      </div>
-      <div style="margin-left:auto;display:flex;gap:8px">
-        <button id="stats-pdf-btn" onclick="toggleStatsPDFSelect(false)" style="padding:7px 16px;background:linear-gradient(135deg,#0C2340,#185FA5);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">⬇ Export PDF</button>
-      </div>
+
+    <!-- MODE SELECTOR -->
+    <div style="display:flex;gap:8px;margin-bottom:1rem">
+      <button onclick="setStatsMode('single')" id="stats-mode-single" style="padding:8px 20px;border-radius:20px;border:2px solid var(--blue);background:var(--blue);color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">📊 Single venue</button>
+      <button onclick="setStatsMode('compare')" id="stats-mode-compare" style="padding:8px 20px;border-radius:20px;border:2px solid var(--border);background:white;color:var(--text-muted);font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">⚖️ Compare venues</button>
     </div>
-    <div style="font-size:12px;color:var(--text-muted);margin-bottom:.5rem;padding:0 2px">💡 Drag cards to rearrange</div>
-    <!-- SUMMARY CARDS -->
-    <div id="stats-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.75rem;margin-bottom:1rem"></div>
-    <!-- CHARTS GRID — draggable -->
-    <div id="stats-charts" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:1rem"></div>
+
+    <!-- SINGLE VENUE MODE -->
+    <div id="stats-single-panel">
+      <div style="background:white;border-radius:12px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);padding:1rem 1.25rem;margin-bottom:1rem;display:flex;flex-wrap:wrap;align-items:center;gap:.75rem">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+          <span style="font-size:12px;font-weight:600;color:var(--text-muted)">Period:</span>
+          <button onclick="setStatsPeriod('week',this)" class="stats-period-btn">Week</button>
+          <button onclick="setStatsPeriod('month',this)" class="stats-period-btn stats-period-active">Month</button>
+          <button onclick="setStatsPeriod('quarter',this)" class="stats-period-btn">Quarter</button>
+          <button onclick="setStatsPeriod('custom',this)" class="stats-period-btn">Custom</button>
+        </div>
+        <div id="stats-custom-dates" style="display:none;gap:6px;align-items:center">
+          <input type="date" id="stats-from" onchange="renderStatsSingle()" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif"/>
+          <span style="font-size:12px;color:var(--text-muted)">→</span>
+          <input type="date" id="stats-to" onchange="renderStatsSingle()" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif"/>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:12px;font-weight:600;color:var(--text-muted)">Venue:</span>
+          <select id="stats-venue-filter" onchange="renderStatsSingle()" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif;min-width:160px">
+            <option value="">All venues</option>
+          </select>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:12px;font-weight:600;color:var(--text-muted)">Show:</span>
+          <select id="stats-data-filter" onchange="renderStatsSingle()" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif">
+            <option value="both">Tasks & Usage</option>
+            <option value="tasks">Tasks only</option>
+            <option value="usage">Usage only</option>
+          </select>
+        </div>
+        <button id="stats-pdf-btn" onclick="toggleStatsPDFSelect(false)" style="margin-left:auto;padding:7px 16px;background:linear-gradient(135deg,#0C2340,#185FA5);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">⬇ Export PDF</button>
+      </div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:.5rem;padding:0 2px">💡 Drag cards to rearrange · Click Export PDF to select charts</div>
+      <div id="stats-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.75rem;margin-bottom:1rem"></div>
+      <div id="stats-charts" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:1rem"></div>
+    </div>
+
+    <!-- COMPARE VENUES MODE -->
+    <div id="stats-compare-panel" style="display:none">
+
+      <!-- PRESETS -->
+      <div style="background:white;border-radius:12px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);padding:1rem 1.25rem;margin-bottom:1rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+          <span style="font-size:14px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif">📌 Saved presets</span>
+          <button onclick="saveComparePreset()" style="padding:5px 12px;background:#f1f5f9;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text-muted)">+ Save current</button>
+        </div>
+        <div id="compare-presets-list" style="display:flex;flex-wrap:wrap;gap:6px">
+          <span style="font-size:12px;color:var(--text-hint);font-style:italic">No saved presets yet</span>
+        </div>
+      </div>
+
+      <!-- BUILDER -->
+      <div style="background:white;border-radius:12px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);padding:1rem 1.25rem;margin-bottom:1rem">
+        <div style="font-size:14px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif;margin-bottom:1rem">🔧 Build comparison</div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem">
+
+          <!-- Step 1: Venues -->
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">1. Select venues</div>
+            <div style="display:flex;gap:6px;margin-bottom:6px">
+              <button onclick="selectAllCompareVenues(true)" style="padding:3px 10px;font-size:11px;border:1px solid var(--border);border-radius:4px;background:white;cursor:pointer;font-family:'DM Sans',sans-serif">All</button>
+              <button onclick="selectAllCompareVenues(false)" style="padding:3px 10px;font-size:11px;border:1px solid var(--border);border-radius:4px;background:white;cursor:pointer;font-family:'DM Sans',sans-serif">None</button>
+            </div>
+            <div id="compare-venue-checkboxes" style="max-height:180px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;padding:2px"></div>
+          </div>
+
+          <!-- Step 2: Metric -->
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">2. Compare by</div>
+            <select id="compare-metric" onchange="updateCompareMetricDetail()" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;margin-bottom:6px">
+              <option value="task-hours-total">Task hours — total</option>
+              <option value="task-hours-type">Task hours — by type</option>
+              <option value="task-count">Number of tasks</option>
+              <option value="usage-hours-total">Usage hours — total</option>
+              <option value="usage-hours-type">Usage hours — by type</option>
+              <option value="usage-count">Number of usage entries</option>
+              <option value="tasks-vs-usage">Tasks vs Usage hours</option>
+            </select>
+            <div id="compare-metric-detail" style="display:none">
+              <select id="compare-task-type" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif"></select>
+            </div>
+            <div id="compare-usage-type-wrap" style="display:none;margin-top:6px">
+              <select id="compare-usage-type" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif">
+                <option value="all">All types</option>
+                <option value="Match Day">Match Day</option>
+                <option value="Training Session">Training Session</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Step 3: Period -->
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">3. Time period</div>
+            <select id="compare-period" onchange="updateComparePeriodCustom()" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;margin-bottom:6px">
+              <option value="week">This week</option>
+              <option value="month" selected>This month</option>
+              <option value="quarter">This quarter</option>
+              <option value="year">This year</option>
+              <option value="custom">Custom range</option>
+            </select>
+            <div id="compare-custom-dates" style="display:none;display:flex;flex-direction:column;gap:4px">
+              <input type="date" id="compare-from" style="padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif"/>
+              <input type="date" id="compare-to" style="padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif"/>
+            </div>
+          </div>
+
+          <!-- Step 4: Chart type -->
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">4. Chart type</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+              <button onclick="setCompareChartType('bar',this)" class="chart-type-btn chart-type-active" style="padding:10px;border:2px solid var(--blue);border-radius:8px;background:#EBF3FF;font-size:18px;cursor:pointer">📊</button>
+              <button onclick="setCompareChartType('line',this)" class="chart-type-btn" style="padding:10px;border:2px solid var(--border);border-radius:8px;background:white;font-size:18px;cursor:pointer">📈</button>
+              <button onclick="setCompareChartType('pie',this)" class="chart-type-btn" style="padding:10px;border:2px solid var(--border);border-radius:8px;background:white;font-size:18px;cursor:pointer">🥧</button>
+              <button onclick="setCompareChartType('doughnut',this)" class="chart-type-btn" style="padding:10px;border:2px solid var(--border);border-radius:8px;background:white;font-size:18px;cursor:pointer">🍩</button>
+            </div>
+            <input type="text" id="compare-chart-title" placeholder="Chart title (optional)" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;margin-top:8px;box-sizing:border-box"/>
+          </div>
+        </div>
+
+        <button onclick="addCompareChart()" style="margin-top:1rem;padding:9px 24px;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 2px 8px rgba(24,95,165,.3)">+ Add chart</button>
+      </div>
+
+      <!-- GENERATED CHARTS -->
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:.5rem;padding:0 2px">💡 Drag cards to rearrange · Click Export PDF to select charts</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+        <span id="compare-charts-count" style="font-size:12px;color:var(--text-hint)"></span>
+        <div style="display:flex;gap:8px">
+          <button onclick="clearCompareCharts()" style="padding:5px 12px;background:#f1f5f9;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text-muted)">Clear all</button>
+          <button id="compare-pdf-btn" onclick="toggleStatsPDFSelect('compare')" style="padding:7px 16px;background:linear-gradient(135deg,#0C2340,#185FA5);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">⬇ Export PDF</button>
+        </div>
+      </div>
+      <div id="compare-charts" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:1rem"></div>
+    </div>
   </div>
+
 
   <!-- PDF EXPORT MODAL -->
   <div class="modal-overlay" id="modal-stats-pdf">
@@ -2659,12 +2765,14 @@ function switchProjectTab(tab){
   if(tab==='stats'){
     const pid=state.currentProjectId;
     if(pid){
-      // Populate venue filter
       const venues=projectVenues(pid);
+      // Populate venue filter for single mode
       const fv=document.getElementById('stats-venue-filter');
       if(fv) fv.innerHTML='<option value="">All venues</option>'+venues.map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('');
-      // Ensure usage data loaded then render
-      refreshProjectUsage(pid, true).then(()=>renderStats());
+      refreshProjectUsage(pid, true).then(()=>{
+        if(statsMode==='compare') initCompareBuilder();
+        else renderStatsSingle();
+      });
     }
   }
   if(tab==='usage'){
@@ -3867,8 +3975,6 @@ function renderVenueStats_tab(){
 // ════════════════════════════════════════
 // ADMIN STATS — FULL REBUILD
 // ════════════════════════════════════════
-let statsPeriod = 'month';
-let statsChartInstances = {};
 
 function getStatsDates(){
   const now = new Date();
@@ -3895,197 +4001,6 @@ function setStatsPeriod(period,btn){
   const customEl=document.getElementById('stats-custom-dates');
   if(customEl) customEl.style.display=period==='custom'?'flex':'none';
   renderStats();
-}
-
-function renderStats(){
-  const pid=state.currentProjectId; if(!pid) return;
-  const {from,to}=getStatsDates();
-  const venueFilter=document.getElementById('stats-venue-filter')?.value||'';
-  const dataFilter=document.getElementById('stats-data-filter')?.value||'both';
-  const venues=projectVenues(pid);
-  const isSingleVenue=!!venueFilter;
-
-  // Filter data
-  const filterOps=o=>venues.find(v=>v.id===o.venueId)&&(!from||o.date>=from)&&(!to||o.date<=to)&&(!venueFilter||o.venueId===venueFilter);
-  const filterUsage=u=>venues.find(v=>v.id===u.venueId)&&(!from||u.date>=from)&&(!to||u.date<=to)&&(!venueFilter||u.venueId===venueFilter);
-  const ops=state.operations.filter(filterOps);
-  const usage=state_admin_usage.filter(filterUsage);
-  const totalTaskH=ops.reduce((s,o)=>s+calcHours(o.timeFrom,o.timeTo),0);
-  const totalUsageH=usage.reduce((s,u)=>s+calcHours(u.timeFrom,u.timeTo),0);
-
-  // Summary cards
-  const summaryEl=document.getElementById('stats-summary');
-  if(summaryEl) summaryEl.innerHTML=[
-    {l:'Total tasks',v:ops.length,c:'#185FA5',i:'📋'},
-    {l:'Task hours',v:totalTaskH.toFixed(1)+'h',c:'#185FA5',i:'⏱'},
-    {l:'Total usage',v:usage.length,c:'#7C3AED',i:'⚽'},
-    {l:'Usage hours',v:totalUsageH.toFixed(1)+'h',c:'#7C3AED',i:'🕐'},
-    {l:'Venues active',v:new Set([...ops.map(o=>o.venueId),...usage.map(u=>u.venueId)]).size,c:'#3B6D11',i:'🏟'},
-    {l:'Maint/Play ratio',v:totalUsageH>0?(totalTaskH/totalUsageH).toFixed(1)+'x':'—',c:'#854F0B',i:'📊'},
-  ].map(s=>`<div style="background:white;border-radius:12px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);padding:1rem;text-align:center">
-    <div style="font-size:18px;margin-bottom:4px">${s.i}</div>
-    <div style="font-size:22px;font-weight:700;color:${s.c};font-family:'Syne',sans-serif">${s.v}</div>
-    <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px">${s.l}</div>
-  </div>`).join('');
-
-  // Destroy existing charts
-  Object.values(statsChartInstances).forEach(ch=>{try{ch.destroy();}catch(e){}});
-  statsChartInstances={};
-
-  const chartsEl=document.getElementById('stats-charts');
-  if(!chartsEl) return;
-
-  const charts=[];
-
-  if(isSingleVenue){
-    // ── SINGLE VENUE VIEW (same as venue stats) ──
-    if(dataFilter!=='usage'){
-      // Task hours by type — bar
-      const th={};
-      ops.forEach(o=>{th[o.type]=(th[o.type]||0)+calcHours(o.timeFrom,o.timeTo);});
-      const sorted=Object.entries(th).sort((a,b)=>b[1]-a[1]).slice(0,12);
-      if(sorted.length){
-        charts.push({id:'sc-task-hours',title:'Task hours by type',type:'bar',
-          data:{labels:sorted.map(t=>t[0]),datasets:[{label:'Hours',data:sorted.map(t=>+t[1].toFixed(1)),backgroundColor:'#185FA5cc',borderRadius:4}]},
-          opts:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Hours'}}}}});
-        // Pizza chart — same data
-        const totalHs=sorted.reduce((s,t)=>s+t[1],0);
-        charts.push({id:'sc-task-pie',title:'Task hours by type — share',type:'pie',
-          data:{labels:sorted.map(t=>t[0]+' ('+((t[1]/totalHs)*100).toFixed(1)+'%)'),datasets:[{data:sorted.map(t=>+t[1].toFixed(1)),backgroundColor:['#185FA5','#378ADD','#60A5FA','#93C5FD','#3B6D11','#10B981','#F59E0B','#EF9F27','#7C3AED','#A855F7','#A32D2D','#854F0B'],borderWidth:2}]},
-          opts:{plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:ctx=>{const total=ctx.dataset.data.reduce((a,b)=>a+b,0);const pct=((ctx.raw/total)*100).toFixed(1);return ctx.label.split(' (')[0]+': '+ctx.raw+'h ('+pct+'%)';}}}}}});
-      }
-      // Activity over time
-      const bd={};
-      ops.forEach(o=>{bd[o.date]=(bd[o.date]||0)+1;});
-      const dates=Object.keys(bd).sort();
-      if(dates.length>1) charts.push({id:'sc-activity',title:'Task activity over time',type:'line',
-        data:{labels:dates.map(d=>formatDateOnly(d)),datasets:[{label:'Tasks',data:dates.map(d=>bd[d]),borderColor:'#185FA5',backgroundColor:'#185FA520',tension:.3,fill:true,pointRadius:3}]},
-        opts:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
-      // Status breakdown
-      const sc={planned:0,inprogress:0,completed:0,missed:0};
-      ops.forEach(o=>{if(sc[o.status]!==undefined)sc[o.status]++;});
-      if(ops.length) charts.push({id:'sc-status',title:'Tasks by status',type:'doughnut',
-        data:{labels:['Planned','In progress','Completed','Missed'],datasets:[{data:[sc.planned,sc.inprogress,sc.completed,sc.missed],backgroundColor:['#EF9F27','#378ADD','#3B6D11','#A32D2D'],borderWidth:2}]},
-        opts:{plugins:{legend:{position:'bottom'}}}});
-    }
-    if(dataFilter!=='tasks'){
-      const uth={'Match Day':0,'Training Session':0,'Other':0};
-      usage.forEach(u=>{uth[u.usageType]=(uth[u.usageType]||0)+calcHours(u.timeFrom,u.timeTo);});
-      if(usage.length) charts.push({id:'sc-usage-types',title:'Usage hours by type',type:'bar',
-        data:{labels:Object.keys(uth),datasets:[{label:'Hours',data:Object.values(uth).map(v=>+v.toFixed(1)),backgroundColor:['#7C3AED','#10B981','#F59E0B'],borderRadius:4}]},
-        opts:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,title:{display:true,text:'Hours'}}}}});
-      const ubd={};
-      usage.forEach(u=>{ubd[u.date]=(ubd[u.date]||0)+calcHours(u.timeFrom,u.timeTo);});
-      const udates=Object.keys(ubd).sort();
-      if(udates.length>1) charts.push({id:'sc-usage-time',title:'Pitch usage hours over time',type:'line',
-        data:{labels:udates.map(d=>formatDateOnly(d)),datasets:[{label:'Hours',data:udates.map(d=>+ubd[d].toFixed(1)),borderColor:'#7C3AED',backgroundColor:'#7C3AED20',tension:.3,fill:true,pointRadius:3}]},
-        opts:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,title:{display:true,text:'Hours'}}}}});
-    }
-    if(dataFilter==='both'&&(totalTaskH>0||totalUsageH>0)) charts.push({id:'sc-ratio',title:'Pitch time: Maintenance vs Playing',type:'doughnut',
-      data:{labels:['Maintenance (Tasks)','Playing (Usage)'],datasets:[{data:[+totalTaskH.toFixed(1),+totalUsageH.toFixed(1)],backgroundColor:['#185FA5','#7C3AED'],borderWidth:2}]},
-      opts:{plugins:{legend:{position:'bottom'}}}});
-  } else {
-    // ── ALL VENUES COMPARISON VIEW ──
-    const activeVenues=venues.filter(v=>ops.find(o=>o.venueId===v.id)||usage.find(u=>u.venueId===v.id));
-    if(!activeVenues.length){
-      chartsEl.innerHTML='<div style="grid-column:1/-1;padding:3rem;text-align:center;color:var(--text-hint)">No data for selected period.</div>';
-      return;
-    }
-
-    if(dataFilter!=='usage'){
-      // Venue task hours comparison
-      const vTaskH=venues.map(v=>({name:v.name,h:ops.filter(o=>o.venueId===v.id).reduce((s,o)=>s+calcHours(o.timeFrom,o.timeTo),0)})).filter(v=>v.h>0).sort((a,b)=>b.h-a.h);
-      if(vTaskH.length) charts.push({id:'sc-venue-task-h',title:'Task hours per venue',type:'bar',
-        data:{labels:vTaskH.map(v=>v.name),datasets:[{label:'Hours',data:vTaskH.map(v=>+v.h.toFixed(1)),backgroundColor:'#185FA5cc',borderRadius:4}]},
-        opts:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Hours'}}}}});
-      // Venue task count
-      const vTaskC=venues.map(v=>({name:v.name,c:ops.filter(o=>o.venueId===v.id).length})).filter(v=>v.c>0).sort((a,b)=>b.c-a.c);
-      if(vTaskC.length) charts.push({id:'sc-venue-task-c',title:'Number of tasks per venue',type:'bar',
-        data:{labels:vTaskC.map(v=>v.name),datasets:[{label:'Tasks',data:vTaskC.map(v=>v.c),backgroundColor:'#378ADDcc',borderRadius:4}]},
-        opts:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Tasks'}}}}});
-      // Task hours by type across all venues — bar + pizza
-      const th={};
-      ops.forEach(o=>{th[o.type]=(th[o.type]||0)+calcHours(o.timeFrom,o.timeTo);});
-      const sortedTh=Object.entries(th).sort((a,b)=>b[1]-a[1]).slice(0,12);
-      if(sortedTh.length){
-        charts.push({id:'sc-type-h',title:'Task hours by type (all venues)',type:'bar',
-          data:{labels:sortedTh.map(t=>t[0]),datasets:[{label:'Hours',data:sortedTh.map(t=>+t[1].toFixed(1)),backgroundColor:'#185FA5cc',borderRadius:4}]},
-          opts:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Hours'}}}}});
-        const totalAllH=sortedTh.reduce((s,t)=>s+t[1],0);
-        charts.push({id:'sc-type-pie',title:'Task hours by type — share',type:'pie',
-          data:{labels:sortedTh.map(t=>t[0]+' ('+((t[1]/totalAllH)*100).toFixed(1)+'%)'),datasets:[{data:sortedTh.map(t=>+t[1].toFixed(1)),backgroundColor:['#185FA5','#378ADD','#60A5FA','#93C5FD','#3B6D11','#10B981','#F59E0B','#EF9F27','#7C3AED','#A855F7','#A32D2D','#854F0B'],borderWidth:2}]},
-          opts:{plugins:{legend:{position:'right'},tooltip:{callbacks:{label:ctx=>{const total=ctx.dataset.data.reduce((a,b)=>a+b,0);const pct=((ctx.raw/total)*100).toFixed(1);return ctx.label.split(' (')[0]+': '+ctx.raw+'h ('+pct+'%)';}}}}}});
-      }
-    }
-    if(dataFilter!=='tasks'){
-      // Usage hours per venue
-      const vUsageH=venues.map(v=>({name:v.name,h:usage.filter(u=>u.venueId===v.id).reduce((s,u)=>s+calcHours(u.timeFrom,u.timeTo),0)})).filter(v=>v.h>0).sort((a,b)=>b.h-a.h);
-      if(vUsageH.length) charts.push({id:'sc-venue-usage-h',title:'Usage hours per venue',type:'bar',
-        data:{labels:vUsageH.map(v=>v.name),datasets:[{label:'Hours',data:vUsageH.map(v=>+v.h.toFixed(1)),backgroundColor:'#7C3AEDcc',borderRadius:4}]},
-        opts:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Hours'}}}}});
-      // Usage type breakdown
-      const uth={'Match Day':0,'Training Session':0,'Other':0};
-      usage.forEach(u=>{uth[u.usageType]=(uth[u.usageType]||0)+calcHours(u.timeFrom,u.timeTo);});
-      if(usage.length) charts.push({id:'sc-usage-breakdown',title:'Usage hours by type (all venues)',type:'bar',
-        data:{labels:Object.keys(uth),datasets:[{label:'Hours',data:Object.values(uth).map(v=>+v.toFixed(1)),backgroundColor:['#7C3AED','#10B981','#F59E0B'],borderRadius:4}]},
-        opts:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,title:{display:true,text:'Hours'}}}}});
-    }
-    if(dataFilter==='both'){
-      // Tasks vs Usage comparison per venue
-      const vComp=venues.map(v=>({
-        name:v.name,
-        th:ops.filter(o=>o.venueId===v.id).reduce((s,o)=>s+calcHours(o.timeFrom,o.timeTo),0),
-        uh:usage.filter(u=>u.venueId===v.id).reduce((s,u)=>s+calcHours(u.timeFrom,u.timeTo),0)
-      })).filter(v=>v.th>0||v.uh>0);
-      if(vComp.length) charts.push({id:'sc-comp',title:'Tasks vs Usage hours per venue',type:'bar',
-        data:{labels:vComp.map(v=>v.name),datasets:[
-          {label:'Task hours',data:vComp.map(v=>+v.th.toFixed(1)),backgroundColor:'#185FA5cc',borderRadius:4},
-          {label:'Usage hours',data:vComp.map(v=>+v.uh.toFixed(1)),backgroundColor:'#7C3AEDcc',borderRadius:4}
-        ]},
-        opts:{plugins:{legend:{position:'top'}},scales:{y:{beginAtZero:true,title:{display:true,text:'Hours'}}}}});
-    }
-  }
-
-  if(!charts.length){
-    chartsEl.innerHTML='<div style="grid-column:1/-1;padding:3rem;text-align:center;color:var(--text-hint);font-size:14px">No data for the selected period and filters.</div>';
-    return;
-  }
-
-  // Render draggable cards (desktop + touch)
-  chartsEl.innerHTML=charts.map(ch=>`
-    <div class="stats-card" id="card-${ch.id}" draggable="true"
-      ondragstart="statsCardDragStart(event,'${ch.id}')"
-      ondragover="statsCardDragOver(event)"
-      ondrop="statsCardDrop(event,'${ch.id}')"
-      ondragleave="statsCardDragLeave(event)"
-      ontouchstart="statsTouchStart(event,'${ch.id}','stats-charts')"
-      ontouchmove="statsTouchMove(event)"
-      ontouchend="statsTouchEnd(event)"
-      style="cursor:grab;position:relative;touch-action:none">
-      <div style="position:absolute;top:8px;right:8px;font-size:16px;opacity:.25;pointer-events:none">⠿</div>
-      <div class="stats-card-title">${ch.title}</div>
-      <canvas id="${ch.id}"></canvas>
-    </div>`).join('');
-
-  // Restore saved order
-  loadCardOrder(getStatsStorageKey(), 'stats-charts');
-
-  setTimeout(()=>{
-    charts.forEach(ch=>{
-      const canvas=document.getElementById(ch.id); if(!canvas) return;
-      statsChartInstances[ch.id]=new Chart(canvas,{
-        type:ch.type,data:ch.data,
-        options:{responsive:true,maintainAspectRatio:true,...ch.opts,
-          plugins:{...(ch.opts?.plugins||{}),
-            tooltip:{callbacks:{label:ctx=>{
-              const v=ctx.parsed?.y??ctx.parsed??ctx.raw;
-              return typeof v==='number'?v+'h':String(v);
-            }}}
-          }
-        }
-      });
-    });
-  },50);
 }
 
 // ── DRAG & DROP for stats cards ──
@@ -4239,110 +4154,549 @@ function statsTouchEnd(e){
 // ════════════════════════════════════════
 // STATS PDF EXPORT — select cards visually
 // ════════════════════════════════════════
+
+// ════════════════════════════════════════
+// STATS PDF — select by hiding cards
+// ════════════════════════════════════════
 let statsSelectMode = false;
 let vstatsSelectMode = false;
 
 function toggleStatsPDFSelect(isVenue){
-  if(isVenue){
-    vstatsSelectMode = !vstatsSelectMode;
-    const btn = document.getElementById('vstats-pdf-btn');
-    const grid = document.getElementById('vstats-charts');
-    if(!grid) return;
-    if(vstatsSelectMode){
-      btn.textContent = '⬇ Export selected';
-      btn.style.background = 'linear-gradient(135deg,#3B6D11,#16a34a)';
-      // Add checkboxes to all cards
-      [...grid.children].forEach(card=>{
-        if(!card.querySelector('.stats-select-cb')){
-          const cb = document.createElement('input');
-          cb.type='checkbox'; cb.checked=true; cb.className='stats-select-cb';
-          cb.style.cssText='position:absolute;top:10px;left:10px;width:18px;height:18px;accent-color:var(--blue);z-index:10;cursor:pointer';
-          card.appendChild(cb);
-        }
-      });
-    } else {
-      btn.textContent = '⬇ Export PDF';
-      btn.style.background = 'linear-gradient(135deg,#0C2340,#185FA5)';
-      [...grid.querySelectorAll('.stats-select-cb')].forEach(cb=>cb.remove());
-      doExportPDF('vstats-charts', true);
-    }
+  const gridId = isVenue ? 'vstats-charts' : 'stats-charts';
+  const btnId = isVenue ? 'vstats-pdf-btn' : 'stats-pdf-btn';
+  const btn = document.getElementById(btnId);
+  const grid = document.getElementById(gridId);
+  if(!grid||!btn) return;
+
+  const inSelectMode = btn.dataset.selectMode === '1';
+
+  if(!inSelectMode){
+    // Enter select mode — show checkboxes
+    btn.dataset.selectMode = '1';
+    btn.innerHTML = '✅ Export selected';
+    btn.style.background = 'linear-gradient(135deg,#3B6D11,#16a34a)';
+    [...grid.children].forEach(card=>{
+      card.style.position = 'relative';
+      if(!card.querySelector('.stats-select-cb')){
+        const wrap = document.createElement('label');
+        wrap.className = 'stats-select-wrap';
+        wrap.style.cssText = 'position:absolute;top:8px;left:8px;z-index:10;display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.9);border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px;font-weight:600;color:var(--navy);box-shadow:0 1px 4px rgba(0,0,0,.15)';
+        const cb = document.createElement('input');
+        cb.type='checkbox'; cb.checked=true; cb.className='stats-select-cb';
+        cb.style.cssText='width:15px;height:15px;accent-color:var(--blue);cursor:pointer';
+        wrap.appendChild(cb);
+        wrap.appendChild(document.createTextNode(' Include'));
+        card.appendChild(wrap);
+      }
+    });
   } else {
-    statsSelectMode = !statsSelectMode;
-    const btn = document.getElementById('stats-pdf-btn');
-    const grid = document.getElementById('stats-charts');
-    if(!grid) return;
-    if(statsSelectMode){
-      btn.textContent = '⬇ Export selected';
-      btn.style.background = 'linear-gradient(135deg,#3B6D11,#16a34a)';
-      [...grid.children].forEach(card=>{
-        if(!card.querySelector('.stats-select-cb')){
-          const cb = document.createElement('input');
-          cb.type='checkbox'; cb.checked=true; cb.className='stats-select-cb';
-          cb.style.cssText='position:absolute;top:10px;left:10px;width:18px;height:18px;accent-color:var(--blue);z-index:10;cursor:pointer';
-          card.appendChild(cb);
-        }
-      });
+    // Export mode — collect selected, export, exit select mode
+    btn.dataset.selectMode = '0';
+    btn.innerHTML = '⬇ Export PDF';
+    btn.style.background = 'linear-gradient(135deg,#0C2340,#185FA5)';
+
+    // Capture images BEFORE removing checkboxes
+    const cards = [...grid.children];
+    const selected = cards.filter(card=>{
+      const cb = card.querySelector('.stats-select-cb');
+      return !cb || cb.checked;
+    });
+
+    if(!selected.length){ showToast('Select at least one chart'); [...grid.querySelectorAll('.stats-select-wrap')].forEach(w=>w.remove()); return; }
+
+    // Build PDF from selected cards
+    const pfx = isVenue ? 'vcard-' : 'card-';
+    const chartsHTML = selected.map(card=>{
+      const id = card.id.replace(pfx,'');
+      const canvas = document.getElementById(id); if(!canvas) return '';
+      const img = canvas.toDataURL('image/png');
+      const title = card.querySelector('.stats-card-title')?.textContent||'';
+      return `<div class="cb"><h3>${title}</h3><img src="${img}" style="width:100%;max-height:260px;object-fit:contain"/></div>`;
+    }).filter(Boolean).join('');
+
+    // Remove checkboxes
+    [...grid.querySelectorAll('.stats-select-wrap')].forEach(w=>w.remove());
+
+    if(!chartsHTML){ showToast('No charts to export'); return; }
+
+    // Header info
+    let loc, period;
+    if(isVenue){
+      const venue=state.venues.find(v=>v.id===state.currentVenueId);
+      loc='🏟 '+(venue?.name||'');
+      const {from,to}=getVenueStatsDates();
+      period=venueStatsPeriod==='custom'?(from||'')+(to?' — '+to:''):venueStatsPeriod.charAt(0).toUpperCase()+venueStatsPeriod.slice(1);
     } else {
-      btn.textContent = '⬇ Export PDF';
-      btn.style.background = 'linear-gradient(135deg,#0C2340,#185FA5)';
-      [...grid.querySelectorAll('.stats-select-cb')].forEach(cb=>cb.remove());
-      doExportPDF('stats-charts', false);
+      const vf=document.getElementById('stats-venue-filter')?.value||'';
+      const venues=projectVenues(state.currentProjectId||'');
+      loc='📍 '+(vf?venues.find(v=>v.id===vf)?.name||'':'All venues');
+      const {from,to}=getStatsDates();
+      period=statsPeriod==='custom'?(from||'')+(to?' — '+to:''):statsPeriod.charAt(0).toUpperCase()+statsPeriod.slice(1);
     }
+
+    const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Pitch Operations Report</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,sans-serif;color:#0C2340;padding:24px;background:white}
+.rh{border-bottom:3px solid #0C2340;padding-bottom:14px;margin-bottom:20px}
+.rt{font-size:22px;font-weight:700}
+.rm{font-size:11px;color:#5a6a82;display:flex;gap:20px;margin-top:6px}
+.cg{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.cb{background:#f8fafc;border-radius:8px;padding:14px;page-break-inside:avoid}
+.cb h3{font-size:11px;font-weight:700;color:#0C2340;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+@media print{
+  body{padding:12px;margin:0}
+  .cg{gap:12px}
+  .cb{page-break-inside:avoid}
+}
+</style></head><body>
+<div class="rh">
+  <div class="rt">Pitch Operations Report</div>
+  <div class="rm">
+    <span>${esc(loc)}</span>
+    <span>📅 ${period}</span>
+    <span>🕐 Generated: ${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</span>
+  </div>
+</div>
+<div class="cg">${chartsHTML}</div>
+</body></html>`;
+
+    const win=window.open('','_blank','width=900,height=700');
+    if(!win){ showToast('Allow popups to export PDF'); return; }
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
+    win.onload=()=>{ setTimeout(()=>{ win.focus(); win.print(); },300); };
   }
 }
 
-function doExportPDF(gridId, isVenue){
-  const grid = document.getElementById(gridId); if(!grid) return;
-  const pfx = isVenue ? 'vcard-' : 'card-';
+// ════════════════════════════════════════
+// ADMIN STATS — FULL SYSTEM
+// ════════════════════════════════════════
+let statsPeriod = 'month';
+let statsChartInstances = {};
+let compareChartInstances = {};
+let compareChartType = 'bar';
+let statsMode = 'single'; // 'single' | 'compare'
+let compareChartCounter = 0;
 
-  // Get selected cards (or all if no checkboxes)
-  const cards = [...grid.children].filter(card=>{
-    const cb = card.querySelector('.stats-select-cb');
-    return !cb || cb.checked;
-  });
-  if(!cards.length){ showToast('Select at least one chart'); return; }
-
-  const chartsHTML = cards.map(card=>{
-    const id = card.id.replace(pfx,'');
-    const canvas = document.getElementById(id); if(!canvas) return '';
-    const img = canvas.toDataURL('image/png');
-    const title = card.querySelector('.stats-card-title')?.textContent||'';
-    return `<div class="chart-block"><h3>${title}</h3><img src="${img}" style="width:100%;max-height:260px;object-fit:contain"/></div>`;
-  }).join('');
-
-  // Header info
-  let headerLine1, headerLine2;
-  if(isVenue){
-    const venue = state.venues.find(v=>v.id===state.currentVenueId);
-    headerLine1 = '🏟 ' + esc(venue?.name||'');
-    const {from,to} = getVenueStatsDates();
-    headerLine2 = venueStatsPeriod==='custom'?(from||'')+(to?' — '+to:''):venueStatsPeriod.charAt(0).toUpperCase()+venueStatsPeriod.slice(1);
+// ── Mode switch ──
+function setStatsMode(mode){
+  statsMode = mode;
+  const single = document.getElementById('stats-single-panel');
+  const compare = document.getElementById('stats-compare-panel');
+  const btnS = document.getElementById('stats-mode-single');
+  const btnC = document.getElementById('stats-mode-compare');
+  if(mode==='single'){
+    single.style.display='block'; compare.style.display='none';
+    btnS.style.background='var(--blue)'; btnS.style.color='white'; btnS.style.borderColor='var(--blue)';
+    btnC.style.background='white'; btnC.style.color='var(--text-muted)'; btnC.style.borderColor='var(--border)';
+    renderStatsSingle();
   } else {
-    const venueFilter = document.getElementById('stats-venue-filter')?.value||'';
-    const venues = projectVenues(state.currentProjectId||'');
-    headerLine1 = '📍 ' + esc(venueFilter ? venues.find(v=>v.id===venueFilter)?.name||'' : 'All venues');
-    const {from,to} = getStatsDates();
-    headerLine2 = statsPeriod==='custom'?(from||'')+(to?' — '+to:''):statsPeriod.charAt(0).toUpperCase()+statsPeriod.slice(1);
+    single.style.display='none'; compare.style.display='block';
+    btnC.style.background='var(--blue)'; btnC.style.color='white'; btnC.style.borderColor='var(--blue)';
+    btnS.style.background='white'; btnS.style.color='var(--text-muted)'; btnS.style.borderColor='var(--border)';
+    initCompareBuilder();
+  }
+}
+
+// ── Period helpers ──
+function getStatsDates(){
+  const now=new Date();
+  let from, to=todayStr();
+  if(statsPeriod==='week'){ const d=new Date(now); d.setDate(now.getDate()-now.getDay()+1); from=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  else if(statsPeriod==='month'){ from=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-01'; }
+  else if(statsPeriod==='quarter'){ const q=new Date(now.getFullYear(),Math.floor(now.getMonth()/3)*3,1); from=q.getFullYear()+'-'+String(q.getMonth()+1).padStart(2,'0')+'-01'; }
+  else { from=document.getElementById('stats-from')?.value||''; to=document.getElementById('stats-to')?.value||todayStr(); }
+  return {from,to};
+}
+
+function getCompareDates(){
+  const p=document.getElementById('compare-period')?.value||'month';
+  const now=new Date(); let from, to=todayStr();
+  if(p==='week'){ const d=new Date(now); d.setDate(now.getDate()-now.getDay()+1); from=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  else if(p==='month'){ from=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-01'; }
+  else if(p==='quarter'){ const q=new Date(now.getFullYear(),Math.floor(now.getMonth()/3)*3,1); from=q.getFullYear()+'-'+String(q.getMonth()+1).padStart(2,'0')+'-01'; }
+  else if(p==='year'){ from=now.getFullYear()+'-01-01'; }
+  else { from=document.getElementById('compare-from')?.value||''; to=document.getElementById('compare-to')?.value||todayStr(); }
+  return {from,to};
+}
+
+function setStatsPeriod(period,btn){
+  statsPeriod=period;
+  document.querySelectorAll('#stats-single-panel .stats-period-btn').forEach(b=>b.classList.remove('stats-period-active'));
+  btn.classList.add('stats-period-active');
+  const customEl=document.getElementById('stats-custom-dates');
+  if(customEl) customEl.style.display=period==='custom'?'flex':'none';
+  renderStatsSingle();
+}
+
+function updateComparePeriodCustom(){
+  const p=document.getElementById('compare-period')?.value;
+  const el=document.getElementById('compare-custom-dates');
+  if(el) el.style.display=p==='custom'?'flex':'none';
+}
+
+// ══ SINGLE VENUE MODE ══
+function renderStatsSingle(){
+  const pid=state.currentProjectId; if(!pid) return;
+  const {from,to}=getStatsDates();
+  const venueFilter=document.getElementById('stats-venue-filter')?.value||'';
+  const dataFilter=document.getElementById('stats-data-filter')?.value||'both';
+  const venues=projectVenues(pid);
+
+  const ops=state.operations.filter(o=>venues.find(v=>v.id===o.venueId)&&(!from||o.date>=from)&&(!to||o.date<=to)&&(!venueFilter||o.venueId===venueFilter));
+  const usage=state_admin_usage.filter(u=>venues.find(v=>v.id===u.venueId)&&(!from||u.date>=from)&&(!to||u.date<=to)&&(!venueFilter||u.venueId===venueFilter));
+  const totalTaskH=ops.reduce((s,o)=>s+calcHours(o.timeFrom,o.timeTo),0);
+  const totalUsageH=usage.reduce((s,u)=>s+calcHours(u.timeFrom,u.timeTo),0);
+
+  // Summary
+  const summaryEl=document.getElementById('stats-summary');
+  if(summaryEl) summaryEl.innerHTML=[
+    {l:'Total tasks',v:ops.length,c:'#185FA5',i:'📋'},
+    {l:'Task hours',v:totalTaskH.toFixed(1)+'h',c:'#185FA5',i:'⏱'},
+    {l:'Total usage',v:usage.length,c:'#7C3AED',i:'⚽'},
+    {l:'Usage hours',v:totalUsageH.toFixed(1)+'h',c:'#7C3AED',i:'🕐'},
+    {l:'Venues active',v:new Set([...ops.map(o=>o.venueId),...usage.map(u=>u.venueId)]).size,c:'#3B6D11',i:'🏟'},
+    {l:'Maint/Play ratio',v:totalUsageH>0?(totalTaskH/totalUsageH).toFixed(1)+'x':'—',c:'#854F0B',i:'📊'},
+  ].map(s=>`<div style="background:white;border-radius:12px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);padding:1rem;text-align:center">
+    <div style="font-size:18px;margin-bottom:4px">${s.i}</div>
+    <div style="font-size:22px;font-weight:700;color:${s.c};font-family:'Syne',sans-serif">${s.v}</div>
+    <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px">${s.l}</div>
+  </div>`).join('');
+
+  Object.values(statsChartInstances).forEach(ch=>{try{ch.destroy();}catch(e){}});
+  statsChartInstances={};
+  const chartsEl=document.getElementById('stats-charts');
+  if(!chartsEl) return;
+  const charts=[];
+
+  if(dataFilter!=='usage'){
+    const th={};
+    ops.forEach(o=>{th[o.type]=(th[o.type]||0)+calcHours(o.timeFrom,o.timeTo);});
+    const sorted=Object.entries(th).sort((a,b)=>b[1]-a[1]).slice(0,12);
+    if(sorted.length){
+      charts.push({id:'sc-task-hours',title:'Task hours by type',type:'bar',
+        data:{labels:sorted.map(t=>t[0]),datasets:[{label:'Hours',data:sorted.map(t=>+t[1].toFixed(1)),backgroundColor:'#185FA5cc',borderRadius:4}]},
+        opts:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Hours'}}}}});
+      const totalH=sorted.reduce((s,t)=>s+t[1],0);
+      charts.push({id:'sc-task-pie',title:'Task hours by type — share',type:'pie',
+        data:{labels:sorted.map(t=>t[0]+' ('+((t[1]/totalH)*100).toFixed(1)+'%)'),datasets:[{data:sorted.map(t=>+t[1].toFixed(1)),backgroundColor:['#185FA5','#378ADD','#60A5FA','#93C5FD','#3B6D11','#10B981','#F59E0B','#EF9F27','#7C3AED','#A855F7','#A32D2D','#854F0B'],borderWidth:2}]},
+        opts:{plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:ctx=>{const tot=ctx.dataset.data.reduce((a,b)=>a+b,0);return ctx.label.split(' (')[0]+': '+ctx.raw+'h ('+(ctx.raw/tot*100).toFixed(1)+'%)';}}}}}});
+    }
+    const bd={};
+    ops.forEach(o=>{bd[o.date]=(bd[o.date]||0)+1;});
+    const dates=Object.keys(bd).sort();
+    if(dates.length>1) charts.push({id:'sc-activity',title:'Task activity over time',type:'line',
+      data:{labels:dates.map(d=>formatDateOnly(d)),datasets:[{label:'Tasks',data:dates.map(d=>bd[d]),borderColor:'#185FA5',backgroundColor:'#185FA520',tension:.3,fill:true,pointRadius:3}]},
+      opts:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
+    if(ops.length){
+      const sc={planned:0,inprogress:0,completed:0,missed:0};
+      ops.forEach(o=>{if(sc[o.status]!==undefined)sc[o.status]++;});
+      charts.push({id:'sc-status',title:'Tasks by status',type:'doughnut',
+        data:{labels:['Planned','In progress','Completed','Missed'],datasets:[{data:[sc.planned,sc.inprogress,sc.completed,sc.missed],backgroundColor:['#EF9F27','#378ADD','#3B6D11','#A32D2D'],borderWidth:2}]},
+        opts:{plugins:{legend:{position:'bottom'}}}});
+    }
+    if(venues.length>1&&!venueFilter){
+      const vth=venues.map(v=>({name:v.name,h:ops.filter(o=>o.venueId===v.id).reduce((s,o)=>s+calcHours(o.timeFrom,o.timeTo),0)})).filter(v=>v.h>0).sort((a,b)=>b.h-a.h);
+      if(vth.length) charts.push({id:'sc-venue-tasks',title:'Task hours per venue',type:'bar',
+        data:{labels:vth.map(v=>v.name),datasets:[{label:'Hours',data:vth.map(v=>+v.h.toFixed(1)),backgroundColor:'#185FA5cc',borderRadius:4}]},
+        opts:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Hours'}}}}});
+    }
+  }
+  if(dataFilter!=='tasks'){
+    const uth={'Match Day':0,'Training Session':0,'Other':0};
+    usage.forEach(u=>{uth[u.usageType]=(uth[u.usageType]||0)+calcHours(u.timeFrom,u.timeTo);});
+    if(usage.length) charts.push({id:'sc-usage-types',title:'Usage hours by type',type:'bar',
+      data:{labels:Object.keys(uth),datasets:[{label:'Hours',data:Object.values(uth).map(v=>+v.toFixed(1)),backgroundColor:['#7C3AED','#10B981','#F59E0B'],borderRadius:4}]},
+      opts:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,title:{display:true,text:'Hours'}}}}});
+    const ubd={};
+    usage.forEach(u=>{ubd[u.date]=(ubd[u.date]||0)+calcHours(u.timeFrom,u.timeTo);});
+    const udates=Object.keys(ubd).sort();
+    if(udates.length>1) charts.push({id:'sc-usage-time',title:'Pitch usage hours over time',type:'line',
+      data:{labels:udates.map(d=>formatDateOnly(d)),datasets:[{label:'Hours',data:udates.map(d=>+ubd[d].toFixed(1)),borderColor:'#7C3AED',backgroundColor:'#7C3AED20',tension:.3,fill:true,pointRadius:3}]},
+      opts:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,title:{display:true,text:'Hours'}}}}});
+    if(venues.length>1&&!venueFilter){
+      const vuh=venues.map(v=>({name:v.name,h:usage.filter(u=>u.venueId===v.id).reduce((s,u)=>s+calcHours(u.timeFrom,u.timeTo),0)})).filter(v=>v.h>0).sort((a,b)=>b.h-a.h);
+      if(vuh.length) charts.push({id:'sc-venue-usage',title:'Usage hours per venue',type:'bar',
+        data:{labels:vuh.map(v=>v.name),datasets:[{label:'Hours',data:vuh.map(v=>+v.h.toFixed(1)),backgroundColor:'#7C3AEDcc',borderRadius:4}]},
+        opts:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Hours'}}}}});
+    }
+  }
+  if(dataFilter==='both'&&(totalTaskH>0||totalUsageH>0)) charts.push({id:'sc-ratio',title:'Maintenance vs Playing time',type:'doughnut',
+    data:{labels:['Maintenance','Playing'],datasets:[{data:[+totalTaskH.toFixed(1),+totalUsageH.toFixed(1)],backgroundColor:['#185FA5','#7C3AED'],borderWidth:2}]},
+    opts:{plugins:{legend:{position:'bottom'}}}});
+
+  if(!charts.length){ chartsEl.innerHTML='<div style="grid-column:1/-1;padding:3rem;text-align:center;color:var(--text-hint)">No data for selected period.</div>'; return; }
+
+  chartsEl.innerHTML=charts.map(ch=>`
+    <div class="stats-card" id="card-${ch.id}" draggable="true"
+      ondragstart="statsCardDragStart(event,'${ch.id}')"
+      ondragover="statsCardDragOver(event)"
+      ondrop="statsCardDrop(event,'${ch.id}')"
+      ondragleave="statsCardDragLeave(event)"
+      ontouchstart="statsTouchStart(event,'${ch.id}','stats-charts')"
+      ontouchmove="statsTouchMove(event)" ontouchend="statsTouchEnd(event)"
+      style="cursor:grab;position:relative;touch-action:none">
+      <div style="position:absolute;top:8px;right:8px;font-size:16px;opacity:.25;pointer-events:none">⠿</div>
+      <div class="stats-card-title">${ch.title}</div>
+      <canvas id="${ch.id}"></canvas>
+    </div>`).join('');
+
+  loadCardOrder(getStatsStorageKey(), 'stats-charts');
+  setTimeout(()=>{
+    charts.forEach(ch=>{
+      const canvas=document.getElementById(ch.id); if(!canvas) return;
+      statsChartInstances[ch.id]=new Chart(canvas,{type:ch.type,data:ch.data,options:{responsive:true,maintainAspectRatio:true,...ch.opts,plugins:{...(ch.opts?.plugins||{}),tooltip:{callbacks:{label:ctx=>{const v=ctx.parsed?.y??ctx.raw;return typeof v==='number'?v+'h':String(v);}}}}}});
+    });
+  },50);
+}
+
+// ══ COMPARE BUILDER ══
+function initCompareBuilder(){
+  const pid=state.currentProjectId; if(!pid) return;
+  const venues=projectVenues(pid);
+
+  // Venue checkboxes
+  const vcb=document.getElementById('compare-venue-checkboxes');
+  if(vcb) vcb.innerHTML=venues.map(v=>`
+    <label style="display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;cursor:pointer;font-size:13px;background:#f8fafc;border:1px solid var(--border)">
+      <input type="checkbox" value="${v.id}" checked style="accent-color:var(--blue);width:14px;height:14px"/>
+      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${v.color||'#185FA5'};flex-shrink:0"></span>
+      ${esc(v.name)}
+    </label>`).join('');
+
+  // Task type options
+  updateCompareMetricDetail();
+  loadComparePresets();
+}
+
+function selectAllCompareVenues(checked){
+  document.querySelectorAll('#compare-venue-checkboxes input[type=checkbox]').forEach(cb=>cb.checked=checked);
+}
+
+function setCompareChartType(type, btn){
+  compareChartType=type;
+  document.querySelectorAll('.chart-type-btn').forEach(b=>{
+    b.style.borderColor='var(--border)'; b.style.background='white';
+  });
+  btn.style.borderColor='var(--blue)'; btn.style.background='#EBF3FF';
+}
+
+function updateCompareMetricDetail(){
+  const metric=document.getElementById('compare-metric')?.value||'';
+  const detail=document.getElementById('compare-metric-detail');
+  const usageWrap=document.getElementById('compare-usage-type-wrap');
+  if(metric==='task-hours-type'){
+    if(detail){ detail.style.display='block';
+      const sel=document.getElementById('compare-task-type');
+      if(sel) sel.innerHTML=state.opTypes.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
+    }
+    if(usageWrap) usageWrap.style.display='none';
+  } else if(metric==='usage-hours-type'){
+    if(detail) detail.style.display='none';
+    if(usageWrap) usageWrap.style.display='block';
+  } else {
+    if(detail) detail.style.display='none';
+    if(usageWrap) usageWrap.style.display='none';
+  }
+}
+
+function addCompareChart(){
+  const pid=state.currentProjectId; if(!pid) return;
+  const selectedVenueIds=[...document.querySelectorAll('#compare-venue-checkboxes input:checked')].map(cb=>cb.value);
+  if(!selectedVenueIds.length){ showToast('Select at least one venue'); return; }
+
+  const metric=document.getElementById('compare-metric')?.value||'task-hours-total';
+  const period=document.getElementById('compare-period')?.value||'month';
+  const chartType=compareChartType;
+  const customTitle=document.getElementById('compare-chart-title')?.value.trim()||'';
+  const {from,to}=getCompareDates();
+  const venues=projectVenues(pid);
+  const usageTypeFilter=document.getElementById('compare-usage-type')?.value||'all';
+  const taskTypeFilter=document.getElementById('compare-task-type')?.value||'';
+
+  const COLORS=['#185FA5','#7C3AED','#3B6D11','#854F0B','#A32D2D','#0891B2','#D97706','#059669','#7C3AED','#DC2626'];
+
+  // Build data per selected venue
+  const labels=[];
+  const data=[];
+  const colors=[];
+
+  selectedVenueIds.forEach((vid,idx)=>{
+    const venue=venues.find(v=>v.id===vid); if(!venue) return;
+    labels.push(venue.name);
+    colors.push(COLORS[idx%COLORS.length]);
+
+    const vOps=state.operations.filter(o=>o.venueId===vid&&(!from||o.date>=from)&&(!to||o.date<=to));
+    const vUsage=state_admin_usage.filter(u=>u.venueId===vid&&(!from||u.date>=from)&&(!to||u.date<=to));
+
+    let val=0;
+    if(metric==='task-hours-total') val=vOps.reduce((s,o)=>s+calcHours(o.timeFrom,o.timeTo),0);
+    else if(metric==='task-hours-type') val=vOps.filter(o=>o.type===taskTypeFilter).reduce((s,o)=>s+calcHours(o.timeFrom,o.timeTo),0);
+    else if(metric==='task-count') val=vOps.length;
+    else if(metric==='usage-hours-total') val=vUsage.reduce((s,u)=>s+calcHours(u.timeFrom,u.timeTo),0);
+    else if(metric==='usage-hours-type') val=vUsage.filter(u=>usageTypeFilter==='all'||u.usageType===usageTypeFilter).reduce((s,u)=>s+calcHours(u.timeFrom,u.timeTo),0);
+    else if(metric==='usage-count') val=vUsage.length;
+    else if(metric==='tasks-vs-usage'){
+      val=vOps.reduce((s,o)=>s+calcHours(o.timeFrom,o.timeTo),0);
+    }
+    data.push(+val.toFixed(1));
+  });
+
+  const metricLabels={'task-hours-total':'Task hours','task-hours-type':'Hours: '+taskTypeFilter,'task-count':'Task count','usage-hours-total':'Usage hours','usage-hours-type':'Usage hours'+(usageTypeFilter!=='all'?' ('+usageTypeFilter+')':''),'usage-count':'Usage count','tasks-vs-usage':'Task hours'};
+  const isHours=['task-hours-total','task-hours-type','usage-hours-total','usage-hours-type','tasks-vs-usage'].includes(metric);
+  const periodLabel={week:'This week',month:'This month',quarter:'This quarter',year:'This year',custom:(from||'')+(to?' — '+to:'')}[period]||period;
+
+  const chartTitle=customTitle||(metricLabels[metric]||metric)+' — '+periodLabel;
+  const chartId='cmp-'+Date.now();
+  compareChartCounter++;
+
+  // For pie/doughnut, labels include venue names with %
+  let chartData;
+  if(chartType==='pie'||chartType==='doughnut'){
+    const total=data.reduce((a,b)=>a+b,0);
+    chartData={
+      labels:labels.map((l,i)=>l+(total>0?' ('+((data[i]/total)*100).toFixed(1)+'%)':'')),
+      datasets:[{data,backgroundColor:colors,borderWidth:2}]
+    };
+  } else {
+    chartData={
+      labels,
+      datasets:[{label:metricLabels[metric]||metric,data,backgroundColor:colors,borderColor:colors,borderRadius:4,tension:.3}]
+    };
   }
 
-  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Pitch Operations Report</title>
-  <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;color:#0C2340;padding:32px}
-  .rh{border-bottom:2px solid #0C2340;padding-bottom:16px;margin-bottom:24px}
-  .rt{font-size:24px;font-weight:700;margin-bottom:4px}
-  .rm{font-size:12px;color:#5a6a82;display:flex;gap:24px;flex-wrap:wrap;margin-top:8px}
-  .cg{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
-  .cb{background:#f8fafc;border-radius:8px;padding:16px;break-inside:avoid}
-  .cb h3{font-size:12px;font-weight:700;color:#0C2340;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
-  @media print{body{padding:16px}.cb{break-inside:avoid}}</style>
-  </head><body>
-  <div class="rh"><div class="rt">Pitch Operations Report</div>
-  <div class="rm"><span>${headerLine1}</span><span>📅 ${headerLine2}</span><span>🕐 ${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</span></div></div>
-  <div class="cg">${chartsHTML}</div></body></html>`;
+  const yUnit=isHours?'h':'';
+  const chartOpts=chartType==='bar'
+    ?{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,title:{display:true,text:isHours?'Hours':'Count'},ticks:{callback:v=>v+yUnit}}}}
+    :chartType==='line'
+    ?{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{callback:v=>v+yUnit}}}}
+    :{plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:ctx=>{const tot=ctx.dataset.data.reduce((a,b)=>a+b,0);const pct=tot>0?((ctx.raw/tot)*100).toFixed(1)+'%':'0%';return ctx.label.split(' (')[0]+': '+ctx.raw+(isHours?'h':'')+' ('+pct+')';}}}}}};
 
-  const win = window.open('','_blank');
-  win.document.write(html);
-  win.document.close();
-  setTimeout(()=>win.print(), 500);
+  // Add to grid
+  const grid=document.getElementById('compare-charts');
+  if(!grid) return;
+  const card=document.createElement('div');
+  card.className='stats-card'; card.id='ccard-'+chartId; card.draggable=true;
+  card.style.cssText='cursor:grab;position:relative;touch-action:none';
+  card.setAttribute('ondragstart',`statsCardDragStart(event,'ccard-${chartId}')`);
+  card.setAttribute('ondragover','statsCardDragOver(event)');
+  card.setAttribute('ondrop',`statsCardDrop(event,'ccard-${chartId}')`);
+  card.setAttribute('ondragleave','statsCardDragLeave(event)');
+  card.setAttribute('ontouchstart',`statsTouchStart(event,'ccard-${chartId}','compare-charts')`);
+  card.setAttribute('ontouchmove','statsTouchMove(event)');
+  card.setAttribute('ontouchend','statsTouchEnd(event)');
+  card.innerHTML=`
+    <button onclick="removeCompareChart('ccard-${chartId}')" style="position:absolute;top:8px;right:8px;background:#fee2e2;border:none;border-radius:4px;width:22px;height:22px;cursor:pointer;font-size:12px;color:#dc2626;display:flex;align-items:center;justify-content:center">✕</button>
+    <div class="stats-card-title">${chartTitle}</div>
+    <canvas id="${chartId}"></canvas>`;
+  grid.appendChild(card);
+
+  setTimeout(()=>{
+    const canvas=document.getElementById(chartId); if(!canvas) return;
+    compareChartInstances[chartId]=new Chart(canvas,{type:chartType,data:chartData,options:{responsive:true,maintainAspectRatio:true,...chartOpts}});
+  },50);
+
+  const cnt=document.getElementById('compare-charts-count');
+  if(cnt) cnt.textContent=grid.children.length+' chart'+(grid.children.length!==1?'s':'');
+
+  // Clear title input
+  const ti=document.getElementById('compare-chart-title');
+  if(ti) ti.value='';
+
+  showToast('Chart added!');
+
+
+function removeCompareChart(cardId){
+  const card=document.getElementById(cardId);
+  const chartId=cardId.replace('ccard-','');
+  if(compareChartInstances[chartId]){ try{compareChartInstances[chartId].destroy();}catch(e){} delete compareChartInstances[chartId]; }
+  if(card) card.remove();
+  const grid=document.getElementById('compare-charts');
+  const cnt=document.getElementById('compare-charts-count');
+  if(cnt&&grid) cnt.textContent=grid.children.length+' chart'+(grid.children.length!==1?'s':'');
+}
+
+function clearCompareCharts(){
+  Object.values(compareChartInstances).forEach(ch=>{try{ch.destroy();}catch(e){}});
+  compareChartInstances={};
+  const grid=document.getElementById('compare-charts');
+  if(grid) grid.innerHTML='';
+  const cnt=document.getElementById('compare-charts-count');
+  if(cnt) cnt.textContent='';
+}
+
+// ══ PRESETS ══
+function saveComparePreset(){
+  const pid=state.currentProjectId; if(!pid) return;
+  const name=prompt('Preset name:'); if(!name) return;
+
+  const selectedVenueIds=[...document.querySelectorAll('#compare-venue-checkboxes input:checked')].map(cb=>cb.value);
+  const preset={
+    name, venueIds:selectedVenueIds,
+    metric:document.getElementById('compare-metric')?.value,
+    taskType:document.getElementById('compare-task-type')?.value,
+    usageType:document.getElementById('compare-usage-type')?.value,
+    period:document.getElementById('compare-period')?.value,
+    chartType:compareChartType,
+    from:document.getElementById('compare-from')?.value,
+    to:document.getElementById('compare-to')?.value,
+  };
+
+  try{
+    const key='pitchops_compare_presets_'+pid;
+    const saved=JSON.parse(localStorage.getItem(key)||'[]');
+    saved.push(preset);
+    localStorage.setItem(key,JSON.stringify(saved));
+    loadComparePresets();
+    showToast('Preset saved!');
+  } catch(e){ showToast('Could not save preset'); }
+}
+
+function loadComparePresets(){
+  const pid=state.currentProjectId; if(!pid) return;
+  const list=document.getElementById('compare-presets-list'); if(!list) return;
+  try{
+    const saved=JSON.parse(localStorage.getItem('pitchops_compare_presets_'+pid)||'[]');
+    if(!saved.length){ list.innerHTML='<span style="font-size:12px;color:var(--text-hint);font-style:italic">No saved presets yet</span>'; return; }
+    list.innerHTML=saved.map((p,i)=>`
+      <div style="display:flex;align-items:center;gap:4px">
+        <button onclick="applyComparePreset(${i})" style="padding:5px 12px;background:#EBF3FF;border:1px solid var(--blue);border-radius:6px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--blue)">${esc(p.name)}</button>
+        <button onclick="deleteComparePreset(${i})" style="padding:4px 8px;background:#fee2e2;border:none;border-radius:4px;font-size:11px;cursor:pointer;color:#dc2626">✕</button>
+      </div>`).join('');
+  } catch(e){}
+}
+
+function applyComparePreset(idx){
+  const pid=state.currentProjectId; if(!pid) return;
+  try{
+    const saved=JSON.parse(localStorage.getItem('pitchops_compare_presets_'+pid)||'[]');
+    const p=saved[idx]; if(!p) return;
+    // Apply venue checkboxes
+    document.querySelectorAll('#compare-venue-checkboxes input[type=checkbox]').forEach(cb=>{
+      cb.checked=p.venueIds.includes(cb.value);
+    });
+    if(p.metric){ const el=document.getElementById('compare-metric'); if(el) el.value=p.metric; updateCompareMetricDetail(); }
+    if(p.taskType){ const el=document.getElementById('compare-task-type'); if(el) el.value=p.taskType; }
+    if(p.usageType){ const el=document.getElementById('compare-usage-type'); if(el) el.value=p.usageType; }
+    if(p.period){ const el=document.getElementById('compare-period'); if(el) el.value=p.period; updateComparePeriodCustom(); }
+    if(p.chartType){ compareChartType=p.chartType; document.querySelectorAll('.chart-type-btn').forEach(b=>{b.style.borderColor='var(--border)';b.style.background='white';}); }
+    if(p.from){ const el=document.getElementById('compare-from'); if(el) el.value=p.from; }
+    if(p.to){ const el=document.getElementById('compare-to'); if(el) el.value=p.to; }
+    showToast('Preset applied!');
+  } catch(e){}
+}
+
+function deleteComparePreset(idx){
+  const pid=state.currentProjectId; if(!pid) return;
+  try{
+    const key='pitchops_compare_presets_'+pid;
+    const saved=JSON.parse(localStorage.getItem(key)||'[]');
+    saved.splice(idx,1);
+    localStorage.setItem(key,JSON.stringify(saved));
+    loadComparePresets();
+  } catch(e){}
 }
 
 init();
