@@ -752,7 +752,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       </div>
     </div>
   </div>
-</div>
+
 
 
 <!-- ══ PROJECT VIEWER ══ -->
@@ -2397,8 +2397,19 @@ function renderEditStaffTags(){
   document.getElementById('edit-staff-tags').innerHTML=state.editStaff.map(n=>`
     <div class="staff-tag"><span>${esc(n)}</span><button class="staff-tag-remove" onclick="removeEditStaff('${esc(n)}')">×</button></div>`).join('');
 }
-document.getElementById('staff-name-input').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addStaff();}});
-document.getElementById('edit-staff-input').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addEditStaff();}});
+window.addEventListener('load',function(){
+  var _si=document.getElementById('staff-name-input');
+  if(_si) _si.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();addStaff();}});
+  var _ei=document.getElementById('edit-staff-input');
+  if(_ei) _ei.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();addEditStaff();}});
+  document.addEventListener('keydown',function(e){
+    var lb=document.getElementById('lightbox');
+    if(!lb||!lb.classList.contains('open'))return;
+    if(e.key==='ArrowLeft')lightboxNav(-1);
+    if(e.key==='ArrowRight')lightboxNav(1);
+    if(e.key==='Escape')closeLightboxBtn();
+  });
+});
 
 // ════════════════════════════════════════
 // PHOTOS
@@ -2446,7 +2457,6 @@ function updateLightbox(){document.getElementById('lightbox-img').src=_lbPhotos[
 function lightboxNav(d){_lbIdx=(_lbIdx+d+_lbPhotos.length)%_lbPhotos.length;updateLightbox();}
 function closeLightbox(e){if(e.target===document.getElementById('lightbox'))closeLightboxBtn();}
 function closeLightboxBtn(){document.getElementById('lightbox').classList.remove('open');}
-document.addEventListener('keydown',e=>{if(!document.getElementById('lightbox').classList.contains('open'))return;if(e.key==='ArrowLeft')lightboxNav(-1);if(e.key==='ArrowRight')lightboxNav(1);if(e.key==='Escape')closeLightboxBtn();});
 
 // ════════════════════════════════════════
 // EXPORT CSV
@@ -2555,7 +2565,6 @@ async function deleteVenue(){
 // ════════════════════════════════════════
 function toggleCustomZone(){ document.getElementById('zone-custom-wrap').style.display=document.getElementById('new-op-zone').value==='Custom'?'block':'none'; }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function nowLocal(){ return new Date().toISOString().slice(0,16); }
 function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function formatDate(dt){ if(!dt) return '—'; const d=new Date(dt); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); }
 function formatDateOnly(dt){
@@ -2678,13 +2687,6 @@ function venueTypeDot(type, color){
     <rect x="8" y="13" width="16" height="6" rx="1" fill="${c}22" stroke="${c}" stroke-width="1.2"/>
     <ellipse cx="16" cy="16" rx="5" ry="2" stroke="${c}" stroke-width="1.2" fill="none"/>
   </svg>`;
-}
-
-function venueTypeIcon(type){
-  const t=type||'Stadium';
-  if(t==='Training Site') return '<svg width="18" height="18" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="8" width="28" height="18" rx="2" fill="#EAF3DE" stroke="#3B6D11" stroke-width="1.5"/><line x1="16" y1="8" x2="16" y2="26" stroke="#3B6D11" stroke-width="1" stroke-dasharray="2 2"/><rect x="2" y="8" width="28" height="18" rx="2" fill="none" stroke="#3B6D11" stroke-width="1.5"/><rect x="10" y="8" width="12" height="18" fill="none" stroke="#3B6D11" stroke-width="1" opacity=".5"/><circle cx="16" cy="17" r="3" stroke="#3B6D11" stroke-width="1.5" fill="none"/><line x1="2" y1="17" x2="6" y2="17" stroke="#3B6D11" stroke-width="1.5"/><line x1="26" y1="17" x2="30" y2="17" stroke="#3B6D11" stroke-width="1.5"/></svg>';
-  if(t==='Other') return '<svg width="18" height="18" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="12" stroke="#854F0B" stroke-width="1.5" fill="#FAEEDA"/><path d="M10 16 Q16 8 22 16 Q16 24 10 16Z" stroke="#854F0B" stroke-width="1.5" fill="none"/><line x1="4" y1="16" x2="28" y2="16" stroke="#854F0B" stroke-width="1" opacity=".5"/><line x1="16" y1="4" x2="16" y2="28" stroke="#854F0B" stroke-width="1" opacity=".5"/></svg>';
-  return '<svg width="18" height="18" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="20" width="28" height="4" rx="1" fill="#185FA5"/><rect x="4" y="14" width="4" height="6" fill="#378ADD"/><rect x="24" y="14" width="4" height="6" fill="#378ADD"/><rect x="6" y="8" width="20" height="6" rx="1" fill="#185FA5" opacity=".5"/><rect x="8" y="14" width="16" height="6" rx="1" fill="#E6F1FB" stroke="#185FA5" stroke-width="1"/><ellipse cx="16" cy="17" rx="5" ry="2" stroke="#185FA5" stroke-width="1" fill="none"/></svg>';
 }
 
 const OP_COLORS=[
@@ -2966,15 +2968,6 @@ function renderVenueUpcoming(){
 }
 
 
-async function prefillFromPlan(opId){
-  // Open log modal pre-filled with this planned task's data
-  const op=state.operations.find(o=>o.id===opId);
-  if(!op) return;
-  openLogTaskModal(op.date?.slice(0,10), op.timeFrom||'08:00', op.type, 'completed');
-  if(op.notes) setTimeout(()=>{ document.getElementById('new-op-notes').value=op.notes; },100);
-}
-
-
 // ════════════════════════════════════════
 // UNIFIED VENUE CALENDAR — one source of truth
 // ════════════════════════════════════════
@@ -3145,22 +3138,6 @@ function openLogTaskModal(dateStr, timeStr, prefillType, prefillStatus){
     else { vind.style.display='none'; }
   }
   openModal('modal-log-task');
-}
-
-function openNewOpForDate(dateStr){
-  if(document.querySelector('.modal-overlay.open')) return;
-  // switch to log tab and pre-fill date
-  switchVenueTab('log');
-  const d = new Date(dateStr+'T08:00');
-  document.getElementById('new-op-date').value = dateStr+'T08:00';
-  // auto-set status
-  const statusEl=document.getElementById('new-op-status');
-  if(statusEl){
-    statusEl.value='planned';
-  }
-  // scroll to form
-  document.getElementById('vtab-log-content').scrollIntoView({behavior:'smooth'});
-  showToast('Date pre-filled — add operation details');
 }
 
 function venueSchedNav(dir){ venueSchedOffset+=dir; renderVenueSched(); }
@@ -4541,11 +4518,14 @@ function addCompareChart(){
   }
 
   const yUnit=isHours?'h':'';
-  const chartOpts=chartType==='bar'
-    ?{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,title:{display:true,text:isHours?'Hours':'Count'},ticks:{callback:v=>v+yUnit}}}}
-    :chartType==='line'
-    ?{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{callback:v=>v+yUnit}}}}
-    :{plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:ctx=>{const tot=ctx.dataset.data.reduce((a,b)=>a+b,0);const pct=tot>0?((ctx.raw/tot)*100).toFixed(1)+'%':'0%';return ctx.label.split(' (')[0]+': '+ctx.raw+(isHours?'h':'')+' ('+pct+')';}}}}}};
+  let chartOpts;
+  if(chartType==='bar'){
+    chartOpts={plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,title:{display:true,text:isHours?'Hours':'Count'},ticks:{callback:function(v){return v+yUnit;}}}}};
+  } else if(chartType==='line'){
+    chartOpts={plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{callback:function(v){return v+yUnit;}}}}};
+  } else {
+    chartOpts={plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:function(ctx){const tot=ctx.dataset.data.reduce(function(a,b){return a+b;},0);const pct=tot>0?((ctx.raw/tot)*100).toFixed(1)+'%':'0%';return ctx.label.split(' (')[0]+': '+ctx.raw+(isHours?'h':'')+' ('+pct+')';}}}}};
+  }
 
   // Add to grid
   const grid=document.getElementById('compare-charts');
@@ -4579,7 +4559,7 @@ function addCompareChart(){
   if(ti) ti.value='';
 
   showToast('Chart added!');
-
+}
 
 function removeCompareChart(cardId){
   const card=document.getElementById(cardId);
