@@ -4268,6 +4268,7 @@ function openLightboxFromUsage(id, i){
 
 // ── ADMIN LOG TASK MODAL ──
 function openAdminLogTaskModal(dateStr){
+  try {
   const pid=state.currentProjectId; if(!pid) return;
   const venues=projectVenues(pid);
   const vsel=document.getElementById('admin-task-venue');
@@ -4287,6 +4288,7 @@ function openAdminLogTaskModal(dateStr){
   adminTaskStaff=[];
   renderAdminTaskStaffTags();
   openModal('modal-admin-log-task');
+  } catch(err){ showToast('ERR openAdminLogTask: '+err.message); console.error(err); }
 }
 
 function addAdminTaskStaff(){
@@ -4332,6 +4334,7 @@ async function adminLogTask(){
 
 // ── ADMIN LOG USAGE MODAL ──
 function openAdminLogUsageModal(dateStr){
+  try {
   const pid=state.currentProjectId; if(!pid) return;
   const venues=projectVenues(pid);
   const vsel=document.getElementById('admin-usage-venue');
@@ -4347,6 +4350,7 @@ function openAdminLogUsageModal(dateStr){
   document.getElementById('admin-usage-notes').value='';
   document.getElementById('admin-usage-status').value='planned';
   openModal('modal-admin-log-usage');
+  } catch(err){ showToast('ERR openAdminLogUsage: '+err.message); console.error(err); }
 }
 
 async function adminLogUsage(){
