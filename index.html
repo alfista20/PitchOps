@@ -450,7 +450,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
         <span>➕</span> Add venue
       </button>
       <button onclick="openManageTypesModal();toggleAdminMenu()" style="display:flex;align-items:center;gap:10px;width:100%;padding:.75rem 1rem;background:none;border:none;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);cursor:pointer" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='none'">
-        <span>⚙️</span> Tasks bank
+        <span>⚙️</span> <span data-i18n="tasks_bank">Tasks bank</span>
       </button>
       <div style="height:1px;background:var(--border)"></div>
       <button onclick="logout()" style="display:flex;align-items:center;gap:10px;width:100%;padding:.75rem 1rem;background:none;border:none;font-size:14px;font-family:'DM Sans',sans-serif;color:#dc2626;cursor:pointer" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'">
@@ -491,8 +491,8 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
   <div style="background:white;border-bottom:2px solid var(--border);padding:0 1rem;display:flex;gap:0;flex-shrink:0">
     <button class="tab-btn active" id="ptab-ops" onclick="switchProjectTab('ops')">📋 Tasks</button>
     <button class="tab-btn" id="ptab-usage" onclick="switchProjectTab('usage')">⏱ Usage</button>
-    <button class="tab-btn" id="ptab-calendar" onclick="switchProjectTab('calendar')">📅 Schedule</button>
-    <button class="tab-btn" id="ptab-stats" onclick="switchProjectTab('stats')">📊 Stats</button>
+    <button class="tab-btn" id="ptab-calendar" onclick="switchProjectTab('calendar')" data-i18n="tab_schedule">📅 Schedule</button>
+    <button class="tab-btn" id="ptab-stats" onclick="switchProjectTab('stats')" data-i18n="tab_stats">📊 Stats</button>
   </div>
 
   <!-- OPS TAB -->
@@ -739,7 +739,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
               <span id="gantt-week-label" style="font-size:12px;font-weight:500;min-width:150px;text-align:center">—</span>
               <button onclick="ganttNav(1)" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--text-muted);padding:0 2px">→</button>
             </div>
-            <button onclick="ganttGoToday()" style="padding:4px 10px;font-size:11px;background:white;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text-muted)">Today</button>
+            <button onclick="ganttGoToday()" style="padding:4px 10px;font-size:11px;background:white;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text-muted)" data-i18n="today" data-i18n="today">Today</button>
             <div style="display:flex;gap:4px;flex-wrap:wrap" id="gantt-status-pills">
               <button onclick="ganttFilter('all',this)" class="sf-pill sf-active">All</button>
               <button onclick="ganttFilter('planned',this)" class="sf-pill">Planned</button>
@@ -751,10 +751,10 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
           
         </div>
         <div style="display:flex;gap:8px;padding:.35rem .75rem;border-bottom:1px solid var(--border);flex-wrap:wrap">
-          <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:2px;background:var(--amber);display:inline-block"></span>Planned</span>
-          <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:2px;background:var(--blue);display:inline-block"></span>In progress</span>
-          <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:2px;background:var(--green);display:inline-block"></span>Completed</span>
-          <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:2px;background:var(--red);display:inline-block"></span>Missed</span>
+          <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:2px;background:var(--amber);display:inline-block"></span><span data-i18n="legend_planned">Planned</span></span>
+          <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:2px;background:var(--blue);display:inline-block"></span><span data-i18n="legend_inprogress">In progress</span></span>
+          <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:2px;background:var(--green);display:inline-block"></span><span data-i18n="legend_completed">Completed</span></span>
+          <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:2px;background:var(--red);display:inline-block"></span><span data-i18n="legend_missed">Missed</span></span>
         </div>
         <div id="gantt-grid" style="overflow-x:auto;width:100%"></div>
       </div>
@@ -763,17 +763,17 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       <div style="background:white;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden">
         <div style="padding:.6rem .75rem;border-bottom:1px solid var(--border);background:#fafbfc;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-            <button onclick="exitVenueCal()" style="padding:5px 10px;font-size:12px;background:white;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text-muted)">← All venues</button>
+            <button onclick="exitVenueCal()" style="padding:5px 10px;font-size:12px;background:white;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text-muted)" data-i18n="all_venues_back">← All venues</button>
             <div style="display:flex;align-items:center;background:white;border:1px solid var(--border);border-radius:var(--radius-sm);padding:2px 8px;gap:6px">
               <button onclick="venueCalNav(-1)" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--text-muted);padding:0 2px">←</button>
               <span id="venue-cal-label" style="font-size:12px;font-weight:500;min-width:140px;text-align:center">—</span>
               <button onclick="venueCalNav(1)" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--text-muted);padding:0 2px">→</button>
             </div>
-            <button onclick="venueCalGoToday()" style="padding:4px 10px;font-size:11px;background:white;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text-muted)">Today</button>
+            <button onclick="venueCalGoToday()" style="padding:4px 10px;font-size:11px;background:white;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text-muted)" data-i18n="today">Today</button>
             <div style="display:flex;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">
-              <button id="vcv-day" onclick="setVenueCalView('day')" style="padding:5px 12px;font-size:12px;font-weight:400;border:none;background:white;cursor:pointer;color:var(--text-muted);font-family:'DM Sans',sans-serif;border-right:1px solid var(--border)">Day</button>
-              <button id="vcv-week" onclick="setVenueCalView('week')" style="padding:5px 12px;font-size:12px;font-weight:600;border:none;background:var(--navy);cursor:pointer;color:white;font-family:'DM Sans',sans-serif;border-right:1px solid var(--border)">Week</button>
-              <button id="vcv-month" onclick="setVenueCalView('month')" style="padding:5px 12px;font-size:12px;font-weight:400;border:none;background:white;cursor:pointer;color:var(--text-muted);font-family:'DM Sans',sans-serif">Month</button>
+              <button id="vcv-day" data-i18n="view_day" onclick="setVenueCalView('day')" style="padding:5px 12px;font-size:12px;font-weight:400;border:none;background:white;cursor:pointer;color:var(--text-muted);font-family:'DM Sans',sans-serif;border-right:1px solid var(--border)">Day</button>
+              <button id="vcv-week" data-i18n="view_week" onclick="setVenueCalView('week')" style="padding:5px 12px;font-size:12px;font-weight:600;border:none;background:var(--navy);cursor:pointer;color:white;font-family:'DM Sans',sans-serif;border-right:1px solid var(--border)">Week</button>
+              <button id="vcv-month" data-i18n="view_month" onclick="setVenueCalView('month')" style="padding:5px 12px;font-size:12px;font-weight:400;border:none;background:white;cursor:pointer;color:var(--text-muted);font-family:'DM Sans',sans-serif">Month</button>
             </div>
           </div>
           <div style="display:flex;align-items:center;gap:8px">
@@ -892,8 +892,8 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 
   <!-- TABS -->
   <div style="background:white;border-bottom:1px solid var(--border);padding:0 1.25rem;display:flex;flex-shrink:0">
-    <button id="vtab-log" onclick="switchVenueTab('log')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid var(--blue);background:white;color:var(--blue);cursor:pointer;font-family:'DM Sans',sans-serif">🗒 Log task</button>
-    <button id="vtab-usage" onclick="switchVenueTab('usage')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif">⏱ Log usage</button>
+    <button id="vtab-log" onclick="switchVenueTab('log')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid var(--blue);background:white;color:var(--blue);cursor:pointer;font-family:'DM Sans',sans-serif" data-i18n="tab_log">🗒 Log task</button>
+    <button id="vtab-usage" onclick="switchVenueTab('usage')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif" data-i18n="tab_usage">⏱ Log usage</button>
     <button id="vtab-schedule" onclick="switchVenueTab('schedule')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif">📅 Schedule</button>
     <button id="vtab-stats" onclick="switchVenueTab('stats')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif">📊 Stats</button>
 
@@ -906,9 +906,9 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     <!-- UPCOMING -->
     <div style="background:white;border-radius:16px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);margin-bottom:1rem;overflow:hidden">
       <div style="padding:1rem 1.25rem .75rem;display:flex;align-items:center;justify-content:space-between">
-        <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif">Today</div>
+        <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif" data-i18n="today">Today</div>
         <div style="display:flex;gap:6px">
-          <button onclick="openLogTaskModal()" style="background:linear-gradient(135deg,#185FA5,#1d4ed8);border:none;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;color:white;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 3px 10px rgba(24,95,165,.35)">+ Log task</button>
+          <button onclick="openLogTaskModal()" style="background:linear-gradient(135deg,#185FA5,#1d4ed8);border:none;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;color:white;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 3px 10px rgba(24,95,165,.35)" data-i18n="btn_log_task">+ Log task</button>
         </div>
       </div>
       <div id="venue-upcoming" style="display:none">
@@ -916,14 +916,14 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       </div>
       <div id="venue-upcoming-empty" style="padding:2.5rem 1rem;text-align:center;display:none">
         <div style="font-size:36px;margin-bottom:8px">🌱</div>
-        <div style="font-size:15px;font-weight:600;color:var(--text-muted)">No upcoming tasks</div>
+        <div style="font-size:15px;font-weight:600;color:var(--text-muted)" data-i18n="no_tasks_today">No upcoming tasks</div>
         <div style="font-size:13px;color:var(--text-hint);margin-top:4px">No tasks for today. Tap "+ Log task" to add one</div>
       </div>
     </div>
     <!-- HISTORY -->
     <div style="background:white;border-radius:16px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);overflow:hidden">
       <div style="padding:1rem 1.25rem .75rem;display:flex;align-items:center;justify-content:space-between">
-        <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif">History</div>
+        <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif" data-i18n="history_lbl">History</div>
         <input type="text" id="venue-hist-search" placeholder="🔍 Search..." oninput="renderVenueHistory()" style="padding:7px 12px;border:1px solid rgba(0,0,0,.1);border-radius:10px;font-size:12px;outline:none;width:140px;font-family:'DM Sans',sans-serif;background:#f8fafc"/>
       </div>
       <div id="venue-history-list" style="max-height:520px;overflow-y:auto"></div>
@@ -935,8 +935,8 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     <!-- TODAY'S USAGE -->
     <div style="background:white;border-radius:16px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);margin-bottom:1rem;overflow:hidden">
       <div style="padding:1rem 1.25rem .75rem;display:flex;align-items:center;justify-content:space-between">
-        <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif">Today</div>
-        <button onclick="openLogUsageModal()" style="background:linear-gradient(135deg,#7C3AED,#6D28D9);border:none;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;color:white;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 3px 10px rgba(124,58,237,.35)">+ Log usage</button>
+        <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif" data-i18n="today">Today</div>
+        <button onclick="openLogUsageModal()" style="background:linear-gradient(135deg,#7C3AED,#6D28D9);border:none;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;color:white;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 3px 10px rgba(124,58,237,.35)" data-i18n="btn_log_usage">+ Log usage</button>
       </div>
       <div id="venue-usage-today" style="display:none">
         <div id="venue-usage-today-list" style="padding:0 .75rem .75rem"></div>
@@ -950,7 +950,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     <!-- USAGE HISTORY -->
     <div style="background:white;border-radius:16px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);overflow:hidden">
       <div style="padding:1rem 1.25rem .75rem;display:flex;align-items:center;justify-content:space-between">
-        <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif">Usage history</div>
+        <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif" data-i18n="usage_history">Usage history</div>
         <input type="text" id="venue-usage-search" placeholder="🔍 Search..." oninput="renderVenueUsageHistory()" style="padding:7px 12px;border:1px solid rgba(0,0,0,.1);border-radius:10px;font-size:12px;outline:none;width:140px;font-family:'DM Sans',sans-serif;background:#f8fafc"/>
       </div>
       <div id="venue-usage-history-list" style="max-height:520px;overflow-y:auto"></div>
@@ -1005,12 +1005,12 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
             <span id="venue-sched-label" style="font-size:12px;font-weight:600;min-width:150px;text-align:center;color:var(--text)">—</span>
             <button onclick="venueSchedNav(1)" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--text-muted);padding:0">→</button>
           </div>
-          <button onclick="venueSchedToday()" style="padding:5px 12px;font-size:12px;background:white;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text-muted)">Today</button>
+          <button onclick="venueSchedToday()" style="padding:5px 12px;font-size:12px;background:white;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text-muted)" data-i18n="today">Today</button>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:50%;background:#EF9F27;display:inline-block"></span>Planned</span>
-            <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:50%;background:#378ADD;display:inline-block"></span>In progress</span>
-            <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:50%;background:#3B6D11;display:inline-block"></span>Completed</span>
-            <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:50%;background:#A32D2D;display:inline-block"></span>Missed</span>
+            <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:50%;background:#EF9F27;display:inline-block"></span><span data-i18n="legend_planned">Planned</span></span>
+            <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:50%;background:#378ADD;display:inline-block"></span><span data-i18n="legend_inprogress">In progress</span></span>
+            <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:50%;background:#3B6D11;display:inline-block"></span><span data-i18n="legend_completed">Completed</span></span>
+            <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:50%;background:#A32D2D;display:inline-block"></span><span data-i18n="legend_missed">Missed</span></span>
           </div>
         </div>
         <button onclick="openLogTaskModal()" style="padding:7px 16px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 2px 8px rgba(24,95,165,.3)">+ Log task</button>
@@ -1338,7 +1338,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
           <option value="inprogress">In progress</option>
           <option value="completed">Completed</option>
         </select>
-        <p style="font-size:11px;color:var(--text-hint);margin-top:4px">Completed must be set manually by you or admin</p>
+        <p style="font-size:11px;color:var(--text-hint);margin-top:4px" data-i18n="status_manual_hint">Completed must be set manually by you or admin</p>
       </div>
       <div class="field">
         <label data-i18n="op_photos">Photos (max 4)</label>
@@ -1528,7 +1528,7 @@ async function loadAll() {
     state.projects = (proj.data||[]).map(dbToProject);
     state.venues = (ven.data||[]).map(dbToVenue);
     state.operations = (ops.data||[]).map(dbToOp);
-    state.opTypes = (types.data||[]).map(t=>t.name);
+    state.opTypes = (types.data||[]).map(tp=>tp.name);
   } catch(e) { showToast('Error loading data: '+e.message); }
   showLoading(false);
 }
@@ -1547,7 +1547,7 @@ async function refreshProjectOps(projectId, silent=false){
     // Merge: keep ops from other venues, replace ops for this project's venues
     state.operations = state.operations.filter(o=>!vids.includes(o.venueId))
       .concat((ops.data||[]).map(dbToOp));
-    state.opTypes = (types.data||[]).map(t=>t.name);
+    state.opTypes = (types.data||[]).map(tp=>tp.name);
   } catch(e) { showToast('Error loading data: '+e.message); }
   if(!silent) showLoading(false);
 
@@ -1572,7 +1572,7 @@ async function refreshVenueOps(venueId, silent=false){
       supa.from('pitchops_op_types').select('*').order('name'),
     ]);
     state.operations = state.operations.filter(o=>o.venueId!==venueId).concat((ops.data||[]).map(dbToOp));
-    state.opTypes = (types.data||[]).map(t=>t.name);
+    state.opTypes = (types.data||[]).map(tp=>tp.name);
   } catch(e) { showToast('Error loading data: '+e.message); }
   if(!silent) showLoading(false);
 
@@ -1615,18 +1615,320 @@ function showLoading(on){
 // I18N
 // ════════════════════════════════════════
 const i18n = {
-  en:{ stat_total:'This month',stat_last:'Last op',stat_common:'Top type',log_op:'Log new task',op_type:'Task type',op_zone:'Pitch area / zone',op_zone_custom:'Custom zone',op_equipment:'Equipment used',op_weather:'Weather conditions',op_staff:'Done by (staff)',op_staff_hint:'You can add multiple staff members',op_notes:'Notes / observations',op_date:'Task date',btn_log:'Log task',history:'Task history',op_photos:'Photos (max 4)',photo_tap:'Tap to add photos',photo_hint:'JPG, PNG · max 4 photos' },
-  pl:{ stat_total:'Ten miesiąc',stat_last:'Ostatnia op.',stat_common:'Dominuje',log_op:'Dodaj zadanie',op_type:'Typ zadania',op_zone:'Strefa boiska',op_zone_custom:'Własna strefa',op_equipment:'Sprzęt',op_weather:'Pogoda',op_staff:'Wykonał/a',op_staff_hint:'Możesz dodać kilka osób',op_notes:'Notatki',op_date:'Data zadania',btn_log:'Zapisz zadanie',history:'Historia zadań',op_photos:'Zdjęcia (max 4)',photo_tap:'Dotknij aby dodać zdjęcia',photo_hint:'JPG, PNG · max 4 zdjęcia' },
-  es:{ stat_total:'Este mes',stat_last:'Última op.',stat_common:'Más común',log_op:'Registrar tarea',op_type:'Tipo de tarea',op_zone:'Zona del terreno',op_zone_custom:'Zona personalizada',op_equipment:'Equipo utilizado',op_weather:'Condiciones meteorológicas',op_staff:'Realizado por',op_staff_hint:'Puedes añadir varios empleados',op_notes:'Notas / observaciones',op_date:'Fecha de la tarea',btn_log:'Registrar',history:'Historial',op_photos:'Fotos (máx 4)',photo_tap:'Toca para añadir fotos',photo_hint:'JPG, PNG · máx 4 fotos' },
-  fr:{ stat_total:'Ce mois',stat_last:'Dernière op.',stat_common:'Plus fréquent',log_op:'Ajouter tâche',op_type:'Type de tâche',op_zone:'Zone du terrain',op_zone_custom:'Zone personnalisée',op_equipment:'Équipement utilisé',op_weather:'Météo',op_staff:'Réalisé par',op_staff_hint:'Vous pouvez ajouter plusieurs agents',op_notes:'Notes / observations',op_date:'Date de la tâche',btn_log:'Enregistrer',history:'Historique',op_photos:'Photos (max 4)',photo_tap:'Appuyer pour ajouter des photos',photo_hint:'JPG, PNG · max 4 photos' },
-  de:{ stat_total:'Diesen Monat',stat_last:'Letzte Op.',stat_common:'Häufigste',log_op:'Neue Aufgabe',op_type:'Aufgabentyp',op_zone:'Bereich',op_zone_custom:'Benutzerdefinierter Bereich',op_equipment:'Geräte',op_weather:'Wetterbedingungen',op_staff:'Durchgeführt von',op_staff_hint:'Mehrere Mitarbeiter möglich',op_notes:'Notizen',op_date:'Aufgabendatum',btn_log:'Aufgabe speichern',history:'Aufgabenhistorie',op_photos:'Fotos (max 4)',photo_tap:'Tippen um Fotos hinzuzufügen',photo_hint:'JPG, PNG · max 4 Fotos' },
-  pt:{ stat_total:'Este mês',stat_last:'Última op.',stat_common:'Mais comum',log_op:'Registar tarefa',op_type:'Tipo de tarefa',op_zone:'Zona do relvado',op_zone_custom:'Zona personalizada',op_equipment:'Equipamento',op_weather:'Condições meteorológicas',op_staff:'Realizado por',op_staff_hint:'Pode adicionar vários trabalhadores',op_notes:'Notas / observações',op_date:'Data da tarefa',btn_log:'Registar',history:'Histórico',op_photos:'Fotos (máx 4)',photo_tap:'Toque para adicionar fotos',photo_hint:'JPG, PNG · máx 4 fotos' },
+  en:{
+    stat_total:'This month',stat_last:'Last op',stat_common:'Top type',
+    log_op:'Log new task',op_type:'Task type',op_zone:'Pitch area / zone',
+    op_zone_custom:'Custom zone',op_equipment:'Equipment used',op_weather:'Weather conditions',
+    op_staff:'Done by (staff)',op_staff_hint:'You can add multiple staff members',
+    op_notes:'Notes / observations',op_date:'Task date',btn_log:'Log task',
+    history:'Task history',op_photos:'Photos (max 4)',photo_tap:'Tap to add photos',
+    photo_hint:'JPG, PNG · max 4 photos',
+    // tabs & buttons
+    tab_log:'🗒 Log task',tab_usage:'⏱ Log usage',tab_schedule:'📅 Schedule',tab_stats:'📊 Stats',
+    btn_log_task:'+ Log task',btn_log_usage:'+ Log usage',
+    today:'Today',history_lbl:'History',usage_history:'Usage history',
+    no_tasks_today:'No upcoming tasks',no_tasks_hint:'No tasks for today. Tap "+ Log task" to add one',
+    no_usage_today:'No usage for today',no_usage_hint:'Tap "+ Log usage" to add one',
+    no_tasks_logged:'No tasks logged yet.',no_usage_history:'No usage history yet',
+    loading:'Loading...',tasks_bank:'Tasks bank',
+    // statuses
+    status_planned:'Planned',status_inprogress:'In progress',status_completed:'Completed',status_missed:'Missed',
+    status_active:'Active',status_project_planned:'Planned',status_finished:'Finished',
+    lbl_today:'TODAY',lbl_tomorrow:'Tomorrow',
+    // legend
+    legend_planned:'Planned',legend_inprogress:'In progress',legend_completed:'Completed',legend_missed:'Missed',
+    // gantt sub-headers
+    col_tasks:'Tasks',col_usage:'Usage',
+    // usage types
+    usage_match:'Match Day',usage_training:'Training Session',usage_other:'Other',
+    // zone options
+    zone_full:'Full pitch',zone_half_a:'Half A',zone_half_b:'Half B',
+    zone_third_a:'Third A',zone_third_b:'Third B',zone_third_c:'Third C',
+    zone_goal_n:'Goal mouth (N)',zone_goal_s:'Goal mouth (S)',
+    zone_centre:'Centre circle',zone_penalty:'Penalty areas',zone_wings:'Wings',zone_custom:'Custom...',
+    // stats labels
+    stats_total_tasks:'Total tasks',stats_task_hours:'Task hours',stats_total_usage:'Total usage',
+    stats_usage_hours:'Usage hours',stats_completed:'Completed tasks',stats_ratio:'Tasks/Usage ratio',
+    stats_venues_active:'Venues active',stats_maint_ratio:'Maint/Play ratio',
+    chart_task_by_type:'Task hours by type',chart_task_share:'Task hours by type — share',
+    chart_activity:'Task activity over time',chart_status:'Tasks by status',
+    chart_usage_types:'Usage hours by type',chart_usage_time:'Pitch usage hours over time',
+    chart_ratio:'Pitch time: Tasks vs Usage',
+    chart_maintenance:'Maintenance (Tasks)',chart_playing:'Playing (Usage)',
+    // completed must be manual
+    status_manual_hint:'Completed must be set manually by you or admin',
+    // misc
+    no_venues:'No venues in this project.',no_venues_add:'No venues yet. Click "+ Add venue".',
+    more_suffix:'more',
+    all_venues_back:'← All venues',all_venues:'All venues',all_types:'All types',view_day:'Day',view_week:'Week',view_month:'Month',
+  },
+  pl:{
+    stat_total:'Ten miesiąc',stat_last:'Ostatnia op.',stat_common:'Dominuje',
+    log_op:'Dodaj zadanie',op_type:'Typ zadania',op_zone:'Strefa boiska',
+    op_zone_custom:'Własna strefa',op_equipment:'Sprzęt',op_weather:'Pogoda',
+    op_staff:'Wykonał/a',op_staff_hint:'Możesz dodać kilka osób',
+    op_notes:'Notatki',op_date:'Data zadania',btn_log:'Zapisz zadanie',
+    history:'Historia zadań',op_photos:'Zdjęcia (max 4)',photo_tap:'Dotknij aby dodać zdjęcia',
+    photo_hint:'JPG, PNG · max 4 zdjęcia',
+    tab_log:'🗒 Zadanie',tab_usage:'⏱ Użycie',tab_schedule:'📅 Harmonogram',tab_stats:'📊 Statystyki',
+    btn_log_task:'+ Dodaj zadanie',btn_log_usage:'+ Dodaj użycie',
+    today:'Dziś',history_lbl:'Historia',usage_history:'Historia użycia',
+    no_tasks_today:'Brak zaplanowanych zadań',no_tasks_hint:'Brak zadań na dziś. Naciśnij „+ Dodaj zadanie"',
+    no_usage_today:'Brak użycia na dziś',no_usage_hint:'Naciśnij „+ Dodaj użycie"',
+    no_tasks_logged:'Brak zapisanych zadań.',no_usage_history:'Brak historii użycia',
+    loading:'Ładowanie...',tasks_bank:'Bank zadań',
+    status_planned:'Zaplanowane',status_inprogress:'W trakcie',status_completed:'Ukończone',status_missed:'Niewykonane',
+    status_active:'Aktywny',status_project_planned:'Planowany',status_finished:'Zakończony',
+    lbl_today:'DZIŚ',lbl_tomorrow:'Jutro',
+    legend_planned:'Zaplanowane',legend_inprogress:'W trakcie',legend_completed:'Ukończone',legend_missed:'Niewykonane',
+    col_tasks:'Zadania',col_usage:'Użycie',
+    usage_match:'Mecz',usage_training:'Trening',usage_other:'Inne',
+    zone_full:'Całe boisko',zone_half_a:'Połowa A',zone_half_b:'Połowa B',
+    zone_third_a:'Tercja A',zone_third_b:'Tercja B',zone_third_c:'Tercja C',
+    zone_goal_n:'Pole bramkowe (N)',zone_goal_s:'Pole bramkowe (S)',
+    zone_centre:'Koło środkowe',zone_penalty:'Pola karne',zone_wings:'Skrzydła',zone_custom:'Własna...',
+    stats_total_tasks:'Łączne zadania',stats_task_hours:'Godziny zadań',stats_total_usage:'Łączne użycie',
+    stats_usage_hours:'Godziny użycia',stats_completed:'Ukończone zadania',stats_ratio:'Wskaźnik zad./użycia',
+    stats_venues_active:'Aktywne obiekty',stats_maint_ratio:'Wskaźnik kons./gry',
+    chart_task_by_type:'Godziny zadań wg typu',chart_task_share:'Udział godzin zadań',
+    chart_activity:'Aktywność zadań w czasie',chart_status:'Zadania wg statusu',
+    chart_usage_types:'Godziny użycia wg typu',chart_usage_time:'Godziny użycia boiska w czasie',
+    chart_ratio:'Czas boiska: Zadania vs Użycie',
+    chart_maintenance:'Konserwacja (Zadania)',chart_playing:'Gra (Użycie)',
+    status_manual_hint:'Status „Ukończone" musi być ustawiony ręcznie przez Ciebie lub admina',
+    no_venues:'Brak obiektów w projekcie.',no_venues_add:'Brak obiektów. Kliknij „+ Dodaj obiekt".',
+    more_suffix:'więcej',
+    all_venues_back:'← Wszystkie obiekty',all_venues:'Wszystkie obiekty',all_types:'Wszystkie typy',view_day:'Dzień',view_week:'Tydzień',view_month:'Miesiąc',
+  },
+  es:{
+    stat_total:'Este mes',stat_last:'Última op.',stat_common:'Más común',
+    log_op:'Registrar tarea',op_type:'Tipo de tarea',op_zone:'Zona del terreno',
+    op_zone_custom:'Zona personalizada',op_equipment:'Equipo utilizado',op_weather:'Condiciones meteorológicas',
+    op_staff:'Realizado por',op_staff_hint:'Puedes añadir varios empleados',
+    op_notes:'Notas / observaciones',op_date:'Fecha de la tarea',btn_log:'Registrar',
+    history:'Historial',op_photos:'Fotos (máx 4)',photo_tap:'Toca para añadir fotos',
+    photo_hint:'JPG, PNG · máx 4 fotos',
+    tab_log:'🗒 Registrar',tab_usage:'⏱ Uso',tab_schedule:'📅 Horario',tab_stats:'📊 Estadísticas',
+    btn_log_task:'+ Registrar tarea',btn_log_usage:'+ Registrar uso',
+    today:'Hoy',history_lbl:'Historial',usage_history:'Historial de uso',
+    no_tasks_today:'Sin tareas programadas',no_tasks_hint:'Sin tareas hoy. Pulsa "+ Registrar tarea"',
+    no_usage_today:'Sin uso hoy',no_usage_hint:'Pulsa "+ Registrar uso"',
+    no_tasks_logged:'No hay tareas registradas.',no_usage_history:'Sin historial de uso',
+    loading:'Cargando...',tasks_bank:'Banco de tareas',
+    status_planned:'Planificado',status_inprogress:'En progreso',status_completed:'Completado',status_missed:'Perdido',
+    status_active:'Activo',status_project_planned:'Planificado',status_finished:'Finalizado',
+    lbl_today:'HOY',lbl_tomorrow:'Mañana',
+    legend_planned:'Planificado',legend_inprogress:'En progreso',legend_completed:'Completado',legend_missed:'Perdido',
+    col_tasks:'Tareas',col_usage:'Uso',
+    usage_match:'Día de partido',usage_training:'Entrenamiento',usage_other:'Otro',
+    zone_full:'Campo completo',zone_half_a:'Mitad A',zone_half_b:'Mitad B',
+    zone_third_a:'Tercio A',zone_third_b:'Tercio B',zone_third_c:'Tercio C',
+    zone_goal_n:'Área de portería (N)',zone_goal_s:'Área de portería (S)',
+    zone_centre:'Círculo central',zone_penalty:'Áreas de penalti',zone_wings:'Bandas',zone_custom:'Personalizado...',
+    stats_total_tasks:'Total tareas',stats_task_hours:'Horas de tareas',stats_total_usage:'Total uso',
+    stats_usage_hours:'Horas de uso',stats_completed:'Tareas completadas',stats_ratio:'Ratio tareas/uso',
+    stats_venues_active:'Recintos activos',stats_maint_ratio:'Ratio mant./juego',
+    chart_task_by_type:'Horas de tareas por tipo',chart_task_share:'Distribución de horas',
+    chart_activity:'Actividad de tareas en el tiempo',chart_status:'Tareas por estado',
+    chart_usage_types:'Horas de uso por tipo',chart_usage_time:'Horas de uso del campo en el tiempo',
+    chart_ratio:'Tiempo de campo: Tareas vs Uso',
+    chart_maintenance:'Mantenimiento (Tareas)',chart_playing:'Juego (Uso)',
+    status_manual_hint:'Completado debe establecerse manualmente',
+    no_venues:'Sin recintos en este proyecto.',no_venues_add:'Sin recintos. Haz clic en "+ Añadir recinto".',
+    more_suffix:'más',
+    all_venues_back:'← Todos los recintos',all_venues:'Todos los recintos',all_types:'Todos los tipos',view_day:'Día',view_week:'Semana',view_month:'Mes',
+  },
+  fr:{
+    stat_total:'Ce mois',stat_last:'Dernière op.',stat_common:'Plus fréquent',
+    log_op:'Ajouter tâche',op_type:'Type de tâche',op_zone:'Zone du terrain',
+    op_zone_custom:'Zone personnalisée',op_equipment:'Équipement utilisé',op_weather:'Météo',
+    op_staff:'Réalisé par',op_staff_hint:'Vous pouvez ajouter plusieurs agents',
+    op_notes:'Notes / observations',op_date:'Date de la tâche',btn_log:'Enregistrer',
+    history:'Historique',op_photos:'Photos (max 4)',photo_tap:'Appuyer pour ajouter des photos',
+    photo_hint:'JPG, PNG · max 4 photos',
+    tab_log:'🗒 Enregistrer',tab_usage:'⏱ Utilisation',tab_schedule:'📅 Planning',tab_stats:'📊 Statistiques',
+    btn_log_task:'+ Enregistrer tâche',btn_log_usage:'+ Enregistrer usage',
+    today:"Aujourd'hui",history_lbl:'Historique',usage_history:"Historique d'utilisation",
+    no_tasks_today:'Aucune tâche prévue',no_tasks_hint:'Aucune tâche. Appuyez sur "+ Enregistrer tâche"',
+    no_usage_today:"Pas d'utilisation aujourd'hui",no_usage_hint:'Appuyez sur "+ Enregistrer usage"',
+    no_tasks_logged:'Aucune tâche enregistrée.',no_usage_history:"Pas d'historique d'utilisation",
+    loading:'Chargement...',tasks_bank:'Banque de tâches',
+    status_planned:'Planifié',status_inprogress:'En cours',status_completed:'Terminé',status_missed:'Manqué',
+    status_active:'Actif',status_project_planned:'Planifié',status_finished:'Terminé',
+    lbl_today:"AUJOURD'HUI",lbl_tomorrow:'Demain',
+    legend_planned:'Planifié',legend_inprogress:'En cours',legend_completed:'Terminé',legend_missed:'Manqué',
+    col_tasks:'Tâches',col_usage:'Utilisation',
+    usage_match:'Jour de match',usage_training:'Entraînement',usage_other:'Autre',
+    zone_full:'Terrain complet',zone_half_a:'Moitié A',zone_half_b:'Moitié B',
+    zone_third_a:'Tiers A',zone_third_b:'Tiers B',zone_third_c:'Tiers C',
+    zone_goal_n:'Surface de but (N)',zone_goal_s:'Surface de but (S)',
+    zone_centre:'Cercle central',zone_penalty:'Surfaces de réparation',zone_wings:'Ailes',zone_custom:'Personnalisé...',
+    stats_total_tasks:'Total tâches',stats_task_hours:'Heures de tâches',stats_total_usage:'Total utilisation',
+    stats_usage_hours:"Heures d'utilisation",stats_completed:'Tâches terminées',stats_ratio:'Ratio tâches/utilisation',
+    stats_venues_active:'Sites actifs',stats_maint_ratio:'Ratio maint./jeu',
+    chart_task_by_type:'Heures de tâches par type',chart_task_share:'Répartition des heures',
+    chart_activity:'Activité des tâches dans le temps',chart_status:'Tâches par statut',
+    chart_usage_types:"Heures d'utilisation par type",chart_usage_time:"Heures d'utilisation dans le temps",
+    chart_ratio:'Temps terrain : Tâches vs Utilisation',
+    chart_maintenance:'Maintenance (Tâches)',chart_playing:'Jeu (Utilisation)',
+    status_manual_hint:'Terminé doit être défini manuellement',
+    no_venues:'Aucun site dans ce projet.',no_venues_add:'Aucun site. Cliquez sur "+ Ajouter site".',
+    more_suffix:'autres',
+    all_venues_back:'← Tous les sites',all_venues:'Tous les sites',all_types:'Tous les types',view_day:'Jour',view_week:'Semaine',view_month:'Mois',
+  },
+  de:{
+    stat_total:'Diesen Monat',stat_last:'Letzte Op.',stat_common:'Häufigste',
+    log_op:'Neue Aufgabe',op_type:'Aufgabentyp',op_zone:'Bereich',
+    op_zone_custom:'Benutzerdefinierter Bereich',op_equipment:'Geräte',op_weather:'Wetterbedingungen',
+    op_staff:'Durchgeführt von',op_staff_hint:'Mehrere Mitarbeiter möglich',
+    op_notes:'Notizen',op_date:'Aufgabendatum',btn_log:'Aufgabe speichern',
+    history:'Aufgabenhistorie',op_photos:'Fotos (max 4)',photo_tap:'Tippen um Fotos hinzuzufügen',
+    photo_hint:'JPG, PNG · max 4 Fotos',
+    tab_log:'🗒 Aufgabe',tab_usage:'⏱ Nutzung',tab_schedule:'📅 Zeitplan',tab_stats:'📊 Statistiken',
+    btn_log_task:'+ Aufgabe erfassen',btn_log_usage:'+ Nutzung erfassen',
+    today:'Heute',history_lbl:'Historie',usage_history:'Nutzungshistorie',
+    no_tasks_today:'Keine geplanten Aufgaben',no_tasks_hint:'Keine Aufgaben heute. Auf "+ Aufgabe erfassen" tippen',
+    no_usage_today:'Keine Nutzung heute',no_usage_hint:'Auf "+ Nutzung erfassen" tippen',
+    no_tasks_logged:'Keine Aufgaben erfasst.',no_usage_history:'Keine Nutzungshistorie',
+    loading:'Laden...',tasks_bank:'Aufgabenbank',
+    status_planned:'Geplant',status_inprogress:'In Bearbeitung',status_completed:'Abgeschlossen',status_missed:'Verpasst',
+    status_active:'Aktiv',status_project_planned:'Geplant',status_finished:'Abgeschlossen',
+    lbl_today:'HEUTE',lbl_tomorrow:'Morgen',
+    legend_planned:'Geplant',legend_inprogress:'In Bearbeitung',legend_completed:'Abgeschlossen',legend_missed:'Verpasst',
+    col_tasks:'Aufgaben',col_usage:'Nutzung',
+    usage_match:'Spieltag',usage_training:'Training',usage_other:'Sonstige',
+    zone_full:'Ganzes Spielfeld',zone_half_a:'Hälfte A',zone_half_b:'Hälfte B',
+    zone_third_a:'Drittel A',zone_third_b:'Drittel B',zone_third_c:'Drittel C',
+    zone_goal_n:'Torraum (N)',zone_goal_s:'Torraum (S)',
+    zone_centre:'Mittelkreis',zone_penalty:'Strafräume',zone_wings:'Flügel',zone_custom:'Benutzerdefiniert...',
+    stats_total_tasks:'Aufgaben gesamt',stats_task_hours:'Aufgabenstunden',stats_total_usage:'Nutzung gesamt',
+    stats_usage_hours:'Nutzungsstunden',stats_completed:'Abgeschlossene Aufgaben',stats_ratio:'Aufgaben/Nutzung-Verhältnis',
+    stats_venues_active:'Aktive Standorte',stats_maint_ratio:'Wartung/Spiel-Verhältnis',
+    chart_task_by_type:'Aufgabenstunden nach Typ',chart_task_share:'Stundenverteilung',
+    chart_activity:'Aufgabenaktivität über Zeit',chart_status:'Aufgaben nach Status',
+    chart_usage_types:'Nutzungsstunden nach Typ',chart_usage_time:'Platznutzungsstunden über Zeit',
+    chart_ratio:'Platzzeit: Aufgaben vs Nutzung',
+    chart_maintenance:'Wartung (Aufgaben)',chart_playing:'Spiel (Nutzung)',
+    status_manual_hint:'Abgeschlossen muss manuell gesetzt werden',
+    no_venues:'Keine Standorte in diesem Projekt.',no_venues_add:'Keine Standorte. Auf "+ Standort hinzufügen" klicken.',
+    more_suffix:'weitere',
+    all_venues_back:'← Alle Standorte',all_venues:'Alle Standorte',all_types:'Alle Typen',view_day:'Tag',view_week:'Woche',view_month:'Monat',
+  },
+  pt:{
+    stat_total:'Este mês',stat_last:'Última op.',stat_common:'Mais comum',
+    log_op:'Registar tarefa',op_type:'Tipo de tarefa',op_zone:'Zona do relvado',
+    op_zone_custom:'Zona personalizada',op_equipment:'Equipamento',op_weather:'Condições meteorológicas',
+    op_staff:'Realizado por',op_staff_hint:'Pode adicionar vários trabalhadores',
+    op_notes:'Notas / observações',op_date:'Data da tarefa',btn_log:'Registar',
+    history:'Histórico',op_photos:'Fotos (máx 4)',photo_tap:'Toque para adicionar fotos',
+    photo_hint:'JPG, PNG · máx 4 fotos',
+    tab_log:'🗒 Tarefa',tab_usage:'⏱ Utilização',tab_schedule:'📅 Agenda',tab_stats:'📊 Estatísticas',
+    btn_log_task:'+ Registar tarefa',btn_log_usage:'+ Registar utilização',
+    today:'Hoje',history_lbl:'Histórico',usage_history:'Histórico de utilização',
+    no_tasks_today:'Sem tarefas programadas',no_tasks_hint:'Sem tarefas hoje. Prima "+ Registar tarefa"',
+    no_usage_today:'Sem utilização hoje',no_usage_hint:'Prima "+ Registar utilização"',
+    no_tasks_logged:'Nenhuma tarefa registada.',no_usage_history:'Sem histórico de utilização',
+    loading:'A carregar...',tasks_bank:'Banco de tarefas',
+    status_planned:'Planeado',status_inprogress:'Em curso',status_completed:'Concluído',status_missed:'Falhado',
+    status_active:'Ativo',status_project_planned:'Planeado',status_finished:'Terminado',
+    lbl_today:'HOJE',lbl_tomorrow:'Amanhã',
+    legend_planned:'Planeado',legend_inprogress:'Em curso',legend_completed:'Concluído',legend_missed:'Falhado',
+    col_tasks:'Tarefas',col_usage:'Utilização',
+    usage_match:'Dia de jogo',usage_training:'Treino',usage_other:'Outro',
+    zone_full:'Campo completo',zone_half_a:'Metade A',zone_half_b:'Metade B',
+    zone_third_a:'Terço A',zone_third_b:'Terço B',zone_third_c:'Terço C',
+    zone_goal_n:'Área de baliza (N)',zone_goal_s:'Área de baliza (S)',
+    zone_centre:'Círculo central',zone_penalty:'Áreas de penálti',zone_wings:'Alas',zone_custom:'Personalizado...',
+    stats_total_tasks:'Total tarefas',stats_task_hours:'Horas de tarefas',stats_total_usage:'Total utilização',
+    stats_usage_hours:'Horas de utilização',stats_completed:'Tarefas concluídas',stats_ratio:'Rácio tarefas/utilização',
+    stats_venues_active:'Instalações ativas',stats_maint_ratio:'Rácio manut./jogo',
+    chart_task_by_type:'Horas de tarefas por tipo',chart_task_share:'Distribuição de horas',
+    chart_activity:'Atividade de tarefas ao longo do tempo',chart_status:'Tarefas por estado',
+    chart_usage_types:'Horas de utilização por tipo',chart_usage_time:'Horas de utilização ao longo do tempo',
+    chart_ratio:'Tempo de campo: Tarefas vs Utilização',
+    chart_maintenance:'Manutenção (Tarefas)',chart_playing:'Jogo (Utilização)',
+    status_manual_hint:'Concluído deve ser definido manualmente',
+    no_venues:'Sem instalações neste projeto.',no_venues_add:'Sem instalações. Clique em "+ Adicionar instalação".',
+    more_suffix:'mais',
+    all_venues_back:'← Todos os locais',all_venues:'Todos os locais',all_types:'Todos os tipos',view_day:'Dia',view_week:'Semana',view_month:'Mês',
+  },
 };
 function t(k){ return (i18n[state.lang]||i18n.en)[k]||k; }
+
+function _updateSelectOptions(selId, opts){
+  const sel=document.getElementById(selId); if(!sel) return;
+  const cur=sel.value;
+  opts.forEach(([val,text])=>{
+    const o=sel.querySelector('option[value="'+val+'"]');
+    if(o) o.textContent=text;
+  });
+  sel.value=cur;
+}
+
 function setLang(l){
   state.lang=l; save();
-  document.querySelectorAll('[data-i18n]').forEach(el=>{ const v=(i18n[l]||i18n.en)[el.dataset.i18n]; if(v) el.textContent=v; });
+  const T=i18n[l]||i18n.en;
+  // Static data-i18n elements
+  document.querySelectorAll('[data-i18n]').forEach(el=>{ const v=T[el.dataset.i18n]; if(v) el.textContent=v; });
   document.querySelectorAll('.lang-select,#lang-select-login').forEach(s=>s.value=l);
+
+  // ── Zone select options (Log Task modal) ──
+  const zoneOpts=[
+    ['','Full pitch'],['Half A','Half A'],['Half B','Half B'],
+    ['Third A','Third A'],['Third B','Third B'],['Third C','Third C'],
+    ['Custom','Custom...']
+  ];
+  const zoneKeys=['zone_full','zone_half_a','zone_half_b','zone_third_a','zone_third_b','zone_third_c','zone_custom'];
+  ['new-op-zone','edit-op-zone-select'].forEach(id=>{
+    const sel=document.getElementById(id); if(!sel) return;
+    const cur=sel.value;
+    const opts=sel.querySelectorAll('option');
+    const keys=['zone_full','zone_half_a','zone_half_b','zone_third_a','zone_third_b','zone_third_c','zone_goal_n','zone_goal_s','zone_centre','zone_penalty','zone_wings','zone_custom'];
+    opts.forEach((o,i)=>{ if(keys[i]) o.textContent=T[keys[i]]||o.textContent; });
+    sel.value=cur;
+  });
+  // Admin task zone select
+  ['admin-task-zone-select','admin-usage-zone-select','usage-zone-select'].forEach(id=>{
+    const sel=document.getElementById(id); if(!sel) return;
+    const cur=sel.value;
+    const opts=sel.querySelectorAll('option');
+    const keys=['zone_full','zone_goal_n','zone_goal_s','zone_centre','zone_penalty','zone_wings','zone_half_a','zone_half_b','zone_third_a','zone_third_b','zone_third_c','zone_custom'];
+    opts.forEach((o,i)=>{ if(keys[i]) o.textContent=T[keys[i]]||o.textContent; });
+    sel.value=cur;
+  });
+
+  // ── Usage type select options ──
+  const usageTypeMap=[['Match Day','usage_match'],['Training Session','usage_training'],['Other','usage_other']];
+  ['usage-type-select','edit-usage-type','admin-usage-type'].forEach(id=>{
+    const sel=document.getElementById(id); if(!sel) return;
+    const cur=sel.value;
+    usageTypeMap.forEach(([val,key])=>{
+      const o=sel.querySelector('option[value="'+val+'"]');
+      if(o) o.textContent=T[key]||o.textContent;
+    });
+    sel.value=cur;
+  });
+
+  // ── Status select options ──
+  const statusMap=[['planned','status_planned'],['inprogress','status_inprogress'],['completed','status_completed'],['missed','status_missed']];
+  ['new-op-status','edit-op-status','admin-task-status','admin-usage-status','usage-status','edit-usage-status'].forEach(id=>{
+    const sel=document.getElementById(id); if(!sel) return;
+    const cur=sel.value;
+    statusMap.forEach(([val,key])=>{
+      const o=sel.querySelector('option[value="'+val+'"]');
+      if(o) o.textContent=T[key]||o.textContent;
+    });
+    sel.value=cur;
+  });
+
+  // ── Re-render dynamic content if visible ──
+  if(typeof renderVenueUpcoming==='function') renderVenueUpcoming();
+  if(typeof renderVenueHistory==='function') renderVenueHistory();
+  if(typeof renderVenueUsageToday==='function') renderVenueUsageToday();
+  if(typeof renderVenueUsageHistory==='function') renderVenueUsageHistory();
+  if(document.getElementById('ptab-calendar-content')?.style.display==='block' && typeof renderGantt==='function') renderGantt();
+  if(document.getElementById('vtab-schedule-content')?.style.display==='block' && state.currentVenueId && typeof renderWeekCalendar==='function')
+    renderWeekCalendar(state.currentVenueId,'venue-sched-grid',typeof venueSchedOffset!=='undefined'?venueSchedOffset:0);
 }
 
 // ════════════════════════════════════════
@@ -1672,7 +1974,7 @@ async function enterViewerDashboard(proj){
   document.getElementById('viewer-badge').textContent=proj.code+' — View only';
   document.getElementById('viewer-project-tag').textContent=proj.code;
   document.getElementById('viewer-project-name').textContent=proj.name;
-  document.getElementById('viewer-project-meta').textContent=(proj.country?'📍 '+proj.country+' · ':'')+({active:'🟢 Active',planned:'🟡 Planned',finished:'⚫ Finished'}[proj.status]||'');
+  document.getElementById('viewer-project-meta').textContent=(proj.country?'📍 '+proj.country+' · ':'')+({active:'🟢 '+t('status_active'),planned:'🟡 '+t('status_project_planned'),finished:'⚫ '+t('status_finished')}[proj.status]||'');
   document.getElementById('viewer-hero').style.background=`linear-gradient(135deg,${proj.color}dd 0%,${proj.color} 100%)`;
 
   // load all data for this project
@@ -1686,7 +1988,7 @@ async function enterViewerDashboard(proj){
     state.operations = (ops_res.data||[]).map(dbToOp);
   } else { state.operations=[]; }
   const types_res = await supa.from('pitchops_op_types').select('*').order('name');
-  state.opTypes = (types_res.data||[]).map(t=>t.name);
+  state.opTypes = (types_res.data||[]).map(tp=>tp.name);
   showLoading(false);
 
   const venues=projectVenues(proj.id);
@@ -1715,8 +2017,8 @@ async function enterViewerDashboard(proj){
   }
 
   // populate viewer filters
-  document.getElementById('vw-filter-venue').innerHTML=`<option value="">All venues</option>`+venues.map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('');
-  document.getElementById('vw-filter-type').innerHTML=`<option value="">All types</option>`+state.opTypes.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
+  document.getElementById('vw-filter-venue').innerHTML=`<option value="">${t('all_venues')}</option>`+venues.map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('');
+  document.getElementById('vw-filter-type').innerHTML=`<option value="">All types</option>`+state.opTypes.map(tp=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
   renderViewerOps();
   showScreen('screen-viewer');
 }
@@ -1855,7 +2157,7 @@ function renderProjects(){
     const venueCount = state.venues.filter(v=>v.projectIds&&v.projectIds.includes(p.id)).length;
     const opCount = projectOps(p.id).length;
     const statusClass = {active:'status-active',planned:'status-planned',finished:'status-finished'}[p.status]||'status-planned';
-    const statusLabel = {active:'Active',planned:'Planned',finished:'Finished'}[p.status]||p.status;
+    const statusLabel = {active:t('status_active'),planned:t('status_project_planned'),finished:t('status_finished')}[p.status]||p.status;
     return `<div class="project-card" onclick="openProject('${p.id}')">
       <div class="project-card-banner" style="background:${p.color}"></div>
       <div class="project-card-body">
@@ -1972,14 +2274,14 @@ function renderProjectDetail(pid){
   document.getElementById('detail-breadcrumb').textContent=proj.code;
   document.getElementById('detail-project-tag').textContent=proj.code;
   document.getElementById('detail-project-name').textContent=proj.name;
-  document.getElementById('detail-project-meta').textContent=(proj.country?'📍 '+proj.country+' · ':'')+({active:'🟢 Active',planned:'🟡 Planned',finished:'⚫ Finished'}[proj.status]||'');
+  document.getElementById('detail-project-meta').textContent=(proj.country?'📍 '+proj.country+' · ':'')+({active:'🟢 '+t('status_active'),planned:'🟡 '+t('status_project_planned'),finished:'⚫ '+t('status_finished')}[proj.status]||'');
 
   updateDetailStats(pid);
 
   // venue list
   const venues = projectVenues(pid);
   const vlist = document.getElementById('detail-venue-list');
-  if(!venues.length){ vlist.innerHTML=`<div class="empty-state"><div class="ico">🏟</div><div>No venues yet. Click "+ Add venue".</div></div>`; }
+  if(!venues.length){ vlist.innerHTML=`<div class="empty-state"><div class="ico">🏟</div><div>${t('no_venues_add')}</div></div>`; }
   else {
     vlist.innerHTML=venues.map(v=>{
       const vc=state.operations.filter(o=>o.venueId===v.id).length;
@@ -2005,7 +2307,7 @@ function renderProjectDetail(pid){
 
   // populate filter dropdowns
   const fv=document.getElementById('filter-venue');
-  fv.innerHTML=`<option value="">All venues</option>`+venues.map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('');
+  fv.innerHTML=`<option value="">${t('all_venues')}</option>`+venues.map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('');
   populateOpTypeSelects();
   renderDetailOps();
 }
@@ -2180,7 +2482,7 @@ function renderVenueStats(){
   const ops=venueOps(); const now=new Date();
   const thisMonth=ops.filter(o=>{const d=new Date(o.date);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});
   document.getElementById('stat-total').textContent=thisMonth.length;
-  if(ops.length){ const diff=Math.floor((now-new Date(ops[0].date))/86400000); document.getElementById('stat-last').textContent=diff===0?'Today':diff+'d'; }
+  if(ops.length){ const diff=Math.floor((now-new Date(ops[0].date))/86400000); document.getElementById('stat-last').textContent=diff===0?t('today'):diff+'d'; }
   else document.getElementById('stat-last').textContent='—';
   if(ops.length){ const freq={}; ops.forEach(o=>freq[o.type]=(freq[o.type]||0)+1); const top=Object.entries(freq).sort((a,b)=>b[1]-a[1])[0]; document.getElementById('stat-common').textContent=top?top[0].slice(0,7):'—'; }
   else document.getElementById('stat-common').textContent='—';
@@ -2192,7 +2494,7 @@ function renderVenueHistory(){
     .filter(o=>o.status==='completed'||o.status==='missed')
     .filter(o=>!search||o.type.toLowerCase().includes(search)||(o.notes||'').toLowerCase().includes(search)||(o.staff||[]).join(' ').toLowerCase().includes(search));
   const container=document.getElementById('venue-history-list');
-  if(!ops.length){ if(container) container.innerHTML=`<div class="empty-state"><div class="ico">📋</div><div>No tasks logged yet.</div></div>`; return; }
+  if(!ops.length){ if(container) container.innerHTML=`<div class="empty-state"><div class="ico">📋</div><div>${t('no_tasks_logged')}</div></div>`; return; }
   const statusBar={completed:'#3B6D11',missed:'#A32D2D',inprogress:'#378ADD',planned:'#EF9F27'};
   const histHTML=ops.map(op=>{
     const badge=opBadge(op.type);
@@ -2360,12 +2662,12 @@ async function deleteOperation(){
 // OP TYPES
 // ════════════════════════════════════════
 function populateOpTypeSelects(){
-  ['new-op-type','edit-op-type'].forEach(id=>{
+  ['new-op-type','edit-op-type','admin-task-type','edit-plan-op-type'].forEach(id=>{
     const s=document.getElementById(id); if(!s) return;
-    s.innerHTML=state.opTypes.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
+    s.innerHTML=state.opTypes.map(tp=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
   });
   const ft=document.getElementById('filter-type');
-  if(ft) ft.innerHTML=`<option value="">All types</option>`+state.opTypes.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
+  if(ft) ft.innerHTML=`<option value="">All types</option>`+state.opTypes.map(tp=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
 }
 function openManageTypesModal(){ renderOpTypesList(); openModal('modal-op-types'); }
 function renderOpTypesList(){
@@ -2798,7 +3100,7 @@ function switchProjectTab(tab){
     document.getElementById('venue-cal-view').style.display='none';
     const pid=state.currentProjectId;
     if(pid){
-      document.getElementById('gantt-grid').innerHTML='<div style="padding:2rem;text-align:center;color:#96a6bb;font-size:13px">Loading...</div>';
+      document.getElementById('gantt-grid').innerHTML=`<div style="padding:2rem;text-align:center;color:#96a6bb;font-size:13px">${t('loading')}</div>`;
       renderGantt();
       Promise.all([refreshProjectOps(pid, true), refreshProjectUsage(pid, true)]).then(()=>renderGantt());
     }
@@ -2897,8 +3199,8 @@ async function renderGantt(){
   // Sub-header: Tasks | Usage per day
   let subHeaderCols=`<th colspan="2" style="background:#fafbfc;border-right:1px solid rgba(0,0,0,0.09)"></th>`;
   days.forEach(()=>{
-    subHeaderCols+=`<th style="padding:3px 4px;text-align:center;font-size:9px;font-weight:700;color:#5a6a82;text-transform:uppercase;background:#f4f6f8;border-right:1px dashed rgba(0,0,0,0.08)">Tasks</th>
-    <th style="padding:3px 4px;text-align:center;font-size:9px;font-weight:700;color:#7C3AED;text-transform:uppercase;background:#faf5ff;border-right:1px solid rgba(0,0,0,0.09)">Usage</th>`;
+    subHeaderCols+=`<th style="padding:3px 4px;text-align:center;font-size:9px;font-weight:700;color:#5a6a82;text-transform:uppercase;background:#f4f6f8;border-right:1px dashed rgba(0,0,0,0.08)">${t('col_tasks')}</th>
+    <th style="padding:3px 4px;text-align:center;font-size:9px;font-weight:700;color:#7C3AED;text-transform:uppercase;background:#faf5ff;border-right:1px solid rgba(0,0,0,0.09)">${t('col_usage')}</th>`;
   });
 
   let rows='';
@@ -2934,8 +3236,8 @@ async function renderGantt(){
         return `<div draggable="true" class="gantt-chip" ondragstart="onDragStart(event,'usage','${u.id}','${dStr}','${v.id}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditUsageModal('${u.id}')" style="${cs}">⚽ ${esc(u.usageType)}${tl}</div>`;
       }).join('');
 
-      const opsOverflow=dayOps.length>3?`<div style="font-size:8px;color:#185FA5;padding:1px 3px;background:#E6F1FB;border-radius:3px;display:inline-block;margin-top:1px">+${dayOps.length-3} more</div>`:'';
-      const usageOverflow=dayUsage.length>3?`<div style="font-size:8px;color:#7C3AED;padding:1px 3px;background:#F3E8FF;border-radius:3px;display:inline-block;margin-top:1px">+${dayUsage.length-3} more</div>`:'';
+      const opsOverflow=dayOps.length>3?`<div style="font-size:8px;color:#185FA5;padding:1px 3px;background:#E6F1FB;border-radius:3px;display:inline-block;margin-top:1px">+${dayOps.length-3} ${t('more_suffix')}</div>`:'';
+      const usageOverflow=dayUsage.length>3?`<div style="font-size:8px;color:#7C3AED;padding:1px 3px;background:#F3E8FF;border-radius:3px;display:inline-block;margin-top:1px">+${dayUsage.length-3} ${t('more_suffix')}</div>`:'';
       const opsDisplay=dayOps.length>3?dayOps.slice(0,3).map(o=>{const cs=chipStyle[o.status]||chipStyle.planned;const tl=o.timeFrom&&o.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${o.timeFrom}–${o.timeTo}</span>`:'';return `<div draggable="true" class="gantt-chip" ondragstart="onDragStart(event,'op','${o.id}','${dStr}','${v.id}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditModal('${o.id}')" style="${cs}">${esc(o.type)}${tl}</div>`;}).join('')+opsOverflow:opsChips;
       const usageDisplay=dayUsage.length>3?dayUsage.slice(0,3).map(u=>{const cs=usageChipStyle[u.status]||usageChipStyle.planned;const tl=u.timeFrom&&u.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${u.timeFrom}–${u.timeTo}</span>`:'';return `<div draggable="true" class="gantt-chip" ondragstart="onDragStart(event,'usage','${u.id}','${dStr}','${v.id}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditUsageModal('${u.id}')" style="${cs}">⚽ ${esc(u.usageType)}${tl}</div>`;}).join('')+usageOverflow:usageChips;
       cells+=`<td onclick="if(!document.querySelector('.modal-overlay.open'))openAdminLogTaskModal('${dStr}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px;border-right:1px dashed rgba(0,0,0,0.06);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgT};min-height:40px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsDisplay}</td>
@@ -2985,9 +3287,9 @@ function renderVenueUpcoming(){
   if(empty) empty.style.display='none';
 
   const statusConfig={
-    planned:{color:'#854F0B',bg:'#FAEEDA',bar:'#EF9F27',label:'Planned',icon:'🕐'},
-    inprogress:{color:'#185FA5',bg:'#E6F1FB',bar:'#378ADD',label:'In progress',icon:'⚡'},
-    completed:{color:'#3B6D11',bg:'#EAF3DE',bar:'#3B6D11',label:'Completed',icon:'✓'},
+    planned:{color:'#854F0B',bg:'#FAEEDA',bar:'#EF9F27',label:t('status_planned'),icon:'🕐'},
+    inprogress:{color:'#185FA5',bg:'#E6F1FB',bar:'#378ADD',label:t('status_inprogress'),icon:'⚡'},
+    completed:{color:'#3B6D11',bg:'#EAF3DE',bar:'#3B6D11',label:t('status_completed'),icon:'✓'},
   };
   list.innerHTML=visible.map(op=>{
     const dStr=(op.date||'').slice(0,10);
@@ -2995,7 +3297,7 @@ function renderVenueUpcoming(){
     const tl=op.timeFrom&&op.timeTo?`${op.timeFrom} – ${op.timeTo}`:'';
     const sc=statusConfig[op.status]||statusConfig.planned;
     const daysUntil=Math.round((new Date(dStr)-new Date(today))/(86400000));
-    const daysLabel=isToday?'<span style="font-size:10px;font-weight:700;color:#185FA5;background:#E6F1FB;padding:1px 6px;border-radius:10px">TODAY</span>':daysUntil===1?'<span style="font-size:10px;color:#854F0B">Tomorrow</span>':daysUntil>0?`<span style="font-size:10px;color:var(--text-hint)">in ${daysUntil}d</span>`:'';
+    const daysLabel=isToday?`<span style="font-size:10px;font-weight:700;color:#185FA5;background:#E6F1FB;padding:1px 6px;border-radius:10px">${t('lbl_today')}</span>`:daysUntil===1?`<span style="font-size:10px;color:#854F0B">${t('lbl_tomorrow')}</span>`:daysUntil>0?`<span style="font-size:10px;color:var(--text-hint)">in ${daysUntil}d</span>`:'';
     return `<div onclick="openEditModal('${op.id}')" style="display:flex;align-items:stretch;border-radius:10px;overflow:hidden;margin-bottom:8px;cursor:pointer;border:1px solid ${isToday?sc.bar:'rgba(0,0,0,0.08)'};transition:box-shadow .15s" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,.1)'" onmouseout="this.style.boxShadow='none'">
       <div style="width:4px;background:${sc.bar};flex-shrink:0"></div>
       <div style="flex:1;padding:10px 12px;background:${isToday?sc.bg:'white'}">
@@ -3079,8 +3381,8 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
   // Sub-header: Tasks | Usage per date
   let subHeaderCols='';
   allCols.forEach(()=>{
-    subHeaderCols+=`<th style="padding:3px 6px;text-align:center;font-size:9px;font-weight:700;color:#5a6a82;text-transform:uppercase;background:#f4f6f8;border-right:1px dashed rgba(0,0,0,0.08)">Tasks</th>
-    <th style="padding:3px 6px;text-align:center;font-size:9px;font-weight:700;color:#7C3AED;text-transform:uppercase;background:#faf5ff;border-right:1px solid rgba(0,0,0,0.09)">Usage</th>`;
+    subHeaderCols+=`<th style="padding:3px 6px;text-align:center;font-size:9px;font-weight:700;color:#5a6a82;text-transform:uppercase;background:#f4f6f8;border-right:1px dashed rgba(0,0,0,0.08)">${t('col_tasks')}</th>
+    <th style="padding:3px 6px;text-align:center;font-size:9px;font-weight:700;color:#7C3AED;text-transform:uppercase;background:#faf5ff;border-right:1px solid rgba(0,0,0,0.09)">${t('col_usage')}</th>`;
   });
 
   // Data row — one row with Tasks | Usage cells per date
@@ -3258,7 +3560,7 @@ function renderVenueUsageToday(){
   if(!section||!list||!empty) return;
   if(!visible.length){ section.style.display='none'; empty.style.display='block'; return; }
   section.style.display='block'; empty.style.display='none';
-  const scColors={planned:{bar:'#EF9F27',bg:'#FAEEDA',color:'#854F0B',icon:'🕐',label:'Planned'},inprogress:{bar:'#378ADD',bg:'#E6F1FB',color:'#185FA5',icon:'⚡',label:'In progress'}};
+  const scColors={planned:{bar:'#EF9F27',bg:'#FAEEDA',color:'#854F0B',icon:'🕐',label:t('status_planned')},inprogress:{bar:'#378ADD',bg:'#E6F1FB',color:'#185FA5',icon:'⚡',label:t('status_inprogress')}};
   list.innerHTML=visible.map(u=>{
     const sc=scColors[u.status]||scColors.planned;
     const tl=u.timeFrom&&u.timeTo?`${u.timeFrom} – ${u.timeTo}`:'';
@@ -3286,7 +3588,7 @@ function renderVenueUsageHistory(){
   const container=document.getElementById('venue-usage-history-list');
   if(!container) return;
   const statusBar={completed:'#3B6D11',missed:'#A32D2D',inprogress:'#378ADD',planned:'#EF9F27'};
-  if(!items.length){ container.innerHTML=`<div style="padding:2rem;text-align:center;color:var(--text-hint);font-size:13px">No usage history yet</div>`; return; }
+  if(!items.length){ container.innerHTML=`<div style="padding:2rem;text-align:center;color:var(--text-hint);font-size:13px">${t('no_usage_history')}</div>`; return; }
   container.innerHTML=items.map(u=>{
     const bar=statusBar[u.status]||'#888';
     return `<div style="display:flex;align-items:stretch;border-bottom:1px solid rgba(0,0,0,.06);background:white;transition:background .12s" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
@@ -3592,7 +3894,7 @@ function openAdminLogTaskModal(dateStr){
   const vsel=document.getElementById('admin-task-venue');
   vsel.innerHTML=venues.map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('');
   const tsel=document.getElementById('admin-task-type');
-  tsel.innerHTML=state.opTypes.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
+  tsel.innerHTML=state.opTypes.map(tp=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
   document.getElementById('admin-task-date').value=dateStr||todayStr();
   document.getElementById('admin-task-zone-select').value='Full pitch';
   document.getElementById('admin-task-zone-custom-wrap').style.display='none';
@@ -3872,12 +4174,12 @@ function renderVenueStats_tab(){
   // Summary cards
   const summaryEl=document.getElementById('vstats-summary');
   if(summaryEl) summaryEl.innerHTML=[
-    {label:'Total tasks',val:ops.length,color:'#185FA5',icon:'📋'},
-    {label:'Task hours',val:totalTaskHours.toFixed(1)+'h',color:'#185FA5',icon:'⏱'},
-    {label:'Total usage',val:usage.length,color:'#7C3AED',icon:'⚽'},
-    {label:'Usage hours',val:totalUsageHours.toFixed(1)+'h',color:'#7C3AED',icon:'🕐'},
-    {label:'Completed tasks',val:ops.filter(o=>o.status==='completed').length,color:'#3B6D11',icon:'✅'},
-    {label:'Tasks/Usage ratio',val:totalUsageHours>0?(totalTaskHours/totalUsageHours).toFixed(1)+'x':'—',color:'#854F0B',icon:'📊'},
+    {label:t('stats_total_tasks'),val:ops.length,color:'#185FA5',icon:'📋'},
+    {label:t('stats_task_hours'),val:totalTaskHours.toFixed(1)+'h',color:'#185FA5',icon:'⏱'},
+    {label:t('stats_total_usage'),val:usage.length,color:'#7C3AED',icon:'⚽'},
+    {label:t('stats_usage_hours'),val:totalUsageHours.toFixed(1)+'h',color:'#7C3AED',icon:'🕐'},
+    {label:t('stats_completed'),val:ops.filter(o=>o.status==='completed').length,color:'#3B6D11',icon:'✅'},
+    {label:t('stats_ratio'),val:totalUsageHours>0?(totalTaskHours/totalUsageHours).toFixed(1)+'x':'—',color:'#854F0B',icon:'📊'},
   ].map(s=>`<div style="background:white;border-radius:12px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);padding:1rem;text-align:center">
     <div style="font-size:20px;margin-bottom:4px">${s.icon}</div>
     <div style="font-size:22px;font-weight:700;color:${s.color};font-family:'Syne',sans-serif">${s.val}</div>
@@ -3899,12 +4201,12 @@ function renderVenueStats_tab(){
     ops.forEach(o=>{typeHours[o.type]=(typeHours[o.type]||0)+calcHours(o.timeFrom,o.timeTo);});
     const sorted=Object.entries(typeHours).sort((a,b)=>b[1]-a[1]).slice(0,10);
     if(sorted.length){
-      charts.push({id:'vch-task-types',title:'Task hours by type',type:'bar',
-        data:{labels:sorted.map(t=>t[0]),datasets:[{label:'Hours',data:sorted.map(t=>+t[1].toFixed(1)),backgroundColor:'#185FA5cc',borderRadius:4}]},
+      charts.push({id:'vch-task-types',title:t('chart_task_by_type'),type:'bar',
+        data:{labels:sorted.map(tc=>tc[0]),datasets:[{label:'Hours',data:sorted.map(tc=>+tc[1].toFixed(1)),backgroundColor:'#185FA5cc',borderRadius:4}]},
         opts:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Hours'}}}}});
       const totalH=sorted.reduce((s,t)=>s+t[1],0);
-      charts.push({id:'vch-task-pie',title:'Task hours by type — share',type:'pie',
-        data:{labels:sorted.map(t=>t[0]+' ('+((t[1]/totalH)*100).toFixed(1)+'%)'),datasets:[{data:sorted.map(t=>+t[1].toFixed(1)),backgroundColor:['#185FA5','#378ADD','#60A5FA','#93C5FD','#3B6D11','#10B981','#F59E0B','#EF9F27','#7C3AED','#A855F7','#A32D2D','#854F0B'],borderWidth:2}]},
+      charts.push({id:'vch-task-pie',title:t('chart_task_share'),type:'pie',
+        data:{labels:sorted.map(tc=>tc[0]+' ('+((t[1]/totalH)*100).toFixed(1)+'%)'),datasets:[{data:sorted.map(tc=>+tc[1].toFixed(1)),backgroundColor:['#185FA5','#378ADD','#60A5FA','#93C5FD','#3B6D11','#10B981','#F59E0B','#EF9F27','#7C3AED','#A855F7','#A32D2D','#854F0B'],borderWidth:2}]},
         opts:{plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:ctx=>{const total=ctx.dataset.data.reduce((a,b)=>a+b,0);const pct=((ctx.raw/total)*100).toFixed(1);return ctx.label.split(' (')[0]+': '+ctx.raw+'h ('+pct+'%)';}}}}}});
     }
 
@@ -3913,7 +4215,7 @@ function renderVenueStats_tab(){
       const byDate={};
       ops.forEach(o=>{byDate[o.date]=(byDate[o.date]||0)+1;});
       const dates=Object.keys(byDate).sort();
-      charts.push({id:'vch-activity',title:'Task activity over time',type:'line',
+      charts.push({id:'vch-activity',title:t('chart_activity'),type:'line',
         data:{labels:dates.map(d=>formatDateOnly(d)),datasets:[{label:'Tasks',data:dates.map(d=>byDate[d]),borderColor:'#185FA5',backgroundColor:'#185FA520',tension:.3,fill:true,pointRadius:3}]},
         opts:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
     }
@@ -3922,8 +4224,8 @@ function renderVenueStats_tab(){
     if(ops.length){
       const sc={planned:0,inprogress:0,completed:0,missed:0};
       ops.forEach(o=>{if(sc[o.status]!==undefined)sc[o.status]++;});
-      charts.push({id:'vch-status',title:'Tasks by status',type:'doughnut',
-        data:{labels:['Planned','In progress','Completed','Missed'],datasets:[{data:[sc.planned,sc.inprogress,sc.completed,sc.missed],backgroundColor:['#EF9F27','#378ADD','#3B6D11','#A32D2D'],borderWidth:2}]},
+      charts.push({id:'vch-status',title:t('chart_status'),type:'doughnut',
+        data:{labels:[t('status_planned'),t('status_inprogress'),t('status_completed'),t('status_missed')],datasets:[{data:[sc.planned,sc.inprogress,sc.completed,sc.missed],backgroundColor:['#EF9F27','#378ADD','#3B6D11','#A32D2D'],borderWidth:2}]},
         opts:{plugins:{legend:{position:'bottom'}}}});
     }
   }
@@ -3933,7 +4235,7 @@ function renderVenueStats_tab(){
     if(usage.length){
       const uh={'Match Day':0,'Training Session':0,'Other':0};
       usage.forEach(u=>{uh[u.usageType]=(uh[u.usageType]||0)+calcHours(u.timeFrom,u.timeTo);});
-      charts.push({id:'vch-usage-types',title:'Usage hours by type',type:'bar',
+      charts.push({id:'vch-usage-types',title:t('chart_usage_types'),type:'bar',
         data:{labels:Object.keys(uh),datasets:[{label:'Hours',data:Object.values(uh).map(v=>+v.toFixed(1)),backgroundColor:['#7C3AED','#10B981','#F59E0B'],borderRadius:4}]},
         opts:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,title:{display:true,text:'Hours'}}}}});
 
@@ -3941,7 +4243,7 @@ function renderVenueStats_tab(){
       const byDate={};
       usage.forEach(u=>{byDate[u.date]=(byDate[u.date]||0)+calcHours(u.timeFrom,u.timeTo);});
       const dates=Object.keys(byDate).sort();
-      charts.push({id:'vch-usage-time',title:'Pitch usage hours over time',type:'line',
+      charts.push({id:'vch-usage-time',title:t('chart_usage_time'),type:'line',
         data:{labels:dates.map(d=>formatDateOnly(d)),datasets:[{label:'Hours',data:dates.map(d=>+byDate[d].toFixed(1)),borderColor:'#7C3AED',backgroundColor:'#7C3AED20',tension:.3,fill:true,pointRadius:3}]},
         opts:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,title:{display:true,text:'Hours'}}}}});
     }
@@ -3949,8 +4251,8 @@ function renderVenueStats_tab(){
 
   // Tasks vs Usage ratio
   if(dataFilter==='both'&&(totalTaskHours>0||totalUsageHours>0)){
-    charts.push({id:'vch-ratio',title:'Pitch time: Tasks vs Usage',type:'doughnut',
-      data:{labels:['Maintenance (Tasks)','Playing (Usage)'],datasets:[{data:[+totalTaskHours.toFixed(1),+totalUsageHours.toFixed(1)],backgroundColor:['#185FA5','#7C3AED'],borderWidth:2}]},
+    charts.push({id:'vch-ratio',title:t('chart_ratio'),type:'doughnut',
+      data:{labels:[t('chart_maintenance'),t('chart_playing')],datasets:[{data:[+totalTaskHours.toFixed(1),+totalUsageHours.toFixed(1)],backgroundColor:['#185FA5','#7C3AED'],borderWidth:2}]},
       opts:{plugins:{legend:{position:'bottom'}}}});
   }
 
@@ -4385,12 +4687,12 @@ function renderStatsSingle(){
   // Summary
   const summaryEl=document.getElementById('stats-summary');
   if(summaryEl) summaryEl.innerHTML=[
-    {l:'Total tasks',v:ops.length,c:'#185FA5',i:'📋'},
-    {l:'Task hours',v:totalTaskH.toFixed(1)+'h',c:'#185FA5',i:'⏱'},
-    {l:'Total usage',v:usage.length,c:'#7C3AED',i:'⚽'},
-    {l:'Usage hours',v:totalUsageH.toFixed(1)+'h',c:'#7C3AED',i:'🕐'},
-    {l:'Venues active',v:new Set([...ops.map(o=>o.venueId),...usage.map(u=>u.venueId)]).size,c:'#3B6D11',i:'🏟'},
-    {l:'Maint/Play ratio',v:totalUsageH>0?(totalTaskH/totalUsageH).toFixed(1)+'x':'—',c:'#854F0B',i:'📊'},
+    {l:t('stats_total_tasks'),v:ops.length,c:'#185FA5',i:'📋'},
+    {l:t('stats_task_hours'),v:totalTaskH.toFixed(1)+'h',c:'#185FA5',i:'⏱'},
+    {l:t('stats_total_usage'),v:usage.length,c:'#7C3AED',i:'⚽'},
+    {l:t('stats_usage_hours'),v:totalUsageH.toFixed(1)+'h',c:'#7C3AED',i:'🕐'},
+    {l:t('stats_venues_active'),v:new Set([...ops.map(o=>o.venueId),...usage.map(u=>u.venueId)]).size,c:'#3B6D11',i:'🏟'},
+    {l:t('stats_maint_ratio'),v:totalUsageH>0?(totalTaskH/totalUsageH).toFixed(1)+'x':'—',c:'#854F0B',i:'📊'},
   ].map(s=>`<div style="background:white;border-radius:12px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);padding:1rem;text-align:center">
     <div style="font-size:18px;margin-bottom:4px">${s.i}</div>
     <div style="font-size:22px;font-weight:700;color:${s.c};font-family:'Syne',sans-serif">${s.v}</div>
@@ -4408,25 +4710,25 @@ function renderStatsSingle(){
     ops.forEach(o=>{th[o.type]=(th[o.type]||0)+calcHours(o.timeFrom,o.timeTo);});
     const sorted=Object.entries(th).sort((a,b)=>b[1]-a[1]).slice(0,12);
     if(sorted.length){
-      charts.push({id:'sc-task-hours',title:'Task hours by type',type:'bar',
-        data:{labels:sorted.map(t=>t[0]),datasets:[{label:'Hours',data:sorted.map(t=>+t[1].toFixed(1)),backgroundColor:'#185FA5cc',borderRadius:4}]},
+      charts.push({id:'sc-task-hours',title:t('chart_task_by_type'),type:'bar',
+        data:{labels:sorted.map(tc=>tc[0]),datasets:[{label:'Hours',data:sorted.map(tc=>+tc[1].toFixed(1)),backgroundColor:'#185FA5cc',borderRadius:4}]},
         opts:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Hours'}}}}});
       const totalH=sorted.reduce((s,t)=>s+t[1],0);
-      charts.push({id:'sc-task-pie',title:'Task hours by type — share',type:'pie',
-        data:{labels:sorted.map(t=>t[0]+' ('+((t[1]/totalH)*100).toFixed(1)+'%)'),datasets:[{data:sorted.map(t=>+t[1].toFixed(1)),backgroundColor:['#185FA5','#378ADD','#60A5FA','#93C5FD','#3B6D11','#10B981','#F59E0B','#EF9F27','#7C3AED','#A855F7','#A32D2D','#854F0B'],borderWidth:2}]},
+      charts.push({id:'sc-task-pie',title:t('chart_task_share'),type:'pie',
+        data:{labels:sorted.map(tc=>tc[0]+' ('+((t[1]/totalH)*100).toFixed(1)+'%)'),datasets:[{data:sorted.map(tc=>+tc[1].toFixed(1)),backgroundColor:['#185FA5','#378ADD','#60A5FA','#93C5FD','#3B6D11','#10B981','#F59E0B','#EF9F27','#7C3AED','#A855F7','#A32D2D','#854F0B'],borderWidth:2}]},
         opts:{plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:ctx=>{const tot=ctx.dataset.data.reduce((a,b)=>a+b,0);return ctx.label.split(' (')[0]+': '+ctx.raw+'h ('+(ctx.raw/tot*100).toFixed(1)+'%)';}}}}}});
     }
     const bd={};
     ops.forEach(o=>{bd[o.date]=(bd[o.date]||0)+1;});
     const dates=Object.keys(bd).sort();
-    if(dates.length>1) charts.push({id:'sc-activity',title:'Task activity over time',type:'line',
+    if(dates.length>1) charts.push({id:'sc-activity',title:t('chart_activity'),type:'line',
       data:{labels:dates.map(d=>formatDateOnly(d)),datasets:[{label:'Tasks',data:dates.map(d=>bd[d]),borderColor:'#185FA5',backgroundColor:'#185FA520',tension:.3,fill:true,pointRadius:3}]},
       opts:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
     if(ops.length){
       const sc={planned:0,inprogress:0,completed:0,missed:0};
       ops.forEach(o=>{if(sc[o.status]!==undefined)sc[o.status]++;});
-      charts.push({id:'sc-status',title:'Tasks by status',type:'doughnut',
-        data:{labels:['Planned','In progress','Completed','Missed'],datasets:[{data:[sc.planned,sc.inprogress,sc.completed,sc.missed],backgroundColor:['#EF9F27','#378ADD','#3B6D11','#A32D2D'],borderWidth:2}]},
+      charts.push({id:'sc-status',title:t('chart_status'),type:'doughnut',
+        data:{labels:[t('status_planned'),t('status_inprogress'),t('status_completed'),t('status_missed')],datasets:[{data:[sc.planned,sc.inprogress,sc.completed,sc.missed],backgroundColor:['#EF9F27','#378ADD','#3B6D11','#A32D2D'],borderWidth:2}]},
         opts:{plugins:{legend:{position:'bottom'}}}});
     }
     if(venues.length>1&&!venueFilter){
@@ -4439,13 +4741,13 @@ function renderStatsSingle(){
   if(dataFilter!=='tasks'){
     const uth={'Match Day':0,'Training Session':0,'Other':0};
     usage.forEach(u=>{uth[u.usageType]=(uth[u.usageType]||0)+calcHours(u.timeFrom,u.timeTo);});
-    if(usage.length) charts.push({id:'sc-usage-types',title:'Usage hours by type',type:'bar',
+    if(usage.length) charts.push({id:'sc-usage-types',title:t('chart_usage_types'),type:'bar',
       data:{labels:Object.keys(uth),datasets:[{label:'Hours',data:Object.values(uth).map(v=>+v.toFixed(1)),backgroundColor:['#7C3AED','#10B981','#F59E0B'],borderRadius:4}]},
       opts:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,title:{display:true,text:'Hours'}}}}});
     const ubd={};
     usage.forEach(u=>{ubd[u.date]=(ubd[u.date]||0)+calcHours(u.timeFrom,u.timeTo);});
     const udates=Object.keys(ubd).sort();
-    if(udates.length>1) charts.push({id:'sc-usage-time',title:'Pitch usage hours over time',type:'line',
+    if(udates.length>1) charts.push({id:'sc-usage-time',title:t('chart_usage_time'),type:'line',
       data:{labels:udates.map(d=>formatDateOnly(d)),datasets:[{label:'Hours',data:udates.map(d=>+ubd[d].toFixed(1)),borderColor:'#7C3AED',backgroundColor:'#7C3AED20',tension:.3,fill:true,pointRadius:3}]},
       opts:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,title:{display:true,text:'Hours'}}}}});
     if(venues.length>1&&!venueFilter){
@@ -4522,7 +4824,7 @@ function updateCompareMetricDetail(){
   if(metric==='task-hours-type'){
     if(detail){ detail.style.display='block';
       const sel=document.getElementById('compare-task-type');
-      if(sel) sel.innerHTML=state.opTypes.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
+      if(sel) sel.innerHTML=state.opTypes.map(tp=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
     }
     if(usageWrap) usageWrap.style.display='none';
   } else if(metric==='usage-hours-type'){
@@ -4576,7 +4878,7 @@ function addCompareChart(){
     data.push(+val.toFixed(1));
   });
 
-  const metricLabels={'task-hours-total':'Task hours','task-hours-type':'Hours: '+taskTypeFilter,'task-count':'Task count','usage-hours-total':'Usage hours','usage-hours-type':'Usage hours'+(usageTypeFilter!=='all'?' ('+usageTypeFilter+')':''),'usage-count':'Usage count','tasks-vs-usage':'Task hours'};
+  const metricLabels={'task-hours-total':t('stats_task_hours'),'task-hours-type':'Hours: '+taskTypeFilter,'task-count':'Task count','usage-hours-total':t('stats_usage_hours'),'usage-hours-type':t('stats_usage_hours')+(usageTypeFilter!=='all'?' ('+usageTypeFilter+')':''),'usage-count':'Usage count','tasks-vs-usage':t('stats_task_hours')};
   const isHours=['task-hours-total','task-hours-type','usage-hours-total','usage-hours-type','tasks-vs-usage'].includes(metric);
   const periodLabel={week:'This week',month:'This month',quarter:'This quarter',year:'This year',custom:(from||'')+(to?' — '+to:'')}[period]||period;
 
