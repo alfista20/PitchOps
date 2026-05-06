@@ -373,8 +373,8 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
         Sign in as Master Admin
       </button>
       <div style="text-align:center;font-size:12px;color:var(--text-hint)">— or —</div>
-      <div class="field" style="margin:0"><label>Venue access token</label><input id="venue-token-input" type="text" placeholder="Paste your venue token..."/></div>
-      <button class="btn btn-blue btn-full" onclick="venueTokenLogin()">Access Venue Dashboard</button>
+      <div class="field" style="margin:0"><label data-i18n="lbl_venue_token">Venue access token</label><input id="venue-token-input" type="text" placeholder="Paste your venue token..."/></div>
+      <button class="btn btn-blue btn-full" onclick="venueTokenLogin()" data-i18n="btn_access_venue">Access Venue Dashboard</button>
     </div>
     <div style="text-align:center">
       <select id="lang-select-login" onchange="setLang(this.value)" style="padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;outline:none;background:white">
@@ -394,12 +394,12 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     </div>
     <p class="login-title">Master Admin</p>
     <p class="login-sub">Restricted access — authorised users only</p>
-    <div class="field"><label>Email</label><input id="admin-email-input" type="email" placeholder="Enter your email..."/></div>
-    <div class="field"><label>Password</label><input id="admin-pass-input" type="password" placeholder="Enter your password..."/></div>
+    <div class="field"><label data-i18n="lbl_email">Email</label><input id="admin-email-input" type="email" placeholder="Enter your email..."/></div>
+    <div class="field"><label data-i18n="lbl_password">Password</label><input id="admin-pass-input" type="password" placeholder="Enter your password..."/></div>
     <div id="admin-login-error" style="display:none;font-size:12px;color:var(--red);margin-bottom:.75rem;padding:8px 12px;background:var(--red-pale);border-radius:var(--radius-sm)"></div>
     <div style="display:flex;gap:8px">
       <button class="btn btn-ghost" onclick="showScreen('screen-login')">Back</button>
-      <button class="btn btn-primary" style="flex:1" onclick="adminLogin()">Sign in</button>
+      <button class="btn btn-primary" style="flex:1" onclick="adminLogin()" data-i18n="btn_sign_in">Sign in</button>
     </div>
   </div>
 </div>
@@ -413,9 +413,9 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     </div>
     <div class="topnav-right">
       <select class="lang-select" onchange="setLang(this.value)" id="lang-select-admin"><option value="en">EN</option><option value="pl">PL</option><option value="es">ES</option><option value="fr">FR</option><option value="de">DE</option><option value="pt">PT</option></select>
-      <button class="btn btn-blue btn-sm" onclick="openModal('modal-add-project')">+ New project</button>
+      <button class="btn btn-blue btn-sm" onclick="openModal('modal-add-project')" data-i18n="btn_new_project">+ New project</button>
       <button class="btn btn-ghost btn-sm" style="color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.2)" onclick="openModal('modal-change-password')">🔑</button>
-      <button class="btn btn-ghost btn-sm" style="color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.2)" onclick="logout()">Sign out</button>
+      <button class="btn btn-ghost btn-sm" style="color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.2)" onclick="logout()" data-i18n="btn_sign_out">Sign out</button>
     </div>
   </div>
   <div class="projects-home">
@@ -489,10 +489,10 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
   </div>
   <!-- PROJECT TABS -->
   <div style="background:white;border-bottom:2px solid var(--border);padding:0 1rem;display:flex;gap:0;flex-shrink:0">
-    <button class="tab-btn active" id="ptab-ops" onclick="switchProjectTab('ops')">📋 Tasks</button>
-    <button class="tab-btn" id="ptab-usage" onclick="switchProjectTab('usage')">⏱ Usage</button>
+    <button class="tab-btn active" id="ptab-ops" data-i18n="ptab_tasks" onclick="switchProjectTab('ops')">📋 Tasks</button>
+    <button class="tab-btn" id="ptab-usage" data-i18n="ptab_usage" onclick="switchProjectTab('usage')">⏱ Usage</button>
     <button class="tab-btn" id="ptab-calendar" onclick="switchProjectTab('calendar')" data-i18n="tab_schedule">📅 Schedule</button>
-    <button class="tab-btn" id="ptab-stats" onclick="switchProjectTab('stats')" data-i18n="tab_stats">📊 Stats</button>
+    <button class="tab-btn" id="ptab-stats" data-i18n="ptab_stats" onclick="switchProjectTab('stats')">📊 Stats</button>
   </div>
 
   <!-- OPS TAB -->
@@ -519,7 +519,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       <div style="overflow-x:auto">
         <table class="ops-table">
           <thead><tr>
-            <th>Date</th><th>Venue</th><th>Type</th><th>Zone</th><th>Staff</th><th>Notes</th><th>Photos</th><th>Flag</th>
+            <th data-i18n="th_date">Date</th><th data-i18n="th_venue">Venue</th><th data-i18n="th_type">Type</th><th data-i18n="th_zone">Zone</th><th data-i18n="th_staff">Staff</th><th data-i18n="th_notes">Notes</th><th data-i18n="th_photos">Photos</th><th data-i18n="th_flag">Flag</th>
           </tr></thead>
           <tbody id="detail-ops-tbody"></tbody>
         </table>
@@ -558,7 +558,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       <div style="overflow-x:auto">
         <table class="ops-table">
           <thead><tr>
-            <th>Date</th><th>Venue</th><th>Usage type</th><th>Team</th><th>Zone</th><th>Weather</th><th>Notes</th><th>Photos</th><th>Flag</th>
+            <th data-i18n="th_date">Date</th><th data-i18n="th_venue">Venue</th><th data-i18n="th_usage_type">Usage type</th><th data-i18n="th_team">Team</th><th data-i18n="th_zone">Zone</th><th data-i18n="th_weather">Weather</th><th data-i18n="th_notes">Notes</th><th data-i18n="th_photos">Photos</th><th data-i18n="th_flag">Flag</th>
           </tr></thead>
           <tbody id="detail-usage-tbody"></tbody>
         </table>
@@ -619,7 +619,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       <div style="background:white;border-radius:12px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);padding:1rem 1.25rem;margin-bottom:1rem">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
           <span style="font-size:14px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif">📌 Saved presets</span>
-          <button onclick="saveComparePreset()" style="padding:5px 12px;background:#f1f5f9;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text-muted)">+ Save current</button>
+          <button onclick="saveComparePreset()" style="padding:5px 12px;background:#f1f5f9;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text-muted)" data-i18n="btn_save_preset">+ Save current</button>
         </div>
         <div id="compare-presets-list" style="display:flex;flex-wrap:wrap;gap:6px">
           <span style="font-size:12px;color:var(--text-hint);font-style:italic">No saved presets yet</span>
@@ -696,7 +696,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
           </div>
         </div>
 
-        <button onclick="addCompareChart()" style="margin-top:1rem;padding:9px 24px;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 2px 8px rgba(24,95,165,.3)">+ Add chart</button>
+        <button onclick="addCompareChart()" style="margin-top:1rem;padding:9px 24px;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 2px 8px rgba(24,95,165,.3)" data-i18n="btn_add_chart">+ Add chart</button>
       </div>
 
       <!-- GENERATED CHARTS -->
@@ -741,11 +741,11 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
             </div>
             <button onclick="ganttGoToday()" style="padding:4px 10px;font-size:11px;background:white;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text-muted)" data-i18n="today" data-i18n="today">Today</button>
             <div style="display:flex;gap:4px;flex-wrap:wrap" id="gantt-status-pills">
-              <button onclick="ganttFilter('all',this)" class="sf-pill sf-active">All</button>
-              <button onclick="ganttFilter('planned',this)" class="sf-pill">Planned</button>
-              <button onclick="ganttFilter('inprogress',this)" class="sf-pill">In progress</button>
-              <button onclick="ganttFilter('completed',this)" class="sf-pill">Completed</button>
-              <button onclick="ganttFilter('missed',this)" class="sf-pill">Missed</button>
+              <button onclick="ganttFilter('all',this)" class="sf-pill sf-active" data-i18n="filter_all">All</button>
+              <button onclick="ganttFilter('planned',this)" class="sf-pill" data-i18n="legend_planned">Planned</button>
+              <button onclick="ganttFilter('inprogress',this)" class="sf-pill" data-i18n="legend_inprogress">In progress</button>
+              <button onclick="ganttFilter('completed',this)" class="sf-pill" data-i18n="legend_completed">Completed</button>
+              <button onclick="ganttFilter('missed',this)" class="sf-pill" data-i18n="legend_missed">Missed</button>
             </div>
           </div>
           
@@ -829,7 +829,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       <div style="overflow-x:auto">
         <table class="ops-table">
           <thead><tr>
-            <th>Date</th><th>Venue</th><th>Type</th><th>Zone</th><th>Staff</th><th>Notes</th><th>Photos</th>
+            <th data-i18n="th_date">Date</th><th data-i18n="th_venue">Venue</th><th data-i18n="th_type">Type</th><th data-i18n="th_zone">Zone</th><th data-i18n="th_staff">Staff</th><th data-i18n="th_notes">Notes</th><th data-i18n="th_photos">Photos</th>
           </tr></thead>
           <tbody id="viewer-ops-tbody"></tbody>
         </table>
@@ -1026,13 +1026,13 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 <!-- ADD PROJECT -->
 <div class="modal-overlay" id="modal-add-project">
   <div class="modal">
-    <div class="modal-header"><span class="modal-title">New project</span><button class="modal-close" onclick="closeModal('modal-add-project')">✕</button></div>
+    <div class="modal-header"><span class="modal-title" data-i18n="modal_new_project">New project</span><button class="modal-close" onclick="closeModal('modal-add-project')">✕</button></div>
     <div class="modal-body">
-      <div class="field"><label>Project code / ID</label><input id="new-proj-code" type="text" placeholder="e.g. U20FWWC26"/></div>
-      <div class="field"><label>Full project name</label><input id="new-proj-name" type="text" placeholder="e.g. FIFA U-20 Women's World Cup 2026"/></div>
-      <div class="field"><label>Country / Location</label><input id="new-proj-country" type="text" placeholder="e.g. Poland"/></div>
+      <div class="field"><label data-i18n="lbl_proj_code">Project code / ID</label><input id="new-proj-code" type="text" placeholder="e.g. U20FWWC26"/></div>
+      <div class="field"><label data-i18n="lbl_proj_name">Full project name</label><input id="new-proj-name" type="text" placeholder="e.g. FIFA U-20 Women's World Cup 2026"/></div>
+      <div class="field"><label data-i18n="lbl_proj_country">Country / Location</label><input id="new-proj-country" type="text" placeholder="e.g. Poland"/></div>
       <div class="field">
-        <label>Status</label>
+        <label data-i18n="lbl_status">Status</label>
         <select id="new-proj-status">
           <option value="planned">Planned</option>
           <option value="active">Active</option>
@@ -1040,7 +1040,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
         </select>
       </div>
       <div class="field">
-        <label>Project colour</label>
+        <label data-i18n="lbl_proj_color">Project colour</label>
         <div class="color-opts" id="proj-color-opts">
           <div class="color-opt picked" data-c="#185FA5" style="background:#185FA5" onclick="pickProjColor(this)"></div>
           <div class="color-opt" data-c="#3B6D11" style="background:#3B6D11" onclick="pickProjColor(this)"></div>
@@ -1054,8 +1054,8 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-add-project')">Cancel</button>
-      <button class="btn btn-primary" onclick="createProject()">Create project</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-add-project')" data-i18n="btn_cancel">Cancel</button>
+      <button class="btn btn-primary" onclick="createProject()" data-i18n="btn_create_project">Create project</button>
     </div>
   </div>
 </div>
@@ -1063,19 +1063,19 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 <!-- EDIT PROJECT -->
 <div class="modal-overlay" id="modal-edit-project">
   <div class="modal">
-    <div class="modal-header"><span class="modal-title">Edit project</span><button class="modal-close" onclick="closeModal('modal-edit-project')">✕</button></div>
+    <div class="modal-header"><span class="modal-title" data-i18n="modal_edit_project">Edit project</span><button class="modal-close" onclick="closeModal('modal-edit-project')">✕</button></div>
     <div class="modal-body">
       <input type="hidden" id="edit-proj-id"/>
-      <div class="field"><label>Project code / ID</label><input id="edit-proj-code" type="text"/></div>
-      <div class="field"><label>Full project name</label><input id="edit-proj-name" type="text"/></div>
-      <div class="field"><label>Country / Location</label><input id="edit-proj-country" type="text"/></div>
-      <div class="field"><label>Status</label>
+      <div class="field"><label data-i18n="lbl_proj_code">Project code / ID</label><input id="edit-proj-code" type="text"/></div>
+      <div class="field"><label data-i18n="lbl_proj_name">Full project name</label><input id="edit-proj-name" type="text"/></div>
+      <div class="field"><label data-i18n="lbl_proj_country">Country / Location</label><input id="edit-proj-country" type="text"/></div>
+      <div class="field"><label data-i18n="lbl_status">Status</label>
         <select id="edit-proj-status">
           <option value="planned">Planned</option><option value="active">Active</option><option value="finished">Finished</option>
         </select>
       </div>
       <div class="field">
-        <label>Project colour</label>
+        <label data-i18n="lbl_proj_color">Project colour</label>
         <div class="color-opts" id="edit-proj-color-opts">
           <div class="color-opt" data-c="#185FA5" style="background:#185FA5" onclick="pickEditProjColor(this)"></div>
           <div class="color-opt" data-c="#3B6D11" style="background:#3B6D11" onclick="pickEditProjColor(this)"></div>
@@ -1089,8 +1089,8 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-danger" onclick="deleteProject()">Delete project</button>
-      <button class="btn btn-ghost" onclick="closeModal('modal-edit-project')">Cancel</button>
+      <button class="btn btn-danger" onclick="deleteProject()" data-i18n="btn_delete_project">Delete project</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-edit-project')" data-i18n="btn_cancel">Cancel</button>
       <button class="btn btn-primary" onclick="saveEditProject()">Save</button>
     </div>
   </div>
@@ -1099,17 +1099,17 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 <!-- ADD VENUE -->
 <div class="modal-overlay" id="modal-add-venue">
   <div class="modal">
-    <div class="modal-header"><span class="modal-title">Add venue to project</span><button class="modal-close" onclick="closeModal('modal-add-venue')">✕</button></div>
+    <div class="modal-header"><span class="modal-title" data-i18n="modal_add_venue">Add venue to project</span><button class="modal-close" onclick="closeModal('modal-add-venue')">✕</button></div>
     <div class="modal-body">
-      <div class="field"><label>Venue name</label><input id="new-venue-name" type="text" placeholder="e.g. Stadion Śląski"/></div>
-      <div class="field"><label>City / Country</label><input id="new-venue-city" type="text" placeholder="e.g. Chorzów, Poland"/></div>
-      <div class="field"><label>Responsible person</label><input id="new-venue-person" type="text" placeholder="e.g. Jan Kowalski"/></div>
+      <div class="field"><label data-i18n="lbl_venue_name">Venue name</label><input id="new-venue-name" type="text" placeholder="e.g. Stadion Śląski"/></div>
+      <div class="field"><label data-i18n="lbl_city_country">City / Country</label><input id="new-venue-city" type="text" placeholder="e.g. Chorzów, Poland"/></div>
+      <div class="field"><label data-i18n="lbl_contact_person">Responsible person</label><input id="new-venue-person" type="text" placeholder="e.g. Jan Kowalski"/></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div class="field"><label>Contact phone</label><input id="new-venue-phone" type="tel" placeholder="e.g. +48 600 123 456"/></div>
-        <div class="field"><label>Contact email</label><input id="new-venue-email" type="email" placeholder="e.g. jan@stadion.pl"/></div>
+        <div class="field"><label data-i18n="lbl_contact_phone">Contact phone</label><input id="new-venue-phone" type="tel" placeholder="e.g. +48 600 123 456"/></div>
+        <div class="field"><label data-i18n="lbl_contact_email">Contact email</label><input id="new-venue-email" type="email" placeholder="e.g. jan@stadion.pl"/></div>
       </div>
       <div class="field">
-        <label>Venue type</label>
+        <label data-i18n="lbl_venue_type">Venue type</label>
         <div class="venue-type-opts">
           <div class="venue-type-opt picked" data-vtype="Stadium" onclick="pickVenueType(this)">
             <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1152,8 +1152,8 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-add-venue')">Cancel</button>
-      <button class="btn btn-primary" onclick="createVenue()">Create venue</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-add-venue')" data-i18n="btn_cancel">Cancel</button>
+      <button class="btn btn-primary" onclick="createVenue()" data-i18n="btn_create_venue">Create venue</button>
     </div>
   </div>
 </div>
@@ -1162,18 +1162,18 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 <!-- EDIT VENUE -->
 <div class="modal-overlay" id="modal-edit-venue">
   <div class="modal">
-    <div class="modal-header"><span class="modal-title">Edit venue</span><button class="modal-close" onclick="closeModal('modal-edit-venue')">✕</button></div>
+    <div class="modal-header"><span class="modal-title" data-i18n="modal_edit_venue">Edit venue</span><button class="modal-close" onclick="closeModal('modal-edit-venue')">✕</button></div>
     <div class="modal-body">
       <input type="hidden" id="edit-venue-id"/>
-      <div class="field"><label>Venue name</label><input id="edit-venue-name" type="text"/></div>
-      <div class="field"><label>City / Country</label><input id="edit-venue-city" type="text"/></div>
-      <div class="field"><label>Responsible person</label><input id="edit-venue-person" type="text" placeholder="e.g. Jan Kowalski"/></div>
+      <div class="field"><label data-i18n="lbl_venue_name">Venue name</label><input id="edit-venue-name" type="text"/></div>
+      <div class="field"><label data-i18n="lbl_city_country">City / Country</label><input id="edit-venue-city" type="text"/></div>
+      <div class="field"><label data-i18n="lbl_contact_person">Responsible person</label><input id="edit-venue-person" type="text" placeholder="e.g. Jan Kowalski"/></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div class="field"><label>Contact phone</label><input id="edit-venue-phone" type="tel" placeholder="e.g. +48 600 123 456"/></div>
-        <div class="field"><label>Contact email</label><input id="edit-venue-email" type="email" placeholder="e.g. jan@stadion.pl"/></div>
+        <div class="field"><label data-i18n="lbl_contact_phone">Contact phone</label><input id="edit-venue-phone" type="tel" placeholder="e.g. +48 600 123 456"/></div>
+        <div class="field"><label data-i18n="lbl_contact_email">Contact email</label><input id="edit-venue-email" type="email" placeholder="e.g. jan@stadion.pl"/></div>
       </div>
       <div class="field">
-        <label>Venue type</label>
+        <label data-i18n="lbl_venue_type">Venue type</label>
         <div class="venue-type-opts" id="edit-venue-type-opts">
           <div class="venue-type-opt" data-vtype="Stadium" onclick="pickEditVenueType(this)">
             <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1215,22 +1215,22 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-danger" onclick="deleteVenue()">Delete venue</button>
-      <button class="btn btn-ghost" onclick="closeModal('modal-edit-venue')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveEditVenue()">Save changes</button>
+      <button class="btn btn-danger" onclick="deleteVenue()" data-i18n="btn_delete_venue">Delete venue</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-edit-venue')" data-i18n="btn_cancel">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditVenue()" data-i18n="btn_save_changes">Save changes</button>
     </div>
   </div>
 </div>
 <!-- EDIT OPERATION -->
 <div class="modal-overlay" id="modal-edit-op">
   <div class="modal">
-    <div class="modal-header"><span class="modal-title">Edit operation</span><button class="modal-close" onclick="closeModal('modal-edit-op')">✕</button></div>
+    <div class="modal-header"><span class="modal-title" data-i18n="modal_edit_op">Edit operation</span><button class="modal-close" onclick="closeModal('modal-edit-op')">✕</button></div>
     <div class="modal-body">
       <input type="hidden" id="edit-op-id"/>
-      <div class="field"><label>Task type</label><select id="edit-op-type"></select></div>
-      <div class="field"><label>Pitch area / zone</label><input id="edit-op-zone" type="text"/></div>
-      <div class="field"><label>Equipment used</label><input id="edit-op-equipment" type="text"/></div>
-      <div class="field"><label>Weather conditions</label><input id="edit-op-weather" type="text"/></div>
+      <div class="field"><label data-i18n="lbl_type">Task type</label><select id="edit-op-type"></select></div>
+      <div class="field"><label data-i18n="lbl_zone">Pitch area / zone</label><input id="edit-op-zone" type="text"/></div>
+      <div class="field"><label data-i18n="lbl_equipment">Equipment used</label><input id="edit-op-equipment" type="text"/></div>
+      <div class="field"><label data-i18n="lbl_weather">Weather conditions</label><input id="edit-op-weather" type="text"/></div>
       <div class="field">
         <label>Done by (staff)</label>
         <div class="staff-tags" id="edit-staff-tags"></div>
@@ -1242,14 +1242,14 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       <div class="field"><label>Notes / observations</label><textarea id="edit-op-notes"></textarea></div>
       <div class="field"><label>Task date (when it happens)</label><input id="edit-op-date" type="date"/></div>
       <div class="field">
-        <label>Time window</label>
+        <label data-i18n="lbl_time_window">Time window</label>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
           <div><label style="font-size:10px;color:var(--text-hint)">Start</label><input id="edit-op-time-from" type="time"/></div>
           <div><label style="font-size:10px;color:var(--text-hint)">End</label><input id="edit-op-time-to" type="time"/></div>
         </div>
       </div>
       <div class="field">
-        <label>Status</label>
+        <label data-i18n="lbl_status">Status</label>
         <select id="edit-op-status">
           <option value="planned">Planned</option>
           <option value="inprogress">In progress</option>
@@ -1269,9 +1269,9 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-danger" onclick="deleteOperation()">Delete</button>
-      <button class="btn btn-ghost" onclick="closeModal('modal-edit-op')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveEditOperation()">Save changes</button>
+      <button class="btn btn-danger" onclick="deleteOperation()" data-i18n="btn_delete">Delete</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-edit-op')" data-i18n="btn_cancel">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditOperation()" data-i18n="btn_save_changes">Save changes</button>
     </div>
   </div>
 </div>
@@ -1279,7 +1279,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 <!-- MANAGE OP TYPES -->
 <div class="modal-overlay" id="modal-op-types">
   <div class="modal">
-    <div class="modal-header"><span class="modal-title">Manage task types</span><button class="modal-close" onclick="closeModal('modal-op-types')">✕</button></div>
+    <div class="modal-header"><span class="modal-title" data-i18n="modal_op_types">Manage task types</span><button class="modal-close" onclick="closeModal('modal-op-types')">✕</button></div>
     <div class="modal-body">
       <div id="op-types-list" style="margin-bottom:1rem"></div>
       <div style="display:flex;gap:8px">
@@ -1296,7 +1296,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 <div class="modal-overlay" id="modal-log-task">
   <div class="modal" style="max-width:560px">
     <div class="modal-header">
-      <span class="modal-title">Log new task</span>
+      <span class="modal-title" data-i18n="modal_log_task">Log new task</span>
       <button class="modal-close" onclick="closeModal('modal-log-task')">✕</button>
     </div>
     <div class="modal-body">
@@ -1324,14 +1324,14 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       <div class="field"><label data-i18n="op_notes">Notes / observations</label><textarea id="new-op-notes" placeholder="Any observations, measurements, remarks..."></textarea></div>
       <div class="field"><label data-i18n="op_date">Task date (when it happens)</label><input id="new-op-date" type="date"/></div>
       <div class="field">
-        <label>Time window</label>
+        <label data-i18n="lbl_time_window">Time window</label>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
           <div><label style="font-size:10px;color:var(--text-hint)">Start</label><input id="new-op-time-from" type="time" value="08:00"/></div>
           <div><label style="font-size:10px;color:var(--text-hint)">End</label><input id="new-op-time-to" type="time" value="17:00"/></div>
         </div>
       </div>
       <div class="field">
-        <label>Status</label>
+        <label data-i18n="lbl_status">Status</label>
         <select id="new-op-status">
           <option value="auto">Auto (future → Planned, today → In progress)</option>
           <option value="planned">Planned</option>
@@ -1352,7 +1352,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-log-task')">Cancel</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-log-task')" data-i18n="btn_cancel">Cancel</button>
       <button class="btn btn-blue" onclick="logOperation()" data-i18n="btn_log">Log task</button>
     </div>
   </div>
@@ -1361,15 +1361,15 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 <!-- VENUE CONTACT EDIT -->
 <div class="modal-overlay" id="modal-venue-contact">
   <div class="modal">
-    <div class="modal-header"><span class="modal-title">My contact details</span><button class="modal-close" onclick="closeModal('modal-venue-contact')">✕</button></div>
+    <div class="modal-header"><span class="modal-title" data-i18n="modal_contact">My contact details</span><button class="modal-close" onclick="closeModal('modal-venue-contact')">✕</button></div>
     <div class="modal-body">
       <p style="font-size:13px;color:var(--text-muted);margin-bottom:1rem">Update the contact information for this venue. Only you and the admin can see this.</p>
-      <div class="field"><label>Responsible person</label><input id="vc-person" type="text" placeholder="e.g. Jan Kowalski"/></div>
-      <div class="field"><label>Contact phone</label><input id="vc-phone" type="tel" placeholder="e.g. +48 600 123 456"/></div>
-      <div class="field"><label>Contact email</label><input id="vc-email" type="email" placeholder="e.g. jan@stadion.pl"/></div>
+      <div class="field"><label data-i18n="lbl_contact_person">Responsible person</label><input id="vc-person" type="text" placeholder="e.g. Jan Kowalski"/></div>
+      <div class="field"><label data-i18n="lbl_contact_phone">Contact phone</label><input id="vc-phone" type="tel" placeholder="e.g. +48 600 123 456"/></div>
+      <div class="field"><label data-i18n="lbl_contact_email">Contact email</label><input id="vc-email" type="email" placeholder="e.g. jan@stadion.pl"/></div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-venue-contact')">Cancel</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-venue-contact')" data-i18n="btn_cancel">Cancel</button>
       <button class="btn btn-primary" onclick="saveVenueContact()">Save</button>
     </div>
   </div>
@@ -1378,16 +1378,16 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 <!-- CHANGE PASSWORD -->
 <div class="modal-overlay" id="modal-change-password">
   <div class="modal">
-    <div class="modal-header"><span class="modal-title">Change admin password</span><button class="modal-close" onclick="closeModal('modal-change-password')">✕</button></div>
+    <div class="modal-header"><span class="modal-title" data-i18n="modal_change_pass">Change admin password</span><button class="modal-close" onclick="closeModal('modal-change-password')">✕</button></div>
     <div class="modal-body">
-      <div class="field"><label>Current password</label><input id="cp-current" type="password" placeholder="Current password"/></div>
-      <div class="field"><label>New password</label><input id="cp-new" type="password" placeholder="New password (min 8 chars)"/></div>
-      <div class="field"><label>Confirm new password</label><input id="cp-confirm" type="password" placeholder="Repeat new password"/></div>
+      <div class="field"><label data-i18n="lbl_current_pass">Current password</label><input id="cp-current" type="password" placeholder="Current password"/></div>
+      <div class="field"><label data-i18n="lbl_new_pass">New password</label><input id="cp-new" type="password" placeholder="New password (min 8 chars)"/></div>
+      <div class="field"><label data-i18n="lbl_confirm_pass">Confirm new password</label><input id="cp-confirm" type="password" placeholder="Repeat new password"/></div>
       <div id="cp-error" style="display:none;font-size:12px;color:var(--red);padding:8px 12px;background:var(--red-pale);border-radius:var(--radius-sm)"></div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-change-password')">Cancel</button>
-      <button class="btn btn-primary" onclick="changePassword()">Update password</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-change-password')" data-i18n="btn_cancel">Cancel</button>
+      <button class="btn btn-primary" onclick="changePassword()" data-i18n="btn_update_password">Update password</button>
     </div>
   </div>
 </div>
@@ -1395,7 +1395,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 <!-- PROJECT VIEWER LINK -->
 <div class="modal-overlay" id="modal-viewer-link">
   <div class="modal">
-    <div class="modal-header"><span class="modal-title">Project viewer link</span><button class="modal-close" onclick="closeModal('modal-viewer-link')">✕</button></div>
+    <div class="modal-header"><span class="modal-title" data-i18n="modal_viewer_link">Project viewer link</span><button class="modal-close" onclick="closeModal('modal-viewer-link')">✕</button></div>
     <div class="modal-body">
       <p style="font-size:13px;color:var(--text-muted);margin-bottom:1rem">Share this link to give read-only access to this project. Anyone with the link can view all venues and operations but cannot edit anything.</p>
       <div id="viewer-link-display" class="link-copy">
@@ -1403,12 +1403,12 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
         <button class="btn btn-ghost btn-sm" onclick="copyViewerLink()">Copy</button>
       </div>
       <div style="margin-top:1rem;display:flex;gap:8px">
-        <button class="btn btn-danger btn-sm" onclick="revokeViewerLink()">🔄 Regenerate link</button>
+        <button class="btn btn-danger btn-sm" onclick="revokeViewerLink()" data-i18n="btn_regenerate_link">🔄 Regenerate link</button>
         <span style="font-size:12px;color:var(--text-hint);align-self:center">Old link will stop working</span>
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-primary" onclick="closeModal('modal-viewer-link')">Done</button>
+      <button class="btn btn-primary" onclick="closeModal('modal-viewer-link')" data-i18n="btn_done">Done</button>
     </div>
   </div>
 </div>
@@ -1417,25 +1417,25 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 <!-- EDIT PLAN MODAL -->
 <div class="modal-overlay" id="modal-edit-plan">
   <div class="modal">
-    <div class="modal-header"><span class="modal-title">Edit plan entry</span><button class="modal-close" onclick="closeModal('modal-edit-plan')">✕</button></div>
+    <div class="modal-header"><span class="modal-title" data-i18n="modal_edit_plan">Edit plan entry</span><button class="modal-close" onclick="closeModal('modal-edit-plan')">✕</button></div>
     <div class="modal-body">
       <input type="hidden" id="edit-plan-id"/>
-      <div class="field"><label>Task type</label><select id="edit-plan-op-type"></select></div>
+      <div class="field"><label data-i18n="lbl_type">Task type</label><select id="edit-plan-op-type"></select></div>
       <div class="field">
-        <label>Date range</label>
+        <label data-i18n="lbl_date_range">Date range</label>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
           <div><label style="font-size:10px;color:var(--text-hint)">From date</label><input id="edit-plan-from" type="date"/></div>
           <div><label style="font-size:10px;color:var(--text-hint)">To date</label><input id="edit-plan-to" type="date"/></div>
         </div>
       </div>
       <div class="field">
-        <label>Time of day</label>
+        <label data-i18n="lbl_time_of_day">Time of day</label>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
           <div><label style="font-size:10px;color:var(--text-hint)">Start time</label><input id="edit-plan-time-from" type="time"/></div>
           <div><label style="font-size:10px;color:var(--text-hint)">End time</label><input id="edit-plan-time-to" type="time"/></div>
         </div>
       </div>
-      <div class="field"><label>Notes</label><input id="edit-plan-notes" type="text"/></div>
+      <div class="field"><label data-i18n="lbl_notes_short">Notes</label><input id="edit-plan-notes" type="text"/></div>
       <div class="field"><label>Priority</label>
         <select id="edit-plan-priority">
           <option value="normal">Normal</option>
@@ -1443,7 +1443,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
           <option value="critical">Critical</option>
         </select>
       </div>
-      <div class="field"><label>Status</label>
+      <div class="field"><label data-i18n="lbl_status">Status</label>
         <select id="edit-plan-status">
           <option value="planned">Planned</option>
           <option value="inprogress">In progress</option>
@@ -1453,8 +1453,8 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     </div>
     <div class="modal-footer">
       <button class="btn btn-danger" onclick="deletePlan()">Delete</button>
-      <button class="btn btn-ghost" onclick="closeModal('modal-edit-plan')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveEditPlan()">Save changes</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-edit-plan')" data-i18n="btn_cancel">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditPlan()" data-i18n="btn_save_changes">Save changes</button>
     </div>
   </div>
 </div>
@@ -1661,7 +1661,178 @@ const i18n = {
     no_venues:'No venues in this project.',no_venues_add:'No venues yet. Click "+ Add venue".',
     more_suffix:'more',
     all_venues_back:'← All venues',all_venues:'All venues',all_types:'All types',view_day:'Day',view_week:'Week',view_month:'Month',
+    filter_all:'All',
+    filter_all:'All',
     period_week:'Week',period_month:'Month',period_quarter:'Quarter',period_custom:'Custom',
+    ptab_tasks:'📋 Tasks',
+    ptab_usage:'⏱ Usage',
+    ptab_schedule:'📅 Schedule',
+    ptab_stats:'📊 Stats',
+    btn_sign_in:'Sign in',
+    btn_sign_out:'Sign out',
+    btn_cancel:'Cancel',
+    btn_save:'Save',
+    btn_save_changes:'Save changes',
+    btn_delete:'Delete',
+    btn_done:'Done',
+    btn_add:'Add',
+    btn_copy:'Copy',
+    btn_clear:'Clear',
+    btn_create_project:'Create project',
+    btn_create_venue:'Create venue',
+    btn_save_task:'Save task',
+    btn_save_usage:'Save usage',
+    btn_update_password:'Update password',
+    btn_delete_project:'Delete project',
+    btn_delete_venue:'Delete venue',
+    btn_back:'Back',
+    btn_projects:'Projects',
+    btn_export_pdf:'⬇ Export PDF',
+    btn_export_csv:'CSV',
+    btn_clear_all:'Clear all',
+    btn_new_project:'+ New project',
+    btn_access_venue:'Access Venue Dashboard',
+    btn_move:'✂️ Move',
+    btn_copy_item:'📋 Copy',
+    btn_regenerate_link:'🔄 Regenerate link',
+    btn_add_chart:'+ Add chart',
+    btn_save_preset:'+ Save current',
+    btn_single_venue:'📊 Single venue',
+    btn_compare:'⚖️ Compare venues',
+    btn_task_types:'⚙ Task types',
+    modal_new_project:'New project',
+    modal_edit_project:'Edit project',
+    modal_add_venue:'Add venue to project',
+    modal_edit_venue:'Edit venue',
+    modal_log_task:'Log new task',
+    modal_edit_op:'Edit operation',
+    modal_log_usage:'Log pitch usage',
+    modal_edit_usage:'Edit usage',
+    modal_admin_log_task:'Log task',
+    modal_admin_log_usage:'Log usage',
+    modal_op_types:'Manage task types',
+    modal_dnd:'Move or Copy?',
+    modal_contact:'My contact details',
+    modal_viewer_link:'Project viewer link',
+    modal_change_pass:'Change admin password',
+    modal_edit_plan:'Edit plan entry',
+    modal_export_pdf:'Export PDF — select charts',
+    lbl_venue_name:'Venue name',
+    lbl_venue_type:'Venue type',
+    lbl_city_country:'City / Country',
+    lbl_contact_person:'Responsible person',
+    lbl_contact_phone:'Contact phone',
+    lbl_contact_email:'Contact email',
+    lbl_venue_token:'Venue access token',
+    lbl_proj_code:'Project code / ID',
+    lbl_proj_name:'Full project name',
+    lbl_proj_country:'Country / Location',
+    lbl_proj_color:'Project colour',
+    lbl_proj_status:'Status',
+    lbl_venue_field:'Venue',
+    lbl_date:'Date',
+    lbl_date_range:'Date range',
+    lbl_from_date:'From date',
+    lbl_to_date:'To date',
+    lbl_time_window:'Time window',
+    lbl_time_from:'Time from',
+    lbl_time_to:'Time to',
+    lbl_start:'Start',
+    lbl_end:'End',
+    lbl_start_time:'Start time',
+    lbl_end_time:'End time',
+    lbl_usage_date:'Usage date',
+    lbl_task_date_full:'Task date (when it happens)',
+    lbl_type:'Type',
+    lbl_usage_type:'Usage type',
+    lbl_team:'Team name',
+    lbl_zone:'Pitch area / zone',
+    lbl_zone_custom_lbl:'Custom zone',
+    lbl_equipment:'Equipment used',
+    lbl_weather:'Weather conditions',
+    lbl_staff:'Done by (staff)',
+    lbl_staff_hint:'You can add multiple staff members',
+    lbl_notes:'Notes / observations',
+    lbl_notes_short:'Notes',
+    lbl_status:'Status',
+    lbl_priority:'Priority',
+    lbl_photos:'Photos (max 4)',
+    lbl_time_of_day:'Time of day',
+    lbl_email:'Email',
+    lbl_password:'Password',
+    lbl_current_pass:'Current password',
+    lbl_new_pass:'New password',
+    lbl_confirm_pass:'Confirm new password',
+    vtype_stadium:'Stadium',
+    vtype_training:'Training site',
+    vtype_other:'Other',
+    th_date:'Date',
+    th_venue:'Venue',
+    th_type:'Type',
+    th_zone:'Zone',
+    th_staff:'Staff',
+    th_notes:'Notes',
+    th_photos:'Photos',
+    th_flag:'Flag',
+    th_team:'Team',
+    th_weather:'Weather',
+    th_usage_type:'Usage type',
+    toast_task_logged:'Task logged!',
+    toast_task_updated:'Task updated',
+    toast_task_deleted:'Task deleted',
+    toast_task_not_found:'Task not found',
+    toast_usage_logged:'Usage logged!',
+    toast_usage_updated:'Usage updated',
+    toast_usage_deleted:'Deleted',
+    toast_usage_not_found:'Usage not found',
+    toast_venue_added:'Venue added!',
+    toast_venue_updated:'Venue updated!',
+    toast_venue_deleted:'Venue deleted',
+    toast_venue_removed:'Venue removed from project',
+    toast_project_created:'Project created!',
+    toast_project_updated:'Project updated',
+    toast_project_deleted:'Project deleted',
+    toast_link_copied:'Link copied!',
+    toast_viewer_link_copied:'Viewer link copied!',
+    toast_venue_link_copied:'Venue link copied!',
+    toast_pass_updated:'Password updated successfully!',
+    toast_contact_saved:'Contact details saved!',
+    toast_type_added:'Type added',
+    toast_type_exists:'Type already exists',
+    toast_type_renamed:'Renamed',
+    toast_csv_exported:'CSV exported!',
+    toast_select_venue:'Select at least one venue',
+    toast_select_chart:'Select at least one chart',
+    toast_no_charts:'No charts to export',
+    toast_chart_added:'Chart added!',
+    toast_preset_saved:'Preset saved!',
+    toast_preset_applied:'Preset applied!',
+    toast_preset_error:'Could not save preset',
+    toast_link_new:'New viewer link generated!',
+    toast_popups:'Allow popups to export PDF',
+    toast_invalid_link:'Invalid or expired viewer link',
+    toast_invalid_token:'Invalid venue token',
+    toast_token_not_found:'Token not found — please check and try again',
+    toast_max_photos:'Maximum 3 photos per operation',
+    toast_connection_error:'Connection error',
+    toast_completed_future:'Cannot mark as completed — date is in the future.',
+    confirm_regen_link:'Regenerate link? The old link will immediately stop working.',
+    confirm_delete_project:'Delete this project? Venues and operations will NOT be deleted.',
+    confirm_remove_venue:'Remove this venue from the project?',
+    confirm_delete_op:'Delete this operation?',
+    confirm_delete_venue:'Delete this venue and ALL its operations permanently?',
+    confirm_delete_usage:'Delete this usage entry?',
+    lbl_auto_status:'Auto (future → Planned, today → In progress)',
+    lbl_status_hint:'Completed must be set manually by you or admin',
+    txt_viewer_desc:'Share this link to give read-only access to this project. Anyone with the link can view all venues and operations but cannot edit anything.',
+    txt_regen_warning:'Old link will stop working',
+    txt_contact_desc:'Update the contact information for this venue. Only you and the admin can see this.',
+    lbl_venue_indicator:'Venue',
+    lbl_compare_venue_select:'1. Venues to compare',
+    lbl_compare_metric:'2. Compare by',
+    lbl_compare_period:'3. Time period',
+    lbl_compare_chart_type:'4. Chart type',
+    txt_tap_to_drill:'tap to drill in →',
   },
   pl:{
     stat_total:'Ten miesiąc',stat_last:'Ostatnia op.',stat_common:'Dominuje',
@@ -1700,7 +1871,176 @@ const i18n = {
     no_venues:'Brak obiektów w projekcie.',no_venues_add:'Brak obiektów. Kliknij „+ Dodaj obiekt".',
     more_suffix:'więcej',
     all_venues_back:'← Wszystkie obiekty',all_venues:'Wszystkie obiekty',all_types:'Wszystkie typy',view_day:'Dzień',view_week:'Tydzień',view_month:'Miesiąc',
+    filter_all:'Wszystkie',
     period_week:'Tydzień',period_month:'Miesiąc',period_quarter:'Kwartał',period_custom:'Własny',
+    ptab_tasks:'📋 Zadania',
+    ptab_usage:'⏱ Użycie',
+    ptab_schedule:'📅 Harmonogram',
+    ptab_stats:'📊 Statystyki',
+    btn_sign_in:'Zaloguj',
+    btn_sign_out:'Wyloguj',
+    btn_cancel:'Anuluj',
+    btn_save:'Zapisz',
+    btn_save_changes:'Zapisz zmiany',
+    btn_delete:'Usuń',
+    btn_done:'Gotowe',
+    btn_add:'Dodaj',
+    btn_copy:'Kopiuj',
+    btn_clear:'Wyczyść',
+    btn_create_project:'Utwórz projekt',
+    btn_create_venue:'Utwórz obiekt',
+    btn_save_task:'Zapisz zadanie',
+    btn_save_usage:'Zapisz użycie',
+    btn_update_password:'Zmień hasło',
+    btn_delete_project:'Usuń projekt',
+    btn_delete_venue:'Usuń obiekt',
+    btn_back:'Wstecz',
+    btn_projects:'Projekty',
+    btn_export_pdf:'⬇ Eksport PDF',
+    btn_export_csv:'CSV',
+    btn_clear_all:'Wyczyść wszystko',
+    btn_new_project:'+ Nowy projekt',
+    btn_access_venue:'Otwórz pulpit obiektu',
+    btn_move:'✂️ Przenieś',
+    btn_copy_item:'📋 Kopiuj',
+    btn_regenerate_link:'🔄 Regeneruj link',
+    btn_add_chart:'+ Dodaj wykres',
+    btn_save_preset:'+ Zapisz bieżący',
+    btn_single_venue:'📊 Jeden obiekt',
+    btn_compare:'⚖️ Porównaj obiekty',
+    btn_task_types:'⚙ Typy zadań',
+    modal_new_project:'Nowy projekt',
+    modal_edit_project:'Edytuj projekt',
+    modal_add_venue:'Dodaj obiekt do projektu',
+    modal_edit_venue:'Edytuj obiekt',
+    modal_log_task:'Nowe zadanie',
+    modal_edit_op:'Edytuj zadanie',
+    modal_log_usage:'Rejestruj użycie boiska',
+    modal_edit_usage:'Edytuj użycie',
+    modal_admin_log_task:'Dodaj zadanie',
+    modal_admin_log_usage:'Dodaj użycie',
+    modal_op_types:'Zarządzaj typami zadań',
+    modal_dnd:'Przenieść czy skopiować?',
+    modal_contact:'Moje dane kontaktowe',
+    modal_viewer_link:'Link dla widza projektu',
+    modal_change_pass:'Zmień hasło admina',
+    modal_edit_plan:'Edytuj wpis planu',
+    modal_export_pdf:'Eksport PDF — wybierz wykresy',
+    lbl_venue_name:'Nazwa obiektu',
+    lbl_venue_type:'Typ obiektu',
+    lbl_city_country:'Miasto / Kraj',
+    lbl_contact_person:'Osoba odpowiedzialna',
+    lbl_contact_phone:'Telefon kontaktowy',
+    lbl_contact_email:'E-mail kontaktowy',
+    lbl_venue_token:'Token dostępu do obiektu',
+    lbl_proj_code:'Kod / ID projektu',
+    lbl_proj_name:'Pełna nazwa projektu',
+    lbl_proj_country:'Kraj / Lokalizacja',
+    lbl_proj_color:'Kolor projektu',
+    lbl_proj_status:'Status',
+    lbl_venue_field:'Obiekt',
+    lbl_date:'Data',
+    lbl_date_range:'Zakres dat',
+    lbl_from_date:'Data od',
+    lbl_to_date:'Data do',
+    lbl_time_window:'Okno czasowe',
+    lbl_time_from:'Czas od',
+    lbl_time_to:'Czas do',
+    lbl_start:'Start',
+    lbl_end:'Koniec',
+    lbl_start_time:'Czas start',
+    lbl_end_time:'Czas koniec',
+    lbl_usage_date:'Data użycia',
+    lbl_task_date_full:'Data zadania (kiedy się odbywa)',
+    lbl_type:'Typ',
+    lbl_usage_type:'Typ użycia',
+    lbl_team:'Nazwa drużyny',
+    lbl_zone:'Strefa boiska',
+    lbl_zone_custom_lbl:'Własna strefa',
+    lbl_equipment:'Sprzęt',
+    lbl_weather:'Pogoda',
+    lbl_staff:'Wykonał/a',
+    lbl_staff_hint:'Możesz dodać kilka osób',
+    lbl_notes:'Notatki / obserwacje',
+    lbl_notes_short:'Notatki',
+    lbl_status:'Status',
+    lbl_priority:'Priorytet',
+    lbl_photos:'Zdjęcia (max 4)',
+    lbl_time_of_day:'Pora dnia',
+    lbl_email:'E-mail',
+    lbl_password:'Hasło',
+    lbl_current_pass:'Aktualne hasło',
+    lbl_new_pass:'Nowe hasło',
+    lbl_confirm_pass:'Potwierdź nowe hasło',
+    vtype_stadium:'Stadion',
+    vtype_training:'Obiekt treningowy',
+    vtype_other:'Inny',
+    th_date:'Data',
+    th_venue:'Obiekt',
+    th_type:'Typ',
+    th_zone:'Strefa',
+    th_staff:'Wykonał/a',
+    th_notes:'Notatki',
+    th_photos:'Zdjęcia',
+    th_flag:'Flaga',
+    th_team:'Drużyna',
+    th_weather:'Pogoda',
+    th_usage_type:'Typ użycia',
+    toast_task_logged:'Zadanie zapisane!',
+    toast_task_updated:'Zadanie zaktualizowane',
+    toast_task_deleted:'Zadanie usunięte',
+    toast_task_not_found:'Nie znaleziono zadania',
+    toast_usage_logged:'Użycie zapisane!',
+    toast_usage_updated:'Użycie zaktualizowane',
+    toast_usage_deleted:'Usunięto',
+    toast_usage_not_found:'Nie znaleziono użycia',
+    toast_venue_added:'Obiekt dodany!',
+    toast_venue_updated:'Obiekt zaktualizowany!',
+    toast_venue_deleted:'Obiekt usunięty',
+    toast_venue_removed:'Obiekt usunięty z projektu',
+    toast_project_created:'Projekt utworzony!',
+    toast_project_updated:'Projekt zaktualizowany',
+    toast_project_deleted:'Projekt usunięty',
+    toast_link_copied:'Link skopiowany!',
+    toast_viewer_link_copied:'Link widza skopiowany!',
+    toast_venue_link_copied:'Link obiektu skopiowany!',
+    toast_pass_updated:'Hasło zaktualizowane!',
+    toast_contact_saved:'Dane kontaktowe zapisane!',
+    toast_type_added:'Typ dodany',
+    toast_type_exists:'Typ już istnieje',
+    toast_type_renamed:'Zmieniono nazwę',
+    toast_csv_exported:'CSV wyeksportowany!',
+    toast_select_venue:'Wybierz co najmniej jeden obiekt',
+    toast_select_chart:'Wybierz co najmniej jeden wykres',
+    toast_no_charts:'Brak wykresów do eksportu',
+    toast_chart_added:'Wykres dodany!',
+    toast_preset_saved:'Preset zapisany!',
+    toast_preset_applied:'Preset zastosowany!',
+    toast_preset_error:'Nie można zapisać presetu',
+    toast_link_new:'Nowy link widza wygenerowany!',
+    toast_popups:'Zezwól na wyskakujące okienka aby eksportować PDF',
+    toast_invalid_link:'Nieprawidłowy lub wygasły link widza',
+    toast_invalid_token:'Nieprawidłowy token obiektu',
+    toast_token_not_found:'Token nie znaleziony — sprawdź i spróbuj ponownie',
+    toast_max_photos:'Maksymalnie 3 zdjęcia na operację',
+    toast_connection_error:'Błąd połączenia',
+    toast_completed_future:'Nie można oznaczyć jako ukończone — data jest w przyszłości.',
+    confirm_regen_link:'Regenerować link? Stary link przestanie działać natychmiast.',
+    confirm_delete_project:'Usunąć projekt? Obiekty i operacje NIE zostaną usunięte.',
+    confirm_remove_venue:'Usunąć ten obiekt z projektu?',
+    confirm_delete_op:'Usunąć tę operację?',
+    confirm_delete_venue:'Usunąć ten obiekt i WSZYSTKIE jego operacje na stałe?',
+    confirm_delete_usage:'Usunąć ten wpis użycia?',
+    lbl_auto_status:'Auto (przyszłość → Zaplanowane, dziś → W trakcie)',
+    lbl_status_hint:'Status „Ukończone" musi być ustawiony ręcznie',
+    txt_viewer_desc:'Udostępnij ten link aby dać dostęp tylko do odczytu tego projektu.',
+    txt_regen_warning:'Stary link przestanie działać',
+    txt_contact_desc:'Zaktualizuj dane kontaktowe dla tego obiektu. Tylko Ty i admin możecie to widzieć.',
+    lbl_compare_venue_select:'1. Obiekty do porównania',
+    lbl_compare_metric:'2. Porównaj według',
+    lbl_compare_period:'3. Okres czasu',
+    lbl_compare_chart_type:'4. Typ wykresu',
+    txt_tap_to_drill:'kliknij aby przejść →',
   },
   es:{
     stat_total:'Este mes',stat_last:'Última op.',stat_common:'Más común',
@@ -1778,6 +2118,7 @@ const i18n = {
     no_venues:'Aucun site dans ce projet.',no_venues_add:'Aucun site. Cliquez sur "+ Ajouter site".',
     more_suffix:'autres',
     all_venues_back:'← Tous les sites',all_venues:'Tous les sites',all_types:'Tous les types',view_day:'Jour',view_week:'Semaine',view_month:'Mois',
+    filter_all:'Tous',
     period_week:'Semaine',period_month:'Mois',period_quarter:'Trimestre',period_custom:'Personnalisé',
   },
   de:{
@@ -1817,6 +2158,7 @@ const i18n = {
     no_venues:'Keine Standorte in diesem Projekt.',no_venues_add:'Keine Standorte. Auf "+ Standort hinzufügen" klicken.',
     more_suffix:'weitere',
     all_venues_back:'← Alle Standorte',all_venues:'Alle Standorte',all_types:'Alle Typen',view_day:'Tag',view_week:'Woche',view_month:'Monat',
+    filter_all:'Alle',
     period_week:'Woche',period_month:'Monat',period_quarter:'Quartal',period_custom:'Benutzerdefiniert',
   },
   pt:{
@@ -1915,6 +2257,29 @@ function applyTranslations(l){
     sel.value=cur;
   });
 
+  // ── Project status select options ──
+  const projStatusMap=[['planned','status_project_planned'],['active','status_active'],['finished','status_finished']];
+  ['new-proj-status','edit-proj-status'].forEach(id=>{
+    const sel=document.getElementById(id); if(!sel) return;
+    const cur=sel.value;
+    projStatusMap.forEach(([val,key])=>{ const o=sel.querySelector('option[value="'+val+'"]'); if(o) o.textContent=T[key]||o.textContent; });
+    sel.value=cur;
+  });
+
+  // ── Venue type spans ──
+  document.querySelectorAll('.venue-type-opt span').forEach(span=>{
+    const opt=span.closest('.venue-type-opt');
+    if(!opt) return;
+    const vtype=opt.dataset.vtype;
+    if(vtype==='Stadium') span.textContent=T.vtype_stadium||span.textContent;
+    else if(vtype==='Training Site') span.textContent=T.vtype_training||span.textContent;
+    else if(vtype==='Other') span.textContent=T.vtype_other||span.textContent;
+  });
+
+  // ── Admin tab buttons ──
+  const adminTabMap=[['ptab-tasks','ptab_tasks'],['ptab-usage','ptab_usage'],['ptab-schedule','ptab_schedule'],['ptab-stats','ptab_stats']];
+  adminTabMap.forEach(([id,key])=>{ const el=document.getElementById(id); if(el&&T[key]) el.textContent=T[key]; });
+
   // ── Status select options ──
   const statusMap=[['planned','status_planned'],['inprogress','status_inprogress'],['completed','status_completed'],['missed','status_missed']];
   ['new-op-status','edit-op-status','admin-task-status','admin-usage-status','usage-status','edit-usage-status'].forEach(id=>{
@@ -1965,18 +2330,18 @@ function openViewerLinkModal(){
 }
 
 function copyViewerLink(){
-  navigator.clipboard.writeText(document.getElementById('viewer-link-text').textContent).then(()=>showToast('Viewer link copied!'));
+  navigator.clipboard.writeText(document.getElementById('viewer-link-text').textContent).then(()=>showToast(t('toast_viewer_link_copied')));
 }
 
 async function revokeViewerLink(){
-  if(!confirm('Regenerate link? The old link will immediately stop working.')) return;
+  if(!confirm(t('confirm_regen_link'))) return;
   const pid=state.currentProjectId; if(!pid) return;
   const proj=state.projects.find(p=>p.id===pid); if(!proj) return;
   proj.viewerToken=genToken();
   await supa.from('pitchops_projects').update({viewer_token:proj.viewerToken}).eq('id',pid);
   const link=window.location.href.split('?')[0]+'?view='+proj.viewerToken;
   document.getElementById('viewer-link-text').textContent=link;
-  showToast('New viewer link generated!');
+  showToast(t('toast_link_new'));
 }
 
 // ── VIEWER DASHBOARD ──
@@ -2029,7 +2394,7 @@ async function enterViewerDashboard(proj){
 
   // populate viewer filters
   document.getElementById('vw-filter-venue').innerHTML=`<option value="">${t('all_venues')}</option>`+venues.map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('');
-  document.getElementById('vw-filter-type').innerHTML=`<option value="">All types</option>`+state.opTypes.map(tp=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
+  document.getElementById('vw-filter-type').innerHTML=`<option value="">All types</option>`+state.opTypes.map(tp=>`<option value="${esc(tp)}">${esc(tp)}</option>`).join('');
   renderViewerOps();
   showScreen('screen-viewer');
 }
@@ -2044,7 +2409,7 @@ function focusViewerVenue(vid){
 function copyVenueViewerLink(e,token){
   e.stopPropagation();
   const link=window.location.href.split('?')[0]+'?token='+token;
-  navigator.clipboard.writeText(link).then(()=>showToast('Venue link copied!'));
+  navigator.clipboard.writeText(link).then(()=>showToast(t('toast_venue_link_copied')));
 }
 
 function renderViewerOps(){
@@ -2118,23 +2483,23 @@ function changePassword(){
   document.getElementById('cp-current').value='';
   document.getElementById('cp-new').value='';
   document.getElementById('cp-confirm').value='';
-  showToast('Password updated successfully!');
+  showToast(t('toast_pass_updated'));
 }
 
 async function venueTokenLogin(){
   const tok = document.getElementById('venue-token-input').value.trim().replace(/\s/g,'');
-  if(!tok){ showToast('Please paste your venue token'); return; }
+  if(!tok){ showToast(t('lbl_venue_token')); return; }
   showLoading(true);
   const {data:venues, error} = await supa.from('pitchops_venues').select('*').eq('token',tok);
   showLoading(false);
-  if(error){ showToast('Connection error: '+error.message); return; }
+  if(error){ showToast(t('toast_connection_error')+': '+error.message); return; }
   if(venues&&venues.length){
     const venue=dbToVenue(venues[0]);
     state.venues=[venue];
     state.currentVenueId=venue.id;
     await enterVenueDashboard(venue);
   } else {
-    showToast('Token not found — please check and try again');
+    showToast(t('toast_token_not_found'));
   }
 }
 
@@ -2190,7 +2555,7 @@ function renderProjects(){
 async function createProject(){
   const code = document.getElementById('new-proj-code').value.trim();
   const name = document.getElementById('new-proj-name').value.trim();
-  if(!code||!name){ showToast('Please enter project code and name'); return; }
+  if(!code||!name){ showToast(t('lbl_proj_code')+' & '+t('lbl_proj_name')); return; }
   const proj = {
     id:'proj_'+Date.now(), code, name,
     country: document.getElementById('new-proj-country').value.trim(),
@@ -2205,7 +2570,7 @@ async function createProject(){
   document.getElementById('new-proj-code').value='';
   document.getElementById('new-proj-name').value='';
   document.getElementById('new-proj-country').value='';
-  renderProjects(); showToast('Project created!');
+  renderProjects(); showToast(t('toast_project_created'));
 }
 
 function editProjectModal(e, pid){
@@ -2237,12 +2602,12 @@ async function saveEditProject(){
   if(error){ showToast('Error: '+error.message); return; }
   closeModal('modal-edit-project'); renderProjects();
   if(state.currentProjectId===id) renderProjectDetail(id);
-  showToast('Project updated');
+  showToast(t('toast_project_updated'));
 }
 
 async function deleteProject(){
   const id=document.getElementById('edit-proj-id').value;
-  if(!confirm('Delete this project? Venues and operations will NOT be deleted.')) return;
+  if(!confirm(t('confirm_delete_project'))) return;
   const {error} = await supa.from('pitchops_projects').delete().eq('id',id);
   if(error){ showToast('Error: '+error.message); return; }
   state.projects=state.projects.filter(p=>p.id!==id);
@@ -2253,7 +2618,7 @@ async function deleteProject(){
       await supa.from('pitchops_venues').update({project_ids:v.projectIds}).eq('id',v.id);
     }
   }
-  closeModal('modal-edit-project'); renderProjects(); showToast('Project deleted');
+  closeModal('modal-edit-project'); renderProjects(); showToast(t('toast_project_deleted'));
 }
 
 function openProject(pid){
@@ -2418,7 +2783,7 @@ function openAddVenueModal(){
 
 async function createVenue(){
   const name=document.getElementById('new-venue-name').value.trim();
-  if(!name){ showToast('Please enter a venue name'); return; }
+  if(!name){ showToast(t('lbl_venue_name')+' '+t('lbl_required')||'Please enter a venue name'); return; }
   const token=genToken();
   const pid=state.currentProjectId;
   // check if venue with same name already exists — if so, just add project link
@@ -2435,25 +2800,25 @@ async function createVenue(){
   document.getElementById('venue-link-text').textContent=link;
   document.getElementById('venue-link-result').style.display='block';
   renderProjectDetail(pid);
-  showToast('Venue added!');
+  showToast(t('toast_venue_added'));
 }
 
 function copyVenueLinkById(e,token){
   e.stopPropagation();
-  navigator.clipboard.writeText(window.location.href.split('?')[0]+'?token='+token).then(()=>showToast('Link copied!'));
+  navigator.clipboard.writeText(window.location.href.split('?')[0]+'?token='+token).then(()=>showToast(t('toast_link_copied')));
 }
 function copyVenueLink(){
-  navigator.clipboard.writeText(document.getElementById('venue-link-text').textContent).then(()=>showToast('Link copied!'));
+  navigator.clipboard.writeText(document.getElementById('venue-link-text').textContent).then(()=>showToast(t('toast_link_copied')));
 }
 
 async function removeVenueFromProject(e,vid){
   e.stopPropagation();
-  if(!confirm('Remove this venue from the project?')) return;
+  if(!confirm(t('confirm_remove_venue'))) return;
   const v=state.venues.find(x=>x.id===vid); if(!v) return;
   v.projectIds=v.projectIds.filter(pid=>pid!==state.currentProjectId);
   const {error} = await supa.from('pitchops_venues').update({project_ids:v.projectIds}).eq('id',vid);
   if(error){ showToast('Error: '+error.message); return; }
-  renderProjectDetail(state.currentProjectId); showToast('Venue removed from project');
+  renderProjectDetail(state.currentProjectId); showToast(t('toast_venue_removed'));
 }
 
 // ════════════════════════════════════════
@@ -2567,7 +2932,7 @@ async function logOperation(){
     createdAt:new Date().toISOString()
   };
   const {error} = await supa.from('pitchops_operations').insert(opToDb(op));
-  if(error){ showToast('Error saving: '+error.message); return; }
+  if(error){ showToast('Error: '+error.message); return; }
   state.operations.unshift(op);
   document.getElementById('new-op-equipment').value='';
   document.getElementById('new-op-weather').value='';
@@ -2582,7 +2947,7 @@ async function logOperation(){
   }
   if(document.getElementById('ptab-calendar-content')?.style.display==='block') renderGantt();
   closeModal('modal-log-task');
-  showToast('Task logged!');
+  showToast(t('toast_task_logged'));
 }
 
 function openEditModal(opId){
@@ -2615,7 +2980,7 @@ async function saveEditOperation(){
   const editDateVal=(document.getElementById('edit-op-date').value||'').slice(0,10);
   const editStatus=document.getElementById('edit-op-status')?.value||'completed';
   // Block completed status if date is in the future
-  if(editStatus==='completed' && editDateVal>todayStr()){showToast('Cannot mark as completed — date is in the future.');return;}
+  if(editStatus==='completed' && editDateVal>todayStr()){showToast(t('toast_completed_future'));return;}
   state.operations[idx]={...state.operations[idx],
     type:document.getElementById('edit-op-type').value,
     zone:document.getElementById('edit-op-zone').value,
@@ -2648,12 +3013,12 @@ async function saveEditOperation(){
     renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
   }
   if(document.getElementById('ptab-calendar-content')?.style.display==='block') renderGantt();
-  showToast('Task updated');
+  showToast(t('toast_task_updated'));
 }
 
 async function deleteOperation(){
   const id=document.getElementById('edit-op-id').value;
-  if(!confirm('Delete this operation?')) return;
+  if(!confirm(t('confirm_delete_op'))) return;
   const {error} = await supa.from('pitchops_operations').delete().eq('id',id);
   if(error){ showToast('Error: '+error.message); return; }
   state.operations=state.operations.filter(o=>o.id!==id);
@@ -2669,7 +3034,7 @@ async function deleteOperation(){
     renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
   }
   if(document.getElementById('ptab-calendar-content')?.style.display==='block') renderGantt();
-  showToast('Task deleted');
+  showToast(t('toast_task_deleted'));
 }
 
 // ════════════════════════════════════════
@@ -2678,16 +3043,16 @@ async function deleteOperation(){
 function populateOpTypeSelects(){
   ['new-op-type','edit-op-type','admin-task-type','edit-plan-op-type'].forEach(id=>{
     const s=document.getElementById(id); if(!s) return;
-    s.innerHTML=state.opTypes.map(tp=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
+    s.innerHTML=state.opTypes.map(tp=>`<option value="${esc(tp)}">${esc(tp)}</option>`).join('');
   });
   const ft=document.getElementById('filter-type');
-  if(ft) ft.innerHTML=`<option value="">All types</option>`+state.opTypes.map(tp=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
+  if(ft) ft.innerHTML=`<option value="">All types</option>`+state.opTypes.map(tp=>`<option value="${esc(tp)}">${esc(tp)}</option>`).join('');
 }
 function openManageTypesModal(){ renderOpTypesList(); openModal('modal-op-types'); }
 function renderOpTypesList(){
-  document.getElementById('op-types-list').innerHTML=state.opTypes.map((t,i)=>`
+  document.getElementById('op-types-list').innerHTML=state.opTypes.map((tp,i)=>`
     <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
-      <input value="${esc(t)}" data-orig="${esc(t)}"
+      <input value="${esc(tp)}" data-orig="${esc(tp)}"
         style="flex:1;font-size:13px;padding:5px 8px;border:1px solid transparent;border-radius:6px;font-family:'DM Sans',sans-serif;background:transparent;outline:none"
         onfocus="this.style.border='1px solid var(--blue)';this.style.background='white'"
         onblur="renameOpType(${i},this)"
@@ -2702,22 +3067,22 @@ async function renameOpType(i, input){
   const oldName=input.dataset.orig;
   const newName=input.value.trim();
   if(!newName||newName===oldName){ input.value=oldName; return; }
-  if(state.opTypes.includes(newName)){ showToast('Type already exists'); input.value=oldName; return; }
+  if(state.opTypes.includes(newName)){ showToast(t('toast_type_exists')); input.value=oldName; return; }
   const {error}=await supa.from('pitchops_op_types').update({name:newName}).eq('name',oldName);
   if(error){ showToast(error.message); input.value=oldName; return; }
   state.opTypes[i]=newName;
   input.dataset.orig=newName;
   populateOpTypeSelects();
-  showToast('Renamed');
+  showToast(t('toast_type_renamed'));
 }
 async function addOpType(){
   const val=document.getElementById('new-op-type-input').value.trim();
-  if(!val||state.opTypes.includes(val)){ showToast(val?'Type already exists':'Enter a type name'); return; }
+  if(!val||state.opTypes.includes(val)){ showToast(val?t('toast_type_exists'):t('toast_type_add_hint')||'Enter a type name'); return; }
   const {error} = await supa.from('pitchops_op_types').insert({name:val});
   if(error){ showToast(error.message); return; }
   state.opTypes.push(val);
   document.getElementById('new-op-type-input').value='';
-  renderOpTypesList(); populateOpTypeSelects(); showToast('Type added');
+  renderOpTypesList(); populateOpTypeSelects(); showToast(t('toast_type_added'));
 }
 async function removeOpType(i){
   const name=state.opTypes[i];
@@ -2774,7 +3139,7 @@ const MAX_PHOTOS=4;
 function handlePhotoSelect(input,ctx){
   const files=Array.from(input.files);
   const allowed=MAX_PHOTOS-currentPhotos[ctx].length;
-  if(allowed<=0){showToast('Maximum 3 photos per operation');input.value='';return;}
+  if(allowed<=0){showToast(t('toast_max_photos'));input.value='';return;}
   files.slice(0,allowed).forEach(file=>{
     const reader=new FileReader();
     reader.onload=e=>compressImage(e.target.result,1200,.82,dataUrl=>{
@@ -2828,7 +3193,7 @@ function exportCSV(){
   const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
   const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
   a.download='pitchops_'+(proj?.code||'export')+'_'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
-  showToast('CSV exported!');
+  showToast(t('toast_csv_exported'));
 }
 
 // ════════════════════════════════════════
@@ -2872,7 +3237,7 @@ function openEditVenueModal(e, vid){
 }
 
 function copyEditVenueLink(){
-  navigator.clipboard.writeText(document.getElementById('edit-venue-link-text').textContent).then(()=>showToast('Link copied!'));
+  navigator.clipboard.writeText(document.getElementById('edit-venue-link-text').textContent).then(()=>showToast(t('toast_link_copied')));
 }
 
 async function saveEditVenue(){
@@ -2898,12 +3263,12 @@ async function saveEditVenue(){
   if(error){showToast('Error: '+error.message);return;}
   closeModal('modal-edit-venue');
   renderProjectDetail(state.currentProjectId);
-  showToast('Venue updated!');
+  showToast(t('toast_venue_updated'));
 }
 
 async function deleteVenue(){
   const id=document.getElementById('edit-venue-id').value;
-  if(!confirm('Delete this venue and ALL its operations permanently?')) return;
+  if(!confirm(t('confirm_delete_venue'))) return;
   const {error}=await supa.from('pitchops_operations').delete().eq('venue_id',id);
   if(error){showToast('Error: '+error.message);return;}
   const {error:e2}=await supa.from('pitchops_venues').delete().eq('id',id);
@@ -2912,7 +3277,7 @@ async function deleteVenue(){
   state.operations=state.operations.filter(o=>o.venueId!==id);
   closeModal('modal-edit-venue');
   renderProjectDetail(state.currentProjectId);
-  showToast('Venue deleted');
+  showToast(t('toast_venue_deleted'));
 }
 
 // ════════════════════════════════════════
@@ -2957,7 +3322,7 @@ async function saveVenueContact(){
   if(error){showToast('Error: '+error.message);return;}
   closeModal('modal-venue-contact');
   renderVenueContactInfo();
-  showToast('Contact details saved!');
+  showToast(t('toast_contact_saved'));
 }
 
 function renderVenueContactInfo(){
@@ -3072,7 +3437,7 @@ async function init(){
       await enterViewerDashboard(proj);
       return;
     }
-    showToast('Invalid or expired viewer link');
+    showToast(t('toast_invalid_link'));
   }
 
   // check ?token= — venue manager flow
@@ -3087,7 +3452,7 @@ async function init(){
       await enterVenueDashboard(venue);
       return;
     }
-    showToast('Invalid venue token');
+    showToast(t('toast_invalid_token'));
   }
   showScreen('screen-login');
 }
@@ -3699,7 +4064,7 @@ async function logUsage(){
   if(document.getElementById('vtab-schedule-content')?.style.display==='block'){
     renderWeekCalendar(venueId,'venue-sched-grid',venueSchedOffset);
   }
-  showToast('Usage logged!');
+  showToast(t('toast_usage_logged'));
 }
 
 // ── EDIT USAGE ──
@@ -3742,12 +4107,12 @@ async function saveEditUsage(){
   if(document.getElementById('vtab-schedule-content')?.style.display==='block'){
     renderWeekCalendar(state.currentVenueId,'venue-sched-grid',venueSchedOffset);
   }
-  showToast('Usage updated');
+  showToast(t('toast_usage_updated'));
 }
 
 async function deleteUsage(){
   const id=document.getElementById('edit-usage-id').value;
-  if(!confirm('Delete this usage entry?')) return;
+  if(!confirm(t('confirm_delete_usage'))) return;
   const {error}=await supa.from('pitchops_usage').delete().eq('id',id);
   if(error){ showToast('Error: '+error.message); return; }
   state_usage=state_usage.filter(u=>u.id!==id);
@@ -3756,7 +4121,7 @@ async function deleteUsage(){
   if(document.getElementById('vtab-schedule-content')?.style.display==='block'){
     renderWeekCalendar(state.currentVenueId,'venue-sched-grid',venueSchedOffset);
   }
-  showToast('Deleted');
+  showToast(t('toast_usage_deleted'));
 }
 
 // ════════════════════════════════════════
@@ -3908,7 +4273,7 @@ function openAdminLogTaskModal(dateStr){
   const vsel=document.getElementById('admin-task-venue');
   vsel.innerHTML=venues.map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('');
   const tsel=document.getElementById('admin-task-type');
-  tsel.innerHTML=state.opTypes.map(tp=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
+  tsel.innerHTML=state.opTypes.map(tp=>`<option value="${esc(tp)}">${esc(tp)}</option>`).join('');
   document.getElementById('admin-task-date').value=dateStr||todayStr();
   document.getElementById('admin-task-zone-select').value='Full pitch';
   document.getElementById('admin-task-zone-custom-wrap').style.display='none';
@@ -3961,7 +4326,7 @@ async function adminLogTask(){
   if(document.getElementById('ptab-calendar-content')?.style.display==='block') renderGantt();
   if(document.getElementById('venue-cal-view')?.style.display==='block' && state.currentVenueCalId)
     renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
-  showToast('Task logged!');
+  showToast(t('toast_task_logged'));
 }
 
 // ── ADMIN LOG USAGE MODAL ──
@@ -4011,7 +4376,7 @@ async function adminLogUsage(){
   if(document.getElementById('ptab-calendar-content')?.style.display==='block') renderGantt();
   if(document.getElementById('venue-cal-view')?.style.display==='block' && state.currentVenueCalId)
     renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
-  showToast('Usage logged!');
+  showToast(t('toast_usage_logged'));
 }
 
 // ════════════════════════════════════════
@@ -4071,7 +4436,7 @@ async function executeDrop(dragData, newDate, newVenueId, copy){
 
   if(type === 'op'){
     const idx = state.operations.findIndex(o=>o.id===id);
-    if(idx === -1){ showToast('Task not found'); return; }
+    if(idx === -1){ showToast(t('toast_task_not_found')); return; }
     const op = state.operations[idx];
     if(copy){
       const newOp = {...op, id:'op_'+Date.now(), date:newDate, venueId:targetVenueId, createdAt:new Date().toISOString()};
@@ -4093,7 +4458,7 @@ async function executeDrop(dragData, newDate, newVenueId, copy){
       const i = arr.findIndex(u=>u.id===id);
       if(i>-1){ found=arr[i]; foundArr=arr; foundIdx=i; break; }
     }
-    if(!found){ showToast('Usage not found'); return; }
+    if(!found){ showToast(t('toast_usage_not_found')); return; }
     if(copy){
       const newU = {...found, id:'u_'+Date.now(), date:newDate, venueId:targetVenueId, createdAt:new Date().toISOString()};
       const {error} = await supa.from('pitchops_usage').insert(usageToDb(newU));
@@ -4549,7 +4914,7 @@ function toggleStatsPDFSelect(isVenue){
       return !cb || cb.checked;
     });
 
-    if(!selected.length){ showToast('Select at least one chart'); [...grid.querySelectorAll('.stats-select-wrap')].forEach(w=>w.remove()); return; }
+    if(!selected.length){ showToast(t('toast_select_chart')); [...grid.querySelectorAll('.stats-select-wrap')].forEach(w=>w.remove()); return; }
 
     // Build PDF from selected cards
     const pfx = isVenue ? 'vcard-' : 'card-';
@@ -4564,7 +4929,7 @@ function toggleStatsPDFSelect(isVenue){
     // Remove checkboxes
     [...grid.querySelectorAll('.stats-select-wrap')].forEach(w=>w.remove());
 
-    if(!chartsHTML){ showToast('No charts to export'); return; }
+    if(!chartsHTML){ showToast(t('toast_no_charts')); return; }
 
     // Header info
     let loc, period;
@@ -4610,7 +4975,7 @@ body{font-family:Arial,sans-serif;color:#0C2340;padding:24px;background:white}
 </body></html>`;
 
     const win=window.open('','_blank','width=1000,height=800');
-    if(!win){ showToast('Allow popups to export PDF'); return; }
+    if(!win){ showToast(t('toast_popups')); return; }
     win.document.open();
     win.document.write(html);
     win.document.close();
@@ -4838,7 +5203,7 @@ function updateCompareMetricDetail(){
   if(metric==='task-hours-type'){
     if(detail){ detail.style.display='block';
       const sel=document.getElementById('compare-task-type');
-      if(sel) sel.innerHTML=state.opTypes.map(tp=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
+      if(sel) sel.innerHTML=state.opTypes.map(tp=>`<option value="${esc(tp)}">${esc(tp)}</option>`).join('');
     }
     if(usageWrap) usageWrap.style.display='none';
   } else if(metric==='usage-hours-type'){
@@ -4853,7 +5218,7 @@ function updateCompareMetricDetail(){
 function addCompareChart(){
   const pid=state.currentProjectId; if(!pid) return;
   const selectedVenueIds=[...document.querySelectorAll('#compare-venue-checkboxes input:checked')].map(cb=>cb.value);
-  if(!selectedVenueIds.length){ showToast('Select at least one venue'); return; }
+  if(!selectedVenueIds.length){ showToast(t('toast_select_venue')); return; }
 
   const metric=document.getElementById('compare-metric')?.value||'task-hours-total';
   const period=document.getElementById('compare-period')?.value||'month';
@@ -4956,7 +5321,7 @@ function addCompareChart(){
   const ti=document.getElementById('compare-chart-title');
   if(ti) ti.value='';
 
-  showToast('Chart added!');
+  showToast(t('toast_chart_added'));
 }
 
 function removeCompareChart(cardId){
@@ -5001,8 +5366,8 @@ function saveComparePreset(){
     saved.push(preset);
     localStorage.setItem(key,JSON.stringify(saved));
     loadComparePresets();
-    showToast('Preset saved!');
-  } catch(e){ showToast('Could not save preset'); }
+    showToast(t('toast_preset_saved'));
+  } catch(e){ showToast(t('toast_preset_error')); }
 }
 
 function loadComparePresets(){
@@ -5035,7 +5400,7 @@ function applyComparePreset(idx){
     if(p.chartType){ compareChartType=p.chartType; document.querySelectorAll('.chart-type-btn').forEach(b=>{b.style.borderColor='var(--border)';b.style.background='white';}); }
     if(p.from){ const el=document.getElementById('compare-from'); if(el) el.value=p.from; }
     if(p.to){ const el=document.getElementById('compare-to'); if(el) el.value=p.to; }
-    showToast('Preset applied!');
+    showToast(t('toast_preset_applied'));
   } catch(e){}
 }
 
@@ -5057,12 +5422,12 @@ init();
 <div class="modal-overlay" id="modal-log-usage">
   <div class="modal">
     <div class="modal-header">
-      <span class="modal-title">Log pitch usage</span>
+      <span class="modal-title" data-i18n="modal_log_usage">Log pitch usage</span>
       <button class="modal-close" onclick="closeModal('modal-log-usage')">✕</button>
     </div>
     <div class="modal-body">
       <div class="field">
-        <label>Usage type</label>
+        <label data-i18n="lbl_usage_type">Usage type</label>
         <select id="usage-type-select" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px">
           <option value="Match Day">Match Day</option>
           <option value="Training Session">Training Session</option>
@@ -5070,11 +5435,11 @@ init();
         </select>
       </div>
       <div class="field">
-        <label>Team name</label>
+        <label data-i18n="lbl_team">Team name</label>
         <input id="usage-team" type="text" placeholder="e.g. FC Barcelona U20"/>
       </div>
       <div class="field">
-        <label>Pitch area / zone</label>
+        <label data-i18n="lbl_zone">Pitch area / zone</label>
         <select id="usage-zone-select" onchange="document.getElementById('usage-zone-custom-wrap').style.display=this.value==='Custom'?'block':'none'">
           <option value="">Full pitch</option>
           <option value="Half A">Half A</option>
@@ -5089,7 +5454,7 @@ init();
         </div>
       </div>
       <div class="field">
-        <label>Weather conditions</label>
+        <label data-i18n="lbl_weather">Weather conditions</label>
         <input id="usage-weather" type="text" placeholder="e.g. sunny, 18°C"/>
       </div>
       <div class="field">
@@ -5097,21 +5462,21 @@ init();
         <textarea id="usage-notes" rows="2" placeholder="Any notes..." style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;resize:vertical;box-sizing:border-box"></textarea>
       </div>
       <div class="field">
-        <label>Usage date</label>
+        <label data-i18n="lbl_usage_date">Usage date</label>
         <input id="usage-date" type="date"/>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         <div class="field">
-          <label>Time from</label>
+          <label data-i18n="lbl_time_from">Time from</label>
           <input id="usage-time-from" type="time" value="08:00"/>
         </div>
         <div class="field">
-          <label>Time to</label>
+          <label data-i18n="lbl_time_to">Time to</label>
           <input id="usage-time-to" type="time" value="17:00"/>
         </div>
       </div>
       <div class="field">
-        <label>Status</label>
+        <label data-i18n="lbl_status">Status</label>
         <select id="usage-status">
           <option value="planned">Planned</option>
           <option value="inprogress">In progress</option>
@@ -5127,8 +5492,8 @@ init();
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-log-usage')">Cancel</button>
-      <button class="btn btn-primary" onclick="logUsage()">Save usage</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-log-usage')" data-i18n="btn_cancel">Cancel</button>
+      <button class="btn btn-primary" onclick="logUsage()" data-i18n="btn_save_usage">Save usage</button>
     </div>
   </div>
 </div>
@@ -5137,13 +5502,13 @@ init();
 <div class="modal-overlay" id="modal-edit-usage">
   <div class="modal">
     <div class="modal-header">
-      <span class="modal-title">Edit usage</span>
+      <span class="modal-title" data-i18n="modal_edit_usage">Edit usage</span>
       <button class="modal-close" onclick="closeModal('modal-edit-usage')">✕</button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="edit-usage-id"/>
       <div class="field">
-        <label>Usage type</label>
+        <label data-i18n="lbl_usage_type">Usage type</label>
         <select id="edit-usage-type">
           <option value="Match Day">Match Day</option>
           <option value="Training Session">Training Session</option>
@@ -5151,31 +5516,31 @@ init();
         </select>
       </div>
       <div class="field">
-        <label>Team name</label>
+        <label data-i18n="lbl_team">Team name</label>
         <input id="edit-usage-team" type="text"/>
       </div>
       <div class="field">
-        <label>Pitch area / zone</label>
+        <label data-i18n="lbl_zone">Pitch area / zone</label>
         <input id="edit-usage-zone" type="text"/>
       </div>
       <div class="field">
-        <label>Weather conditions</label>
+        <label data-i18n="lbl_weather">Weather conditions</label>
         <input id="edit-usage-weather" type="text"/>
       </div>
       <div class="field">
-        <label>Notes</label>
+        <label data-i18n="lbl_notes_short">Notes</label>
         <textarea id="edit-usage-notes" rows="2" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;resize:vertical;box-sizing:border-box"></textarea>
       </div>
       <div class="field">
-        <label>Usage date</label>
+        <label data-i18n="lbl_usage_date">Usage date</label>
         <input id="edit-usage-date" type="date"/>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div class="field"><label>Time from</label><input id="edit-usage-time-from" type="time"/></div>
-        <div class="field"><label>Time to</label><input id="edit-usage-time-to" type="time"/></div>
+        <div class="field"><label data-i18n="lbl_time_from">Time from</label><input id="edit-usage-time-from" type="time"/></div>
+        <div class="field"><label data-i18n="lbl_time_to">Time to</label><input id="edit-usage-time-to" type="time"/></div>
       </div>
       <div class="field">
-        <label>Status</label>
+        <label data-i18n="lbl_status">Status</label>
         <select id="edit-usage-status">
           <option value="planned">Planned</option>
           <option value="inprogress">In progress</option>
@@ -5191,9 +5556,9 @@ init();
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-danger" onclick="deleteUsage()">Delete</button>
-      <button class="btn btn-ghost" onclick="closeModal('modal-edit-usage')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveEditUsage()">Save changes</button>
+      <button class="btn btn-danger" onclick="deleteUsage()" data-i18n="btn_delete">Delete</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-edit-usage')" data-i18n="btn_cancel">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditUsage()" data-i18n="btn_save_changes">Save changes</button>
     </div>
   </div>
 </div>
@@ -5201,19 +5566,19 @@ init();
 <div class="modal-overlay" id="modal-admin-log-task">
   <div class="modal">
     <div class="modal-header">
-      <span class="modal-title">Log task</span>
+      <span class="modal-title" data-i18n="modal_admin_log_task">Log task</span>
       <button class="modal-close" onclick="closeModal('modal-admin-log-task')">✕</button>
     </div>
     <div class="modal-body">
       <div class="field">
-        <label>Venue</label>
+        <label data-i18n="lbl_venue_field">Venue</label>
         <select id="admin-task-venue" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px"></select>
       </div>
       <div class="field">
-        <label>Task type</label>
+        <label data-i18n="lbl_type">Task type</label>
         <select id="admin-task-type" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px"></select>
       </div>
-      <div class="field"><label>Pitch area / zone</label><select id="admin-task-zone-select" onchange="document.getElementById('admin-task-zone-custom-wrap').style.display=this.value==='Custom'?'block':'none'" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px">
+      <div class="field"><label data-i18n="lbl_zone">Pitch area / zone</label><select id="admin-task-zone-select" onchange="document.getElementById('admin-task-zone-custom-wrap').style.display=this.value==='Custom'?'block':'none'" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px">
           <option value="Full pitch">Full pitch</option>
           <option value="Goal mouth (N)">Goal mouth (N)</option>
           <option value="Goal mouth (S)">Goal mouth (S)</option>
@@ -5225,8 +5590,8 @@ init();
         <div id="admin-task-zone-custom-wrap" style="display:none;margin-top:6px">
           <input id="admin-task-zone-custom" type="text" placeholder="Describe zone..."/>
         </div></div>
-      <div class="field"><label>Equipment used</label><input id="admin-task-equipment" type="text" placeholder="e.g. Pedestrian spreader"/></div>
-      <div class="field"><label>Weather conditions</label><input id="admin-task-weather" type="text" placeholder="e.g. sunny, 18°C"/></div>
+      <div class="field"><label data-i18n="lbl_equipment">Equipment used</label><input id="admin-task-equipment" type="text" placeholder="e.g. Pedestrian spreader"/></div>
+      <div class="field"><label data-i18n="lbl_weather">Weather conditions</label><input id="admin-task-weather" type="text" placeholder="e.g. sunny, 18°C"/></div>
       <div class="field"><label>Done by (staff)</label>
         <div style="display:flex;gap:6px;margin-bottom:6px">
           <input id="admin-task-staff-input" type="text" placeholder="Add name..." style="flex:1"/>
@@ -5234,13 +5599,13 @@ init();
         </div>
         <div id="admin-task-staff-tags" style="display:flex;flex-wrap:wrap;gap:6px"></div>
       </div>
-      <div class="field"><label>Notes</label><textarea id="admin-task-notes" rows="2" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;resize:vertical;box-sizing:border-box"></textarea></div>
+      <div class="field"><label data-i18n="lbl_notes_short">Notes</label><textarea id="admin-task-notes" rows="2" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;resize:vertical;box-sizing:border-box"></textarea></div>
       <div class="field"><label>Task date</label><input id="admin-task-date" type="date"/></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div class="field"><label>Time from</label><input id="admin-task-time-from" type="time" value="08:00"/></div>
-        <div class="field"><label>Time to</label><input id="admin-task-time-to" type="time" value="17:00"/></div>
+        <div class="field"><label data-i18n="lbl_time_from">Time from</label><input id="admin-task-time-from" type="time" value="08:00"/></div>
+        <div class="field"><label data-i18n="lbl_time_to">Time to</label><input id="admin-task-time-to" type="time" value="17:00"/></div>
       </div>
-      <div class="field"><label>Status</label>
+      <div class="field"><label data-i18n="lbl_status">Status</label>
         <select id="admin-task-status">
           <option value="planned">Planned</option>
           <option value="inprogress">In progress</option>
@@ -5249,8 +5614,8 @@ init();
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-admin-log-task')">Cancel</button>
-      <button class="btn btn-primary" onclick="adminLogTask()">Save task</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-admin-log-task')" data-i18n="btn_cancel">Cancel</button>
+      <button class="btn btn-primary" onclick="adminLogTask()" data-i18n="btn_save_task">Save task</button>
     </div>
   </div>
 </div>
@@ -5259,23 +5624,23 @@ init();
 <div class="modal-overlay" id="modal-admin-log-usage">
   <div class="modal">
     <div class="modal-header">
-      <span class="modal-title">Log pitch usage</span>
+      <span class="modal-title" data-i18n="modal_log_usage">Log pitch usage</span>
       <button class="modal-close" onclick="closeModal('modal-admin-log-usage')">✕</button>
     </div>
     <div class="modal-body">
       <div class="field">
-        <label>Venue</label>
+        <label data-i18n="lbl_venue_field">Venue</label>
         <select id="admin-usage-venue" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px"></select>
       </div>
-      <div class="field"><label>Usage type</label>
+      <div class="field"><label data-i18n="lbl_usage_type">Usage type</label>
         <select id="admin-usage-type" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px">
           <option value="Match Day">Match Day</option>
           <option value="Training Session">Training Session</option>
           <option value="Other">Other</option>
         </select>
       </div>
-      <div class="field"><label>Team name</label><input id="admin-usage-team" type="text" placeholder="e.g. FC Barcelona U20"/></div>
-      <div class="field"><label>Pitch area / zone</label><select id="admin-usage-zone-select" onchange="document.getElementById('admin-usage-zone-custom-wrap').style.display=this.value==='Custom'?'block':'none'" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px">
+      <div class="field"><label data-i18n="lbl_team">Team name</label><input id="admin-usage-team" type="text" placeholder="e.g. FC Barcelona U20"/></div>
+      <div class="field"><label data-i18n="lbl_zone">Pitch area / zone</label><select id="admin-usage-zone-select" onchange="document.getElementById('admin-usage-zone-custom-wrap').style.display=this.value==='Custom'?'block':'none'" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px">
           <option value="Full pitch">Full pitch</option>
           <option value="Goal mouth (N)">Goal mouth (N)</option>
           <option value="Goal mouth (S)">Goal mouth (S)</option>
@@ -5287,14 +5652,14 @@ init();
         <div id="admin-usage-zone-custom-wrap" style="display:none;margin-top:6px">
           <input id="admin-usage-zone-custom" type="text" placeholder="Describe zone..."/>
         </div></div>
-      <div class="field"><label>Weather conditions</label><input id="admin-usage-weather" type="text" placeholder="e.g. sunny, 18°C"/></div>
-      <div class="field"><label>Notes</label><textarea id="admin-usage-notes" rows="2" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;resize:vertical;box-sizing:border-box"></textarea></div>
-      <div class="field"><label>Usage date</label><input id="admin-usage-date" type="date"/></div>
+      <div class="field"><label data-i18n="lbl_weather">Weather conditions</label><input id="admin-usage-weather" type="text" placeholder="e.g. sunny, 18°C"/></div>
+      <div class="field"><label data-i18n="lbl_notes_short">Notes</label><textarea id="admin-usage-notes" rows="2" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;resize:vertical;box-sizing:border-box"></textarea></div>
+      <div class="field"><label data-i18n="lbl_usage_date">Usage date</label><input id="admin-usage-date" type="date"/></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div class="field"><label>Time from</label><input id="admin-usage-time-from" type="time" value="08:00"/></div>
-        <div class="field"><label>Time to</label><input id="admin-usage-time-to" type="time" value="17:00"/></div>
+        <div class="field"><label data-i18n="lbl_time_from">Time from</label><input id="admin-usage-time-from" type="time" value="08:00"/></div>
+        <div class="field"><label data-i18n="lbl_time_to">Time to</label><input id="admin-usage-time-to" type="time" value="17:00"/></div>
       </div>
-      <div class="field"><label>Status</label>
+      <div class="field"><label data-i18n="lbl_status">Status</label>
         <select id="admin-usage-status">
           <option value="planned">Planned</option>
           <option value="inprogress">In progress</option>
@@ -5303,8 +5668,8 @@ init();
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-admin-log-usage')">Cancel</button>
-      <button class="btn btn-primary" onclick="adminLogUsage()" style="background:linear-gradient(135deg,#7C3AED,#6D28D9);border:none">Save usage</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-admin-log-usage')" data-i18n="btn_cancel">Cancel</button>
+      <button class="btn btn-primary" onclick="adminLogUsage()" style="background:linear-gradient(135deg,#7C3AED,#6D28D9);border:none" data-i18n="btn_save_usage">Save usage</button>
     </div>
   </div>
 </div>
@@ -5313,7 +5678,7 @@ init();
 <div class="modal-overlay" id="modal-dnd-choice">
   <div class="modal" style="max-width:320px;text-align:center">
     <div class="modal-header">
-      <span class="modal-title">Move or Copy?</span>
+      <span class="modal-title" data-i18n="modal_dnd">Move or Copy?</span>
       <button class="modal-close" onclick="closeModal('modal-dnd-choice');_pendingDrop=null">✕</button>
     </div>
     <div class="modal-body" style="padding:1rem 1.5rem">
