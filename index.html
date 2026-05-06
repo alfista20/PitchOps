@@ -2975,6 +2975,7 @@ function openEditModal(opId){
 }
 
 async function saveEditOperation(){
+  try {
   const id=document.getElementById('edit-op-id').value;
   const idx=state.operations.findIndex(o=>o.id===id); if(idx===-1) return;
   const editDateVal=(document.getElementById('edit-op-date').value||'').slice(0,10);
@@ -3014,6 +3015,7 @@ async function saveEditOperation(){
   }
   if(document.getElementById('ptab-calendar-content')?.style.display==='block') renderGantt();
   showToast(t('toast_task_updated'));
+  } catch(err){ console.error('saveEditOperation:',err); showToast('Error: '+err.message); }
 }
 
 async function deleteOperation(){
@@ -3619,8 +3621,8 @@ async function renderGantt(){
       const usageOverflow=dayUsage.length>3?`<div style="font-size:8px;color:#7C3AED;padding:1px 3px;background:#F3E8FF;border-radius:3px;display:inline-block;margin-top:1px">+${dayUsage.length-3} ${t('more_suffix')}</div>`:'';
       const opsDisplay=dayOps.length>3?dayOps.slice(0,3).map(o=>{const cs=chipStyle[o.status]||chipStyle.planned;const tl=o.timeFrom&&o.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${o.timeFrom}–${o.timeTo}</span>`:'';return `<div draggable="true" class="gantt-chip" ondragstart="onDragStart(event,'op','${o.id}','${dStr}','${v.id}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditModal('${o.id}')" style="${cs}">${esc(o.type)}${tl}</div>`;}).join('')+opsOverflow:opsChips;
       const usageDisplay=dayUsage.length>3?dayUsage.slice(0,3).map(u=>{const cs=usageChipStyle[u.status]||usageChipStyle.planned;const tl=u.timeFrom&&u.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${u.timeFrom}–${u.timeTo}</span>`:'';return `<div draggable="true" class="gantt-chip" ondragstart="onDragStart(event,'usage','${u.id}','${dStr}','${v.id}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditUsageModal('${u.id}')" style="${cs}">⚽ ${esc(u.usageType)}${tl}</div>`;}).join('')+usageOverflow:usageChips;
-      cells+=`<td onclick="if(!document.querySelector('.modal-overlay.open'))openAdminLogTaskModal('${dStr}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px;border-right:1px dashed rgba(0,0,0,0.06);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgT};min-height:40px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsDisplay}</td>
-      <td onclick="if(!document.querySelector('.modal-overlay.open'))openAdminLogUsageModal('${dStr}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:40px;min-width:65px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageDisplay}</td>`;
+      cells+=`<td onclick="if(!document.querySelector('.modal-overlay.open'))openAdminLogTaskModal('${dStr}','${v.id}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px;border-right:1px dashed rgba(0,0,0,0.06);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgT};min-height:40px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsDisplay}</td>
+      <td onclick="if(!document.querySelector('.modal-overlay.open'))openAdminLogUsageModal('${dStr}','${v.id}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:40px;min-width:65px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageDisplay}</td>`;
     });
     rows+=`<tr>${cells}</tr>`;
   });
@@ -4086,9 +4088,17 @@ function openEditUsageModal(id){
 }
 
 async function saveEditUsage(){
+  try {
   const id=document.getElementById('edit-usage-id').value;
-  const idx=state_usage.findIndex(u=>u.id===id); if(idx===-1) return;
-  state_usage[idx]={...state_usage[idx],
+  // Find in state_usage (venue context) or state_admin_usage (admin context)
+  let idx=state_usage.findIndex(u=>u.id===id);
+  let arr=state_usage;
+  if(idx===-1 && typeof state_admin_usage!=='undefined'){
+    idx=state_admin_usage.findIndex(u=>u.id===id);
+    arr=state_admin_usage;
+  }
+  if(idx===-1) return;
+  arr[idx]={...arr[idx],
     usageType:document.getElementById('edit-usage-type').value,
     teamName:document.getElementById('edit-usage-team').value.trim(),
     zone:document.getElementById('edit-usage-zone').value.trim(),
@@ -4100,7 +4110,7 @@ async function saveEditUsage(){
     status:document.getElementById('edit-usage-status').value,
     photos:currentUsagePhotos.edit.map(p=>({dataUrl:p.dataUrl,name:p.name||'photo'})),
   };
-  const {error}=await supa.from('pitchops_usage').update(usageToDb(state_usage[idx])).eq('id',id);
+  const {error}=await supa.from('pitchops_usage').update(usageToDb(arr[idx])).eq('id',id);
   if(error){ showToast('Error: '+error.message); return; }
   closeModal('modal-edit-usage');
   renderVenueUsageToday(); renderVenueUsageHistory();
@@ -4108,6 +4118,7 @@ async function saveEditUsage(){
     renderWeekCalendar(state.currentVenueId,'venue-sched-grid',venueSchedOffset);
   }
   showToast(t('toast_usage_updated'));
+  } catch(err){ console.error('saveEditUsage:',err); showToast('Error: '+err.message); }
 }
 
 async function deleteUsage(){
@@ -4116,8 +4127,10 @@ async function deleteUsage(){
   const {error}=await supa.from('pitchops_usage').delete().eq('id',id);
   if(error){ showToast('Error: '+error.message); return; }
   state_usage=state_usage.filter(u=>u.id!==id);
+  if(typeof state_admin_usage!=='undefined') state_admin_usage=state_admin_usage.filter(u=>u.id!==id);
   closeModal('modal-edit-usage');
   renderVenueUsageToday(); renderVenueUsageHistory();
+  renderDetailUsage();
   if(document.getElementById('vtab-schedule-content')?.style.display==='block'){
     renderWeekCalendar(state.currentVenueId,'venue-sched-grid',venueSchedOffset);
   }
@@ -4267,12 +4280,13 @@ function openLightboxFromUsage(id, i){
 }
 
 // ── ADMIN LOG TASK MODAL ──
-function openAdminLogTaskModal(dateStr){
+function openAdminLogTaskModal(dateStr, venueId){
   try {
   const pid=state.currentProjectId; if(!pid) return;
   const venues=projectVenues(pid);
   const vsel=document.getElementById('admin-task-venue');
   vsel.innerHTML=venues.map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('');
+  if(venueId) vsel.value=venueId;
   const tsel=document.getElementById('admin-task-type');
   tsel.innerHTML=state.opTypes.map(tp=>`<option value="${esc(tp)}">${esc(tp)}</option>`).join('');
   document.getElementById('admin-task-date').value=dateStr||todayStr();
@@ -4333,12 +4347,13 @@ async function adminLogTask(){
 }
 
 // ── ADMIN LOG USAGE MODAL ──
-function openAdminLogUsageModal(dateStr){
+function openAdminLogUsageModal(dateStr, venueId){
   try {
   const pid=state.currentProjectId; if(!pid) return;
   const venues=projectVenues(pid);
   const vsel=document.getElementById('admin-usage-venue');
   vsel.innerHTML=venues.map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('');
+  if(venueId) vsel.value=venueId;
   document.getElementById('admin-usage-date').value=dateStr||todayStr();
   document.getElementById('admin-usage-zone-select').value='Full pitch';
   document.getElementById('admin-usage-zone-custom-wrap').style.display='none';
