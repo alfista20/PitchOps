@@ -581,10 +581,10 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       <div style="background:white;border-radius:12px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);padding:1rem 1.25rem;margin-bottom:1rem;display:flex;flex-wrap:wrap;align-items:center;gap:.75rem">
         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
           <span style="font-size:12px;font-weight:600;color:var(--text-muted)">Period:</span>
-          <button onclick="setStatsPeriod('week',this)" class="stats-period-btn">Week</button>
-          <button onclick="setStatsPeriod('month',this)" class="stats-period-btn stats-period-active">Month</button>
-          <button onclick="setStatsPeriod('quarter',this)" class="stats-period-btn">Quarter</button>
-          <button onclick="setStatsPeriod('custom',this)" class="stats-period-btn">Custom</button>
+          <button onclick="setStatsPeriod('week',this)" class="stats-period-btn" data-i18n="period_week">Week</button>
+          <button onclick="setStatsPeriod('month',this)" class="stats-period-btn stats-period-active" data-i18n="period_month">Month</button>
+          <button onclick="setStatsPeriod('quarter',this)" class="stats-period-btn" data-i18n="period_quarter">Quarter</button>
+          <button onclick="setStatsPeriod('custom',this)" class="stats-period-btn" data-i18n="period_custom">Custom</button>
         </div>
         <div id="stats-custom-dates" style="display:none;gap:6px;align-items:center">
           <input type="date" id="stats-from" onchange="renderStatsSingle()" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif"/>
@@ -894,8 +894,8 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
   <div style="background:white;border-bottom:1px solid var(--border);padding:0 1.25rem;display:flex;flex-shrink:0">
     <button id="vtab-log" onclick="switchVenueTab('log')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid var(--blue);background:white;color:var(--blue);cursor:pointer;font-family:'DM Sans',sans-serif" data-i18n="tab_log">🗒 Log task</button>
     <button id="vtab-usage" onclick="switchVenueTab('usage')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif" data-i18n="tab_usage">⏱ Log usage</button>
-    <button id="vtab-schedule" onclick="switchVenueTab('schedule')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif">📅 Schedule</button>
-    <button id="vtab-stats" onclick="switchVenueTab('stats')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif">📊 Stats</button>
+    <button id="vtab-schedule" data-i18n="tab_schedule" onclick="switchVenueTab('schedule')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif">📅 Schedule</button>
+    <button id="vtab-stats" data-i18n="tab_stats" onclick="switchVenueTab('stats')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif">📊 Stats</button>
 
 
 
@@ -968,10 +968,10 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     <div style="background:white;border-radius:14px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);padding:1rem 1.25rem;margin-bottom:1rem;display:flex;flex-wrap:wrap;align-items:center;gap:.75rem">
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
         <span style="font-size:12px;font-weight:600;color:var(--text-muted)">Period:</span>
-        <button onclick="setVenueStatsPeriod('week',this)" class="stats-period-btn">Week</button>
-        <button onclick="setVenueStatsPeriod('month',this)" class="stats-period-btn stats-period-active">Month</button>
-        <button onclick="setVenueStatsPeriod('quarter',this)" class="stats-period-btn">Quarter</button>
-        <button onclick="setVenueStatsPeriod('custom',this)" class="stats-period-btn">Custom</button>
+        <button onclick="setVenueStatsPeriod('week',this)" class="stats-period-btn" data-i18n="period_week">Week</button>
+        <button onclick="setVenueStatsPeriod('month',this)" class="stats-period-btn stats-period-active" data-i18n="period_month">Month</button>
+        <button onclick="setVenueStatsPeriod('quarter',this)" class="stats-period-btn" data-i18n="period_quarter">Quarter</button>
+        <button onclick="setVenueStatsPeriod('custom',this)" class="stats-period-btn" data-i18n="period_custom">Custom</button>
       </div>
       <div id="vstats-custom-dates" style="display:none;gap:6px;align-items:center">
         <input type="date" id="vstats-from" onchange="renderVenueStats_tab()" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif"/>
@@ -1013,8 +1013,8 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
             <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:50%;background:#A32D2D;display:inline-block"></span><span data-i18n="legend_missed">Missed</span></span>
           </div>
         </div>
-        <button onclick="openLogTaskModal()" style="padding:7px 16px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 2px 8px rgba(24,95,165,.3)">+ Log task</button>
-        <button onclick="openLogUsageModal()" style="padding:7px 16px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 2px 8px rgba(124,58,237,.3)">+ Log usage</button>
+        <button onclick="openLogTaskModal()" style="padding:7px 16px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 2px 8px rgba(24,95,165,.3)" data-i18n="btn_log_task">+ Log task</button>
+        <button onclick="openLogUsageModal()" style="padding:7px 16px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 2px 8px rgba(124,58,237,.3)" data-i18n="btn_log_usage">+ Log usage</button>
       </div>
       <div id="venue-sched-grid" style="overflow-x:auto;width:100%"></div>
     </div>
@@ -1661,6 +1661,7 @@ const i18n = {
     no_venues:'No venues in this project.',no_venues_add:'No venues yet. Click "+ Add venue".',
     more_suffix:'more',
     all_venues_back:'← All venues',all_venues:'All venues',all_types:'All types',view_day:'Day',view_week:'Week',view_month:'Month',
+    period_week:'Week',period_month:'Month',period_quarter:'Quarter',period_custom:'Custom',
   },
   pl:{
     stat_total:'Ten miesiąc',stat_last:'Ostatnia op.',stat_common:'Dominuje',
@@ -1699,6 +1700,7 @@ const i18n = {
     no_venues:'Brak obiektów w projekcie.',no_venues_add:'Brak obiektów. Kliknij „+ Dodaj obiekt".',
     more_suffix:'więcej',
     all_venues_back:'← Wszystkie obiekty',all_venues:'Wszystkie obiekty',all_types:'Wszystkie typy',view_day:'Dzień',view_week:'Tydzień',view_month:'Miesiąc',
+    period_week:'Tydzień',period_month:'Miesiąc',period_quarter:'Kwartał',period_custom:'Własny',
   },
   es:{
     stat_total:'Este mes',stat_last:'Última op.',stat_common:'Más común',
@@ -1737,6 +1739,7 @@ const i18n = {
     no_venues:'Sin recintos en este proyecto.',no_venues_add:'Sin recintos. Haz clic en "+ Añadir recinto".',
     more_suffix:'más',
     all_venues_back:'← Todos los recintos',all_venues:'Todos los recintos',all_types:'Todos los tipos',view_day:'Día',view_week:'Semana',view_month:'Mes',
+    period_week:'Semana',period_month:'Mes',period_quarter:'Trimestre',period_custom:'Personalizado',
   },
   fr:{
     stat_total:'Ce mois',stat_last:'Dernière op.',stat_common:'Plus fréquent',
@@ -1775,6 +1778,7 @@ const i18n = {
     no_venues:'Aucun site dans ce projet.',no_venues_add:'Aucun site. Cliquez sur "+ Ajouter site".',
     more_suffix:'autres',
     all_venues_back:'← Tous les sites',all_venues:'Tous les sites',all_types:'Tous les types',view_day:'Jour',view_week:'Semaine',view_month:'Mois',
+    period_week:'Semaine',period_month:'Mois',period_quarter:'Trimestre',period_custom:'Personnalisé',
   },
   de:{
     stat_total:'Diesen Monat',stat_last:'Letzte Op.',stat_common:'Häufigste',
@@ -1813,6 +1817,7 @@ const i18n = {
     no_venues:'Keine Standorte in diesem Projekt.',no_venues_add:'Keine Standorte. Auf "+ Standort hinzufügen" klicken.',
     more_suffix:'weitere',
     all_venues_back:'← Alle Standorte',all_venues:'Alle Standorte',all_types:'Alle Typen',view_day:'Tag',view_week:'Woche',view_month:'Monat',
+    period_week:'Woche',period_month:'Monat',period_quarter:'Quartal',period_custom:'Benutzerdefiniert',
   },
   pt:{
     stat_total:'Este mês',stat_last:'Última op.',stat_common:'Mais comum',
@@ -1851,6 +1856,7 @@ const i18n = {
     no_venues:'Sem instalações neste projeto.',no_venues_add:'Sem instalações. Clique em "+ Adicionar instalação".',
     more_suffix:'mais',
     all_venues_back:'← Todos os locais',all_venues:'Todos os locais',all_types:'Todos os tipos',view_day:'Dia',view_week:'Semana',view_month:'Mês',
+    period_week:'Semana',period_month:'Mês',period_quarter:'Trimestre',period_custom:'Personalizado',
   },
 };
 function t(k){ return (i18n[state.lang]||i18n.en)[k]||k; }
@@ -1865,8 +1871,8 @@ function _updateSelectOptions(selId, opts){
   sel.value=cur;
 }
 
-function setLang(l){
-  state.lang=l; try{localStorage.setItem('pitchops_lang',l);}catch(e){}
+// Apply translations to DOM without changing state (safe to call after any render)
+function applyTranslations(l){
   const T=i18n[l]||i18n.en;
   // Static data-i18n elements
   document.querySelectorAll('[data-i18n]').forEach(el=>{ const v=T[el.dataset.i18n]; if(v) el.textContent=v; });
@@ -1929,6 +1935,11 @@ function setLang(l){
   if(document.getElementById('ptab-calendar-content')?.style.display==='block' && typeof renderGantt==='function') renderGantt();
   if(document.getElementById('vtab-schedule-content')?.style.display==='block' && state.currentVenueId && typeof renderWeekCalendar==='function')
     renderWeekCalendar(state.currentVenueId,'venue-sched-grid',typeof venueSchedOffset!=='undefined'?venueSchedOffset:0);
+}
+
+function setLang(l){
+  state.lang=l; try{localStorage.setItem('pitchops_lang',l);}catch(e){}
+  applyTranslations(l);
 }
 
 // ════════════════════════════════════════
@@ -2251,6 +2262,7 @@ function openProject(pid){
   showScreen('screen-project-detail');
   refreshProjectOps(pid, true);
   refreshProjectUsage(pid, true);
+  applyTranslations(state.lang);
 }
 
 function updateDetailStats(pid){
@@ -2474,6 +2486,8 @@ async function enterVenueDashboard(venue){
   populateOpTypeSelects();
   renderVenueContactInfo();
   switchVenueTab('log');
+  // Re-apply translations after screen is rendered
+  applyTranslations(state.lang);
 }
 
 function venueOps(){ return state.operations.filter(o=>o.venueId===state.currentVenueId).sort((a,b)=>new Date(b.date)-new Date(a.date)); }
