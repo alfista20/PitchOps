@@ -4280,7 +4280,6 @@ function openAdminLogTaskModal(dateStr){
   document.getElementById('admin-task-zone-custom').value='';
   document.getElementById('admin-task-time-from').value='08:00';
   document.getElementById('admin-task-time-to').value='17:00';
-  document.getElementById('admin-task-zone').value='';
   document.getElementById('admin-task-equipment').value='';
   document.getElementById('admin-task-weather').value='';
   document.getElementById('admin-task-notes').value='';
@@ -4307,7 +4306,9 @@ async function adminLogTask(){
   const op={
     id:'op_'+Date.now(), venueId,
     type:document.getElementById('admin-task-type').value,
-    zone:document.getElementById('admin-task-zone').value.trim()||'Full pitch',
+    zone:(document.getElementById('admin-task-zone-select').value==='Custom'
+      ?document.getElementById('admin-task-zone-custom').value.trim()
+      :document.getElementById('admin-task-zone-select').value)||'Full pitch',
     equipment:document.getElementById('admin-task-equipment').value.trim(),
     weather:document.getElementById('admin-task-weather').value.trim(),
     staff:[...adminTaskStaff],
@@ -4342,7 +4343,6 @@ function openAdminLogUsageModal(dateStr){
   document.getElementById('admin-usage-time-to').value='17:00';
   document.getElementById('admin-usage-type').value='Training Session';
   document.getElementById('admin-usage-team').value='';
-  document.getElementById('admin-usage-zone').value='';
   document.getElementById('admin-usage-weather').value='';
   document.getElementById('admin-usage-notes').value='';
   document.getElementById('admin-usage-status').value='planned';
