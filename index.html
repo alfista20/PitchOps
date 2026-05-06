@@ -4288,7 +4288,7 @@ function openAdminLogTaskModal(dateStr){
   adminTaskStaff=[];
   renderAdminTaskStaffTags();
   openModal('modal-admin-log-task');
-  } catch(err){ showToast('ERR openAdminLogTask: '+err.message); console.error(err); }
+  } catch(err){ console.error('openAdminLogTask:', err); }
 }
 
 function addAdminTaskStaff(){
@@ -4350,7 +4350,7 @@ function openAdminLogUsageModal(dateStr){
   document.getElementById('admin-usage-notes').value='';
   document.getElementById('admin-usage-status').value='planned';
   openModal('modal-admin-log-usage');
-  } catch(err){ showToast('ERR openAdminLogUsage: '+err.message); console.error(err); }
+  } catch(err){ console.error('openAdminLogUsage:', err); }
 }
 
 async function adminLogUsage(){
