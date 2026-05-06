@@ -259,6 +259,41 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 .gantt-day-cell.today-col:hover{background:var(--blue-pale)}
 .op-chip{border-radius:4px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;cursor:pointer;transition:opacity .12s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;max-width:100%}
 .op-chip:hover{opacity:.8}
+/* Schedule chip hover — inline-style chips need this class injected via JS */
+.sched-chip{
+  border-radius:4px;padding:3px 6px;font-size:10px;font-weight:600;
+  margin-bottom:3px;cursor:grab;display:block;
+  transition:transform .12s, box-shadow .12s, filter .1s;
+  position:relative;
+  will-change:transform;
+}
+.sched-chip:hover{
+  transform:translateY(-1px) scale(1.04);
+  box-shadow:0 3px 10px rgba(12,35,64,.18);
+  filter:brightness(1.06);
+  z-index:10;
+}
+.sched-chip:active{
+  transform:scale(.97);
+  box-shadow:0 1px 4px rgba(12,35,64,.12);
+}
+/* Gantt chip (slightly smaller) */
+.gantt-chip{
+  border-radius:3px;padding:2px 5px;font-size:9px;font-weight:600;
+  margin-bottom:2px;cursor:grab;display:block;
+  transition:transform .12s, box-shadow .12s, filter .1s;
+  position:relative;
+  will-change:transform;
+}
+.gantt-chip:hover{
+  transform:translateY(-1px) scale(1.05);
+  box-shadow:0 3px 10px rgba(12,35,64,.2);
+  filter:brightness(1.07);
+  z-index:10;
+}
+.gantt-chip:active{
+  transform:scale(.96);
+}
 .chip-planned{background:var(--amber-pale);color:var(--amber);border-left:2px solid var(--amber)}
 .chip-inprogress{background:var(--blue-pale);color:var(--blue);border-left:2px solid var(--blue)}
 .chip-completed{background:var(--green-pale);color:var(--green);border-left:2px solid var(--green)}
@@ -2890,19 +2925,19 @@ async function renderGantt(){
       const opsChips=dayOps.map(o=>{
         const cs=chipStyle[o.status]||chipStyle.planned;
         const tl=o.timeFrom&&o.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${o.timeFrom}–${o.timeTo}</span>`:'';
-        return `<div draggable="true" ondragstart="onDragStart(event,'op','${o.id}','${dStr}','${v.id}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditModal('${o.id}')" style="border-radius:3px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;cursor:grab;${cs}">${esc(o.type)}${tl}</div>`;
+        return `<div draggable="true" class="gantt-chip" ondragstart="onDragStart(event,'op','${o.id}','${dStr}','${v.id}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditModal('${o.id}')" style="${cs}">${esc(o.type)}${tl}</div>`;
       }).join('');
 
       const usageChips=dayUsage.map(u=>{
         const cs=usageChipStyle[u.status]||usageChipStyle.planned;
         const tl=u.timeFrom&&u.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${u.timeFrom}–${u.timeTo}</span>`:'';
-        return `<div draggable="true" ondragstart="onDragStart(event,'usage','${u.id}','${dStr}','${v.id}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditUsageModal('${u.id}')" style="border-radius:3px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;cursor:grab;${cs}">⚽ ${esc(u.usageType)}${tl}</div>`;
+        return `<div draggable="true" class="gantt-chip" ondragstart="onDragStart(event,'usage','${u.id}','${dStr}','${v.id}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditUsageModal('${u.id}')" style="${cs}">⚽ ${esc(u.usageType)}${tl}</div>`;
       }).join('');
 
       const opsOverflow=dayOps.length>3?`<div style="font-size:8px;color:#185FA5;padding:1px 3px;background:#E6F1FB;border-radius:3px;display:inline-block;margin-top:1px">+${dayOps.length-3} more</div>`:'';
       const usageOverflow=dayUsage.length>3?`<div style="font-size:8px;color:#7C3AED;padding:1px 3px;background:#F3E8FF;border-radius:3px;display:inline-block;margin-top:1px">+${dayUsage.length-3} more</div>`:'';
-      const opsDisplay=dayOps.length>3?dayOps.slice(0,3).map(o=>{const cs=chipStyle[o.status]||chipStyle.planned;const tl=o.timeFrom&&o.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${o.timeFrom}–${o.timeTo}</span>`:'';return `<div draggable="true" ondragstart="onDragStart(event,'op','${o.id}','${dStr}','${v.id}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditModal('${o.id}')" style="border-radius:3px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;cursor:grab;${cs}">${esc(o.type)}${tl}</div>`;}).join('')+opsOverflow:opsChips;
-      const usageDisplay=dayUsage.length>3?dayUsage.slice(0,3).map(u=>{const cs=usageChipStyle[u.status]||usageChipStyle.planned;const tl=u.timeFrom&&u.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${u.timeFrom}–${u.timeTo}</span>`:'';return `<div draggable="true" ondragstart="onDragStart(event,'usage','${u.id}','${dStr}','${v.id}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditUsageModal('${u.id}')" style="border-radius:3px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;cursor:grab;${cs}">⚽ ${esc(u.usageType)}${tl}</div>`;}).join('')+usageOverflow:usageChips;
+      const opsDisplay=dayOps.length>3?dayOps.slice(0,3).map(o=>{const cs=chipStyle[o.status]||chipStyle.planned;const tl=o.timeFrom&&o.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${o.timeFrom}–${o.timeTo}</span>`:'';return `<div draggable="true" class="gantt-chip" ondragstart="onDragStart(event,'op','${o.id}','${dStr}','${v.id}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditModal('${o.id}')" style="${cs}">${esc(o.type)}${tl}</div>`;}).join('')+opsOverflow:opsChips;
+      const usageDisplay=dayUsage.length>3?dayUsage.slice(0,3).map(u=>{const cs=usageChipStyle[u.status]||usageChipStyle.planned;const tl=u.timeFrom&&u.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${u.timeFrom}–${u.timeTo}</span>`:'';return `<div draggable="true" class="gantt-chip" ondragstart="onDragStart(event,'usage','${u.id}','${dStr}','${v.id}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditUsageModal('${u.id}')" style="${cs}">⚽ ${esc(u.usageType)}${tl}</div>`;}).join('')+usageOverflow:usageChips;
       cells+=`<td onclick="if(!document.querySelector('.modal-overlay.open'))openAdminLogTaskModal('${dStr}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px;border-right:1px dashed rgba(0,0,0,0.06);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgT};min-height:40px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsDisplay}</td>
       <td onclick="if(!document.querySelector('.modal-overlay.open'))openAdminLogUsageModal('${dStr}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:40px;min-width:65px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageDisplay}</td>`;
     });
@@ -3064,13 +3099,13 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
     const opsChips=dayOps.map(o=>{
       const cs=chipStyle[o.status]||chipStyle.planned;
       const tl=o.timeFrom&&o.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${o.timeFrom}–${o.timeTo}</span>`:'';
-      return `<div draggable="true" ondragstart="onDragStart(event,'op','${o.id}','${dStr}','${venueId}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditModal('${o.id}')" style="border-radius:4px;padding:3px 6px;font-size:10px;font-weight:600;margin-bottom:3px;cursor:grab;${cs}">${esc(o.type)}${tl}</div>`;
+      return `<div draggable="true" class="sched-chip" ondragstart="onDragStart(event,'op','${o.id}','${dStr}','${venueId}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditModal('${o.id}')" style="${cs}">${esc(o.type)}${tl}</div>`;
     }).join('');
 
     const usageChips=dayUsage.map(u=>{
       const cs=usageChipStyle[u.status]||usageChipStyle.planned;
       const tl=u.timeFrom&&u.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${u.timeFrom}–${u.timeTo}</span>`:'';
-      return `<div draggable="true" ondragstart="onDragStart(event,'usage','${u.id}','${dStr}','${venueId}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditUsageModal('${u.id}')" style="border-radius:4px;padding:3px 6px;font-size:10px;font-weight:600;margin-bottom:3px;cursor:grab;${cs}">⚽ ${esc(u.usageType)}${tl}</div>`;
+      return `<div draggable="true" class="sched-chip" ondragstart="onDragStart(event,'usage','${u.id}','${dStr}','${venueId}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditUsageModal('${u.id}')" style="${cs}">⚽ ${esc(u.usageType)}${tl}</div>`;
     }).join('');
 
     cells+=`<td onclick="openLogTaskModal('${dStr}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${venueId}')" style="padding:4px;border-right:1px dashed rgba(0,0,0,0.07);vertical-align:top;cursor:pointer;background:${bgT};min-height:50px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsChips||''}</td>
