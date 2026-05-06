@@ -1602,7 +1602,7 @@ function dbToOp(r){
 
 function projectToDb(p){ return {id:p.id,code:p.code,name:p.name,country:p.country,status:p.status,color:p.color,viewer_token:p.viewerToken||null}; }
 function venueToDb(v){ return {id:v.id,name:v.name,city:v.city,color:v.color,token:v.token,project_ids:v.projectIds,venue_type:v.venueType||'Stadium',responsible_person:v.responsiblePerson||null,contact_phone:v.contactPhone||null,contact_email:v.contactEmail||null}; }
-function opToDb(o){ return {id:o.id,venue_id:o.venueId,type:o.type,zone:o.zone,equipment:o.equipment,weather:o.weather,staff:o.staff,notes:o.notes,operation_date:(o.date||'').slice(0,10),time_from:o.timeFrom||'08:00',time_to:o.timeTo||'17:00',status:o.status||'inprogress',photos:o.photos,flagged:o.flagged||false,admin_comment:o.adminComment||''}; }
+function opToDb(o){ if(!o.venueId||o.venueId==='undefined') throw new Error('venueId missing in opToDb'); return {id:o.id,venue_id:o.venueId,type:o.type,zone:o.zone,equipment:o.equipment,weather:o.weather,staff:o.staff,notes:o.notes,operation_date:(o.date||'').slice(0,10),time_from:o.timeFrom||'08:00',time_to:o.timeTo||'17:00',status:o.status||'inprogress',photos:o.photos,flagged:o.flagged||false,admin_comment:o.adminComment||''}; }
 
 // ── LOADING INDICATOR ──
 function showLoading(on){
@@ -4285,8 +4285,9 @@ function openAdminLogTaskModal(dateStr, venueId){
   const pid=state.currentProjectId; if(!pid) return;
   const venues=projectVenues(pid);
   const vsel=document.getElementById('admin-task-venue');
-  vsel.innerHTML=venues.map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('');
-  if(venueId) vsel.value=venueId;
+  const validVenues=venues.filter(v=>v.id);
+  vsel.innerHTML=validVenues.map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('');
+  if(venueId && vsel.querySelector('option[value="'+venueId+'"]')) vsel.value=venueId;
   const tsel=document.getElementById('admin-task-type');
   tsel.innerHTML=state.opTypes.map(tp=>`<option value="${esc(tp)}">${esc(tp)}</option>`).join('');
   document.getElementById('admin-task-date').value=dateStr||todayStr();
@@ -4318,7 +4319,8 @@ function renderAdminTaskStaffTags(){
 }
 
 async function adminLogTask(){
-  const venueId=document.getElementById('admin-task-venue').value; if(!venueId) return;
+  const venueId=document.getElementById('admin-task-venue').value;
+  if(!venueId){ showToast(t('lbl_venue_field')+' required'); return; }
   const op={
     id:'op_'+Date.now(), venueId,
     type:document.getElementById('admin-task-type').value,
@@ -4352,8 +4354,9 @@ function openAdminLogUsageModal(dateStr, venueId){
   const pid=state.currentProjectId; if(!pid) return;
   const venues=projectVenues(pid);
   const vsel=document.getElementById('admin-usage-venue');
-  vsel.innerHTML=venues.map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('');
-  if(venueId) vsel.value=venueId;
+  const validVenues=venues.filter(v=>v.id);
+  vsel.innerHTML=validVenues.map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('');
+  if(venueId && vsel.querySelector('option[value="'+venueId+'"]')) vsel.value=venueId;
   document.getElementById('admin-usage-date').value=dateStr||todayStr();
   document.getElementById('admin-usage-zone-select').value='Full pitch';
   document.getElementById('admin-usage-zone-custom-wrap').style.display='none';
@@ -4369,7 +4372,8 @@ function openAdminLogUsageModal(dateStr, venueId){
 }
 
 async function adminLogUsage(){
-  const venueId=document.getElementById('admin-usage-venue').value; if(!venueId) return;
+  const venueId=document.getElementById('admin-usage-venue').value;
+  if(!venueId){ showToast(t('lbl_venue_field')+' required'); return; }
   const u={
     id:'u_'+Date.now(), venueId,
     usageType:document.getElementById('admin-usage-type').value,
