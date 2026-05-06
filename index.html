@@ -4,7 +4,6 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>PitchOps</title>
-<link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Syne:wght@500;700&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -4248,6 +4247,154 @@ body{font-family:Arial,sans-serif;color:#0C2340;padding:24px;background:white}
   </div>
 </div>
 <div class="cg">${chartsHTML}</div>
+
+<div class="modal-overlay" id="modal-admin-log-task">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Log task</span>
+      <button class="modal-close" onclick="closeModal('modal-admin-log-task')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Venue</label>
+        <select id="admin-task-venue" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px"></select>
+      </div>
+      <div class="field">
+        <label>Task type</label>
+        <select id="admin-task-type" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px"></select>
+      </div>
+      <div class="field"><label>Pitch area / zone</label><select id="admin-task-zone-select" onchange="document.getElementById('admin-task-zone-custom-wrap').style.display=this.value==='Custom'?'block':'none'" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px">
+          <option value="Full pitch">Full pitch</option>
+          <option value="Goal mouth (N)">Goal mouth (N)</option>
+          <option value="Goal mouth (S)">Goal mouth (S)</option>
+          <option value="Centre circle">Centre circle</option>
+          <option value="Penalty areas">Penalty areas</option>
+          <option value="Wings">Wings</option>
+          <option value="Custom">Custom...</option>
+        </select>
+        <div id="admin-task-zone-custom-wrap" style="display:none;margin-top:6px">
+          <input id="admin-task-zone-custom" type="text" placeholder="Describe zone..."/>
+        </div></div>
+      <div class="field"><label>Equipment used</label><input id="admin-task-equipment" type="text" placeholder="e.g. Pedestrian spreader"/></div>
+      <div class="field"><label>Weather conditions</label><input id="admin-task-weather" type="text" placeholder="e.g. sunny, 18°C"/></div>
+      <div class="field"><label>Done by (staff)</label>
+        <div style="display:flex;gap:6px;margin-bottom:6px">
+          <input id="admin-task-staff-input" type="text" placeholder="Add name..." style="flex:1"/>
+          <button class="btn btn-ghost btn-sm" onclick="addAdminTaskStaff()">Add</button>
+        </div>
+        <div id="admin-task-staff-tags" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+      </div>
+      <div class="field"><label>Notes</label><textarea id="admin-task-notes" rows="2" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;resize:vertical;box-sizing:border-box"></textarea></div>
+      <div class="field"><label>Task date</label><input id="admin-task-date" type="date"/></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="field"><label>Time from</label><input id="admin-task-time-from" type="time" value="08:00"/></div>
+        <div class="field"><label>Time to</label><input id="admin-task-time-to" type="time" value="17:00"/></div>
+      </div>
+      <div class="field"><label>Status</label>
+        <select id="admin-task-status">
+          <option value="planned">Planned</option>
+          <option value="inprogress">In progress</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-admin-log-task')">Cancel</button>
+      <button class="btn btn-primary" onclick="adminLogTask()">Save task</button>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal-overlay" id="modal-admin-log-usage">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Log pitch usage</span>
+      <button class="modal-close" onclick="closeModal('modal-admin-log-usage')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Venue</label>
+        <select id="admin-usage-venue" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px"></select>
+      </div>
+      <div class="field"><label>Usage type</label>
+        <select id="admin-usage-type" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px">
+          <option value="Match Day">Match Day</option>
+          <option value="Training Session">Training Session</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="field"><label>Team name</label><input id="admin-usage-team" type="text" placeholder="e.g. FC Barcelona U20"/></div>
+      <div class="field"><label>Pitch area / zone</label><select id="admin-usage-zone-select" onchange="document.getElementById('admin-usage-zone-custom-wrap').style.display=this.value==='Custom'?'block':'none'" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px">
+          <option value="Full pitch">Full pitch</option>
+          <option value="Goal mouth (N)">Goal mouth (N)</option>
+          <option value="Goal mouth (S)">Goal mouth (S)</option>
+          <option value="Centre circle">Centre circle</option>
+          <option value="Penalty areas">Penalty areas</option>
+          <option value="Wings">Wings</option>
+          <option value="Custom">Custom...</option>
+        </select>
+        <div id="admin-usage-zone-custom-wrap" style="display:none;margin-top:6px">
+          <input id="admin-usage-zone-custom" type="text" placeholder="Describe zone..."/>
+        </div></div>
+      <div class="field"><label>Weather conditions</label><input id="admin-usage-weather" type="text" placeholder="e.g. sunny, 18°C"/></div>
+      <div class="field"><label>Notes</label><textarea id="admin-usage-notes" rows="2" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;resize:vertical;box-sizing:border-box"></textarea></div>
+      <div class="field"><label>Usage date</label><input id="admin-usage-date" type="date"/></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="field"><label>Time from</label><input id="admin-usage-time-from" type="time" value="08:00"/></div>
+        <div class="field"><label>Time to</label><input id="admin-usage-time-to" type="time" value="17:00"/></div>
+      </div>
+      <div class="field"><label>Status</label>
+        <select id="admin-usage-status">
+          <option value="planned">Planned</option>
+          <option value="inprogress">In progress</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-admin-log-usage')">Cancel</button>
+      <button class="btn btn-primary" onclick="adminLogUsage()" style="background:linear-gradient(135deg,#7C3AED,#6D28D9);border:none">Save usage</button>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal-overlay" id="modal-dnd-choice">
+  <div class="modal" style="max-width:320px;text-align:center">
+    <div class="modal-header">
+      <span class="modal-title">Move or Copy?</span>
+      <button class="modal-close" onclick="closeModal('modal-dnd-choice');_pendingDrop=null">✕</button>
+    </div>
+    <div class="modal-body" style="padding:1rem 1.5rem">
+      <p style="font-size:14px;color:var(--text-muted);margin-bottom:1.25rem">Target date: <strong id="dnd-new-date"></strong></p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <button onclick="dndChoose(false)" style="padding:12px;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">
+          ✂️ Move
+        </button>
+        <button onclick="dndChoose(true)" style="padding:12px;background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">
+          📋 Copy
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- VENUE STATS PDF MODAL -->
+<div class="modal-overlay" id="modal-vstats-pdf">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header"><span class="modal-title">Export PDF — select charts</span><button class="modal-close" onclick="closeModal('modal-vstats-pdf')">✕</button></div>
+    <div class="modal-body">
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:1rem">Select which charts to include:</div>
+      <div id="vstats-pdf-checklist" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-vstats-pdf')">Cancel</button>
+      <button class="btn btn-primary" onclick="doExportVenueStatsPDF()" style="background:linear-gradient(135deg,#0C2340,#185FA5);border:none">⬇ Export PDF</button>
+    </div>
+  </div>
+</div>
 </body></html>`;
 
     const win=window.open('','_blank','width=1000,height=800');
@@ -4840,136 +4987,7 @@ init();
 </div>
 
 <!-- ADMIN LOG TASK MODAL -->
-<div class="modal-overlay" id="modal-admin-log-task">
-  <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title">Log task</span>
-      <button class="modal-close" onclick="closeModal('modal-admin-log-task')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="field">
-        <label>Venue</label>
-        <select id="admin-task-venue" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px"></select>
-      </div>
-      <div class="field">
-        <label>Task type</label>
-        <select id="admin-task-type" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px"></select>
-      </div>
-      <div class="field"><label>Pitch area / zone</label><select id="admin-task-zone-select" onchange="document.getElementById('admin-task-zone-custom-wrap').style.display=this.value==='Custom'?'block':'none'" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px">
-          <option value="Full pitch">Full pitch</option>
-          <option value="Goal mouth (N)">Goal mouth (N)</option>
-          <option value="Goal mouth (S)">Goal mouth (S)</option>
-          <option value="Centre circle">Centre circle</option>
-          <option value="Penalty areas">Penalty areas</option>
-          <option value="Wings">Wings</option>
-          <option value="Custom">Custom...</option>
-        </select>
-        <div id="admin-task-zone-custom-wrap" style="display:none;margin-top:6px">
-          <input id="admin-task-zone-custom" type="text" placeholder="Describe zone..."/>
-        </div></div>
-      <div class="field"><label>Equipment used</label><input id="admin-task-equipment" type="text" placeholder="e.g. Pedestrian spreader"/></div>
-      <div class="field"><label>Weather conditions</label><input id="admin-task-weather" type="text" placeholder="e.g. sunny, 18°C"/></div>
-      <div class="field"><label>Done by (staff)</label>
-        <div style="display:flex;gap:6px;margin-bottom:6px">
-          <input id="admin-task-staff-input" type="text" placeholder="Add name..." style="flex:1"/>
-          <button class="btn btn-ghost btn-sm" onclick="addAdminTaskStaff()">Add</button>
-        </div>
-        <div id="admin-task-staff-tags" style="display:flex;flex-wrap:wrap;gap:6px"></div>
-      </div>
-      <div class="field"><label>Notes</label><textarea id="admin-task-notes" rows="2" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;resize:vertical;box-sizing:border-box"></textarea></div>
-      <div class="field"><label>Task date</label><input id="admin-task-date" type="date"/></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div class="field"><label>Time from</label><input id="admin-task-time-from" type="time" value="08:00"/></div>
-        <div class="field"><label>Time to</label><input id="admin-task-time-to" type="time" value="17:00"/></div>
-      </div>
-      <div class="field"><label>Status</label>
-        <select id="admin-task-status">
-          <option value="planned">Planned</option>
-          <option value="inprogress">In progress</option>
-          <option value="completed">Completed</option>
-        </select>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-admin-log-task')">Cancel</button>
-      <button class="btn btn-primary" onclick="adminLogTask()">Save task</button>
-    </div>
-  </div>
-</div>
-
 <!-- ADMIN LOG USAGE MODAL -->
-<div class="modal-overlay" id="modal-admin-log-usage">
-  <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title">Log pitch usage</span>
-      <button class="modal-close" onclick="closeModal('modal-admin-log-usage')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="field">
-        <label>Venue</label>
-        <select id="admin-usage-venue" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px"></select>
-      </div>
-      <div class="field"><label>Usage type</label>
-        <select id="admin-usage-type" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px">
-          <option value="Match Day">Match Day</option>
-          <option value="Training Session">Training Session</option>
-          <option value="Other">Other</option>
-        </select>
-      </div>
-      <div class="field"><label>Team name</label><input id="admin-usage-team" type="text" placeholder="e.g. FC Barcelona U20"/></div>
-      <div class="field"><label>Pitch area / zone</label><select id="admin-usage-zone-select" onchange="document.getElementById('admin-usage-zone-custom-wrap').style.display=this.value==='Custom'?'block':'none'" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px">
-          <option value="Full pitch">Full pitch</option>
-          <option value="Goal mouth (N)">Goal mouth (N)</option>
-          <option value="Goal mouth (S)">Goal mouth (S)</option>
-          <option value="Centre circle">Centre circle</option>
-          <option value="Penalty areas">Penalty areas</option>
-          <option value="Wings">Wings</option>
-          <option value="Custom">Custom...</option>
-        </select>
-        <div id="admin-usage-zone-custom-wrap" style="display:none;margin-top:6px">
-          <input id="admin-usage-zone-custom" type="text" placeholder="Describe zone..."/>
-        </div></div>
-      <div class="field"><label>Weather conditions</label><input id="admin-usage-weather" type="text" placeholder="e.g. sunny, 18°C"/></div>
-      <div class="field"><label>Notes</label><textarea id="admin-usage-notes" rows="2" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;resize:vertical;box-sizing:border-box"></textarea></div>
-      <div class="field"><label>Usage date</label><input id="admin-usage-date" type="date"/></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div class="field"><label>Time from</label><input id="admin-usage-time-from" type="time" value="08:00"/></div>
-        <div class="field"><label>Time to</label><input id="admin-usage-time-to" type="time" value="17:00"/></div>
-      </div>
-      <div class="field"><label>Status</label>
-        <select id="admin-usage-status">
-          <option value="planned">Planned</option>
-          <option value="inprogress">In progress</option>
-          <option value="completed">Completed</option>
-        </select>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-admin-log-usage')">Cancel</button>
-      <button class="btn btn-primary" onclick="adminLogUsage()" style="background:linear-gradient(135deg,#7C3AED,#6D28D9);border:none">Save usage</button>
-    </div>
-  </div>
-</div>
-
 <!-- DRAG & DROP CHOICE MODAL -->
-<div class="modal-overlay" id="modal-dnd-choice">
-  <div class="modal" style="max-width:320px;text-align:center">
-    <div class="modal-header">
-      <span class="modal-title">Move or Copy?</span>
-      <button class="modal-close" onclick="closeModal('modal-dnd-choice');_pendingDrop=null">✕</button>
-    </div>
-    <div class="modal-body" style="padding:1rem 1.5rem">
-      <p style="font-size:14px;color:var(--text-muted);margin-bottom:1.25rem">Target date: <strong id="dnd-new-date"></strong></p>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <button onclick="dndChoose(false)" style="padding:12px;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">
-          ✂️ Move
-        </button>
-        <button onclick="dndChoose(true)" style="padding:12px;background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">
-          📋 Copy
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
 </body>
 </html>
