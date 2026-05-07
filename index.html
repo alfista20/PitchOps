@@ -219,6 +219,11 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 .tabs{display:flex;border-bottom:1px solid var(--border)}
 .tab-btn{padding:12px 18px;background:none;border:none;border-bottom:3px solid transparent;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;transition:all .15s;margin:0}
 .tab-btn.active{color:var(--blue);border-bottom-color:var(--blue);background:rgba(24,95,165,0.04)}
+/* Venue tabs — one scrollable line */
+.vtab-bar{display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;border-bottom:1px solid var(--border);background:white;flex-shrink:0}
+.vtab-bar::-webkit-scrollbar{display:none}
+.vtab-btn{flex-shrink:0;white-space:nowrap;padding:14px 18px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:color .15s,border-color .15s}
+.vtab-btn.active{color:var(--blue);border-bottom-color:var(--blue);background:white}
 .color-opts{display:flex;gap:8px;flex-wrap:wrap}
 .color-opt{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:border-color .15s}
 .color-opt.picked{border-color:var(--navy)}
@@ -981,14 +986,11 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
   </div>
 
   <!-- TABS -->
-  <div style="background:white;border-bottom:1px solid var(--border);display:flex;flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none">
-    <button id="vtab-log" onclick="switchVenueTab('log')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid var(--blue);background:white;color:var(--blue);cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;white-space:nowrap" data-i18n="tab_log">🗒 Log task</button>
-    <button id="vtab-usage" onclick="switchVenueTab('usage')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;white-space:nowrap" data-i18n="tab_usage">⏱ Log usage</button>
-    <button id="vtab-schedule" data-i18n="tab_schedule" onclick="switchVenueTab('schedule')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;white-space:nowrap">📅 Schedule</button>
-    <button id="vtab-stats" data-i18n="tab_stats" onclick="switchVenueTab('stats')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;white-space:nowrap">📊 Stats</button>
-
-
-
+  <div class="vtab-bar">
+    <button id="vtab-log" class="vtab-btn active" onclick="switchVenueTab('log')" data-i18n="tab_log">🗒 Log task</button>
+    <button id="vtab-usage" class="vtab-btn" onclick="switchVenueTab('usage')" data-i18n="tab_usage">⏱ Log usage</button>
+    <button id="vtab-schedule" class="vtab-btn" data-i18n="tab_schedule" onclick="switchVenueTab('schedule')">📅 Schedule</button>
+    <button id="vtab-stats" class="vtab-btn" data-i18n="tab_stats" onclick="switchVenueTab('stats')">📊 Stats</button>
   </div>
 
   <!-- LOG TASK TAB -->
@@ -4124,11 +4126,42 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
     <td onclick="openLogUsageModal('${dStr}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${venueId}')" style="padding:4px;border-right:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:120px;min-width:65px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageChips||''}</td>`;
   });
 
+  // ── Multi-day event row for week view ──
+  const venueEventsWeek = (typeof state_events!=='undefined') ? state_events.filter(e=>e.venueId===venueId) : [];
+  const weekStartStr = weekDayStrs[0];
+  const weekEndStr   = weekDayStrs[6];
+  let eventCells = '';
+  // Build one td per day (colspan=2 for Tasks+Usage columns)
+  weekDayStrs.forEach(dStr=>{
+    const dayEvents = venueEventsWeek.filter(ev=>ev.dateStart<=dStr && ev.dateEnd>=dStr);
+    if(dayEvents.length===0){
+      eventCells+=`<td colspan="2" style="padding:0 2px;border-right:1px solid rgba(0,0,0,0.06);height:0;line-height:0"></td>`;
+    } else {
+      const bars = dayEvents.map(ev=>{
+        const isStart = ev.dateStart===dStr;
+        const isEnd   = ev.dateEnd===dStr;
+        const radius  = `${isStart?'4px':'0'} ${isEnd?'4px':'0'} ${isEnd?'4px':'0'} ${isStart?'4px':'0'}`;
+        return `<div onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')"
+          style="background:${ev.colorBg};color:${ev.colorFg};height:20px;line-height:20px;
+            font-size:10px;font-weight:700;padding:0 6px;border-radius:${radius};
+            white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;
+            box-shadow:0 1px 3px rgba(0,0,0,.1);margin-bottom:2px;
+            ${!isStart?'border-left:2px dashed '+ev.colorFg+';margin-left:-2px;':''}"
+          onmouseover="this.style.filter='brightness(.92)'" onmouseout="this.style.filter=''"
+        >${isStart?esc(ev.name):''}</div>`;
+      }).join('');
+      eventCells+=`<td colspan="2" style="padding:2px 2px;border-right:1px solid rgba(0,0,0,0.06);vertical-align:top">${bars}</td>`;
+    }
+  });
+  const eventRow = venueEventsWeek.some(ev=>ev.dateStart<=weekEndStr&&ev.dateEnd>=weekStartStr)
+    ? `<tr>${eventCells}</tr>` : '';
+
   grid.innerHTML=`<div style="overflow-x:auto;width:100%"><table style="border-collapse:collapse;width:100%;min-width:600px">
     <thead>
       <tr>${headerCols}</tr>
       <tr>${subHeaderCols}</tr>
     </thead>
+    ${eventRow?`<tbody>${eventRow}</tbody>`:''}
     <tbody><tr style="height:120px">${cells}</tr></tbody>
   </table></div>`;
   // Scroll today's column into center view
@@ -4157,7 +4190,7 @@ function switchVenueTab(tab){
     const btn=document.getElementById('vtab-'+t);
     const content=document.getElementById('vtab-'+t+'-content');
     const active=t===tab;
-    if(btn){ btn.style.background=active?'white':'transparent'; btn.style.color=active?'var(--blue)':'var(--text-muted)'; btn.style.borderBottom=active?'3px solid var(--blue)':'3px solid transparent'; }
+    if(btn){ btn.classList.toggle('active', active); }
     if(content) content.style.display=active?'block':'none';
   });
   if(tab==='stats'){
@@ -4386,27 +4419,39 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
     // Multi-day event bars for this week
     const weekEventsHTML = venueEvents
       .filter(ev=>ev.dateStart<=weekEndStr && ev.dateEnd>=weekStartStr)
-      .map(ev=>{
-        const startCol = ev.dateStart<=weekStartStr ? 0 : week.findIndex(d=>_dStr(d)>=ev.dateStart);
-        const endCol   = ev.dateEnd>=weekEndStr ? 6 : week.findIndex(d=>_dStr(d)>=ev.dateEnd);
-        const col1 = startCol<0?0:startCol;
-        const col2 = endCol<0?6:endCol;
+      .map((ev,evIdx)=>{
+        // Find start column: if event starts before this week, col=0
+        let col1 = 0;
+        if(ev.dateStart>weekStartStr){
+          col1 = week.findIndex(d=>_dStr(d)===ev.dateStart);
+          if(col1<0) col1 = week.findIndex(d=>_dStr(d)>ev.dateStart);
+          if(col1<0) col1 = 0;
+        }
+        // Find end column: if event ends after this week, col=6
+        let col2 = 6;
+        if(ev.dateEnd<weekEndStr){
+          col2 = week.findIndex(d=>_dStr(d)===ev.dateEnd);
+          if(col2<0) col2 = week.findIndex(d=>_dStr(d)>ev.dateEnd) - 1;
+          if(col2<0) col2 = 6;
+        }
+        col1 = Math.max(0, Math.min(6, col1));
+        col2 = Math.max(col1, Math.min(6, col2));
         const span = col2 - col1 + 1;
         const isStart = ev.dateStart>=weekStartStr;
         const isEnd   = ev.dateEnd<=weekEndStr;
         const leftPct = (col1/7*100).toFixed(2);
-        const widthPct = (span/7*100 - 0.3).toFixed(2);
+        const widthPct = (span/7*100 - 0.4).toFixed(2);
+        const evTop = 30 + (evIdx * 22); // stack: 30, 52, 74...
         return `<div onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')"
-          style="position:absolute;top:30px;left:calc(${leftPct}% + 2px);width:calc(${widthPct}% - 4px);
+          style="position:absolute;top:${evTop}px;left:calc(${leftPct}% + 2px);width:calc(${widthPct}% - 4px);
             background:${ev.colorBg};color:${ev.colorFg};
             height:20px;line-height:20px;font-size:10px;font-weight:700;
             padding:0 6px;cursor:pointer;z-index:5;
             border-radius:${isStart?'4px':'0'} ${isEnd?'4px':'0'} ${isEnd?'4px':'0'} ${isStart?'4px':'0'};
             white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-            box-shadow:0 1px 3px rgba(0,0,0,.12);
-            pointer-events:auto;"
-          onmouseover="this.style.filter='brightness(.92)'" onmouseout="this.style.filter=''"
-        >${isStart?esc(ev.name):''}</div>`;
+            box-shadow:0 1px 3px rgba(0,0,0,.12);pointer-events:auto;"
+          onmouseover="this.style.filter='brightness(.92)'" onmouseout="this.style.filter=''">
+          ${isStart?esc(ev.name):''}</div>`;
       }).join('');
 
     // Day cells for this week
@@ -4419,6 +4464,7 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
       const dayOps = ops.filter(o=>(o.date||'').slice(0,10)===dStr)
         .map(o=>isPast&&o.status==='planned'?{...o,status:'missed'}:o);
       const dayUsage = usage.filter(u=>(u.date||'').slice(0,10)===dStr);
+      const venueEventsForDay = venueEvents.filter(ev=>ev.dateStart<=dStr&&ev.dateEnd>=dStr);
 
       const allItems = [
         ...dayOps.map(o=>({type:'op', label:o.type, style:chipStyle[o.status]||chipStyle.planned, id:o.id})),
@@ -4451,7 +4497,7 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
             onmouseover="this.style.color='#185FA5'" onmouseout="this.style.color='#d0d5dd'"
             title="Add event">+</span>`:''}
         </div>
-        <div style="margin-top:26px">${chipsHTML}</div>
+        <div style="margin-top:${Math.max(26, venueEventsForDay.length*22+4)}px">${chipsHTML}</div>
       </div>`;
     }).join('');
 
