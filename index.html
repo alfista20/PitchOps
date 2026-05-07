@@ -2416,7 +2416,7 @@ function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
-function logout(){ state.currentVenueId=null; state.currentProjectId=null; showScreen('screen-login'); }
+function logout(){ stopAdminRealtime(); state.currentVenueId=null; state.currentProjectId=null; showScreen('screen-login'); }
 function backToProjects(){ state.currentProjectId=null; showScreen('screen-projects'); renderProjects(); }
 
 // ── VIEWER LINK ──
@@ -2553,6 +2553,115 @@ function clearViewerFilters(){
   renderViewerOps();
 }
 
+// ════════════════════════════════════════
+// REALTIME SYNC (admin only)
+// ════════════════════════════════════════
+let _realtimeChannels = [];
+
+function startAdminRealtime() {
+  // Clean up any existing subscriptions first
+  stopAdminRealtime();
+
+  const opsChannel = supa.channel('admin-ops-sync')
+    .on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'pitchops_operations'
+    }, payload => {
+      _handleRealtimeOp(payload);
+    })
+    .subscribe();
+
+  const usageChannel = supa.channel('admin-usage-sync')
+    .on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'pitchops_usage'
+    }, payload => {
+      _handleRealtimeUsage(payload);
+    })
+    .subscribe();
+
+  _realtimeChannels = [opsChannel, usageChannel];
+}
+
+function stopAdminRealtime() {
+  _realtimeChannels.forEach(ch => { try { supa.removeChannel(ch); } catch(e){} });
+  _realtimeChannels = [];
+}
+
+function _handleRealtimeOp(payload) {
+  const { eventType, new: rec, old: oldRec } = payload;
+  if (!rec && !oldRec) return;
+
+  // Only sync ops that belong to a venue in a loaded project
+  const newOp = rec ? dbToOp(rec) : null;
+  const oldId = oldRec ? oldRec.id : null;
+
+  if (eventType === 'INSERT' && newOp) {
+    // Avoid duplicate if admin just logged it themselves
+    if (!state.operations.find(o => o.id === newOp.id)) {
+      state.operations.unshift(newOp);
+      _realtimeNotify('op', 'new', newOp);
+    }
+  } else if (eventType === 'UPDATE' && newOp) {
+    const idx = state.operations.findIndex(o => o.id === newOp.id);
+    if (idx !== -1) state.operations[idx] = newOp;
+    else state.operations.unshift(newOp);
+  } else if (eventType === 'DELETE' && oldId) {
+    state.operations = state.operations.filter(o => o.id !== oldId);
+    if (typeof state_admin_usage !== 'undefined') {}  // ops only here
+  }
+
+  _realtimeRefresh('ops');
+}
+
+function _handleRealtimeUsage(payload) {
+  const { eventType, new: rec, old: oldRec } = payload;
+  if (!rec && !oldRec) return;
+
+  const newU = rec ? dbToUsage(rec) : null;
+  const oldId = oldRec ? oldRec.id : null;
+
+  if (typeof state_admin_usage === 'undefined') return;
+
+  if (eventType === 'INSERT' && newU) {
+    if (!state_admin_usage.find(u => u.id === newU.id)) {
+      state_admin_usage.unshift(newU);
+      _realtimeNotify('usage', 'new', newU);
+    }
+  } else if (eventType === 'UPDATE' && newU) {
+    const idx = state_admin_usage.findIndex(u => u.id === newU.id);
+    if (idx !== -1) state_admin_usage[idx] = newU;
+    else state_admin_usage.unshift(newU);
+  } else if (eventType === 'DELETE' && oldId) {
+    state_admin_usage = state_admin_usage.filter(u => u.id !== oldId);
+  }
+
+  _realtimeRefresh('usage');
+}
+
+function _realtimeRefresh(type) {
+  // Re-render Gantt if calendar tab is visible
+  const calContent = document.getElementById('ptab-calendar-content');
+  if (calContent && calContent.style.display === 'block') {
+    renderGantt();
+  }
+  // Also update task/usage counts in project header
+  if (state.currentProjectId) updateDetailStats();
+}
+
+function _realtimeNotify(type, event, item) {
+  // Find venue name for the toast
+  const venue = state.venues.find(v => v.id === item.venueId);
+  const vName = venue ? venue.name : '';
+  if (type === 'op') {
+    showToast('⚡ ' + (vName ? vName + ': ' : '') + item.type);
+  } else {
+    showToast('⚡ ' + (vName ? vName + ': ' : '') + (item.usageType || 'Usage'));
+  }
+}
+
 async function adminLogin(){
   const email = document.getElementById('admin-email-input').value.trim().toLowerCase();
   const pass = document.getElementById('admin-pass-input').value;
@@ -2569,6 +2678,7 @@ async function adminLogin(){
   await loadAll();
   populateOpTypeSelects();
   showScreen('screen-projects'); renderProjects();
+  startAdminRealtime();
 }
 
 function changePassword(){
@@ -3694,6 +3804,7 @@ function switchProjectTab(tab){
   if(tab==='calendar'){
     document.getElementById('gantt-view').style.display='block';
     document.getElementById('venue-cal-view').style.display='none';
+    ganttWeekOffset=0;
     const pid=state.currentProjectId;
     if(pid){
       document.getElementById('gantt-grid').innerHTML=`<div style="padding:2rem;text-align:center;color:#96a6bb;font-size:13px">${t('loading')}</div>`;
