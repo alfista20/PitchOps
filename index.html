@@ -4135,12 +4135,14 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
         const isStart = ev.dateStart===dStr;
         const isEnd   = ev.dateEnd===dStr;
         const radius  = `${isStart?'4px':'0'} ${isEnd?'4px':'0'} ${isEnd?'4px':'0'} ${isStart?'4px':'0'}`;
+        const midStyle2 = showName
+          ? `overflow:visible;text-align:center;position:relative;z-index:6;white-space:nowrap;`
+          : `overflow:hidden;white-space:nowrap;`;
         return `<div onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')"
           style="background:${ev.colorBg};color:${ev.colorFg};height:20px;line-height:20px;
             font-size:10px;font-weight:700;padding:0 6px;border-radius:${radius};
-            white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;
-            text-align:center;
-            box-shadow:0 1px 3px rgba(0,0,0,.1);margin-bottom:2px;"
+            ${midStyle2}
+            cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.1);margin-bottom:2px;"
           onmouseover="this.style.filter='brightness(.92)'" onmouseout="this.style.filter=''"
         >${showName?esc(ev.name):''}</div>`;
       }).join('');
@@ -4429,12 +4431,14 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
         const isEnd   = ev.dateEnd===dStr;
         const isMid   = wi===midIdx;
         const radius  = `${isStart?'4px':'0'} ${isEnd?'4px':'0'} ${isEnd?'4px':'0'} ${isStart?'4px':'0'}`;
+        const midStyle = isMid
+          ? `overflow:visible;text-align:center;position:relative;z-index:6;white-space:nowrap;`
+          : `overflow:hidden;text-overflow:ellipsis;white-space:nowrap;`;
         return `<div onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')"
           style="height:20px;line-height:20px;margin:1px ${isEnd?'2px':'0'} 0 ${isStart?'2px':'0'};
             background:${ev.colorBg};color:${ev.colorFg};
             font-size:10px;font-weight:700;padding:0 6px;
-            border-radius:${radius};text-align:center;
-            white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+            border-radius:${radius};${midStyle}
             cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.1);
             ${!isEnd?'margin-right:-1px;':''}
             pointer-events:auto;"
