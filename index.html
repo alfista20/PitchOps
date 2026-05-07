@@ -843,12 +843,14 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 <div id="screen-venue" class="screen">
 
   <!-- WELCOME SCREEN -->
-  <div id="venue-welcome" style="display:none;flex-direction:column;height:100%;overflow-y:auto;background:var(--surface)">
+  <div id="venue-welcome" style="display:none;flex-direction:column;min-height:100%;overflow-y:auto;background:#f0f2f5">
     <!-- TOP NAV (duplicate for welcome) -->
     <div style="background:#0C2340;padding:0 1.25rem;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:100">
       <span style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:white">PitchOps</span>
       <button onclick="toggleVenueMenu()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;font-size:18px;line-height:1">☰</button>
     </div>
+    <!-- CENTERED CONTENT WRAPPER -->
+    <div style="max-width:480px;width:100%;margin:0 auto;display:flex;flex-direction:column;flex:1">
     <!-- HEADER -->
     <div style="background:linear-gradient(160deg,#0C2340 0%,#0f2d4e 60%,#163d66 100%);padding:1.5rem 1.25rem 1.75rem;flex-shrink:0">
       <div id="welcome-proj-tag" style="font-size:11px;font-weight:500;color:#4a7a9a;text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px"></div>
@@ -862,10 +864,10 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       </div>
     </div>
     <!-- TILES -->
-    <div style="padding:1.25rem;display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:1">
+    <div style="padding:1.25rem;display:grid;grid-template-columns:1fr 1fr;gap:12px;background:#f0f2f5">
 
       <!-- Log Task -->
-      <div onclick="switchVenueTab('log');showVenueDashboard()" style="background:white;border:0.5px solid rgba(0,0,0,0.08);border-radius:16px;cursor:pointer;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:transform .12s,box-shadow .12s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(24,95,165,.12)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+      <div onclick="showVenueDashboard();switchVenueTab('log');openLogTaskModal()" style="background:white;border:0.5px solid rgba(0,0,0,0.08);border-radius:16px;cursor:pointer;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:transform .12s,box-shadow .12s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(24,95,165,.12)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
         <svg width="72" height="72" viewBox="0 0 52 52" fill="none">
           <rect x="12" y="8" width="22" height="28" rx="3" stroke="#185FA5" stroke-width="1.6"/>
           <line x1="18" y1="16" x2="28" y2="16" stroke="#185FA5" stroke-width="1.5" stroke-linecap="round"/>
@@ -879,7 +881,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       </div>
 
       <!-- Log Usage -->
-      <div onclick="switchVenueTab('usage');showVenueDashboard()" style="background:white;border:0.5px solid rgba(0,0,0,0.08);border-radius:16px;cursor:pointer;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:transform .12s,box-shadow .12s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(124,58,237,.12)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+      <div onclick="showVenueDashboard();switchVenueTab('usage');openLogUsageModal()" style="background:white;border:0.5px solid rgba(0,0,0,0.08);border-radius:16px;cursor:pointer;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:transform .12s,box-shadow .12s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(124,58,237,.12)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
         <svg width="72" height="72" viewBox="0 0 52 52" fill="none">
           <rect x="7" y="13" width="34" height="24" rx="2.5" stroke="#7C3AED" stroke-width="1.6"/>
           <line x1="24" y1="13" x2="24" y2="37" stroke="#7C3AED" stroke-width="1.2" stroke-dasharray="2.5 2"/>
@@ -927,6 +929,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       </div>
 
     </div>
+    </div><!-- end centered wrapper -->
   </div>
 
   <!-- HAMBURGER MENU DROPDOWN -->
