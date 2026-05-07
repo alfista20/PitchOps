@@ -987,10 +987,10 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 
   <!-- TABS -->
   <div class="vtab-bar">
-    <button id="vtab-log" class="vtab-btn active" onclick="switchVenueTab('log')" data-i18n="tab_log">🗒 Log task</button>
-    <button id="vtab-usage" class="vtab-btn" onclick="switchVenueTab('usage')" data-i18n="tab_usage">⏱ Log usage</button>
-    <button id="vtab-schedule" class="vtab-btn" data-i18n="tab_schedule" onclick="switchVenueTab('schedule')">📅 Schedule</button>
-    <button id="vtab-stats" class="vtab-btn" data-i18n="tab_stats" onclick="switchVenueTab('stats')">📊 Stats</button>
+    <button id="vtab-log" class="vtab-btn active" onclick="switchVenueTab('log')">🗒 <span data-i18n="tab_log">Log task</span></button>
+    <button id="vtab-usage" class="vtab-btn" onclick="switchVenueTab('usage')">⏱ <span data-i18n="tab_usage">Log usage</span></button>
+    <button id="vtab-schedule" class="vtab-btn" onclick="switchVenueTab('schedule')">📅 <span data-i18n="tab_schedule">Schedule</span></button>
+    <button id="vtab-stats" class="vtab-btn" onclick="switchVenueTab('stats')">📊 <span data-i18n="tab_stats">Stats</span></button>
   </div>
 
   <!-- LOG TASK TAB -->
@@ -4244,7 +4244,8 @@ async function loadVenueEvents(venueId){
   const {data} = await supa.from('pitchops_events').select('*').eq('venue_id', venueId);
   state_events = (data||[]).map(r=>({
     id: r.id, venueId: r.venue_id, name: r.name,
-    dateStart: r.date_start, dateEnd: r.date_end,
+    dateStart: (r.date_start||'').slice(0,10),
+    dateEnd: (r.date_end||'').slice(0,10),
     colorBg: r.color_bg||'#FDE68A', colorFg: r.color_fg||'#854F0B'
   }));
 }
@@ -4416,43 +4417,38 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
     const weekStartStr = _dStr(week[0]);
     const weekEndStr   = _dStr(week[6]);
 
-    // Multi-day event bars for this week
-    const weekEventsHTML = venueEvents
+    // Get events for this week, sorted by start date
+    const weekEvents = venueEvents
       .filter(ev=>ev.dateStart<=weekEndStr && ev.dateEnd>=weekStartStr)
-      .map((ev,evIdx)=>{
-        // Find start column: if event starts before this week, col=0
-        let col1 = 0;
-        if(ev.dateStart>weekStartStr){
-          col1 = week.findIndex(d=>_dStr(d)===ev.dateStart);
-          if(col1<0) col1 = week.findIndex(d=>_dStr(d)>ev.dateStart);
-          if(col1<0) col1 = 0;
-        }
-        // Find end column: if event ends after this week, col=6
-        let col2 = 6;
-        if(ev.dateEnd<weekEndStr){
-          col2 = week.findIndex(d=>_dStr(d)===ev.dateEnd);
-          if(col2<0) col2 = week.findIndex(d=>_dStr(d)>ev.dateEnd) - 1;
-          if(col2<0) col2 = 6;
-        }
-        col1 = Math.max(0, Math.min(6, col1));
-        col2 = Math.max(col1, Math.min(6, col2));
-        const span = col2 - col1 + 1;
-        const isStart = ev.dateStart>=weekStartStr;
-        const isEnd   = ev.dateEnd<=weekEndStr;
-        const leftPct = (col1/7*100).toFixed(2);
-        const widthPct = (span/7*100 - 0.4).toFixed(2);
-        const evTop = 30 + (evIdx * 22); // stack: 30, 52, 74...
+      .sort((a,b)=>a.dateStart.localeCompare(b.dateStart));
+
+    // Build one event ROW per event (not absolute positioned)
+    const eventRowsHTML = weekEvents.map(ev=>{
+      // Build 7 cells, one per day
+      const dayCells7 = week.map(d=>{
+        const dStr = _dStr(d);
+        const covers = ev.dateStart<=dStr && ev.dateEnd>=dStr;
+        if(!covers) return `<div style="height:22px"></div>`;
+        const isStart = ev.dateStart===dStr;
+        const isEnd   = ev.dateEnd===dStr;
+        const radius  = `${isStart?'4px':'0'} ${isEnd?'4px':'0'} ${isEnd?'4px':'0'} ${isStart?'4px':'0'}`;
         return `<div onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')"
-          style="position:absolute;top:${evTop}px;left:calc(${leftPct}% + 2px);width:calc(${widthPct}% - 4px);
+          style="height:20px;line-height:20px;margin:1px ${isEnd?'2px':'0'} 0 ${isStart?'2px':'0'};
             background:${ev.colorBg};color:${ev.colorFg};
-            height:20px;line-height:20px;font-size:10px;font-weight:700;
-            padding:0 6px;cursor:pointer;z-index:5;
-            border-radius:${isStart?'4px':'0'} ${isEnd?'4px':'0'} ${isEnd?'4px':'0'} ${isStart?'4px':'0'};
+            font-size:10px;font-weight:700;padding:0 ${isStart?'6px':'0'};
+            border-radius:${radius};
             white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-            box-shadow:0 1px 3px rgba(0,0,0,.12);pointer-events:auto;"
-          onmouseover="this.style.filter='brightness(.92)'" onmouseout="this.style.filter=''">
-          ${isStart?esc(ev.name):''}</div>`;
+            cursor:pointer;box-shadow:${isStart?'0 1px 3px rgba(0,0,0,.1)':'none'};
+            ${!isStart?'border-left:none;':''}
+            ${!isEnd?'margin-right:-1px;':''}
+            pointer-events:auto;"
+          onmouseover="this.style.filter='brightness(.92)'" onmouseout="this.style.filter=''"
+        >${isStart?esc(ev.name):''}</div>`;
       }).join('');
+      return `<div style="display:grid;grid-template-columns:repeat(7,1fr);pointer-events:none">
+        ${dayCells7}
+      </div>`;
+    }).join('');
 
     // Day cells for this week
     const dayCells = week.map(d=>{
@@ -4460,32 +4456,24 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
       const isToday = dStr===today;
       const inMonth = d.getMonth()===monthStart.getMonth();
       const isPast  = dStr<today;
-
       const dayOps = ops.filter(o=>(o.date||'').slice(0,10)===dStr)
         .map(o=>isPast&&o.status==='planned'?{...o,status:'missed'}:o);
       const dayUsage = usage.filter(u=>(u.date||'').slice(0,10)===dStr);
-      const venueEventsForDay = venueEvents.filter(ev=>ev.dateStart<=dStr&&ev.dateEnd>=dStr);
-
       const allItems = [
         ...dayOps.map(o=>({type:'op', label:o.type, style:chipStyle[o.status]||chipStyle.planned, id:o.id})),
         ...dayUsage.map(u=>({type:'use',label:u.usageType||'Usage', style:usageBg, id:u.id})),
       ];
-      const visible  = allItems;
-      const overflow = 0;
-
-      const chipsHTML = visible.map(item=>
+      const chipsHTML = allItems.map(item=>
         `<div onclick="event.stopPropagation();${item.type==='op'?`openEditModal('${item.id}')`:`openEditUsageModal('${item.id}')`}"
           style="font-size:10px;font-weight:600;padding:2px 5px;border-radius:3px;margin-bottom:2px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;${item.style}"
           onmouseover="this.style.filter='brightness(.93)'" onmouseout="this.style.filter=''"
         >${esc(item.label)}</div>`
       ).join('');
-
       const bg = isToday?'#EBF4FF':inMonth?'white':'#f8fafc';
       const border = isToday?'1px solid #185FA5':'1px solid rgba(0,0,0,0.06)';
       const numStyle = isToday
         ? 'background:#185FA5;color:white;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;'
         : `color:${inMonth?'#0C2340':'#c0c8d4'};font-size:12px;font-weight:600;`;
-
       return `<div onclick="openLogTaskModal('${dStr}')"
         style="border:${border};background:${bg};padding:6px;min-height:80px;cursor:pointer;box-sizing:border-box;${isToday?'box-shadow:inset 0 0 0 2px #185FA5;':''}"
         onmouseover="this.style.background='${isToday?'#dbeeff':'#f0f7ff'}'" onmouseout="this.style.background='${bg}'"
@@ -4497,17 +4485,13 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
             onmouseover="this.style.color='#185FA5'" onmouseout="this.style.color='#d0d5dd'"
             title="Add event">+</span>`:''}
         </div>
-        <div style="margin-top:${Math.max(26, venueEventsForDay.length*22+4)}px">${chipsHTML}</div>
+        ${chipsHTML}
       </div>`;
     }).join('');
 
-    gridHTML += `<div style="display:grid;grid-template-columns:repeat(7,1fr);position:relative">
-      ${dayCells}
-      <div style="position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none">
-        <div style="position:relative;height:100%;pointer-events:none">
-          ${weekEventsHTML}
-        </div>
-      </div>
+    gridHTML += `<div>
+      ${eventRowsHTML}
+      <div style="display:grid;grid-template-columns:repeat(7,1fr)">${dayCells}</div>
     </div>`;
   }
 
