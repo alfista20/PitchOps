@@ -4424,8 +4424,8 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
         ...dayOps.map(o=>({type:'op', label:o.type, style:chipStyle[o.status]||chipStyle.planned, id:o.id})),
         ...dayUsage.map(u=>({type:'use',label:u.usageType||'Usage', style:usageBg, id:u.id})),
       ];
-      const visible  = allItems.slice(0,2);
-      const overflow = allItems.length>2 ? allItems.length-2 : 0;
+      const visible  = allItems;
+      const overflow = 0;
 
       const chipsHTML = visible.map(item=>
         `<div onclick="event.stopPropagation();${item.type==='op'?`openEditModal('${item.id}')`:`openEditUsageModal('${item.id}')`}"
@@ -4441,10 +4441,10 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
         : `color:${inMonth?'#0C2340':'#c0c8d4'};font-size:12px;font-weight:600;`;
 
       return `<div onclick="openLogTaskModal('${dStr}')"
-        style="border:${border};background:${bg};padding:6px;min-height:90px;cursor:pointer;box-sizing:border-box;${isToday?'box-shadow:inset 0 0 0 2px #185FA5;':''}"
+        style="border:${border};background:${bg};padding:6px;min-height:60px;cursor:pointer;box-sizing:border-box;${isToday?'box-shadow:inset 0 0 0 2px #185FA5;':''}"
         onmouseover="this.style.background='${isToday?'#dbeeff':'#f0f7ff'}'" onmouseout="this.style.background='${bg}'"
       >
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
           <span style="${numStyle}">${d.getDate()}</span>
           ${inMonth?`<span onclick="event.stopPropagation();openMultidayModal('${dStr}')"
             style="font-size:16px;line-height:1;color:#d0d5dd;cursor:pointer;padding:0 2px"
