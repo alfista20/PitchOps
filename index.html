@@ -3812,7 +3812,11 @@ function switchProjectTab(tab){
     if(pid){
       document.getElementById('gantt-grid').innerHTML=`<div style="padding:2rem;text-align:center;color:#96a6bb;font-size:13px">${t('loading')}</div>`;
       renderGantt();
-      Promise.all([refreshProjectOps(pid, true), refreshProjectUsage(pid, true)]).then(()=>renderGantt());
+      Promise.all([
+        refreshProjectOps(pid, true),
+        refreshProjectUsage(pid, true),
+        loadAllVenueEvents(pid)
+      ]).then(()=>renderGantt());
     }
   }
   if(tab==='stats'){
@@ -3953,6 +3957,41 @@ async function renderGantt(){
       cells+=`<td onclick="if(!document.querySelector('.modal-overlay.open'))openAdminLogTaskModal('${dStr}','${v.id}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px;border-right:1px dashed rgba(0,0,0,0.06);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgT};min-height:40px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsDisplay}</td>
       <td onclick="if(!document.querySelector('.modal-overlay.open'))openAdminLogUsageModal('${dStr}','${v.id}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:40px;min-width:65px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageDisplay}</td>`;
     });
+    // ── Multi-day event bars for this venue ──
+    const venueEvs = state_events.filter(e=>e.venueId===v.id);
+    const weekDayStrs2 = days.map(d=>dStrOf(d));
+    const weekStartStr2 = weekDayStrs2[0];
+    const weekEndStr2   = weekDayStrs2[6];
+    const activeEvs = venueEvs.filter(ev=>ev.dateStart<=weekEndStr2&&ev.dateEnd>=weekStartStr2);
+
+    if(activeEvs.length>0){
+      // One event-row per event
+      activeEvs.forEach((ev,evIdx)=>{
+        const evWeekDays = weekDayStrs2.filter(d=>ev.dateStart<=d&&ev.dateEnd>=d);
+        const midDay = evWeekDays[Math.floor(evWeekDays.length/2)];
+        let evCells = `<td colspan="2" style="padding:0;border-right:1px solid rgba(0,0,0,0.09);border-bottom:${evIdx===activeEvs.length-1?'1px solid rgba(0,0,0,0.06)':'none'};background:white"></td>`;
+        weekDayStrs2.forEach(dStr=>{
+          const covers = ev.dateStart<=dStr && ev.dateEnd>=dStr;
+          const isStart = ev.dateStart===dStr;
+          const isEnd   = ev.dateEnd===dStr;
+          const showName = dStr===midDay;
+          const radius  = `${isStart?'4px':'0'} ${isEnd?'4px':'0'} ${isEnd?'4px':'0'} ${isStart?'4px':'0'}`;
+          const midStyle = showName ? 'overflow:visible;text-align:center;position:relative;z-index:6;white-space:nowrap;' : 'overflow:hidden;';
+          const bar = covers
+            ? `<div onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')"
+                style="height:18px;line-height:18px;background:${ev.colorBg};color:${ev.colorFg};
+                  font-size:10px;font-weight:700;padding:0 4px;border-radius:${radius};
+                  ${midStyle}cursor:pointer;white-space:nowrap;
+                  ${isStart?'box-shadow:0 1px 3px rgba(0,0,0,.1);':''}"
+                onmouseover="this.style.filter='brightness(.92)'" onmouseout="this.style.filter=''"
+              >${showName?esc(ev.name):''}</div>`
+            : '';
+          evCells += `<td colspan="2" style="padding:${covers?'1px 0':'0'};border-right:1px solid rgba(0,0,0,0.09);border-bottom:${evIdx===activeEvs.length-1?'1px solid rgba(0,0,0,0.06)':'none'};background:white;vertical-align:top">${bar}</td>`;
+        });
+        rows+=`<tr>${evCells}</tr>`;
+      });
+    }
+
     rows+=`<tr>${cells}</tr>`;
   });
 
@@ -4126,7 +4165,7 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
   weekDayStrs.forEach(dStr=>{
     const dayEvents = venueEventsWeek.filter(ev=>ev.dateStart<=dStr && ev.dateEnd>=dStr);
     if(dayEvents.length===0){
-      eventCells+=`<td colspan="2" style="padding:0 2px;border-right:1px solid rgba(0,0,0,0.06);height:0;line-height:0"></td>`;
+      eventCells+=`<td colspan="2" style="padding:0;border:none;height:0;line-height:0"></td>`;
     } else {
       const bars = dayEvents.map(ev=>{
         const evWeekDays = weekDayStrs.filter(d=>ev.dateStart<=d&&ev.dateEnd>=d);
@@ -4141,12 +4180,15 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
         return `<div onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')"
           style="background:${ev.colorBg};color:${ev.colorFg};height:20px;line-height:20px;
             font-size:10px;font-weight:700;padding:0 6px;border-radius:${radius};
+            margin:0;
             ${midStyle2}
-            cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.1);margin-bottom:2px;"
+            cursor:pointer;
+            ${isStart?'box-shadow:0 1px 3px rgba(0,0,0,.1);':''}
+            margin-bottom:2px;"
           onmouseover="this.style.filter='brightness(.92)'" onmouseout="this.style.filter=''"
         >${showName?esc(ev.name):''}</div>`;
       }).join('');
-      eventCells+=`<td colspan="2" style="padding:2px 2px;border-right:1px solid rgba(0,0,0,0.06);vertical-align:top">${bars}</td>`;
+      eventCells+=`<td colspan="2" style="padding:2px 0 0 0;border:none;vertical-align:top">${bars}</td>`;
     }
   });
   const eventRow = venueEventsWeek.some(ev=>ev.dateStart<=weekEndStr&&ev.dateEnd>=weekStartStr)
@@ -4235,6 +4277,23 @@ function openLogTaskModal(dateStr, timeStr, prefillType, prefillStatus){
 // MULTI-DAY EVENTS (pitchops_events table)
 // ════════════════════════════════════════
 let state_events = []; // {id, venueId, name, dateStart, dateEnd, colorBg, colorFg}
+
+async function loadAllVenueEvents(pid){
+  // Load events for all venues in a project with one query
+  const vids = projectVenues(pid).map(v=>v.id);
+  if(!vids.length) return;
+  const {data} = await supa.from('pitchops_events').select('*').in('venue_id', vids);
+  // Merge into state_events (keep venue events, replace project ones)
+  const projectEventIds = new Set((data||[]).map(r=>r.id));
+  // Remove old events for these venues, add fresh ones
+  state_events = state_events.filter(e=>!vids.includes(e.venueId));
+  state_events = state_events.concat((data||[]).map(r=>({
+    id: r.id, venueId: r.venue_id, name: r.name,
+    dateStart: (r.date_start||'').slice(0,10),
+    dateEnd: (r.date_end||'').slice(0,10),
+    colorBg: r.color_bg||'#FDE68A', colorFg: r.color_fg||'#854F0B'
+  })));
+}
 
 async function loadVenueEvents(venueId){
   const {data} = await supa.from('pitchops_events').select('*').eq('venue_id', venueId);
