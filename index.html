@@ -987,10 +987,10 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 
   <!-- TABS -->
   <div class="vtab-bar">
-    <button id="vtab-log" class="vtab-btn active" onclick="switchVenueTab('log')">🗒 <span data-i18n="tab_log">Log task</span></button>
-    <button id="vtab-usage" class="vtab-btn" onclick="switchVenueTab('usage')">⏱ <span data-i18n="tab_usage">Log usage</span></button>
-    <button id="vtab-schedule" class="vtab-btn" onclick="switchVenueTab('schedule')">📅 <span data-i18n="tab_schedule">Schedule</span></button>
-    <button id="vtab-stats" class="vtab-btn" onclick="switchVenueTab('stats')">📊 <span data-i18n="tab_stats">Stats</span></button>
+    <button id="vtab-log" class="vtab-btn active" onclick="switchVenueTab('log')"><span data-i18n="tab_log">🗒 Log task</span></button>
+    <button id="vtab-usage" class="vtab-btn" onclick="switchVenueTab('usage')"><span data-i18n="tab_usage">⏱ Log usage</span></button>
+    <button id="vtab-schedule" class="vtab-btn" onclick="switchVenueTab('schedule')"><span data-i18n="tab_schedule">📅 Schedule</span></button>
+    <button id="vtab-stats" class="vtab-btn" onclick="switchVenueTab('stats')"><span data-i18n="tab_stats">📊 Stats</span></button>
   </div>
 
   <!-- LOG TASK TAB -->
@@ -1091,25 +1091,25 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
   <div id="vtab-schedule-content" style="display:none;padding:.75rem">
     <div style="background:white;border:1px solid rgba(0,0,0,.06);border-radius:16px;box-shadow:0 2px 12px rgba(12,35,64,.08);overflow:hidden">
       <!-- TOOLBAR -->
-      <div style="padding:.75rem 1rem;border-bottom:1px solid var(--border);background:#f8fafc;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-          <!-- Nav -->
-          <div style="display:flex;align-items:center;background:white;border:1px solid var(--border);border-radius:8px;padding:3px 10px;gap:8px">
-            <button onclick="venueSchedNav(-1)" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--text-muted);padding:0">←</button>
-            <span id="venue-sched-label" style="font-size:12px;font-weight:600;min-width:130px;text-align:center;color:var(--text)">—</span>
-            <button onclick="venueSchedNav(1)" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--text-muted);padding:0">→</button>
-          </div>
-          <button onclick="venueSchedToday()" style="padding:5px 12px;font-size:12px;background:white;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text-muted)" data-i18n="today">Today</button>
-          <!-- View switcher -->
-          <div style="display:flex;background:#f1f3f5;border-radius:8px;padding:2px;gap:2px">
-            <button id="vsched-btn-month" onclick="setVenueSchedView('month')" style="padding:4px 10px;font-size:11px;font-weight:600;border:none;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;background:transparent;color:var(--text-muted)" data-i18n="view_month">Month</button>
-            <button id="vsched-btn-week" onclick="setVenueSchedView('week')" style="padding:4px 10px;font-size:11px;font-weight:600;border:none;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;background:#185FA5;color:white" data-i18n="view_week">Week</button>
-          </div>
+      <div style="padding:.6rem .75rem;border-bottom:1px solid var(--border);background:#f8fafc;display:flex;align-items:center;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-shrink:0">
+        <!-- Nav arrows + label -->
+        <div style="display:flex;align-items:center;background:white;border:1px solid var(--border);border-radius:8px;padding:3px 8px;gap:6px;flex-shrink:0">
+          <button onclick="venueSchedNav(-1)" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--text-muted);padding:0;line-height:1">←</button>
+          <span id="venue-sched-label" style="font-size:12px;font-weight:700;min-width:90px;text-align:center;color:var(--text);white-space:nowrap">—</span>
+          <button onclick="venueSchedNav(1)" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--text-muted);padding:0;line-height:1">→</button>
         </div>
-        <div style="display:flex;gap:6px">
-          <button onclick="openLogTaskModal()" style="padding:7px 16px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 2px 8px rgba(24,95,165,.3)" data-i18n="btn_log_task">+ Log task</button>
-          <button onclick="openLogUsageModal()" style="padding:7px 16px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 2px 8px rgba(124,58,237,.3)" data-i18n="btn_log_usage">+ Log usage</button>
+        <!-- Today -->
+        <button onclick="venueSchedToday()" style="flex-shrink:0;padding:5px 10px;font-size:12px;font-weight:500;background:white;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text-muted);white-space:nowrap" data-i18n="today">Today</button>
+        <!-- View switcher -->
+        <div style="flex-shrink:0;display:flex;background:#f1f3f5;border-radius:8px;padding:2px;gap:2px">
+          <button id="vsched-btn-month" onclick="setVenueSchedView('month')" style="padding:4px 10px;font-size:11px;font-weight:600;border:none;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;background:transparent;color:var(--text-muted);white-space:nowrap" data-i18n="view_month">Month</button>
+          <button id="vsched-btn-week" onclick="setVenueSchedView('week')" style="padding:4px 10px;font-size:11px;font-weight:600;border:none;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;background:#185FA5;color:white;white-space:nowrap" data-i18n="view_week">Week</button>
         </div>
+        <!-- Spacer -->
+        <div style="flex:1;min-width:8px"></div>
+        <!-- Log buttons -->
+        <button onclick="openLogTaskModal()" style="flex-shrink:0;padding:6px 12px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;box-shadow:0 2px 6px rgba(24,95,165,.3)" data-i18n="btn_log_task">+ Log task</button>
+        <button onclick="openLogUsageModal()" style="flex-shrink:0;padding:6px 12px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;box-shadow:0 2px 6px rgba(124,58,237,.3)" data-i18n="btn_log_usage">+ Log usage</button>
       </div>
       <!-- GRID -->
       <div id="venue-sched-grid"></div>
@@ -4145,10 +4145,9 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
           style="background:${ev.colorBg};color:${ev.colorFg};height:20px;line-height:20px;
             font-size:10px;font-weight:700;padding:0 6px;border-radius:${radius};
             white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;
-            box-shadow:0 1px 3px rgba(0,0,0,.1);margin-bottom:2px;
-            ${!isStart?'border-left:2px dashed '+ev.colorFg+';margin-left:-2px;':''}"
+            box-shadow:0 1px 3px rgba(0,0,0,.1);margin-bottom:2px;"
           onmouseover="this.style.filter='brightness(.92)'" onmouseout="this.style.filter=''"
-        >${isStart?esc(ev.name):''}</div>`;
+        >${esc(ev.name)}</div>`;
       }).join('');
       eventCells+=`<td colspan="2" style="padding:2px 2px;border-right:1px solid rgba(0,0,0,0.06);vertical-align:top">${bars}</td>`;
     }
@@ -4435,15 +4434,14 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
         return `<div onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')"
           style="height:20px;line-height:20px;margin:1px ${isEnd?'2px':'0'} 0 ${isStart?'2px':'0'};
             background:${ev.colorBg};color:${ev.colorFg};
-            font-size:10px;font-weight:700;padding:0 ${isStart?'6px':'0'};
+            font-size:10px;font-weight:700;padding:0 6px;
             border-radius:${radius};
             white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-            cursor:pointer;box-shadow:${isStart?'0 1px 3px rgba(0,0,0,.1)':'none'};
-            ${!isStart?'border-left:none;':''}
+            cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.1);
             ${!isEnd?'margin-right:-1px;':''}
             pointer-events:auto;"
           onmouseover="this.style.filter='brightness(.92)'" onmouseout="this.style.filter=''"
-        >${isStart?esc(ev.name):''}</div>`;
+        >${esc(ev.name)}</div>`;
       }).join('');
       return `<div style="display:grid;grid-template-columns:repeat(7,1fr);pointer-events:none">
         ${dayCells7}
