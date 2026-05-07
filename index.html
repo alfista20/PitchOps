@@ -867,7 +867,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     <div style="padding:1.25rem;display:grid;grid-template-columns:1fr 1fr;gap:12px;background:#f0f2f5">
 
       <!-- Log Task -->
-      <div onclick="showVenueDashboard();switchVenueTab('log');openLogTaskModal()" style="background:white;border:0.5px solid rgba(0,0,0,0.08);border-radius:16px;cursor:pointer;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:transform .12s,box-shadow .12s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(24,95,165,.12)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+      <div onclick="showVenueDashboard('log');openLogTaskModal()" style="background:white;border:0.5px solid rgba(0,0,0,0.08);border-radius:16px;cursor:pointer;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:transform .12s,box-shadow .12s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(24,95,165,.12)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
         <svg width="72" height="72" viewBox="0 0 52 52" fill="none">
           <rect x="12" y="8" width="22" height="28" rx="3" stroke="#185FA5" stroke-width="1.6"/>
           <line x1="18" y1="16" x2="28" y2="16" stroke="#185FA5" stroke-width="1.5" stroke-linecap="round"/>
@@ -881,7 +881,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       </div>
 
       <!-- Log Usage -->
-      <div onclick="showVenueDashboard();switchVenueTab('usage');openLogUsageModal()" style="background:white;border:0.5px solid rgba(0,0,0,0.08);border-radius:16px;cursor:pointer;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:transform .12s,box-shadow .12s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(124,58,237,.12)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+      <div onclick="showVenueDashboard('usage');openLogUsageModal()" style="background:white;border:0.5px solid rgba(0,0,0,0.08);border-radius:16px;cursor:pointer;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:transform .12s,box-shadow .12s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(124,58,237,.12)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
         <svg width="72" height="72" viewBox="0 0 52 52" fill="none">
           <rect x="7" y="13" width="34" height="24" rx="2.5" stroke="#7C3AED" stroke-width="1.6"/>
           <line x1="24" y1="13" x2="24" y2="37" stroke="#7C3AED" stroke-width="1.2" stroke-dasharray="2.5 2"/>
@@ -897,7 +897,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       </div>
 
       <!-- Schedule -->
-      <div onclick="switchVenueTab('schedule');showVenueDashboard()" style="background:white;border:0.5px solid rgba(0,0,0,0.08);border-radius:16px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:22px;transition:transform .12s,box-shadow .12s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(59,109,17,.1)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+      <div onclick="showVenueDashboard('schedule')" style="background:white;border:0.5px solid rgba(0,0,0,0.08);border-radius:16px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:22px;transition:transform .12s,box-shadow .12s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(59,109,17,.1)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
         <svg width="52" height="52" viewBox="0 0 40 40" fill="none">
           <rect x="5" y="8" width="30" height="26" rx="2.5" stroke="#3B6D11" stroke-width="1.5"/>
           <line x1="5" y1="15" x2="35" y2="15" stroke="#3B6D11" stroke-width="1.5"/>
@@ -916,7 +916,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       </div>
 
       <!-- Stats -->
-      <div onclick="switchVenueTab('stats');showVenueDashboard()" style="background:white;border:0.5px solid rgba(0,0,0,0.08);border-radius:16px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:22px;transition:transform .12s,box-shadow .12s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(133,79,11,.1)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+      <div onclick="showVenueDashboard('stats')" style="background:white;border:0.5px solid rgba(0,0,0,0.08);border-radius:16px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:22px;transition:transform .12s,box-shadow .12s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(133,79,11,.1)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
         <svg width="52" height="52" viewBox="0 0 40 40" fill="none">
           <line x1="7" y1="33" x2="33" y2="33" stroke="#854F0B" stroke-width="1.5" stroke-linecap="round"/>
           <line x1="7" y1="8" x2="7" y2="33" stroke="#854F0B" stroke-width="1.5" stroke-linecap="round"/>
@@ -992,7 +992,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
   </div>
 
   <!-- LOG TASK TAB -->
-  <div id="vtab-log-content" style="padding:1rem;max-width:860px;margin:0 auto;width:100%;box-sizing:border-box">
+  <div id="vtab-log-content" style="display:none;padding:1rem;max-width:860px;margin:0 auto;width:100%;box-sizing:border-box">
     <!-- UPCOMING -->
     <div style="background:white;border-radius:16px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);margin-bottom:1rem;overflow:hidden">
       <div style="padding:1rem 1.25rem .75rem;display:flex;align-items:center;justify-content:space-between">
@@ -3050,12 +3050,14 @@ function showVenueWelcome(){
   loadWelcomeWeather(venue?venue.city:'');
 }
 
-function showVenueDashboard(){
+function showVenueDashboard(tab){
   document.getElementById('venue-welcome').style.display='none';
   Array.from(document.getElementById('screen-venue').children).forEach(el=>{
     if(!['venue-welcome','venue-menu','venue-menu-overlay'].includes(el.id))
       el.style.display='';
   });
+  // Immediately apply correct tab so nothing flashes
+  switchVenueTab(tab||'log');
 }
 
 async function loadWelcomeWeather(city){
@@ -4043,20 +4045,13 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
   const allUsageSrc=[...state_usage, ...(typeof state_admin_usage!=='undefined'?state_admin_usage:[])];
   const usage=allUsageSrc.filter((u,i,arr)=>u.venueId===venueId&&arr.findIndex(x=>x.id===u.id)===i);
 
-  const allDates=[...new Set([
-    ...ops.map(o=>(o.date||'').slice(0,10)),
-    ...usage.map(u=>(u.date||'').slice(0,10))
-  ].filter(Boolean))].sort();
 
   const weekDayStrs=weekDays.map(d=>{
     return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
   });
-  const allCols=[...new Set([...weekDayStrs,...allDates])].sort();
+  // Show only current week — historical ops show when navigating
+  const allCols=weekDayStrs;
 
-  if(!allCols.length){
-    grid.innerHTML='<div style="padding:2rem;text-align:center;color:#96a6bb;font-size:13px">No tasks logged yet. Click "+ Log task" to add one.</div>';
-    return;
-  }
 
   const chipStyle={
     planned:'background:#FAEEDA;color:#854F0B;border-left:3px solid #EF9F27',
@@ -4079,7 +4074,7 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
     const isT=dStr===today;
     const inWeek=weekDayStrs.includes(dStr);
     const dayName=dayNames[(d.getDay()+6)%7];
-    headerCols+=`<th colspan="2" style="padding:6px 4px;text-align:center;border-right:1px solid rgba(0,0,0,0.09);background:${isT?'rgba(24,95,165,0.08)':'#fafbfc'};min-width:130px;${!inWeek?'opacity:.7':''}">
+    headerCols+=`<th colspan="2" ${isT?'data-today="1"':''} style="padding:6px 4px;text-align:center;border-right:1px solid rgba(0,0,0,0.09);background:${isT?'rgba(24,95,165,0.08)':'#fafbfc'};min-width:130px;${!inWeek?'opacity:.7':''}">
       <div style="font-size:9px;color:#96a6bb;text-transform:uppercase">${dayName}</div>
       <div style="font-size:13px;font-weight:700;color:${isT?'#185FA5':'#0C2340'}">${d.getDate()} ${d.toLocaleDateString('en-GB',{month:'short'})}</div>
     </th>`;
@@ -4128,6 +4123,15 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
     </thead>
     <tbody><tr>${cells}</tr></tbody>
   </table></div>`;
+  // Scroll today's column into center view
+  requestAnimationFrame(()=>{
+    const todayTh=grid.querySelector('th[data-today="1"]');
+    const scrollEl=grid.querySelector('div[style*="overflow-x"]');
+    if(todayTh&&scrollEl){
+      const offset=todayTh.offsetLeft-(scrollEl.clientWidth/2)+(todayTh.offsetWidth);
+      scrollEl.scrollLeft=Math.max(0,offset);
+    }
+  });
 }
 
 
