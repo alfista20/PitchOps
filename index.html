@@ -969,19 +969,10 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     <p id="venue-hero-sub" style="font-size:13px;color:rgba(255,255,255,.5);margin:0 0 6px">City</p>
     <div id="venue-project-tag" style="font-size:12px;color:rgba(255,255,255,.6);margin-bottom:1.25rem;font-weight:500"></div>
     <div id="venue-contact-info" style="display:none"></div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem">
-      <div style="background:rgba(255,255,255,.1);border-radius:14px;padding:.9rem .75rem;text-align:center">
-        <div id="stat-total" style="font-size:26px;font-weight:700;color:white;font-family:'Syne',sans-serif;line-height:1">0</div>
-        <div style="font-size:10px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.5px;margin-top:4px" data-i18n="stat_total">This month</div>
-      </div>
-      <div style="background:rgba(255,255,255,.1);border-radius:14px;padding:.9rem .75rem;text-align:center">
-        <div id="stat-last" style="font-size:26px;font-weight:700;color:white;font-family:'Syne',sans-serif;line-height:1">—</div>
-        <div style="font-size:10px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.5px;margin-top:4px" data-i18n="stat_last">Last op</div>
-      </div>
-      <div style="background:rgba(255,255,255,.1);border-radius:14px;padding:.9rem .75rem;text-align:center">
-        <div id="stat-common" style="font-size:13px;font-weight:700;color:white;font-family:'Syne',sans-serif;line-height:1.2">—</div>
-        <div style="font-size:10px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.5px;margin-top:4px" data-i18n="stat_common">Top type</div>
-      </div>
+    <div style="display:none">
+      <div id="stat-total"></div>
+      <div id="stat-last"></div>
+      <div id="stat-common"></div>
     </div>
   </div>
 
@@ -4138,6 +4129,9 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
       eventCells+=`<td colspan="2" style="padding:0 2px;border-right:1px solid rgba(0,0,0,0.06);height:0;line-height:0"></td>`;
     } else {
       const bars = dayEvents.map(ev=>{
+        const evWeekDays = weekDayStrs.filter(d=>ev.dateStart<=d&&ev.dateEnd>=d);
+        const midDay = evWeekDays[Math.floor(evWeekDays.length/2)];
+        const showName = dStr===midDay;
         const isStart = ev.dateStart===dStr;
         const isEnd   = ev.dateEnd===dStr;
         const radius  = `${isStart?'4px':'0'} ${isEnd?'4px':'0'} ${isEnd?'4px':'0'} ${isStart?'4px':'0'}`;
@@ -4145,9 +4139,10 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
           style="background:${ev.colorBg};color:${ev.colorFg};height:20px;line-height:20px;
             font-size:10px;font-weight:700;padding:0 6px;border-radius:${radius};
             white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;
+            text-align:center;
             box-shadow:0 1px 3px rgba(0,0,0,.1);margin-bottom:2px;"
           onmouseover="this.style.filter='brightness(.92)'" onmouseout="this.style.filter=''"
-        >${esc(ev.name)}</div>`;
+        >${showName?esc(ev.name):''}</div>`;
       }).join('');
       eventCells+=`<td colspan="2" style="padding:2px 2px;border-right:1px solid rgba(0,0,0,0.06);vertical-align:top">${bars}</td>`;
     }
@@ -4424,24 +4419,27 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
     // Build one event ROW per event (not absolute positioned)
     const eventRowsHTML = weekEvents.map(ev=>{
       // Build 7 cells, one per day
-      const dayCells7 = week.map(d=>{
+      const coveredIdxs = week.map((d,i)=>ev.dateStart<=_dStr(d)&&ev.dateEnd>=_dStr(d)?i:-1).filter(i=>i>=0);
+      const midIdx = coveredIdxs.length>0 ? coveredIdxs[Math.floor(coveredIdxs.length/2)] : -1;
+      const dayCells7 = week.map((d,wi)=>{
         const dStr = _dStr(d);
         const covers = ev.dateStart<=dStr && ev.dateEnd>=dStr;
         if(!covers) return `<div style="height:22px"></div>`;
         const isStart = ev.dateStart===dStr;
         const isEnd   = ev.dateEnd===dStr;
+        const isMid   = wi===midIdx;
         const radius  = `${isStart?'4px':'0'} ${isEnd?'4px':'0'} ${isEnd?'4px':'0'} ${isStart?'4px':'0'}`;
         return `<div onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')"
           style="height:20px;line-height:20px;margin:1px ${isEnd?'2px':'0'} 0 ${isStart?'2px':'0'};
             background:${ev.colorBg};color:${ev.colorFg};
             font-size:10px;font-weight:700;padding:0 6px;
-            border-radius:${radius};
+            border-radius:${radius};text-align:center;
             white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
             cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.1);
             ${!isEnd?'margin-right:-1px;':''}
             pointer-events:auto;"
           onmouseover="this.style.filter='brightness(.92)'" onmouseout="this.style.filter=''"
-        >${esc(ev.name)}</div>`;
+        >${isMid?esc(ev.name):''}</div>`;
       }).join('');
       return `<div style="display:grid;grid-template-columns:repeat(7,1fr);pointer-events:none">
         ${dayCells7}
