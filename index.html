@@ -1088,25 +1088,29 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
   <!-- SCHEDULE TAB -->
   <div id="vtab-schedule-content" style="display:none;padding:.75rem">
     <div style="background:white;border:1px solid rgba(0,0,0,.06);border-radius:16px;box-shadow:0 2px 12px rgba(12,35,64,.08);overflow:hidden">
-      <div style="padding:.75rem 1rem;border-bottom:1px solid var(--border);background:#f8fafc;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
+      <!-- TOOLBAR -->
+      <div style="padding:.75rem 1rem;border-bottom:1px solid var(--border);background:#f8fafc;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <!-- Nav -->
           <div style="display:flex;align-items:center;background:white;border:1px solid var(--border);border-radius:8px;padding:3px 10px;gap:8px">
             <button onclick="venueSchedNav(-1)" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--text-muted);padding:0">←</button>
-            <span id="venue-sched-label" style="font-size:12px;font-weight:600;min-width:150px;text-align:center;color:var(--text)">—</span>
+            <span id="venue-sched-label" style="font-size:12px;font-weight:600;min-width:130px;text-align:center;color:var(--text)">—</span>
             <button onclick="venueSchedNav(1)" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--text-muted);padding:0">→</button>
           </div>
           <button onclick="venueSchedToday()" style="padding:5px 12px;font-size:12px;background:white;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text-muted)" data-i18n="today">Today</button>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:50%;background:#EF9F27;display:inline-block"></span><span data-i18n="legend_planned">Planned</span></span>
-            <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:50%;background:#378ADD;display:inline-block"></span><span data-i18n="legend_inprogress">In progress</span></span>
-            <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:50%;background:#3B6D11;display:inline-block"></span><span data-i18n="legend_completed">Completed</span></span>
-            <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:50%;background:#A32D2D;display:inline-block"></span><span data-i18n="legend_missed">Missed</span></span>
+          <!-- View switcher -->
+          <div style="display:flex;background:#f1f3f5;border-radius:8px;padding:2px;gap:2px">
+            <button id="vsched-btn-month" onclick="setVenueSchedView('month')" style="padding:4px 10px;font-size:11px;font-weight:600;border:none;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;background:#185FA5;color:white" data-i18n="view_month">Month</button>
+            <button id="vsched-btn-week" onclick="setVenueSchedView('week')" style="padding:4px 10px;font-size:11px;font-weight:600;border:none;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;background:transparent;color:var(--text-muted)" data-i18n="view_week">Week</button>
           </div>
         </div>
-        <button onclick="openLogTaskModal()" style="padding:7px 16px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 2px 8px rgba(24,95,165,.3)" data-i18n="btn_log_task">+ Log task</button>
-        <button onclick="openLogUsageModal()" style="padding:7px 16px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 2px 8px rgba(124,58,237,.3)" data-i18n="btn_log_usage">+ Log usage</button>
+        <div style="display:flex;gap:6px">
+          <button onclick="openLogTaskModal()" style="padding:7px 16px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 2px 8px rgba(24,95,165,.3)" data-i18n="btn_log_task">+ Log task</button>
+          <button onclick="openLogUsageModal()" style="padding:7px 16px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 2px 8px rgba(124,58,237,.3)" data-i18n="btn_log_usage">+ Log usage</button>
+        </div>
       </div>
-      <div id="venue-sched-grid" style="overflow-x:auto;width:100%"></div>
+      <!-- GRID -->
+      <div id="venue-sched-grid"></div>
     </div>
   </div>
 </div>
@@ -1673,7 +1677,7 @@ async function refreshVenueOps(venueId, silent=false){
     renderVenueUpcoming();
     // Re-render calendar if visible (call renderWeekCalendar directly to avoid loop)
     const schedVisible=document.getElementById('vtab-schedule-content')?.style.display==='block';
-    if(schedVisible) renderWeekCalendar(venueId,'venue-sched-grid',venueSchedOffset);
+    if(schedVisible) renderVenueSched();
     // Re-render admin gantt if visible
     const ganttVisible=document.getElementById('ptab-calendar-content')?.style.display==='block';
     if(ganttVisible) renderGantt();
@@ -2401,7 +2405,7 @@ function applyTranslations(l){
   if(typeof renderVenueUsageHistory==='function') renderVenueUsageHistory();
   if(document.getElementById('ptab-calendar-content')?.style.display==='block' && typeof renderGantt==='function') renderGantt();
   if(document.getElementById('vtab-schedule-content')?.style.display==='block' && state.currentVenueId && typeof renderWeekCalendar==='function')
-    renderWeekCalendar(state.currentVenueId,'venue-sched-grid',typeof venueSchedOffset!=='undefined'?venueSchedOffset:0);
+    renderVenueSched();
 }
 
 function setLang(l){
@@ -3334,7 +3338,7 @@ async function saveEditOperation(){
   renderDetailOps();
   // Always re-render schedule if visible — use venueId from op
   if(document.getElementById('vtab-schedule-content')?.style.display==='block'){
-    renderWeekCalendar(venueIdForRender,'venue-sched-grid',venueSchedOffset);
+    renderVenueSched();
   }
   // Also re-render venue cal drill-down if visible (admin)
   if(document.getElementById('venue-cal-view')?.style.display==='block' && state.currentVenueCalId){
@@ -3357,7 +3361,7 @@ async function deleteOperation(){
   renderVenueUpcoming();
   renderDetailOps();
   if(document.getElementById('vtab-schedule-content')?.style.display==='block' && state.currentVenueId){
-    renderWeekCalendar(state.currentVenueId,'venue-sched-grid',venueSchedOffset);
+    renderVenueSched();
   }
   if(document.getElementById('venue-cal-view')?.style.display==='block' && state.currentVenueCalId){
     renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
@@ -4112,8 +4116,8 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
       return `<div draggable="true" class="sched-chip" ondragstart="onDragStart(event,'usage','${u.id}','${dStr}','${venueId}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditUsageModal('${u.id}')" style="${cs}">⚽ ${esc(u.usageType)}${tl}</div>`;
     }).join('');
 
-    cells+=`<td onclick="openLogTaskModal('${dStr}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${venueId}')" style="padding:4px;border-right:1px dashed rgba(0,0,0,0.07);vertical-align:top;cursor:pointer;background:${bgT};min-height:50px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsChips||''}</td>
-    <td onclick="openLogUsageModal('${dStr}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${venueId}')" style="padding:4px;border-right:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:50px;min-width:65px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageChips||''}</td>`;
+    cells+=`<td onclick="openLogTaskModal('${dStr}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${venueId}')" style="padding:4px;border-right:1px dashed rgba(0,0,0,0.07);vertical-align:top;cursor:pointer;background:${bgT};min-height:120px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsChips||''}</td>
+    <td onclick="openLogUsageModal('${dStr}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${venueId}')" style="padding:4px;border-right:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:120px;min-width:65px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageChips||''}</td>`;
   });
 
   grid.innerHTML=`<div style="overflow-x:auto;width:100%"><table style="border-collapse:collapse;width:100%;min-width:600px">
@@ -4121,7 +4125,7 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
       <tr>${headerCols}</tr>
       <tr>${subHeaderCols}</tr>
     </thead>
-    <tbody><tr>${cells}</tr></tbody>
+    <tbody><tr style="height:120px">${cells}</tr></tbody>
   </table></div>`;
   // Scroll today's column into center view
   requestAnimationFrame(()=>{
@@ -4158,10 +4162,11 @@ function switchVenueTab(tab){
   }
   if(tab==='schedule'){
     venueSchedOffset=0;
+    venueMonthOffset=0;
     const vid=state.currentVenueId;
     if(vid){
-      renderWeekCalendar(vid,'venue-sched-grid',0);
-      Promise.all([refreshVenueOps(vid,true), refreshVenueUsage(vid,true)]).then(()=>renderWeekCalendar(vid,'venue-sched-grid',0));
+      renderVenueSched();
+      Promise.all([refreshVenueOps(vid,true), refreshVenueUsage(vid,true)]).then(()=>renderVenueSched());
     }
   }
   if(tab==='usage'){
@@ -4193,13 +4198,137 @@ function openLogTaskModal(dateStr, timeStr, prefillType, prefillStatus){
   openModal('modal-log-task');
 }
 
-function venueSchedNav(dir){ venueSchedOffset+=dir; renderVenueSched(); }
-function venueSchedToday(){ venueSchedOffset=0; renderVenueSched(); }
+// ════════════════════════════════════════
+// VENUE SCHEDULE — MONTH / WEEK VIEW
+// ════════════════════════════════════════
+let venueSchedView = 'month'; // 'month' | 'week'
+let venueMonthOffset = 0;     // months from current
+
+function setVenueSchedView(view){
+  venueSchedView = view;
+  // Update button styles
+  const btnMonth = document.getElementById('vsched-btn-month');
+  const btnWeek  = document.getElementById('vsched-btn-week');
+  if(btnMonth){ btnMonth.style.background = view==='month'?'#185FA5':'transparent'; btnMonth.style.color = view==='month'?'white':'var(--text-muted)'; }
+  if(btnWeek){  btnWeek.style.background  = view==='week' ?'#185FA5':'transparent'; btnWeek.style.color  = view==='week' ?'white':'var(--text-muted)'; }
+  renderVenueSched();
+}
+
+function venueSchedNav(dir){
+  if(venueSchedView==='month') venueMonthOffset += dir;
+  else venueSchedOffset += dir;
+  renderVenueSched();
+}
+
+function venueSchedToday(){
+  venueMonthOffset = 0;
+  venueSchedOffset = 0;
+  renderVenueSched();
+}
 
 function renderVenueSched(){
-  const vid=state.currentVenueId; if(!vid) return;
-  renderWeekCalendar(vid, 'venue-sched-grid', venueSchedOffset);
+  const vid = state.currentVenueId; if(!vid) return;
+  if(venueSchedView==='month') renderMonthCalendar(vid,'venue-sched-grid',venueMonthOffset);
+  else renderVenueSched();
 }
+
+function renderMonthCalendar(venueId, gridId, monthOffset){
+  const grid = document.getElementById(gridId); if(!grid) return;
+  const labelEl = document.getElementById('venue-sched-label');
+  const today = todayStr();
+
+  // Compute month start
+  const now = new Date();
+  const yr  = now.getFullYear();
+  const mo  = now.getMonth() + monthOffset; // may overflow — Date handles it
+  const monthStart = new Date(yr, mo, 1);
+  const monthEnd   = new Date(yr, mo+1, 0);
+
+  if(labelEl) labelEl.textContent = monthStart.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+
+  // Build 6-week grid (42 cells) starting from Monday before monthStart
+  const firstDay = new Date(monthStart);
+  const dow = firstDay.getDay()||7; // Mon=1
+  firstDay.setDate(firstDay.getDate() - dow + 1);
+
+  const cells = [];
+  for(let i=0;i<42;i++){
+    const d = new Date(firstDay);
+    d.setDate(firstDay.getDate()+i);
+    cells.push(d);
+  }
+
+  // Gather ops and usage for this venue
+  const ops = state.operations.filter(o=>o.venueId===venueId);
+  const allUsageSrc = [...state_usage,...(typeof state_admin_usage!=='undefined'?state_admin_usage:[])];
+  const usage = allUsageSrc.filter((u,i,arr)=>u.venueId===venueId&&arr.findIndex(x=>x.id===u.id)===i);
+
+  const chipStyle = {
+    planned:   'background:#FAEEDA;color:#854F0B;border-left:2px solid #EF9F27',
+    inprogress:'background:#E6F1FB;color:#185FA5;border-left:2px solid #378ADD',
+    completed: 'background:#EAF3DE;color:#3B6D11;border-left:2px solid #3B6D11',
+    missed:    'background:#FCEBEB;color:#A32D2D;border-left:2px solid #A32D2D',
+  };
+  const usageBg = 'background:#F3E8FF;color:#6B21A8;border-left:2px solid #A855F7';
+
+  // Day-of-week header
+  const dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const header = dayNames.map(d=>
+    `<div style="text-align:center;font-size:11px;font-weight:700;color:#96a6bb;text-transform:uppercase;letter-spacing:.4px;padding:8px 0;border-bottom:1px solid var(--border)">${d}</div>`
+  ).join('');
+
+  // Build grid cells
+  const cellsHtml = cells.map(d=>{
+    const dStr = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    const isToday = dStr===today;
+    const isCurrentMonth = d.getMonth()===monthStart.getMonth();
+    const isPast = dStr < today;
+
+    // Collect items for this day
+    const dayOps = ops.filter(o=>(o.date||'').slice(0,10)===dStr)
+      .map(o=>{ if(isPast&&o.status==='planned') return {...o,status:'missed',_auto:true}; return o; });
+    const dayUsage = usage.filter(u=>(u.date||'').slice(0,10)===dStr);
+
+    // Max 3 chips, then +N more
+    const allItems = [
+      ...dayOps.map(o=>({type:'op',  label:o.type,       style:chipStyle[o.status]||chipStyle.planned, id:o.id})),
+      ...dayUsage.map(u=>({type:'use',label:u.usageType||'Usage', style:usageBg, id:u.id})),
+    ];
+    const visible = allItems.slice(0,3);
+    const overflow = allItems.length > 3 ? allItems.length-3 : 0;
+
+    const chipsHtml = visible.map(item=>
+      `<div onclick="event.stopPropagation();${item.type==='op'?`openEditModal('${item.id}')`:`openEditUsageModal('${item.id}')`}"
+        style="font-size:10px;font-weight:600;padding:2px 5px;border-radius:3px;margin-bottom:2px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;${item.style};transition:filter .1s"
+        onmouseover="this.style.filter='brightness(0.93)'" onmouseout="this.style.filter=''"
+      >${esc(item.label)}</div>`
+    ).join('');
+
+    const overflowHtml = overflow>0
+      ? `<div style="font-size:9px;color:#96a6bb;padding:1px 4px">+${overflow} ${t('more_suffix')}</div>` : '';
+
+    const bg = isToday ? '#EBF4FF' : isCurrentMonth ? 'white' : '#f8fafc';
+    const borderColor = isToday ? '#185FA5' : 'rgba(0,0,0,0.06)';
+    const numColor = isToday ? '#185FA5' : isCurrentMonth ? '#0C2340' : '#c0c8d4';
+    const numWeight = isToday ? '800' : '600';
+
+    return `<div onclick="openLogTaskModal('${dStr}')"
+      style="border:1px solid ${borderColor};background:${bg};padding:6px;min-height:90px;cursor:pointer;position:relative;box-sizing:border-box;${isToday?'box-shadow:inset 0 0 0 2px #185FA5;':''}"
+      onmouseover="this.style.background='${isToday?'#dbeeff':'#f0f7ff'}'" onmouseout="this.style.background='${bg}'"
+    >
+      <div style="font-size:12px;font-weight:${numWeight};color:${numColor};margin-bottom:4px;${isToday?'background:#185FA5;color:white;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;':''}">${d.getDate()}</div>
+      ${chipsHtml}
+      ${overflowHtml}
+    </div>`;
+  }).join('');
+
+  grid.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(7,1fr)">
+      ${header}
+      ${cellsHtml}
+    </div>`;
+}
+
 
 function toggleAdminMenu(){
   const menu=document.getElementById('admin-menu');
@@ -4255,7 +4384,7 @@ async function refreshVenueUsage(venueId, silent=false){
   renderVenueUsageHistory();
   // Re-render calendar if visible
   if(document.getElementById('vtab-schedule-content')?.style.display==='block'){
-    renderWeekCalendar(venueId,'venue-sched-grid',venueSchedOffset);
+    renderVenueSched();
   }
 }
 
@@ -4394,7 +4523,7 @@ async function logUsage(){
   closeModal('modal-log-usage');
   renderVenueUsageToday(); renderVenueUsageHistory();
   if(document.getElementById('vtab-schedule-content')?.style.display==='block'){
-    renderWeekCalendar(venueId,'venue-sched-grid',venueSchedOffset);
+    renderVenueSched();
   }
   showToast(t('toast_usage_logged'));
 }
@@ -4445,7 +4574,7 @@ async function saveEditUsage(){
   closeModal('modal-edit-usage');
   renderVenueUsageToday(); renderVenueUsageHistory();
   if(document.getElementById('vtab-schedule-content')?.style.display==='block'){
-    renderWeekCalendar(state.currentVenueId,'venue-sched-grid',venueSchedOffset);
+    renderVenueSched();
   }
   showToast(t('toast_usage_updated'));
   } catch(err){ console.error('saveEditUsage:',err); showToast('Error: '+err.message); }
@@ -4462,7 +4591,7 @@ async function deleteUsage(){
   renderVenueUsageToday(); renderVenueUsageHistory();
   renderDetailUsage();
   if(document.getElementById('vtab-schedule-content')?.style.display==='block'){
-    renderWeekCalendar(state.currentVenueId,'venue-sched-grid',venueSchedOffset);
+    renderVenueSched();
   }
   showToast(t('toast_usage_deleted'));
 }
@@ -4832,7 +4961,7 @@ async function executeDrop(dragData, newDate, newVenueId, copy){
   if(vid){
     renderVenueUpcoming(); renderVenueHistory(); renderVenueStats();
     if(document.getElementById('vtab-schedule-content')?.style.display==='block')
-      renderWeekCalendar(vid,'venue-sched-grid',venueSchedOffset);
+      renderVenueSched();
   }
   if(pid){
     renderDetailOps(); renderDetailUsage();
