@@ -981,11 +981,11 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
   </div>
 
   <!-- TABS -->
-  <div style="background:white;border-bottom:1px solid var(--border);padding:0 1.25rem;display:flex;flex-shrink:0">
-    <button id="vtab-log" onclick="switchVenueTab('log')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid var(--blue);background:white;color:var(--blue);cursor:pointer;font-family:'DM Sans',sans-serif" data-i18n="tab_log">🗒 Log task</button>
-    <button id="vtab-usage" onclick="switchVenueTab('usage')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif" data-i18n="tab_usage">⏱ Log usage</button>
-    <button id="vtab-schedule" data-i18n="tab_schedule" onclick="switchVenueTab('schedule')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif">📅 Schedule</button>
-    <button id="vtab-stats" data-i18n="tab_stats" onclick="switchVenueTab('stats')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif">📊 Stats</button>
+  <div style="background:white;border-bottom:1px solid var(--border);display:flex;flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none">
+    <button id="vtab-log" onclick="switchVenueTab('log')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid var(--blue);background:white;color:var(--blue);cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;white-space:nowrap" data-i18n="tab_log">🗒 Log task</button>
+    <button id="vtab-usage" onclick="switchVenueTab('usage')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;white-space:nowrap" data-i18n="tab_usage">⏱ Log usage</button>
+    <button id="vtab-schedule" data-i18n="tab_schedule" onclick="switchVenueTab('schedule')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;white-space:nowrap">📅 Schedule</button>
+    <button id="vtab-stats" data-i18n="tab_stats" onclick="switchVenueTab('stats')" style="padding:14px 20px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;white-space:nowrap">📊 Stats</button>
 
 
 
@@ -4465,7 +4465,9 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
     </div>`;
   }
 
-  grid.innerHTML = gridHTML;
+  grid.innerHTML = `<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%">
+    <div style="min-width:560px">${gridHTML}</div>
+  </div>`;
 }
 
 function _dStr(d){
