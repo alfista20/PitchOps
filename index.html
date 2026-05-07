@@ -3169,7 +3169,9 @@ async function enterVenueDashboard(venue){
   await Promise.all([refreshVenueOps(venue.id, true), refreshVenueUsage(venue.id, true)]);
   populateOpTypeSelects();
   renderVenueContactInfo();
-  // Load multi-day events for this venue
+  // Reset events loaded flag for fresh load
+  if(!window._eventsLoaded) window._eventsLoaded = {};
+  window._eventsLoaded[venue.id] = false;
   loadVenueEvents(venue.id).catch(()=>{});
   // Show welcome screen first, not directly the log tab
   showVenueWelcome();
@@ -4331,9 +4333,12 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
   const labelEl = document.getElementById('venue-sched-label');
   const today = todayStr();
 
-  // Load events async if needed
-  if(state_events.filter(e=>e.venueId===venueId).length===0){
+  // Load events once per venue (use a loaded-flag to avoid infinite re-render loop)
+  if(!window._eventsLoaded) window._eventsLoaded = {};
+  if(!window._eventsLoaded[venueId]){
+    window._eventsLoaded[venueId] = true;
     loadVenueEvents(venueId).then(()=>renderMonthCalendar(venueId,gridId,monthOffset));
+    // Render immediately with whatever we have (empty events is fine)
   }
 
   // Compute month
