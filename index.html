@@ -1100,8 +1100,8 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
           <button onclick="venueSchedToday()" style="padding:5px 12px;font-size:12px;background:white;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text-muted)" data-i18n="today">Today</button>
           <!-- View switcher -->
           <div style="display:flex;background:#f1f3f5;border-radius:8px;padding:2px;gap:2px">
-            <button id="vsched-btn-month" onclick="setVenueSchedView('month')" style="padding:4px 10px;font-size:11px;font-weight:600;border:none;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;background:#185FA5;color:white" data-i18n="view_month">Month</button>
-            <button id="vsched-btn-week" onclick="setVenueSchedView('week')" style="padding:4px 10px;font-size:11px;font-weight:600;border:none;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;background:transparent;color:var(--text-muted)" data-i18n="view_week">Week</button>
+            <button id="vsched-btn-month" onclick="setVenueSchedView('month')" style="padding:4px 10px;font-size:11px;font-weight:600;border:none;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;background:transparent;color:var(--text-muted)" data-i18n="view_month">Month</button>
+            <button id="vsched-btn-week" onclick="setVenueSchedView('week')" style="padding:4px 10px;font-size:11px;font-weight:600;border:none;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;background:#185FA5;color:white" data-i18n="view_week">Week</button>
           </div>
         </div>
         <div style="display:flex;gap:6px">
@@ -3169,6 +3169,8 @@ async function enterVenueDashboard(venue){
   await Promise.all([refreshVenueOps(venue.id, true), refreshVenueUsage(venue.id, true)]);
   populateOpTypeSelects();
   renderVenueContactInfo();
+  // Load multi-day events for this venue
+  loadVenueEvents(venue.id).catch(()=>{});
   // Show welcome screen first, not directly the log tab
   showVenueWelcome();
   // Set welcome screen venue name and project
@@ -4199,9 +4201,101 @@ function openLogTaskModal(dateStr, timeStr, prefillType, prefillStatus){
 }
 
 // ════════════════════════════════════════
+// MULTI-DAY EVENTS (pitchops_events table)
+// ════════════════════════════════════════
+let state_events = []; // {id, venueId, name, dateStart, dateEnd, colorBg, colorFg}
+
+async function loadVenueEvents(venueId){
+  const {data} = await supa.from('pitchops_events').select('*').eq('venue_id', venueId);
+  state_events = (data||[]).map(r=>({
+    id: r.id, venueId: r.venue_id, name: r.name,
+    dateStart: r.date_start, dateEnd: r.date_end,
+    colorBg: r.color_bg||'#FDE68A', colorFg: r.color_fg||'#854F0B'
+  }));
+}
+
+function selectMultidayColor(el, bg, fg){
+  document.querySelectorAll('#multiday-colors div').forEach(d=>{
+    d.style.border = '2px solid transparent';
+  });
+  el.style.border = '3px solid '+fg;
+  document.getElementById('multiday-color-bg').value = bg;
+  document.getElementById('multiday-color-fg').value = fg;
+}
+
+function openMultidayModal(dateStr){
+  document.getElementById('modal-multiday-title').textContent = 'Add event';
+  document.getElementById('multiday-id').value = '';
+  document.getElementById('multiday-name').value = '';
+  document.getElementById('multiday-start').value = dateStr||todayStr();
+  document.getElementById('multiday-end').value = dateStr||todayStr();
+  document.getElementById('multiday-delete-btn').style.display = 'none';
+  // Reset color to yellow
+  selectMultidayColor(document.querySelector('#multiday-colors div'), '#FDE68A', '#854F0B');
+  openModal('modal-multiday');
+}
+
+function openMultidayEditModal(id){
+  const ev = state_events.find(e=>e.id===id); if(!ev) return;
+  document.getElementById('modal-multiday-title').textContent = 'Edit event';
+  document.getElementById('multiday-id').value = id;
+  document.getElementById('multiday-name').value = ev.name;
+  document.getElementById('multiday-start').value = ev.dateStart;
+  document.getElementById('multiday-end').value = ev.dateEnd;
+  document.getElementById('multiday-delete-btn').style.display = '';
+  document.getElementById('multiday-color-bg').value = ev.colorBg;
+  document.getElementById('multiday-color-fg').value = ev.colorFg;
+  // Highlight matching color swatch
+  document.querySelectorAll('#multiday-colors div').forEach(d=>{
+    d.style.border = d.dataset.bg===ev.colorBg ? '3px solid '+ev.colorFg : '2px solid transparent';
+  });
+  openModal('modal-multiday');
+}
+
+async function saveMultidayEvent(){
+  const id = document.getElementById('multiday-id').value;
+  const name = document.getElementById('multiday-name').value.trim();
+  const dateStart = document.getElementById('multiday-start').value;
+  const dateEnd = document.getElementById('multiday-end').value;
+  const colorBg = document.getElementById('multiday-color-bg').value;
+  const colorFg = document.getElementById('multiday-color-fg').value;
+  const venueId = state.currentVenueId;
+
+  if(!name){ showToast('Please enter event name'); return; }
+  if(!dateStart||!dateEnd){ showToast('Please select dates'); return; }
+  if(dateEnd < dateStart){ showToast('End date must be after start date'); return; }
+
+  const row = { venue_id:venueId, name, date_start:dateStart, date_end:dateEnd, color_bg:colorBg, color_fg:colorFg };
+
+  if(id){
+    const {error} = await supa.from('pitchops_events').update(row).eq('id',id);
+    if(error){ showToast('Error: '+error.message); return; }
+    const idx = state_events.findIndex(e=>e.id===id);
+    if(idx!==-1) state_events[idx] = {...state_events[idx],...row,id,venueId};
+  } else {
+    const newId = 'ev_'+Date.now();
+    const {error} = await supa.from('pitchops_events').insert({id:newId,...row});
+    if(error){ showToast('Error: '+error.message); return; }
+    state_events.unshift({id:newId,venueId,name,dateStart,dateEnd,colorBg,colorFg});
+  }
+  closeModal('modal-multiday');
+  renderVenueSched();
+}
+
+async function deleteMultidayEvent(){
+  const id = document.getElementById('multiday-id').value; if(!id) return;
+  if(!confirm('Delete this event?')) return;
+  const {error} = await supa.from('pitchops_events').delete().eq('id',id);
+  if(error){ showToast('Error: '+error.message); return; }
+  state_events = state_events.filter(e=>e.id!==id);
+  closeModal('modal-multiday');
+  renderVenueSched();
+}
+
+// ════════════════════════════════════════
 // VENUE SCHEDULE — MONTH / WEEK VIEW
 // ════════════════════════════════════════
-let venueSchedView = 'month'; // 'month' | 'week'
+let venueSchedView = 'week'; // 'month' | 'week'
 let venueMonthOffset = 0;     // months from current
 
 function setVenueSchedView(view){
@@ -4236,6 +4330,10 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
   const grid = document.getElementById(gridId); if(!grid) return;
   const labelEl = document.getElementById('venue-sched-label');
   const today = todayStr();
+  // Load events for this venue if not loaded yet
+  if(state_events.filter(e=>e.venueId===venueId).length===0){
+    loadVenueEvents(venueId).then(()=>renderMonthCalendar(venueId,gridId,monthOffset));
+  }
 
   // Compute month start
   const now = new Date();
@@ -4322,11 +4420,109 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
     </div>`;
   }).join('');
 
-  grid.innerHTML = `
-    <div style="display:grid;grid-template-columns:repeat(7,1fr)">
-      ${header}
-      ${cellsHtml}
+  // ── Multi-day events layer ──
+  const venueEvents = state_events.filter(e=>e.venueId===venueId);
+
+  // For each week row, collect events that span into it
+  const weeks = [];
+  for(let w=0;w<6;w++) weeks.push(cells.slice(w*7,(w+1)*7));
+
+  const eventRowsHtml = weeks.map((week, wi)=>{
+    const weekStart = week[0].getFullYear()+'-'+String(week[0].getMonth()+1).padStart(2,'0')+'-'+String(week[0].getDate()).padStart(2,'0');
+    const weekEnd   = week[6].getFullYear()+'-'+String(week[6].getMonth()+1).padStart(2,'0')+'-'+String(week[6].getDate()).padStart(2,'0');
+
+    return venueEvents
+      .filter(ev=> ev.dateStart<=weekEnd && ev.dateEnd>=weekStart)
+      .map(ev=>{
+        // Clamp to week
+        const startInWeek = ev.dateStart<weekStart ? 0 : week.findIndex(d=>{
+          const ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+          return ds>=ev.dateStart;
+        });
+        const endInWeek = ev.dateEnd>weekEnd ? 6 : week.findIndex(d=>{
+          const ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+          return ds>=ev.dateEnd;
+        });
+        const span = (endInWeek<0?6:endInWeek) - startInWeek + 1;
+        const leftPct = (startInWeek/7*100).toFixed(2);
+        const widthPct = (span/7*100 - 0.5).toFixed(2);
+        const isStart = ev.dateStart>=weekStart;
+        const isEnd   = ev.dateEnd<=weekEnd;
+        return `<div onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')"
+          style="position:absolute;top:${wi*0}px;left:${leftPct}%;width:${widthPct}%;
+                 background:${ev.colorBg};color:${ev.colorFg};
+                 height:20px;line-height:20px;font-size:10px;font-weight:700;
+                 padding:0 6px;cursor:pointer;z-index:5;
+                 border-radius:${isStart?'4px':0} ${isEnd?'4px':0} ${isEnd?'4px':0} ${isStart?'4px':0};
+                 white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+                 box-shadow:0 1px 3px rgba(0,0,0,.15);
+                 ${!isStart?'border-left:2px dashed '+ev.colorFg+';':''}
+                 ${!isEnd?'border-right:2px dashed '+ev.colorFg+';':''}"
+          onmouseover="this.style.filter='brightness(0.92)'" onmouseout="this.style.filter=''"
+        >${isStart?esc(ev.name):''}</div>`;
+      }).join('');
+  });
+
+  // Build final grid — cells with relative positioning + overlay for events
+  const cellsWithRelative = cells.map((d, idx)=>{
+    const dStr = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    const isToday = dStr===today;
+    const isCurrentMonth = d.getMonth()===monthStart.getMonth();
+    const isPast = dStr < today;
+    const dayOps = ops.filter(o=>(o.date||'').slice(0,10)===dStr)
+      .map(o=>{ if(isPast&&o.status==='planned') return {...o,status:'missed',_auto:true}; return o; });
+    const dayUsage = usage.filter(u=>(u.date||'').slice(0,10)===dStr);
+    const allItems = [
+      ...dayOps.map(o=>({type:'op',  label:o.type, style:chipStyle[o.status]||chipStyle.planned, id:o.id})),
+      ...dayUsage.map(u=>({type:'use',label:u.usageType||'Usage', style:usageBg, id:u.id})),
+    ];
+    const visible = allItems.slice(0,2); // fewer to leave room for event bars
+    const overflow = allItems.length > 2 ? allItems.length-2 : 0;
+    const chipsHtml = visible.map(item=>
+      `<div onclick="event.stopPropagation();${item.type==='op'?`openEditModal('${item.id}')`:`openEditUsageModal('${item.id}')`}"
+        style="font-size:10px;font-weight:600;padding:2px 5px;border-radius:3px;margin-bottom:2px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;${item.style}"
+        onmouseover="this.style.filter='brightness(0.93)'" onmouseout="this.style.filter=''"
+      >${esc(item.label)}</div>`
+    ).join('');
+    const overflowHtml = overflow>0 ? `<div style="font-size:9px;color:#96a6bb;padding:1px 4px">+${overflow} ${t('more_suffix')}</div>` : '';
+    const bg = isToday ? '#EBF4FF' : isCurrentMonth ? 'white' : '#f8fafc';
+    const borderColor = isToday ? '#185FA5' : 'rgba(0,0,0,0.06)';
+    const numColor = isToday ? 'white' : isCurrentMonth ? '#0C2340' : '#c0c8d4';
+    const numWeight = isToday ? '800' : '600';
+    const numStyle = isToday
+      ? 'background:#185FA5;color:white;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;'
+      : `color:${numColor};font-size:12px;font-weight:${numWeight};`;
+    return `<div onclick="openLogTaskModal('${dStr}')"
+      style="border:1px solid ${borderColor};background:${bg};padding:6px;min-height:90px;cursor:pointer;position:relative;box-sizing:border-box;${isToday?'box-shadow:inset 0 0 0 2px #185FA5;':''}"
+      onmouseover="this.style.background='${isToday?'#dbeeff':'#f0f7ff'}'" onmouseout="this.style.background='${bg}'"
+    >
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
+        <span style="${numStyle}">${d.getDate()}</span>
+        ${isCurrentMonth?`<span onclick="event.stopPropagation();openMultidayModal('${dStr}')" style="font-size:14px;color:#c0c8d4;cursor:pointer;line-height:1;padding:0 2px" onmouseover="this.style.color='#185FA5'" onmouseout="this.style.color='#c0c8d4'" title="Add event">+</span>`:''}
+      </div>
+      <div style="margin-top:22px">${chipsHtml}${overflowHtml}</div>
     </div>`;
+  }).join('');
+
+  // Render: 7-col grid with events overlay per week row
+  let gridRows = `<div style="display:grid;grid-template-columns:repeat(7,1fr)">${header}</div>`;
+  for(let w=0;w<6;w++){
+    const weekCells = cells.slice(w*7,(w+1)*7).map((d,idx)=>{
+      return cellsWithRelative.split('</div>').slice(0)[w*7+idx] || '';
+    });
+    // Actually build row with overlay
+    gridRows += `<div style="display:grid;grid-template-columns:repeat(7,1fr);position:relative">
+      ${cells.slice(w*7,(w+1)*7).map((_,i)=>{
+        const globalIdx = w*7+i;
+        return cellsWithRelative.split(/(?<=<\/div>)/).filter(s=>s.trim())[globalIdx]||'';
+      }).join('')}
+      <div style="position:absolute;top:28px;left:0;right:0;pointer-events:none;display:flex;flex-direction:column;gap:2px">
+        ${eventRowsHtml[w]}
+      </div>
+    </div>`;
+  }
+
+  grid.innerHTML = gridRows;
 }
 
 
@@ -6189,6 +6385,49 @@ init();
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-vstats-pdf')">Cancel</button>
       <button class="btn btn-primary" onclick="doExportVenueStatsPDF()" style="background:linear-gradient(135deg,#0C2340,#185FA5);border:none">⬇ Export PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- MULTI-DAY EVENT MODAL -->
+<div class="modal-overlay" id="modal-multiday">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-multiday-title">Add event</span>
+      <button class="modal-close" onclick="closeModal('modal-multiday')">✕</button>
+    </div>
+    <div class="modal-body">
+      <label>Event name</label>
+      <input id="multiday-name" type="text" placeholder="e.g. Site visits Poland" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;box-sizing:border-box"/>
+      <input type="hidden" id="multiday-id"/>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+        <div>
+          <label>Start date</label>
+          <input id="multiday-start" type="date" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;box-sizing:border-box"/>
+        </div>
+        <div>
+          <label>End date</label>
+          <input id="multiday-end" type="date" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;box-sizing:border-box"/>
+        </div>
+      </div>
+      <div style="margin-top:12px">
+        <label>Colour</label>
+        <div id="multiday-colors" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+          <div onclick="selectMultidayColor(this,'#FDE68A','#854F0B')" data-bg="#FDE68A" data-fg="#854F0B" style="width:28px;height:28px;border-radius:50%;background:#FDE68A;cursor:pointer;border:3px solid #854F0B"></div>
+          <div onclick="selectMultidayColor(this,'#BFDBFE','#1D4ED8')" data-bg="#BFDBFE" data-fg="#1D4ED8" style="width:28px;height:28px;border-radius:50%;background:#BFDBFE;cursor:pointer;border:2px solid transparent"></div>
+          <div onclick="selectMultidayColor(this,'#BBF7D0','#065F46')" data-bg="#BBF7D0" data-fg="#065F46" style="width:28px;height:28px;border-radius:50%;background:#BBF7D0;cursor:pointer;border:2px solid transparent"></div>
+          <div onclick="selectMultidayColor(this,'#FECACA','#991B1B')" data-bg="#FECACA" data-fg="#991B1B" style="width:28px;height:28px;border-radius:50%;background:#FECACA;cursor:pointer;border:2px solid transparent"></div>
+          <div onclick="selectMultidayColor(this,'#E9D5FF','#6D28D9')" data-bg="#E9D5FF" data-fg="#6D28D9" style="width:28px;height:28px;border-radius:50%;background:#E9D5FF;cursor:pointer;border:2px solid transparent"></div>
+          <div onclick="selectMultidayColor(this,'#FED7AA','#C2410C')" data-bg="#FED7AA" data-fg="#C2410C" style="width:28px;height:28px;border-radius:50%;background:#FED7AA;cursor:pointer;border:2px solid transparent"></div>
+        </div>
+        <input type="hidden" id="multiday-color-bg" value="#FDE68A"/>
+        <input type="hidden" id="multiday-color-fg" value="#854F0B"/>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" id="multiday-delete-btn" onclick="deleteMultidayEvent()" style="display:none">Delete</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-multiday')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveMultidayEvent()">Save</button>
     </div>
   </div>
 </div>
