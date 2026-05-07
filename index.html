@@ -4323,7 +4323,7 @@ function venueSchedToday(){
 function renderVenueSched(){
   const vid = state.currentVenueId; if(!vid) return;
   if(venueSchedView==='month') renderMonthCalendar(vid,'venue-sched-grid',venueMonthOffset);
-  else renderVenueSched();
+  else renderWeekCalendar(vid,'venue-sched-grid',venueSchedOffset);
 }
 
 function renderMonthCalendar(venueId, gridId, monthOffset){
