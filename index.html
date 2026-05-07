@@ -842,6 +842,93 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 <!-- ══ VENUE DASHBOARD ══ -->
 <div id="screen-venue" class="screen">
 
+  <!-- WELCOME SCREEN -->
+  <div id="venue-welcome" style="display:none;flex-direction:column;height:100%;overflow-y:auto;background:var(--surface)">
+    <!-- TOP NAV (duplicate for welcome) -->
+    <div style="background:#0C2340;padding:0 1.25rem;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:100">
+      <span style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:white">PitchOps</span>
+      <button onclick="toggleVenueMenu()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;font-size:18px;line-height:1">☰</button>
+    </div>
+    <!-- HEADER -->
+    <div style="background:linear-gradient(160deg,#0C2340 0%,#0f2d4e 60%,#163d66 100%);padding:1.5rem 1.25rem 1.75rem;flex-shrink:0">
+      <div id="welcome-proj-tag" style="font-size:11px;font-weight:500;color:#4a7a9a;text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px"></div>
+      <h2 id="welcome-venue-name" style="font-size:24px;font-weight:700;color:white;font-family:'Syne',sans-serif;margin:0 0 16px;line-height:1.2">Stadium</h2>
+      <!-- Weather -->
+      <div id="welcome-weather-section" style="border-top:0.5px solid #1a3555;padding-top:14px">
+        <div style="font-size:10px;font-weight:500;color:#4a7a9a;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px" data-i18n="weather_forecast">Today's forecast</div>
+        <div id="welcome-weather" style="display:flex;align-items:center;gap:4px;overflow-x:auto;padding-bottom:2px">
+          <div style="font-size:11px;color:#4a7a9a;font-style:italic">Loading weather...</div>
+        </div>
+      </div>
+    </div>
+    <!-- TILES -->
+    <div style="padding:1.25rem;display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:1">
+
+      <!-- Log Task -->
+      <div onclick="switchVenueTab('log');showVenueDashboard()" style="background:white;border:0.5px solid rgba(0,0,0,0.08);border-radius:16px;cursor:pointer;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:transform .12s,box-shadow .12s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(24,95,165,.12)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+        <svg width="72" height="72" viewBox="0 0 52 52" fill="none">
+          <rect x="12" y="8" width="22" height="28" rx="3" stroke="#185FA5" stroke-width="1.6"/>
+          <line x1="18" y1="16" x2="28" y2="16" stroke="#185FA5" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="18" y1="21" x2="28" y2="21" stroke="#185FA5" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="18" y1="26" x2="23" y2="26" stroke="#185FA5" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="38" cy="38" r="9" fill="#185FA5"/>
+          <line x1="38" y1="34" x2="38" y2="42" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          <line x1="34" y1="38" x2="42" y2="38" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div style="font-size:13px;font-weight:600;color:#0C2340;font-family:'DM Sans',sans-serif" data-i18n="tab_log_short">Log task</div>
+      </div>
+
+      <!-- Log Usage -->
+      <div onclick="switchVenueTab('usage');showVenueDashboard()" style="background:white;border:0.5px solid rgba(0,0,0,0.08);border-radius:16px;cursor:pointer;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:transform .12s,box-shadow .12s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(124,58,237,.12)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+        <svg width="72" height="72" viewBox="0 0 52 52" fill="none">
+          <rect x="7" y="13" width="34" height="24" rx="2.5" stroke="#7C3AED" stroke-width="1.6"/>
+          <line x1="24" y1="13" x2="24" y2="37" stroke="#7C3AED" stroke-width="1.2" stroke-dasharray="2.5 2"/>
+          <circle cx="24" cy="25" r="5.5" stroke="#7C3AED" stroke-width="1.2"/>
+          <circle cx="24" cy="25" r="1.4" fill="#7C3AED"/>
+          <rect x="7" y="19" width="7" height="12" stroke="#7C3AED" stroke-width="1.1"/>
+          <rect x="34" y="19" width="7" height="12" stroke="#7C3AED" stroke-width="1.1"/>
+          <circle cx="40" cy="38" r="8.5" fill="#7C3AED"/>
+          <line x1="40" y1="34.5" x2="40" y2="41.5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          <line x1="36.5" y1="38" x2="43.5" y2="38" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div style="font-size:13px;font-weight:600;color:#0C2340;font-family:'DM Sans',sans-serif" data-i18n="tab_usage_short">Log usage</div>
+      </div>
+
+      <!-- Schedule -->
+      <div onclick="switchVenueTab('schedule');showVenueDashboard()" style="background:white;border:0.5px solid rgba(0,0,0,0.08);border-radius:16px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:22px;transition:transform .12s,box-shadow .12s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(59,109,17,.1)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+        <svg width="52" height="52" viewBox="0 0 40 40" fill="none">
+          <rect x="5" y="8" width="30" height="26" rx="2.5" stroke="#3B6D11" stroke-width="1.5"/>
+          <line x1="5" y1="15" x2="35" y2="15" stroke="#3B6D11" stroke-width="1.5"/>
+          <line x1="13" y1="5" x2="13" y2="11" stroke="#3B6D11" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="27" y1="5" x2="27" y2="11" stroke="#3B6D11" stroke-width="1.5" stroke-linecap="round"/>
+          <rect x="8" y="19" width="4" height="10" rx="1" fill="#3B6D11" opacity=".2"/>
+          <rect x="14" y="19" width="4" height="10" rx="1" fill="#3B6D11" opacity=".2"/>
+          <rect x="20" y="19" width="4" height="10" rx="1" fill="#3B6D11" opacity=".2"/>
+          <rect x="26" y="19" width="4" height="10" rx="1" fill="#3B6D11" opacity=".2"/>
+          <rect x="8" y="20" width="4" height="3.5" rx="1" fill="#3B6D11"/>
+          <rect x="14" y="22" width="4" height="5" rx="1" fill="#3B6D11"/>
+          <rect x="20" y="19.5" width="4" height="2.5" rx="1" fill="#3B6D11"/>
+          <rect x="26" y="21" width="4" height="4" rx="1" fill="#3B6D11"/>
+        </svg>
+        <div style="font-size:13px;font-weight:600;color:#0C2340;font-family:'DM Sans',sans-serif" data-i18n="tab_schedule_short">Schedule</div>
+      </div>
+
+      <!-- Stats -->
+      <div onclick="switchVenueTab('stats');showVenueDashboard()" style="background:white;border:0.5px solid rgba(0,0,0,0.08);border-radius:16px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:22px;transition:transform .12s,box-shadow .12s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(133,79,11,.1)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+        <svg width="52" height="52" viewBox="0 0 40 40" fill="none">
+          <line x1="7" y1="33" x2="33" y2="33" stroke="#854F0B" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="7" y1="8" x2="7" y2="33" stroke="#854F0B" stroke-width="1.5" stroke-linecap="round"/>
+          <rect x="10" y="24" width="5" height="9" rx="1.5" fill="#854F0B" opacity=".35"/>
+          <rect x="17.5" y="18" width="5" height="15" rx="1.5" fill="#854F0B" opacity=".6"/>
+          <rect x="25" y="11" width="5" height="22" rx="1.5" fill="#854F0B"/>
+          <polyline points="12.5,27 20,21 27.5,14" stroke="#854F0B" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 2"/>
+        </svg>
+        <div style="font-size:13px;font-weight:600;color:#0C2340;font-family:'DM Sans',sans-serif" data-i18n="tab_stats_short">Stats</div>
+      </div>
+
+    </div>
+  </div>
+
   <!-- HAMBURGER MENU DROPDOWN -->
   <div id="venue-menu" style="display:none;position:fixed;top:52px;right:0;width:220px;background:white;border-radius:0 0 0 16px;box-shadow:0 8px 32px rgba(0,0,0,.18);z-index:200;overflow:hidden">
     <div style="padding:.5rem 0">
@@ -1663,6 +1750,8 @@ const i18n = {
     all_venues_back:'← All venues',all_venues:'All venues',all_types:'All types',view_day:'Day',view_week:'Week',view_month:'Month',
     filter_all:'All',
     filter_all:'All',
+    weather_forecast:"Today's forecast",
+    tab_log_short:'Log task',tab_usage_short:'Log usage',tab_schedule_short:'Schedule',tab_stats_short:'Stats',
     period_week:'Week',period_month:'Month',period_quarter:'Quarter',period_custom:'Custom',
     ptab_tasks:'📋 Tasks',
     ptab_usage:'⏱ Usage',
@@ -1872,6 +1961,8 @@ const i18n = {
     more_suffix:'więcej',
     all_venues_back:'← Wszystkie obiekty',all_venues:'Wszystkie obiekty',all_types:'Wszystkie typy',view_day:'Dzień',view_week:'Tydzień',view_month:'Miesiąc',
     filter_all:'Wszystkie',
+    weather_forecast:'Prognoza na dziś',
+    tab_log_short:'Zadanie',tab_usage_short:'Użycie',tab_schedule_short:'Harmonogram',tab_stats_short:'Statystyki',
     period_week:'Tydzień',period_month:'Miesiąc',period_quarter:'Kwartał',period_custom:'Własny',
     ptab_tasks:'📋 Zadania',
     ptab_usage:'⏱ Użycie',
@@ -2080,6 +2171,8 @@ const i18n = {
     more_suffix:'más',
     all_venues_back:'← Todos los recintos',all_venues:'Todos los recintos',all_types:'Todos los tipos',view_day:'Día',view_week:'Semana',view_month:'Mes',
     period_week:'Semana',period_month:'Mes',period_quarter:'Trimestre',period_custom:'Personalizado',
+    weather_forecast:'Pronóstico de hoy',
+    tab_log_short:'Registrar',tab_usage_short:'Uso',tab_schedule_short:'Horario',tab_stats_short:'Estadísticas',
   },
   fr:{
     stat_total:'Ce mois',stat_last:'Dernière op.',stat_common:'Plus fréquent',
@@ -2119,6 +2212,8 @@ const i18n = {
     more_suffix:'autres',
     all_venues_back:'← Tous les sites',all_venues:'Tous les sites',all_types:'Tous les types',view_day:'Jour',view_week:'Semaine',view_month:'Mois',
     filter_all:'Tous',
+    weather_forecast:'Prévisions du jour',
+    tab_log_short:'Enregistrer',tab_usage_short:'Utilisation',tab_schedule_short:'Planning',tab_stats_short:'Statistiques',
     period_week:'Semaine',period_month:'Mois',period_quarter:'Trimestre',period_custom:'Personnalisé',
   },
   de:{
@@ -2159,6 +2254,8 @@ const i18n = {
     more_suffix:'weitere',
     all_venues_back:'← Alle Standorte',all_venues:'Alle Standorte',all_types:'Alle Typen',view_day:'Tag',view_week:'Woche',view_month:'Monat',
     filter_all:'Alle',
+    weather_forecast:'Heutige Vorhersage',
+    tab_log_short:'Aufgabe',tab_usage_short:'Nutzung',tab_schedule_short:'Zeitplan',tab_stats_short:'Statistiken',
     period_week:'Woche',period_month:'Monat',period_quarter:'Quartal',period_custom:'Benutzerdefiniert',
   },
   pt:{
@@ -2199,6 +2296,8 @@ const i18n = {
     more_suffix:'mais',
     all_venues_back:'← Todos os locais',all_venues:'Todos os locais',all_types:'Todos os tipos',view_day:'Dia',view_week:'Semana',view_month:'Mês',
     period_week:'Semana',period_month:'Mês',period_quarter:'Trimestre',period_custom:'Personalizado',
+    weather_forecast:'Previsão de hoje',
+    tab_log_short:'Tarefa',tab_usage_short:'Utilização',tab_schedule_short:'Agenda',tab_stats_short:'Estatísticas',
   },
 };
 function t(k){ return (i18n[state.lang]||i18n.en)[k]||k; }
@@ -2824,6 +2923,107 @@ async function removeVenueFromProject(e,vid){
 // ════════════════════════════════════════
 // VENUE DASHBOARD
 // ════════════════════════════════════════
+// ── VENUE WELCOME SCREEN ──
+function showVenueWelcome(){
+  document.getElementById('venue-welcome').style.display='flex';
+  // Hide the main dashboard parts
+  document.querySelector('#screen-venue .topnav')&&(document.querySelector('#screen-venue > div:not(#venue-welcome):not(#venue-menu):not(#venue-menu-overlay)').style.display='none');
+  // Actually hide all direct children except venue-welcome, venue-menu, venue-menu-overlay
+  Array.from(document.getElementById('screen-venue').children).forEach(el=>{
+    if(!['venue-welcome','venue-menu','venue-menu-overlay'].includes(el.id))
+      el.style.display='none';
+  });
+  const venue=state.venues.find(v=>v.id===state.currentVenueId);
+  loadWelcomeWeather(venue?venue.city:'');
+}
+
+function showVenueDashboard(){
+  document.getElementById('venue-welcome').style.display='none';
+  Array.from(document.getElementById('screen-venue').children).forEach(el=>{
+    if(!['venue-welcome','venue-menu','venue-menu-overlay'].includes(el.id))
+      el.style.display='';
+  });
+}
+
+async function loadWelcomeWeather(city){
+  const el=document.getElementById('welcome-weather');
+  const section=document.getElementById('welcome-weather-section');
+  if(!el) return;
+
+  // No city → hide the whole weather section silently
+  if(!city||!city.trim()){
+    if(section) section.style.display='none';
+    return;
+  }
+
+  try {
+    // Step 1: Geocode the city using Open-Meteo geocoding API
+    const cityName=city.split('/')[0].split(',')[0].trim(); // handle "Bielsko-Biała" or "Bielsko-Biała / Poland"
+    const geoRes=await fetch('https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(cityName)+'&count=1&language=en&format=json');
+    const geoData=await geoRes.json();
+
+    // City not found → hide silently
+    if(!geoData.results||!geoData.results.length){
+      if(section) section.style.display='none';
+      return;
+    }
+
+    const {latitude,longitude,timezone}=geoData.results[0];
+
+    // Step 2: Fetch hourly forecast
+    const wxRes=await fetch(
+      'https://api.open-meteo.com/v1/forecast?latitude='+latitude+'&longitude='+longitude+
+      '&hourly=temperature_2m,weathercode&timezone='+encodeURIComponent(timezone||'auto')+'&forecast_days=1'
+    );
+    const wxData=await wxRes.json();
+
+    const now=new Date();
+    const currentHour=now.getHours();
+    const hours=wxData.hourly.time.map((tp,i)=>({
+      hour:new Date(tp).getHours(),
+      temp:Math.round(wxData.hourly.temperature_2m[i]),
+      code:wxData.hourly.weathercode[i]
+    })).filter(h=>h.hour>=currentHour&&h.hour<=22).filter((_,i)=>i%2===0).slice(0,6);
+
+    if(!hours.length){
+      if(section) section.style.display='none';
+      return;
+    }
+
+    if(section) section.style.display='block';
+    el.innerHTML=hours.map((h,i)=>
+      `<div style="display:flex;flex-direction:column;align-items:center;gap:5px;min-width:42px">
+        <div style="font-size:11px;color:#7a9ab8">${i===0?'Now':h.hour+':00'}</div>
+        ${weatherIcon(h.code)}
+        <div style="font-size:13px;font-weight:500;color:#fff">${h.temp}°</div>
+      </div>`
+    ).join('');
+
+  } catch(e){
+    // Any error → hide silently
+    if(section) section.style.display='none';
+  }
+}
+
+function weatherIcon(code){
+  // WMO weather codes → SVG icon
+  const s='stroke-linecap="round" stroke-width="1.5"';
+  if(code===0) // clear
+    return `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" ${s}><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.93" y1="4.93" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.07" y2="19.07"/><line x1="4.93" y1="19.07" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.07" y2="4.93"/></svg>`;
+  if(code<=2) // partly cloudy
+    return `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" ${s}><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>`;
+  if(code<=49) // foggy/cloudy
+    return `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" ${s}><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>`;
+  if(code<=69) // rain/drizzle
+    return `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" ${s}><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/><line x1="8" y1="19" x2="8" y2="21" stroke="#60A5FA"/><line x1="12" y1="19" x2="12" y2="21" stroke="#60A5FA"/><line x1="16" y1="19" x2="16" y2="21" stroke="#60A5FA"/></svg>`;
+  if(code<=79) // snow
+    return `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" ${s}><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/><line x1="8" y1="19" x2="8" y2="21" stroke="#BAE6FD"/><line x1="12" y1="19" x2="12" y2="21" stroke="#BAE6FD"/><line x1="16" y1="19" x2="16" y2="21" stroke="#BAE6FD"/></svg>`;
+  if(code<=99) // thunderstorm
+    return `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" ${s}><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/><polyline points="13,12 10,17 14,17 11,22" stroke="#FCD34D" stroke-width="1.5"/></svg>`;
+  // night
+  return `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7a9ab8" ${s}><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+}
+
 async function enterVenueDashboard(venue){
   state.currentVenueId = venue.id;
   document.getElementById('venue-hero-name').textContent=venue.name;
@@ -2850,8 +3050,20 @@ async function enterVenueDashboard(venue){
   await Promise.all([refreshVenueOps(venue.id, true), refreshVenueUsage(venue.id, true)]);
   populateOpTypeSelects();
   renderVenueContactInfo();
-  switchVenueTab('log');
-  // Re-apply translations after screen is rendered
+  // Show welcome screen first, not directly the log tab
+  showVenueWelcome();
+  // Set welcome screen venue name and project
+  const wname=document.getElementById('welcome-venue-name');
+  const wtag=document.getElementById('welcome-proj-tag');
+  if(wname) wname.textContent=venue.name;
+  if(wtag){
+    let proj2=state.projects.find(p=>venue.projectIds&&venue.projectIds.includes(p.id));
+    if(!proj2&&venue.projectIds&&venue.projectIds.length){
+      const {data:pds}=await supa.from('pitchops_projects').select('*').in('id',venue.projectIds);
+      if(pds&&pds.length) proj2={name:pds[0].name,code:pds[0].code};
+    }
+    wtag.textContent=proj2?proj2.name:'';
+  }
   applyTranslations(state.lang);
 }
 
@@ -3573,7 +3785,7 @@ async function renderGantt(){
     const isT=d.getTime()===today.getTime();
     headerCols+=`<th colspan="2" style="padding:6px 4px;text-align:center;border-right:1px solid rgba(0,0,0,0.09);background:${isT?'rgba(24,95,165,0.08)':'#fafbfc'};min-width:130px">
       <div style="font-size:9px;color:#96a6bb;text-transform:uppercase;letter-spacing:.4px">${dayNames[i]}</div>
-      <div style="font-size:15px;font-weight:700;color:${isT?'#185FA5':'#0C2340'}">${d.getDate()}</div>
+      <div style="font-size:13px;font-weight:700;color:${isT?'#185FA5':'#0C2340'}">${d.getDate()} ${d.toLocaleDateString('en-GB',{month:'short'})}</div>
     </th>`;
   });
 
