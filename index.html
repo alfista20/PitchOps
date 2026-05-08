@@ -4314,9 +4314,10 @@ function selectMultidayColor(el, bg, fg){
   document.getElementById('multiday-color-fg').value = fg;
 }
 
-function openMultidayModal(dateStr){
+function openMultidayModal(dateStr, venueId){
   document.getElementById('modal-multiday-title').textContent = 'Add event';
   document.getElementById('multiday-id').value = '';
+  document.getElementById('multiday-venue-id').value = venueId||state.currentVenueId||'';
   document.getElementById('multiday-name').value = '';
   document.getElementById('multiday-start').value = dateStr||todayStr();
   document.getElementById('multiday-end').value = dateStr||todayStr();
@@ -4330,6 +4331,7 @@ function openMultidayEditModal(id){
   const ev = state_events.find(e=>e.id===id); if(!ev) return;
   document.getElementById('modal-multiday-title').textContent = 'Edit event';
   document.getElementById('multiday-id').value = id;
+  document.getElementById('multiday-venue-id').value = ev.venueId||'';
   document.getElementById('multiday-name').value = ev.name;
   document.getElementById('multiday-start').value = ev.dateStart;
   document.getElementById('multiday-end').value = ev.dateEnd;
@@ -4350,7 +4352,8 @@ async function saveMultidayEvent(){
   const dateEnd = document.getElementById('multiday-end').value;
   const colorBg = document.getElementById('multiday-color-bg').value;
   const colorFg = document.getElementById('multiday-color-fg').value;
-  const venueId = state.currentVenueId;
+  const venueId = document.getElementById('multiday-venue-id').value || state.currentVenueId;
+  if(!venueId){ showToast('Venue not found'); return; }
 
   if(!name){ showToast('Please enter event name'); return; }
   if(!dateStart||!dateEnd){ showToast('Please select dates'); return; }
@@ -6437,6 +6440,7 @@ init();
       <label>Event name</label>
       <input id="multiday-name" type="text" placeholder="e.g. Site visits Poland" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;box-sizing:border-box"/>
       <input type="hidden" id="multiday-id"/>
+      <input type="hidden" id="multiday-venue-id"/>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
         <div>
           <label>Start date</label>
