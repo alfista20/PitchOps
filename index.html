@@ -5158,8 +5158,7 @@ function renderVenueUpcoming(){
     const daysLabel=isToday?`<span style="font-size:10px;font-weight:700;color:#185FA5;background:#E6F1FB;padding:1px 6px;border-radius:10px">${t('lbl_today')}</span>`:daysUntil===1?`<span style="font-size:10px;color:#854F0B">${t('lbl_tomorrow')}</span>`:daysUntil>0?`<span style="font-size:10px;color:var(--text-hint)">in ${daysUntil}d</span>`:'';
     return `<div onclick="openEditModal('${op.id}')" style="display:flex;align-items:stretch;border-radius:10px;overflow:hidden;margin-bottom:8px;cursor:pointer;border:1px solid ${isToday?sc.bar:'rgba(0,0,0,0.08)'};transition:box-shadow .15s" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,.1)'" onmouseout="this.style.boxShadow='none'">
       <div style="width:4px;background:${sc.bar};flex-shrink:0"></div>
-const cellBg=isToday?sc.bg:'white';
-      <div style="flex:1;padding:10px 12px;background:${cellBg}">
+<div style="flex:1;padding:10px 12px;background:${isToday?sc.bg:'white'}">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
           <div style="font-size:14px;font-weight:600;color:var(--navy)">${esc(op.type)}</div>
           <span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:${sc.bg};color:${sc.color};flex-shrink:0">${sc.icon} ${sc.label}</span>
