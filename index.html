@@ -3622,7 +3622,7 @@ function renderViewerOps(){
     const staffStr=(op.staff&&op.staff.length)?op.staff.join(', '):'—';
     return `<tr>
       <td style="white-space:nowrap;font-size:12px">${formatDateOnly(op.date)}</td>
-      <td><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:${venue?.color||'#888'};flex-shrink:0"></span>${esc(venue?.name||'')}</span></td>
+      <td><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;style="width:8px;height:8px;border-radius:50%;flex-shrink:0" data-vcolor="${venue?.color||'#888'}"></span>${esc(venue?.name||'')}</span></td>
       <td><span class="badge" style="background:${badge.bg};color:${badge.fg}">${esc(op.type)}</span></td>
       <td style="font-size:12px">${esc(op.zone||'—')}</td>
       <td style="font-size:12px">${esc(staffStr)}</td>
@@ -4040,7 +4040,7 @@ function renderDetailOps(){
     const staffStr=(op.staff&&op.staff.length)?op.staff.join(', '):'—';
     return `<tr>
       <td style="white-space:nowrap;font-size:12px">${formatDateOnly(op.date)}</td>
-      <td><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:${venue?.color||'#888'};flex-shrink:0"></span>${esc(venue?.name||'Unknown')}</span></td>
+      <td><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;style="width:8px;height:8px;border-radius:50%;flex-shrink:0" data-vcolor="${venue?.color||'#888'}"></span>${esc(venue?.name||'Unknown')}</span></td>
       <td><span class="badge" style="background:${badge.bg};color:${badge.fg}">${esc(op.type)}</span></td>
       <td style="font-size:12px">${esc(op.zone||'—')}</td>
       <td style="font-size:12px">${esc(staffStr)}</td>
@@ -4996,9 +4996,11 @@ async function renderGantt(){
   let headerCols=`<th colspan="2" style="width:150px;padding:8px 10px;font-size:10px;font-weight:600;color:#5a6a82;border-right:1px solid rgba(0,0,0,0.09);background:#fafbfc;text-align:left">VENUE</th>`;
   days.forEach((d,i)=>{
     const isT=d.getTime()===today.getTime();
-    headerCols+=`<th colspan="2" style="padding:6px 4px;text-align:center;border-right:1px solid rgba(0,0,0,0.09);background:${isT?'rgba(24,95,165,0.08)':'#fafbfc'};min-width:130px">
+        const hBg=isT?'rgba(24,95,165,0.08)':'#fafbfc';
+    const hCol=isT?'#185FA5':'#0C2340';
+    headerCols+=`<th colspan="2" style="padding:6px 4px;text-align:center;border-right:1px solid rgba(0,0,0,0.09);background:${hBg};min-width:130px">
       <div style="font-size:9px;color:#96a6bb;text-transform:uppercase;letter-spacing:.4px">${dayNames[i]}</div>
-      <div style="font-size:13px;font-weight:700;color:${isT?'#185FA5':'#0C2340'}">${d.getDate()} ${d.toLocaleDateString('en-GB',{month:'short'})}</div>
+      <div style="font-size:13px;font-weight:700;color:${hCol}">${d.getDate()} ${d.toLocaleDateString('en-GB',{month:'short'})}</div>
     </th>`;
   });
 
@@ -5017,29 +5019,41 @@ async function renderGantt(){
       <div style="font-size:9px;color:#96a6bb;margin-top:1px">tap to drill in →</div>
     </td>`;
 
-    // ── Build multi-day event bars per day ──
+    // ── Build multi-day event bars (absolute positioning for solid stripes) ──
     const venueEvs = state_events.filter(e=>e.venueId===v.id);
     const weekDayStrs2 = days.map(d=>dStrOf(d));
     const wS2 = weekDayStrs2[0], wE2 = weekDayStrs2[6];
     const activeEvs = venueEvs.filter(ev=>ev.dateStart<=wE2&&ev.dateEnd>=wS2);
-    const evBarPerDay = {};
-    weekDayStrs2.forEach(ds=>{ evBarPerDay[ds]=''; });
-    activeEvs.forEach(ev=>{
-      const evDays = weekDayStrs2.filter(ds=>ev.dateStart<=ds&&ev.dateEnd>=ds);
-      const midD = evDays[Math.floor(evDays.length/2)];
-      evDays.forEach(ds=>{
-        const iS=ev.dateStart===ds, iE=ev.dateEnd===ds, sN=ds===midD;
-        const r=`${iS?'3px':'0'} ${iE?'3px':'0'} ${iE?'3px':'0'} ${iS?'3px':'0'}`;
-        evBarPerDay[ds]+=`<div onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')"
-          style="height:16px;line-height:16px;margin:0 ${iE?'2px':'0'} 2px ${iS?'0':'-1px'};
-            background:${ev.colorBg};color:${ev.colorFg};font-size:9px;font-weight:700;
-            padding:0 4px;border-radius:${r};white-space:nowrap;
-            ${sN?'overflow:visible;text-align:center;position:relative;z-index:6;':'overflow:hidden;'}
-            cursor:pointer;"
-          onmouseover="this.style.filter='brightness(.92)'" onmouseout="this.style.filter=''"
-        >${sN?esc(ev.name):''}</div>`;
-      });
-    });
+    // Each col = 1/7 of the day columns area (venue td is colspan=2, each day=2 cols)
+    // We'll render a separate <tr> with one wide td that has position:relative
+    // and absolute divs for each event
+    const colW = 100/7; // percent width per day column
+    const evRowBars = activeEvs.map((ev,ei)=>{
+      const col1 = weekDayStrs2.findIndex(ds=>ev.dateStart<=ds&&ev.dateEnd>=ds);
+      const col2Last = weekDayStrs2.reduce((acc,ds,i)=>ev.dateStart<=ds&&ev.dateEnd>=ds?i:acc,-1);
+      if(col1<0||col2Last<0) return '';
+      const left = (col1*colW).toFixed(2);
+      const width = ((col2Last-col1+1)*colW).toFixed(2);
+      const iS = ev.dateStart>=wS2;
+      const iE = ev.dateEnd<=wE2;
+      const r = (iS?'3px':'0')+' '+(iE?'3px':'0')+' '+(iE?'3px':'0')+' '+(iS?'3px':'0');
+      const top = ei*20;
+      return `<div onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')"
+        onmouseover="this.style.filter='brightness(.92)'" onmouseout="this.style.filter=''"
+        style="position:absolute;top:${top}px;left:${left}%;width:${width}%;height:18px;line-height:18px;
+          background:${ev.colorBg};color:${ev.colorFg};font-size:9px;font-weight:700;
+          padding:0 6px;border-radius:${r};white-space:nowrap;overflow:hidden;
+          text-overflow:ellipsis;text-align:center;cursor:pointer;
+          box-shadow:0 1px 3px rgba(0,0,0,.12);">
+        ${esc(ev.name)}</div>`;
+    }).join('');
+    const evRowH = activeEvs.length*20;
+    const evRow = activeEvs.length>0
+      ? `<tr style="height:${evRowH}px">
+          <td colspan="2" style="padding:0;border:none;background:white;min-height:${evRowH}px">&nbsp;</td>
+          <td colspan="${days.length*2}" style="padding:0;border:none;background:white;position:relative;overflow:visible">${evRowBars}</td>
+        </tr>`
+      : '';
 
     days.forEach(d=>{
       const dStr=dStrOf(d);
@@ -5070,10 +5084,10 @@ async function renderGantt(){
       const usageOverflow=dayUsage.length>3?`<div style="font-size:8px;color:#7C3AED;padding:1px 3px;background:#F3E8FF;border-radius:3px;display:inline-block;margin-top:1px">+${dayUsage.length-3} ${t('more_suffix')}</div>`:'';
       const opsDisplay=dayOps.length>3?dayOps.slice(0,3).map(o=>{const cs=chipStyle[o.status]||chipStyle.planned;const tl=o.timeFrom&&o.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${o.timeFrom}–${o.timeTo}</span>`:'';return `<div draggable="true" class="gantt-chip" ondragstart="onDragStart(event,'op','${o.id}','${dStr}','${v.id}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditModal('${o.id}')" style="${cs}">${esc(o.type)}${tl}</div>`;}).join('')+opsOverflow:opsChips;
       const usageDisplay=dayUsage.length>3?dayUsage.slice(0,3).map(u=>{const cs=usageChipStyle[u.status]||usageChipStyle.planned;const tl=u.timeFrom&&u.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${u.timeFrom}–${u.timeTo}</span>`:'';return `<div draggable="true" class="gantt-chip" ondragstart="onDragStart(event,'usage','${u.id}','${dStr}','${v.id}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditUsageModal('${u.id}')" style="${cs}">⚽ ${esc(u.usageType)}${tl}</div>`;}).join('')+usageOverflow:usageChips;
-      cells+=`<td onclick="if(!document.querySelector('.modal-overlay.open'))openAdminLogTaskModal('${dStr}','${v.id}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px;border-right:1px dashed rgba(0,0,0,0.06);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgT};min-height:40px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${evBarPerDay[dStr]||''}${opsDisplay}</td>
+      cells+=`<td onclick="if(!document.querySelector('.modal-overlay.open'))openAdminLogTaskModal('${dStr}','${v.id}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px;border-right:1px dashed rgba(0,0,0,0.06);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgT};min-height:40px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsDisplay}</td>
       <td onclick="if(!document.querySelector('.modal-overlay.open'))openAdminLogUsageModal('${dStr}','${v.id}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:40px;min-width:65px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageDisplay}</td>`;
     });
-    rows+=`<tr>${cells}</tr>`;
+    rows+=evRow+`<tr>${cells}</tr>`;
   });
 
   if(!venues.length){
@@ -5130,7 +5144,8 @@ function renderVenueUpcoming(){
     const daysLabel=isToday?`<span style="font-size:10px;font-weight:700;color:#185FA5;background:#E6F1FB;padding:1px 6px;border-radius:10px">${t('lbl_today')}</span>`:daysUntil===1?`<span style="font-size:10px;color:#854F0B">${t('lbl_tomorrow')}</span>`:daysUntil>0?`<span style="font-size:10px;color:var(--text-hint)">in ${daysUntil}d</span>`:'';
     return `<div onclick="openEditModal('${op.id}')" style="display:flex;align-items:stretch;border-radius:10px;overflow:hidden;margin-bottom:8px;cursor:pointer;border:1px solid ${isToday?sc.bar:'rgba(0,0,0,0.08)'};transition:box-shadow .15s" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,.1)'" onmouseout="this.style.boxShadow='none'">
       <div style="width:4px;background:${sc.bar};flex-shrink:0"></div>
-      <div style="flex:1;padding:10px 12px;background:${isToday?sc.bg:'white'}">
+const cellBg=isToday?sc.bg:'white';
+      <div style="flex:1;padding:10px 12px;background:${cellBg}">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
           <div style="font-size:14px;font-weight:600;color:var(--navy)">${esc(op.type)}</div>
           <span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:${sc.bg};color:${sc.color};flex-shrink:0">${sc.icon} ${sc.label}</span>
@@ -5195,9 +5210,13 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
     const isT=dStr===today;
     const inWeek=weekDayStrs.includes(dStr);
     const dayName=dayNames[(d.getDay()+6)%7];
-    headerCols+=`<th colspan="2" ${isT?'data-today="1"':''} style="padding:6px 4px;text-align:center;border-right:1px solid rgba(0,0,0,0.09);background:${isT?'rgba(24,95,165,0.08)':'#fafbfc'};min-width:130px;${!inWeek?'opacity:.7':''}">
+    const whBg=isT?'rgba(24,95,165,0.08)':'#fafbfc';
+    const whCol=isT?'#185FA5':'#0C2340';
+    const wTodayAttr=isT?'data-today="1"':'';
+    const wOpacity=!inWeek?'opacity:.7':'';
+    headerCols+=`<th colspan="2" ${wTodayAttr} style="padding:6px 4px;text-align:center;border-right:1px solid rgba(0,0,0,0.09);background:${whBg};min-width:130px;${wOpacity}">
       <div style="font-size:9px;color:#96a6bb;text-transform:uppercase">${dayName}</div>
-      <div style="font-size:13px;font-weight:700;color:${isT?'#185FA5':'#0C2340'}">${d.getDate()} ${d.toLocaleDateString('en-GB',{month:'short'})}</div>
+      <div style="font-size:13px;font-weight:700;color:${whCol}">${d.getDate()} ${d.toLocaleDateString('en-GB',{month:'short'})}</div>
     </th>`;
   });
 
@@ -5241,39 +5260,32 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
   const venueEventsWeek = (typeof state_events!=='undefined') ? state_events.filter(e=>e.venueId===venueId) : [];
   const weekStartStr = weekDayStrs[0];
   const weekEndStr   = weekDayStrs[6];
-  let eventCells = '';
-  // Build one td per day (colspan=2 for Tasks+Usage columns)
-  weekDayStrs.forEach(dStr=>{
-    const dayEvents = venueEventsWeek.filter(ev=>ev.dateStart<=dStr && ev.dateEnd>=dStr);
-    if(dayEvents.length===0){
-      eventCells+=`<td colspan="2" style="padding:0;border:none;height:0;line-height:0"></td>`;
-    } else {
-      const bars = dayEvents.map(ev=>{
-        const evWeekDays = weekDayStrs.filter(d=>ev.dateStart<=d&&ev.dateEnd>=d);
-        const midDay = evWeekDays[Math.floor(evWeekDays.length/2)];
-        const showName = dStr===midDay;
-        const isStart = ev.dateStart===dStr;
-        const isEnd   = ev.dateEnd===dStr;
-        const radius  = `${isStart?'4px':'0'} ${isEnd?'4px':'0'} ${isEnd?'4px':'0'} ${isStart?'4px':'0'}`;
-        const midStyle2 = showName
-          ? `overflow:visible;text-align:center;position:relative;z-index:6;white-space:nowrap;`
-          : `overflow:hidden;white-space:nowrap;`;
-        return `<div onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')"
-          style="background:${ev.colorBg};color:${ev.colorFg};height:20px;line-height:20px;
-            font-size:10px;font-weight:700;padding:0 6px;border-radius:${radius};
-            margin:0;
-            ${midStyle2}
-            cursor:pointer;
-            ${isStart?'box-shadow:0 1px 3px rgba(0,0,0,.1);':''}
-            margin-bottom:2px;"
-          onmouseover="this.style.filter='brightness(.92)'" onmouseout="this.style.filter=''"
-        >${showName?esc(ev.name):''}</div>`;
-      }).join('');
-      eventCells+=`<td colspan="2" style="padding:2px 0 0 0;border:none;vertical-align:top">${bars}</td>`;
-    }
-  });
-  const eventRow = venueEventsWeek.some(ev=>ev.dateStart<=weekEndStr&&ev.dateEnd>=weekStartStr)
-    ? `<tr>${eventCells}</tr>` : '';
+  const activeWeekEvs = venueEventsWeek.filter(ev=>ev.dateStart<=weekEndStr&&ev.dateEnd>=weekStartStr);
+
+  // Build absolute-positioned bars — one solid stripe per event, no per-cell gaps
+  const colW2 = 100/7;
+  const wkBars = activeWeekEvs.map((ev,ei)=>{
+    const c1 = weekDayStrs.findIndex(ds=>ev.dateStart<=ds&&ev.dateEnd>=ds);
+    const c2 = weekDayStrs.reduce((acc,ds,i)=>ev.dateStart<=ds&&ev.dateEnd>=ds?i:acc,-1);
+    if(c1<0||c2<0) return '';
+    const iS=ev.dateStart>=weekStartStr, iE=ev.dateEnd<=weekEndStr;
+    const r=(iS?'4px':'0')+' '+(iE?'4px':'0')+' '+(iE?'4px':'0')+' '+(iS?'4px':'0');
+    const lft=(c1*colW2).toFixed(2);
+    const wid=((c2-c1+1)*colW2).toFixed(2);
+    const top=ei*22;
+    return `<div onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')"
+      onmouseover="this.style.filter='brightness(.92)'" onmouseout="this.style.filter=''"
+      style="position:absolute;top:${top}px;left:${lft}%;width:${wid}%;height:20px;line-height:20px;
+        background:${ev.colorBg};color:${ev.colorFg};font-size:10px;font-weight:700;
+        padding:0 8px;border-radius:${r};white-space:nowrap;overflow:hidden;
+        text-overflow:ellipsis;text-align:center;cursor:pointer;
+        box-shadow:0 1px 4px rgba(0,0,0,.12);">
+      ${esc(ev.name)}</div>`;
+  }).join('');
+  const evRowH2 = activeWeekEvs.length*22;
+  const eventRow = activeWeekEvs.length>0
+    ? `<tr><td colspan="1" style="padding:0;border:none;background:white"></td><td colspan="${allCols.length*2}" style="padding:0;border:none;position:relative;height:${evRowH2}px;background:white">${wkBars}</td></tr>`
+    : '';
 
   grid.innerHTML=`<div style="overflow-x:auto;width:100%"><table style="border-collapse:collapse;width:100%;min-width:600px">
     <thead>
@@ -5941,7 +5953,7 @@ function renderDetailUsage(){
     const bg=usageBg[u.usageType]||'#f1f5f9';
     return `<tr>
       <td style="white-space:nowrap;font-size:12px">${formatDateOnly(u.date)}</td>
-      <td><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:${venue?.color||'#888'};flex-shrink:0"></span>${esc(venue?.name||'Unknown')}</span></td>
+      <td><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;style="width:8px;height:8px;border-radius:50%;flex-shrink:0" data-vcolor="${venue?.color||'#888'}"></span>${esc(venue?.name||'Unknown')}</span></td>
       <td><span style="background:${bg};color:${color};padding:3px 8px;border-radius:6px;font-size:12px;font-weight:600">⚽ ${esc(u.usageType)}</span></td>
       <td style="font-size:12px">${esc(u.teamName||'—')}</td>
       <td style="font-size:12px">${esc(u.zone||'—')}</td>
