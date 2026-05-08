@@ -5509,15 +5509,12 @@ function renderVenueSched(){
 }
 
 function renderMonthCalendar(venueId, gridId, monthOffset){
+  try {
   const grid = document.getElementById(gridId); if(!grid) return;
   const labelEl = document.getElementById('venue-sched-label');
   const today = todayStr();
 
-  if(!window._eventsLoaded) window._eventsLoaded = {};
-  if(!window._eventsLoaded[venueId]){
-    window._eventsLoaded[venueId] = true;
-    loadVenueEvents(venueId).then(()=>renderMonthCalendar(venueId,gridId,monthOffset));
-  }
+  // Events are loaded on venue entry - just render with what we have
 
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth()+monthOffset, 1);
@@ -5565,11 +5562,13 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
         const iE = ev.dateEnd===dStrOf(week[ci]);
         const sN = ci===mid;
         const r  = `${iS?'3px':'0'} ${iE?'3px':'0'} ${iE?'3px':'0'} ${iS?'3px':'0'}`;
+        const mR=iE?'2px':'0', mL=iS?'2px':'-1px';
+        const ovf=sN?'overflow:visible;text-align:center;position:relative;z-index:6;':'overflow:hidden;';
         EB[ci] += `<div
           onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')"
           onmouseover="this.style.filter='brightness(.92)'"
           onmouseout="this.style.filter=''"
-          style="height:16px;line-height:16px;margin:0 ${iE?'2px':'0'} 2px ${iS?'2px':'-1px'};background:${ev.colorBg};color:${ev.colorFg};font-size:9px;font-weight:700;padding:0 4px;border-radius:${r};white-space:nowrap;${sN?'overflow:visible;text-align:center;position:relative;z-index:6;':'overflow:hidden;'}cursor:pointer;"
+          style="height:16px;line-height:16px;margin:0 ${mR} 2px ${mL};background:${ev.colorBg};color:${ev.colorFg};font-size:9px;font-weight:700;padding:0 4px;border-radius:${r};white-space:nowrap;${ovf}cursor:pointer;"
         >${sN?esc(ev.name):''}</div>`;
       });
     });
@@ -5596,7 +5595,9 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
       const plus = inM
         ? `<span onclick="event.stopPropagation();openMultidayModal('${dStr}','${venueId}')" onmouseover="this.style.color='#185FA5'" onmouseout="this.style.color='#d0d5dd'" style="font-size:16px;line-height:1;color:#d0d5dd;cursor:pointer;padding:0 2px" title="Add event">+</span>`
         : '';
-      return `<div onclick="openLogTaskModal('${dStr}')" onmouseover="this.style.background='${isT?'#dbeeff':'#f0f7ff'}'" onmouseout="this.style.background='${bg}'" style="border:${brd};background:${bg};padding:6px;min-height:80px;cursor:pointer;box-sizing:border-box;${isT?'box-shadow:inset 0 0 0 2px #185FA5;':''}">
+      const hoverBg = isT?'#dbeeff':'#f0f7ff';
+      const bShadow = isT?'box-shadow:inset 0 0 0 2px #185FA5;':'';
+      return `<div onclick="openLogTaskModal('${dStr}')" onmouseover="this.style.background='${hoverBg}'" onmouseout="this.style.background='${bg}'" style="border:${brd};background:${bg};padding:6px;min-height:80px;cursor:pointer;box-sizing:border-box;${bShadow}">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px"><span style="${ns}">${d.getDate()}</span>${plus}</div>
         ${EB[wi]}${chips}
       </div>`;
@@ -5606,6 +5607,11 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
   }
 
   grid.innerHTML = `<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%"><div style="min-width:560px">${gridHTML}</div></div>`;
+  } catch(err) {
+    console.error('renderMonthCalendar error:', err);
+    const grid2 = document.getElementById(gridId);
+    if(grid2) grid2.innerHTML = `<div style="padding:2rem;color:red;font-size:12px">Error: ${err.message}</div>`;
+  }
 }
 
 
