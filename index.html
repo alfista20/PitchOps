@@ -5016,6 +5016,30 @@ async function renderGantt(){
       <div style="font-size:9px;color:#96a6bb;margin-top:1px">tap to drill in →</div>
     </td>`;
 
+    // ── Build multi-day event bars per day ──
+    const venueEvs = state_events.filter(e=>e.venueId===v.id);
+    const weekDayStrs2 = days.map(d=>dStrOf(d));
+    const wS2 = weekDayStrs2[0], wE2 = weekDayStrs2[6];
+    const activeEvs = venueEvs.filter(ev=>ev.dateStart<=wE2&&ev.dateEnd>=wS2);
+    const evBarPerDay = {};
+    weekDayStrs2.forEach(ds=>{ evBarPerDay[ds]=''; });
+    activeEvs.forEach(ev=>{
+      const evDays = weekDayStrs2.filter(ds=>ev.dateStart<=ds&&ev.dateEnd>=ds);
+      const midD = evDays[Math.floor(evDays.length/2)];
+      evDays.forEach(ds=>{
+        const iS=ev.dateStart===ds, iE=ev.dateEnd===ds, sN=ds===midD;
+        const r=`${iS?'3px':'0'} ${iE?'3px':'0'} ${iE?'3px':'0'} ${iS?'3px':'0'}`;
+        evBarPerDay[ds]+=`<div onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')"
+          style="height:16px;line-height:16px;margin:0 ${iE?'2px':'0'} 2px ${iS?'0':'-1px'};
+            background:${ev.colorBg};color:${ev.colorFg};font-size:9px;font-weight:700;
+            padding:0 4px;border-radius:${r};white-space:nowrap;
+            ${sN?'overflow:visible;text-align:center;position:relative;z-index:6;':'overflow:hidden;'}
+            cursor:pointer;"
+          onmouseover="this.style.filter='brightness(.92)'" onmouseout="this.style.filter=''"
+        >${sN?esc(ev.name):''}</div>`;
+      });
+    });
+
     days.forEach(d=>{
       const dStr=dStrOf(d);
       const isT=d.getTime()===today.getTime();
@@ -5045,66 +5069,9 @@ async function renderGantt(){
       const usageOverflow=dayUsage.length>3?`<div style="font-size:8px;color:#7C3AED;padding:1px 3px;background:#F3E8FF;border-radius:3px;display:inline-block;margin-top:1px">+${dayUsage.length-3} ${t('more_suffix')}</div>`:'';
       const opsDisplay=dayOps.length>3?dayOps.slice(0,3).map(o=>{const cs=chipStyle[o.status]||chipStyle.planned;const tl=o.timeFrom&&o.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${o.timeFrom}–${o.timeTo}</span>`:'';return `<div draggable="true" class="gantt-chip" ondragstart="onDragStart(event,'op','${o.id}','${dStr}','${v.id}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditModal('${o.id}')" style="${cs}">${esc(o.type)}${tl}</div>`;}).join('')+opsOverflow:opsChips;
       const usageDisplay=dayUsage.length>3?dayUsage.slice(0,3).map(u=>{const cs=usageChipStyle[u.status]||usageChipStyle.planned;const tl=u.timeFrom&&u.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${u.timeFrom}–${u.timeTo}</span>`:'';return `<div draggable="true" class="gantt-chip" ondragstart="onDragStart(event,'usage','${u.id}','${dStr}','${v.id}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditUsageModal('${u.id}')" style="${cs}">⚽ ${esc(u.usageType)}${tl}</div>`;}).join('')+usageOverflow:usageChips;
-      cells+=`<td onclick="if(!document.querySelector('.modal-overlay.open'))openAdminLogTaskModal('${dStr}','${v.id}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px;border-right:1px dashed rgba(0,0,0,0.06);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgT};min-height:40px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsDisplay}</td>
+      cells+=`<td onclick="if(!document.querySelector('.modal-overlay.open'))openAdminLogTaskModal('${dStr}','${v.id}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px;border-right:1px dashed rgba(0,0,0,0.06);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgT};min-height:40px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${evBarPerDay[dStr]||''}${opsDisplay}</td>
       <td onclick="if(!document.querySelector('.modal-overlay.open'))openAdminLogUsageModal('${dStr}','${v.id}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:40px;min-width:65px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageDisplay}</td>`;
     });
-    // ── Multi-day event bars — build per-day bar HTML ──
-    const venueEvs = state_events.filter(e=>e.venueId===v.id);
-    const weekDayStrs2 = days.map(d=>dStrOf(d));
-    const weekStartStr2 = weekDayStrs2[0];
-    const weekEndStr2   = weekDayStrs2[6];
-    const activeEvs = venueEvs.filter(ev=>ev.dateStart<=weekEndStr2&&ev.dateEnd>=weekStartStr2);
-
-    // Build event bars per day — inserted above chips inside each td
-    const evBarPerDay = {};
-    weekDayStrs2.forEach(dStr=>{ evBarPerDay[dStr]=''; });
-    activeEvs.forEach(ev=>{
-      const evWeekDays = weekDayStrs2.filter(d=>ev.dateStart<=d&&ev.dateEnd>=d);
-      const midDay = evWeekDays[Math.floor(evWeekDays.length/2)];
-      weekDayStrs2.forEach(dStr=>{
-        const covers = ev.dateStart<=dStr && ev.dateEnd>=dStr;
-        if(!covers) return;
-        const isStart = ev.dateStart===dStr;
-        const isEnd   = ev.dateEnd===dStr;
-        const showName = dStr===midDay;
-        const radius  = `${isStart?'3px':'0'} ${isEnd?'3px':'0'} ${isEnd?'3px':'0'} ${isStart?'3px':'0'}`;
-        const midStyle = showName ? 'overflow:visible;text-align:center;position:relative;z-index:6;' : 'overflow:hidden;';
-        evBarPerDay[dStr] += `<div onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')"
-          style="height:16px;line-height:16px;margin:0 0 2px ${isStart?'0':'-3px'};
-            background:${ev.colorBg};color:${ev.colorFg};
-            font-size:9px;font-weight:700;padding:0 4px;border-radius:${radius};
-            white-space:nowrap;${midStyle}cursor:pointer;"
-          onmouseover="this.style.filter='brightness(.92)'" onmouseout="this.style.filter=''"
-        >${showName?esc(ev.name):''}</div>`;
-      });
-    });
-
-    // Rebuild cells with event bars above chips
-    cells = `<td colspan="2" onclick="openVenueCal('${v.id}')" style="padding:8px 10px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;white-space:nowrap;background:white">
-      <div style="font-size:12px;font-weight:600;color:#185FA5">${esc(v.name)}</div>
-      <div style="font-size:10px;color:#96a6bb">${v.venueType==='Training Site'?'⬜':'🏟'} ${esc(v.venueType||'Stadium')}</div>
-      <div style="font-size:9px;color:#96a6bb;margin-top:1px">${t('txt_tap_to_drill')}</div>
-    </td>`;
-    days.forEach(d=>{
-      const dStr=dStrOf(d);
-      const isT=d.getTime()===today.getTime();
-      const bgT=isT?'rgba(24,95,165,0.03)':'white';
-      const bgU=isT?'rgba(168,85,247,0.03)':'#fdfbff';
-      const dayOps=allOps.filter(o=>o.venueId===v.id&&(o.date||'').slice(0,10)===dStr).map(o=>{
-        if(dStr<todayStr_&&o.status==='planned') return {...o,status:'missed',_autoMissed:true};
-        return o;
-      });
-      const dayUsage=allUsage.filter(u=>u.venueId===v.id&&(u.date||'').slice(0,10)===dStr);
-      const opsChips=dayOps.map(o=>{const cs=chipStyle[o.status]||chipStyle.planned;const tl=o.timeFrom&&o.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${o.timeFrom}–${o.timeTo}</span>`:'';return `<div draggable="true" class="gantt-chip" ondragstart="onDragStart(event,'op','${o.id}','${dStr}','${v.id}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditModal('${o.id}')" style="${cs}">${esc(o.type)}${tl}</div>`;}).join('');
-      const usageChips=dayUsage.map(u=>{const cs=usageChipStyle[u.status]||usageChipStyle.planned;const tl=u.timeFrom&&u.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${u.timeFrom}–${u.timeTo}</span>`:'';return `<div draggable="true" class="gantt-chip" ondragstart="onDragStart(event,'usage','${u.id}','${dStr}','${v.id}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditUsageModal('${u.id}')" style="${cs}">⚽ ${esc(u.usageType)}${tl}</div>`;}).join('');
-      const opsOverflow=dayOps.length>3?`<div style="font-size:8px;color:#185FA5;padding:1px 3px;background:#E6F1FB;border-radius:3px;display:inline-block;margin-top:1px">+${dayOps.length-3} ${t('more_suffix')}</div>`:'';
-      const usageOverflow=dayUsage.length>3?`<div style="font-size:8px;color:#7C3AED;padding:1px 3px;background:#F3E8FF;border-radius:3px;display:inline-block;margin-top:1px">+${dayUsage.length-3} ${t('more_suffix')}</div>`:'';
-      const opsDisplay=dayOps.length>3?dayOps.slice(0,3).map(o=>{const cs=chipStyle[o.status]||chipStyle.planned;const tl=o.timeFrom&&o.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${o.timeFrom}–${o.timeTo}</span>`:'';return `<div draggable="true" class="gantt-chip" ondragstart="onDragStart(event,'op','${o.id}','${dStr}','${v.id}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditModal('${o.id}')" style="${cs}">${esc(o.type)}${tl}</div>`;}).join('')+opsOverflow:opsChips;
-      const usageDisplay=dayUsage.length>3?dayUsage.slice(0,3).map(u=>{const cs=usageChipStyle[u.status]||usageChipStyle.planned;const tl=u.timeFrom&&u.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${u.timeFrom}–${u.timeTo}</span>`:'';return `<div draggable="true" class="gantt-chip" ondragstart="onDragStart(event,'usage','${u.id}','${dStr}','${v.id}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditUsageModal('${u.id}')" style="${cs}">⚽ ${esc(u.usageType)}${tl}</div>`;}).join('')+usageOverflow:usageChips;
-      cells+=`<td onclick="if(!document.querySelector('.modal-overlay.open'))openAdminLogTaskModal('${dStr}','${v.id}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px;border-right:1px dashed rgba(0,0,0,0.06);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgT};min-height:40px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${evBarPerDay[dStr]}${opsDisplay}</td>
-      <td onclick="if(!document.querySelector('.modal-overlay.open'))openAdminLogUsageModal('${dStr}','${v.id}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:40px;min-width:65px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageDisplay}</td>`;
-    });
-
     rows+=`<tr>${cells}</tr>`;
   });
 
