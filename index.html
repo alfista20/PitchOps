@@ -4232,6 +4232,8 @@ function weatherIcon(code){
 }
 
 async function enterVenueDashboard(venue){
+  console.log('[ENTER] enterVenueDashboard for:', venue.name, venue.id);
+  try {
   state.currentVenueId = venue.id;
   document.getElementById('venue-hero-name').textContent=venue.name;
   document.getElementById('venue-hero-sub').textContent=venue.city||'';
@@ -4262,7 +4264,9 @@ async function enterVenueDashboard(venue){
   window._eventsLoaded[venue.id] = false;
   loadVenueEvents(venue.id).catch(()=>{});
   // Show welcome screen first, not directly the log tab
+  console.log('[ENTER] calling showVenueWelcome()');
   showVenueWelcome();
+  console.log('[ENTER] showVenueWelcome done');
   // Set welcome screen venue name and project
   const wname=document.getElementById('welcome-venue-name');
   const wtag=document.getElementById('welcome-proj-tag');
@@ -4276,6 +4280,12 @@ async function enterVenueDashboard(venue){
     wtag.textContent=proj2?proj2.name:'';
   }
   applyTranslations(state.lang);
+  console.log('[ENTER] done');
+  } catch(err) {
+    console.error('[ENTER] CRASHED:', err);
+    // Force show welcome even if crash
+    document.getElementById('venue-welcome').style.display='flex';
+  }
 }
 
 function venueOps(){ return state.operations.filter(o=>o.venueId===state.currentVenueId).sort((a,b)=>new Date(b.date)-new Date(a.date)); }
