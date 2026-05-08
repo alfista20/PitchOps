@@ -3483,13 +3483,17 @@ function applyTranslations(l){
   });
 
   // ── Re-render dynamic content if visible ──
-  if(typeof renderVenueUpcoming==='function') renderVenueUpcoming();
-  if(typeof renderVenueHistory==='function') renderVenueHistory();
-  if(typeof renderVenueUsageToday==='function') renderVenueUsageToday();
-  if(typeof renderVenueUsageHistory==='function') renderVenueUsageHistory();
+  // Skip venue renders when welcome screen is active
+  const _welcomeActive = document.getElementById('venue-welcome')?.style.display==='flex';
+  if(!_welcomeActive){
+    if(typeof renderVenueUpcoming==='function') renderVenueUpcoming();
+    if(typeof renderVenueHistory==='function') renderVenueHistory();
+    if(typeof renderVenueUsageToday==='function') renderVenueUsageToday();
+    if(typeof renderVenueUsageHistory==='function') renderVenueUsageHistory();
+    if(document.getElementById('vtab-schedule-content')?.style.display==='block' && state.currentVenueId && typeof renderVenueSched==='function')
+      renderVenueSched();
+  }
   if(document.getElementById('ptab-calendar-content')?.style.display==='block' && typeof renderGantt==='function') renderGantt();
-  if(document.getElementById('vtab-schedule-content')?.style.display==='block' && state.currentVenueId && typeof renderWeekCalendar==='function')
-    renderVenueSched();
 }
 
 function setLang(l){
@@ -5257,6 +5261,12 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
   });
 
   // ── Multi-day event row for week view ──
+  // Ensure events loaded for this venue
+  if(!window._eventsLoaded) window._eventsLoaded = {};
+  if(!window._eventsLoaded[venueId]){
+    window._eventsLoaded[venueId] = true;
+    loadVenueEvents(venueId).then(()=>renderWeekCalendar(venueId,gridId,weekOffset));
+  }
   const venueEventsWeek = (typeof state_events!=='undefined') ? state_events.filter(e=>e.venueId===venueId) : [];
   const weekStartStr = weekDayStrs[0];
   const weekEndStr   = weekDayStrs[6];
@@ -5284,7 +5294,7 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
   }).join('');
   const evRowH2 = activeWeekEvs.length*22;
   const eventRow = activeWeekEvs.length>0
-    ? `<tr><td colspan="1" style="padding:0;border:none;background:white"></td><td colspan="${allCols.length*2}" style="padding:0;border:none;position:relative;height:${evRowH2}px;background:white">${wkBars}</td></tr>`
+    ? `<tr><td colspan="${allCols.length*2}" style="padding:0;border:none;position:relative;height:${evRowH2}px;background:white">${wkBars}</td></tr>`
     : '';
 
   grid.innerHTML=`<div style="overflow-x:auto;width:100%"><table style="border-collapse:collapse;width:100%;min-width:600px">
@@ -5577,11 +5587,12 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
         const r  = `${iS?'3px':'0'} ${iE?'3px':'0'} ${iE?'3px':'0'} ${iS?'3px':'0'}`;
         const mR=iE?'2px':'0', mL=iS?'2px':'-1px';
         const ovf=sN?'overflow:visible;text-align:center;position:relative;z-index:6;':'overflow:hidden;';
+        const barW = !iE ? 'calc(100% + 1px)' : '100%';
         EB[ci] += `<div
           onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')"
           onmouseover="this.style.filter='brightness(.92)'"
           onmouseout="this.style.filter=''"
-          style="height:16px;line-height:16px;margin:0 ${mR} 2px ${mL};background:${ev.colorBg};color:${ev.colorFg};font-size:9px;font-weight:700;padding:0 4px;border-radius:${r};white-space:nowrap;${ovf}cursor:pointer;"
+          style="height:16px;line-height:16px;margin:0 0 2px ${iS?'1px':'-1px'};width:${barW};background:${ev.colorBg};color:${ev.colorFg};font-size:9px;font-weight:700;padding:0 4px;border-radius:${r};white-space:nowrap;${ovf}cursor:pointer;"
         >${sN?esc(ev.name):''}</div>`;
       });
     });
