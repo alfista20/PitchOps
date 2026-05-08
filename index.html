@@ -4954,6 +4954,8 @@ function ganttFilter(f,btn){
   renderGantt();
 }
 
+function dStrOf(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
 async function renderGantt(){
   const pid=state.currentProjectId; if(!pid) return;
   const weekStart=ganttWeekStart(ganttWeekOffset);
@@ -4990,7 +4992,6 @@ async function renderGantt(){
   };
 
   // Helper: timezone-safe date string from a Date object
-  function dStrOf(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 
   let headerCols=`<th colspan="2" style="width:150px;padding:8px 10px;font-size:10px;font-weight:600;color:#5a6a82;border-right:1px solid rgba(0,0,0,0.09);background:#fafbfc;text-align:left">VENUE</th>`;
   days.forEach((d,i)=>{
