@@ -1597,7 +1597,21 @@ let state = {
   projectFilter: 'all',
 };
 
-function getAdminPass(){ return localStorage.getItem(ADMIN_PASS_KEY)||'admin123'; }
+async function sha256(str){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function getAdminPassHash(){
+  const stored = localStorage.getItem(ADMIN_PASS_KEY);
+  if(!stored) return await sha256('admin123');
+  // Migrate: if stored is plain text (not a 64-char hex hash), hash it now
+  if(stored.length !== 64 || !/^[0-9a-f]+$/.test(stored)){
+    const hashed = await sha256(stored);
+    localStorage.setItem(ADMIN_PASS_KEY, hashed);
+    return hashed;
+  }
+  return stored;
+}
 
 // Data loaded from Supabase on login
 function save() { /* data saved to Supabase directly */ }
@@ -1684,12 +1698,12 @@ function dbToOp(r){
   const d=(r.operation_date||'').slice(0,10); // always date-only YYYY-MM-DD
   const today=todayStr();
   const autoStatus=d>today?'planned':'inprogress'; // never auto-completed
-  return {id:r.id,venueId:r.venue_id,type:r.type,zone:r.zone||'',equipment:r.equipment||'',weather:r.weather||'',staff:r.staff||[],notes:r.notes||'',date:d,timeFrom:r.time_from||'08:00',timeTo:r.time_to||'17:00',status:r.status||autoStatus,photos:r.photos||[],flagged:r.flagged||false,adminComment:r.admin_comment||'',createdAt:r.created_at};
+  return {id:r.id,venueId:r.venue_id,type:r.type,zone:r.zone||'',equipment:r.equipment||'',weather:r.weather||'',staff:r.staff||[],notes:r.notes||'',date:d,timeFrom:r.time_from||'08:00',timeTo:r.time_to||'17:00',status:r.status||autoStatus,photos:r.photo_urls||[],flagged:r.flagged||false,adminComment:r.admin_comment||'',createdAt:r.created_at};
 }
 
 function projectToDb(p){ return {id:p.id,code:p.code,name:p.name,country:p.country,status:p.status,color:p.color,viewer_token:p.viewerToken||null}; }
 function venueToDb(v){ return {id:v.id,name:v.name,city:v.city,color:v.color,token:v.token,project_ids:v.projectIds,venue_type:v.venueType||'Stadium',responsible_person:v.responsiblePerson||null,contact_phone:v.contactPhone||null,contact_email:v.contactEmail||null}; }
-function opToDb(o){ if(!o.venueId||o.venueId==='undefined') throw new Error('venueId missing in opToDb'); return {id:o.id,venue_id:o.venueId,type:o.type,zone:o.zone,equipment:o.equipment,weather:o.weather,staff:o.staff,notes:o.notes,operation_date:(o.date||'').slice(0,10),time_from:o.timeFrom||'08:00',time_to:o.timeTo||'17:00',status:o.status||'inprogress',photos:o.photos,flagged:o.flagged||false,admin_comment:o.adminComment||''}; }
+function opToDb(o){ if(!o.venueId||o.venueId==='undefined') throw new Error('venueId missing in opToDb'); const safeStatus=['planned','inprogress','completed','missed'].includes(o.status)?o.status:'inprogress'; return {id:o.id,venue_id:o.venueId,type:o.type,zone:o.zone,equipment:o.equipment,weather:o.weather,staff:o.staff,notes:o.notes,operation_date:(o.date||'').slice(0,10),time_from:o.timeFrom||'08:00',time_to:o.timeTo||'17:00',status:safeStatus,photo_urls:o.photos||[],flagged:o.flagged||false,admin_comment:o.adminComment||''}; }
 
 // ── LOADING INDICATOR ──
 function showLoading(on){
@@ -1708,7 +1722,7 @@ const i18n = {
     op_zone_custom:'Custom zone',op_equipment:'Equipment used',op_weather:'Weather conditions',
     op_staff:'Done by (staff)',op_staff_hint:'You can add multiple staff members',
     op_notes:'Notes / observations',op_date:'Task date',btn_log:'Log task',
-    history:'Task history',op_photos:'Photos (max 4)',photo_tap:'Tap to add photos',
+    history:'Task history',op_photos:'Photos (max 8)',photo_tap:'Tap to add photos',
     photo_hint:'JPG, PNG · max 4 photos',
     // tabs & buttons
     tab_log:'🗒 Log task',tab_usage:'⏱ Log usage',tab_schedule:'📅 Schedule',tab_stats:'📊 Stats',
@@ -1748,7 +1762,6 @@ const i18n = {
     no_venues:'No venues in this project.',no_venues_add:'No venues yet. Click "+ Add venue".',
     more_suffix:'more',
     all_venues_back:'← All venues',all_venues:'All venues',all_types:'All types',view_day:'Day',view_week:'Week',view_month:'Month',
-    filter_all:'All',
     filter_all:'All',
     weather_forecast:"Today's forecast",
     tab_log_short:'Log task',tab_usage_short:'Log usage',tab_schedule_short:'Schedule',tab_stats_short:'Stats',
@@ -1845,7 +1858,7 @@ const i18n = {
     lbl_notes_short:'Notes',
     lbl_status:'Status',
     lbl_priority:'Priority',
-    lbl_photos:'Photos (max 4)',
+    lbl_photos:'Photos (max 8)',
     lbl_time_of_day:'Time of day',
     lbl_email:'Email',
     lbl_password:'Password',
@@ -1902,7 +1915,7 @@ const i18n = {
     toast_invalid_link:'Invalid or expired viewer link',
     toast_invalid_token:'Invalid venue token',
     toast_token_not_found:'Token not found — please check and try again',
-    toast_max_photos:'Maximum 3 photos per operation',
+    toast_max_photos:'Maximum 8 photos per operation',
     toast_connection_error:'Connection error',
     toast_completed_future:'Cannot mark as completed — date is in the future.',
     confirm_regen_link:'Regenerate link? The old link will immediately stop working.',
@@ -1929,7 +1942,7 @@ const i18n = {
     op_zone_custom:'Własna strefa',op_equipment:'Sprzęt',op_weather:'Pogoda',
     op_staff:'Wykonał/a',op_staff_hint:'Możesz dodać kilka osób',
     op_notes:'Notatki',op_date:'Data zadania',btn_log:'Zapisz zadanie',
-    history:'Historia zadań',op_photos:'Zdjęcia (max 4)',photo_tap:'Dotknij aby dodać zdjęcia',
+    history:'Historia zadań',op_photos:'Zdjęcia (max 8)',photo_tap:'Dotknij aby dodać zdjęcia',
     photo_hint:'JPG, PNG · max 4 zdjęcia',
     tab_log:'🗒 Zadanie',tab_usage:'⏱ Użycie',tab_schedule:'📅 Harmonogram',tab_stats:'📊 Statystyki',
     btn_log_task:'+ Dodaj zadanie',btn_log_usage:'+ Dodaj użycie',
@@ -2113,7 +2126,7 @@ const i18n = {
     toast_invalid_link:'Nieprawidłowy lub wygasły link widza',
     toast_invalid_token:'Nieprawidłowy token obiektu',
     toast_token_not_found:'Token nie znaleziony — sprawdź i spróbuj ponownie',
-    toast_max_photos:'Maksymalnie 3 zdjęcia na operację',
+    toast_max_photos:'Maksymalnie 8 zdjęć na operację',
     toast_connection_error:'Błąd połączenia',
     toast_completed_future:'Nie można oznaczyć jako ukończone — data jest w przyszłości.',
     confirm_regen_link:'Regenerować link? Stary link przestanie działać natychmiast.',
@@ -2194,7 +2207,7 @@ const i18n = {
     lbl_notes:'Notes / observations',
     lbl_notes_short:'Notes',
     lbl_password:'Password',
-    lbl_photos:'Photos (max 4)',
+    lbl_photos:'Photos (max 8)',
     lbl_priority:'Priority',
     lbl_proj_code:'Project code / ID',
     lbl_proj_color:'Project colour',
@@ -2266,7 +2279,7 @@ const i18n = {
     toast_invalid_token:'Invalid venue token',
     toast_link_copied:'Link copied!',
     toast_link_new:'New viewer link generated!',
-    toast_max_photos:'Maximum 3 photos per operation',
+    toast_max_photos:'Maximum 8 photos per operation',
     toast_no_charts:'No charts to export',
     toast_pass_updated:'Password updated successfully!',
     toast_popups:'Allow popups to export PDF',
@@ -2373,7 +2386,7 @@ const i18n = {
     lbl_notes:'Notes / observations',
     lbl_notes_short:'Notes',
     lbl_password:'Password',
-    lbl_photos:'Photos (max 4)',
+    lbl_photos:'Photos (max 8)',
     lbl_priority:'Priority',
     lbl_proj_code:'Project code / ID',
     lbl_proj_color:'Project colour',
@@ -2475,7 +2488,7 @@ const i18n = {
     toast_invalid_token:'Invalid venue token',
     toast_link_copied:'Link copied!',
     toast_link_new:'New viewer link generated!',
-    toast_max_photos:'Maximum 3 photos per operation',
+    toast_max_photos:'Maximum 8 photos per operation',
     toast_no_charts:'No charts to export',
     toast_pass_updated:'Password updated successfully!',
     toast_popups:'Allow popups to export PDF',
@@ -2647,7 +2660,7 @@ const i18n = {
     lbl_notes:'Notes / observations',
     lbl_notes_short:'Notes',
     lbl_password:'Password',
-    lbl_photos:'Photos (max 4)',
+    lbl_photos:'Photos (max 8)',
     lbl_priority:'Priority',
     lbl_proj_code:'Project code / ID',
     lbl_proj_color:'Project colour',
@@ -2719,7 +2732,7 @@ const i18n = {
     toast_invalid_token:'Invalid venue token',
     toast_link_copied:'Link copied!',
     toast_link_new:'New viewer link generated!',
-    toast_max_photos:'Maximum 3 photos per operation',
+    toast_max_photos:'Maximum 8 photos per operation',
     toast_no_charts:'No charts to export',
     toast_pass_updated:'Password updated successfully!',
     toast_popups:'Allow popups to export PDF',
@@ -2763,7 +2776,7 @@ const i18n = {
     op_zone_custom:'Zone personnalisée',op_equipment:'Équipement utilisé',op_weather:'Météo',
     op_staff:'Réalisé par',op_staff_hint:'Vous pouvez ajouter plusieurs agents',
     op_notes:'Notes / observations',op_date:'Date de la tâche',btn_log:'Enregistrer',
-    history:'Historique',op_photos:'Photos (max 4)',photo_tap:'Appuyer pour ajouter des photos',
+    history:'Historique',op_photos:'Photos (max 8)',photo_tap:'Appuyer pour ajouter des photos',
     photo_hint:'JPG, PNG · max 4 photos',
     tab_log:'🗒 Enregistrer',tab_usage:'⏱ Utilisation',tab_schedule:'📅 Planning',tab_stats:'📊 Statistiques',
     btn_log_task:'+ Enregistrer tâche',btn_log_usage:'+ Enregistrer usage',
@@ -2858,7 +2871,7 @@ const i18n = {
     lbl_notes:'Notes / observations',
     lbl_notes_short:'Notes',
     lbl_password:'Password',
-    lbl_photos:'Photos (max 4)',
+    lbl_photos:'Photos (max 8)',
     lbl_priority:'Priority',
     lbl_proj_code:'Project code / ID',
     lbl_proj_color:'Project colour',
@@ -2930,7 +2943,7 @@ const i18n = {
     toast_invalid_token:'Invalid venue token',
     toast_link_copied:'Link copied!',
     toast_link_new:'New viewer link generated!',
-    toast_max_photos:'Maximum 3 photos per operation',
+    toast_max_photos:'Maximum 8 photos per operation',
     toast_no_charts:'No charts to export',
     toast_pass_updated:'Password updated successfully!',
     toast_popups:'Allow popups to export PDF',
@@ -3069,7 +3082,7 @@ const i18n = {
     lbl_notes:'Notes / observations',
     lbl_notes_short:'Notes',
     lbl_password:'Password',
-    lbl_photos:'Photos (max 4)',
+    lbl_photos:'Photos (max 8)',
     lbl_priority:'Priority',
     lbl_proj_code:'Project code / ID',
     lbl_proj_color:'Project colour',
@@ -3141,7 +3154,7 @@ const i18n = {
     toast_invalid_token:'Invalid venue token',
     toast_link_copied:'Link copied!',
     toast_link_new:'New viewer link generated!',
-    toast_max_photos:'Maximum 3 photos per operation',
+    toast_max_photos:'Maximum 8 photos per operation',
     toast_no_charts:'No charts to export',
     toast_pass_updated:'Password updated successfully!',
     toast_popups:'Allow popups to export PDF',
@@ -3280,7 +3293,7 @@ const i18n = {
     lbl_notes:'Notes / observations',
     lbl_notes_short:'Notes',
     lbl_password:'Password',
-    lbl_photos:'Photos (max 4)',
+    lbl_photos:'Photos (max 8)',
     lbl_priority:'Priority',
     lbl_proj_code:'Project code / ID',
     lbl_proj_color:'Project colour',
@@ -3352,7 +3365,7 @@ const i18n = {
     toast_invalid_token:'Invalid venue token',
     toast_link_copied:'Link copied!',
     toast_link_new:'New viewer link generated!',
-    toast_max_photos:'Maximum 3 photos per operation',
+    toast_max_photos:'Maximum 8 photos per operation',
     toast_no_charts:'No charts to export',
     toast_pass_updated:'Password updated successfully!',
     toast_popups:'Allow popups to export PDF',
@@ -3631,7 +3644,7 @@ function renderViewerOps(){
       <td style="font-size:12px">${esc(op.zone||'—')}</td>
       <td style="font-size:12px">${esc(staffStr)}</td>
       <td style="font-size:12px;max-width:200px;white-space:pre-wrap;word-break:break-word">${esc(op.notes||'')}</td>
-      <td>${op.photos&&op.photos.length?`<div class="admin-photo-strip">${op.photos.map((p,i)=>`<img src="${p.dataUrl}" onclick="openLightboxFromOp('${op.id}',${i})">`).join('')}</div>`:'—'}</td>
+      <td>${op.photos&&op.photos.length?`<div class="admin-photo-strip">${op.photos.map((p,i)=>`<img src="${p}" onclick="openLightboxFromOp('${op.id}',${i})">`).join('')}</div>`:'—'}</td>
     </tr>`;
   }).join('');
 }
@@ -3702,7 +3715,6 @@ function _handleRealtimeOp(payload) {
     else state.operations.unshift(newOp);
   } else if (eventType === 'DELETE' && oldId) {
     state.operations = state.operations.filter(o => o.id !== oldId);
-    if (typeof state_admin_usage !== 'undefined') {}  // ops only here
   }
 
   _realtimeRefresh('ops');
@@ -3736,9 +3748,12 @@ function _handleRealtimeUsage(payload) {
 function _realtimeRefresh(type) {
   // Re-render Gantt if calendar tab is visible
   const calContent = document.getElementById('ptab-calendar-content');
-  if (calContent && calContent.style.display === 'block') {
-    renderGantt();
-  }
+  if (calContent && calContent.style.display === 'block') renderGantt();
+  // Update task/usage lists if visible
+  const tasksContent = document.getElementById('ptab-tasks-content');
+  if (tasksContent && tasksContent.style.display === 'block') renderDetailOps();
+  const usageContent = document.getElementById('ptab-usage-content');
+  if (usageContent && usageContent.style.display === 'block') renderDetailUsage();
   // Also update task/usage counts in project header
   if (state.currentProjectId) updateDetailStats();
 }
@@ -3763,7 +3778,9 @@ async function adminLogin(){
     errEl.textContent='This email is not authorised for admin access.';
     errEl.style.display='block'; return;
   }
-  if(pass !== getAdminPass()){
+  const inputHash = await sha256(pass);
+  const storedHash = await getAdminPassHash();
+  if(inputHash !== storedHash){
     errEl.textContent='Incorrect password.';
     errEl.style.display='block'; return;
   }
@@ -3773,16 +3790,19 @@ async function adminLogin(){
   startAdminRealtime();
 }
 
-function changePassword(){
+async function changePassword(){
   const cur=document.getElementById('cp-current').value;
   const nw=document.getElementById('cp-new').value;
   const cf=document.getElementById('cp-confirm').value;
   const err=document.getElementById('cp-error');
   err.style.display='none';
-  if(cur!==getAdminPass()){err.textContent='Current password is incorrect.';err.style.display='block';return;}
+  const curHash=await sha256(cur);
+  const storedHash=await getAdminPassHash();
+  if(curHash!==storedHash){err.textContent='Current password is incorrect.';err.style.display='block';return;}
   if(nw.length<8){err.textContent='New password must be at least 8 characters.';err.style.display='block';return;}
   if(nw!==cf){err.textContent='Passwords do not match.';err.style.display='block';return;}
-  localStorage.setItem(ADMIN_PASS_KEY,nw);
+  const newHash=await sha256(nw);
+  localStorage.setItem(ADMIN_PASS_KEY,newHash);
   closeModal('modal-change-password');
   document.getElementById('cp-current').value='';
   document.getElementById('cp-new').value='';
@@ -4053,7 +4073,7 @@ function renderDetailOps(){
         ${comment?`<div class="comment-text">💬 ${esc(comment)}</div>`:''}
         <input type="text" placeholder="Comment..." value="${esc(comment)}" onchange="saveComment('${op.id}',this.value)" style="width:100%;font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:5px;font-family:'DM Sans',sans-serif;outline:none;margin-top:3px"/>
       </td>
-      <td>${op.photos&&op.photos.length?`<div class="admin-photo-strip">${op.photos.map((p,i)=>`<img src="${p.dataUrl}" onclick="openLightboxFromOp('${op.id}',${i})">`).join('')}</div>`:'<span style="color:var(--text-hint);font-size:12px">—</span>'}</td>
+      <td>${op.photos&&op.photos.length?`<div class="admin-photo-strip">${op.photos.map((p,i)=>`<img src="${p}" onclick="openLightboxFromOp('${op.id}',${i})">`).join('')}</div>`:'<span style="color:var(--text-hint);font-size:12px">—</span>'}</td>
       <td><button class="flag-btn ${flagged?'flagged':''}" onclick="toggleFlag('${op.id}',this)">🚩</button></td>
     </tr>`;
   }).join('');
@@ -4321,7 +4341,7 @@ function renderVenueHistory(){
           <div style="font-size:13px;font-weight:600;color:var(--navy)">${esc(op.type)}</div>
           ${meta?`<div style="font-size:11px;color:var(--text-muted);margin-top:2px">${esc(meta)}</div>`:''}
           ${op.notes?`<div style="font-size:11px;color:var(--text-hint);font-style:italic;margin-top:2px">${esc(op.notes)}</div>`:''}
-          ${op.photos&&op.photos.length?`<div class="admin-photo-strip" style="margin-top:6px">${op.photos.map((p,i)=>`<img src="${p.dataUrl}" onclick="openLightboxFromOp('${op.id}',${i})" style="border-radius:6px">`).join('')}</div>`:''}
+          ${op.photos&&op.photos.length?`<div class="admin-photo-strip" style="margin-top:6px">${op.photos.map((p,i)=>`<img src="${p}" onclick="openLightboxFromOp('${op.id}',${i})" style="border-radius:6px">`).join('')}</div>`:''}
         </div>
         <div style="flex-shrink:0;text-align:right;min-width:90px">
           <div style="font-size:12px;font-weight:500;color:var(--text)">${formatDateOnly(op.date)}</div>
@@ -4349,8 +4369,9 @@ async function logOperation(){
   const selectedStatus = document.getElementById('new-op-status')?.value||'planned';
   const autoStatus = isFutureOp ? 'planned' : 'inprogress';
   const manualStatus = selectedStatus === 'auto' ? autoStatus : selectedStatus;
+  const opId = genId('op_');
   const op={
-    id:'op_'+Date.now(),
+    id:opId,
     venueId:state.currentVenueId,
     type:document.getElementById('new-op-type').value,
     zone, equipment:document.getElementById('new-op-equipment').value.trim(),
@@ -4361,11 +4382,20 @@ async function logOperation(){
     timeFrom:opTimeFrom,
     timeTo:opTimeTo,
     status:manualStatus,
-    photos:currentPhotos.new.map(p=>({dataUrl:p.dataUrl,name:p.name})),
+    photos:[],
     createdAt:new Date().toISOString()
   };
+  // Insert first (get ID into DB), then upload photos and update
   const {error} = await supa.from('pitchops_operations').insert(opToDb(op));
   if(error){ showToast('Error: '+error.message); return; }
+  // Upload any pending photos and patch the record
+  if(currentPhotos.new.some(p=>!p.uploaded)){
+    const urls = await uploadPendingPhotos(currentPhotos.new, opId, 'ops');
+    if(urls.length){
+      await supa.from('pitchops_operations').update({photo_urls:urls}).eq('id',opId);
+      op.photos = urls;
+    }
+  }
   state.operations.unshift(op);
   document.getElementById('new-op-equipment').value='';
   document.getElementById('new-op-weather').value='';
@@ -4374,9 +4404,8 @@ async function logOperation(){
   state.currentStaff=[]; currentPhotos.new=[];
   renderStaffTags(); renderPhotoPreviews('new');
   if(state.currentVenueId){
-    await loadVenueData(state.currentVenueId);
-    renderVenueStats(); renderVenueHistory(); renderVenueUpcoming();
-    if(document.getElementById('vtab-schedule-content')?.style.display==='block') renderVenueSched();
+    // refreshVenueOps already re-renders stats/history/upcoming/schedule internally
+    await refreshVenueOps(state.currentVenueId, true);
   }
   if(document.getElementById('ptab-calendar-content')?.style.display==='block') renderGantt();
   closeModal('modal-log-task');
@@ -4395,8 +4424,7 @@ function openEditModal(opId){
   document.getElementById('edit-op-date').value=(op.date||'').slice(0,10);
   state.editStaff=op.staff?[...op.staff]:[];
   renderEditStaffTags();
-  currentPhotos.edit=op.photos?op.photos.map(p=>({dataUrl:p.dataUrl,name:p.name||'photo'})):[];
-  renderPhotoPreviews('edit');
+  loadPhotosForEdit('edit', op.photos || []);
   // status + time
   const statusEl=document.getElementById('edit-op-status');
   if(statusEl) statusEl.value=op.status||(op.date>todayStr()?'planned':'inprogress');
@@ -4411,23 +4439,33 @@ async function saveEditOperation(){
   try {
   const id=document.getElementById('edit-op-id').value;
   const idx=state.operations.findIndex(o=>o.id===id); if(idx===-1) return;
-  const editDateVal=(document.getElementById('edit-op-date').value||'').slice(0,10);
-  const editStatus=document.getElementById('edit-op-status')?.value||'completed';
+  // Cache all DOM reads up front
+  const g=id=>document.getElementById(id);
+  const editDateVal=(g('edit-op-date').value||'').slice(0,10);
+  const editStatus=g('edit-op-status')?.value||'completed';
   // Block completed status if date is in the future
   if(editStatus==='completed' && editDateVal>todayStr()){showToast(t('toast_completed_future'));return;}
   state.operations[idx]={...state.operations[idx],
-    type:document.getElementById('edit-op-type').value,
-    zone:document.getElementById('edit-op-zone').value,
-    equipment:document.getElementById('edit-op-equipment').value.trim(),
-    weather:document.getElementById('edit-op-weather').value.trim(),
+    type:g('edit-op-type').value,
+    zone:g('edit-op-zone').value,
+    equipment:g('edit-op-equipment').value.trim(),
+    weather:g('edit-op-weather').value.trim(),
     staff:[...state.editStaff],
-    notes:document.getElementById('edit-op-notes').value.trim(),
+    notes:g('edit-op-notes').value.trim(),
     date:editDateVal,
-    timeFrom:document.getElementById('edit-op-time-from')?.value||'08:00',
-    timeTo:document.getElementById('edit-op-time-to')?.value||'17:00',
+    timeFrom:g('edit-op-time-from')?.value||'08:00',
+    timeTo:g('edit-op-time-to')?.value||'17:00',
     status:editStatus,
-    photos:currentPhotos.edit.map(p=>({dataUrl:p.dataUrl,name:p.name||'photo'})),
+    photos:[], // will be set after upload
   };
+  // Determine which old URLs were removed and delete from Storage
+  const oldUrls = (state.operations[idx].photos || []);
+  const keptUrls = currentPhotos.edit.filter(p=>p.uploaded).map(p=>p.url);
+  const removedUrls = oldUrls.filter(u=>!keptUrls.includes(u));
+  removedUrls.forEach(u=>deletePhoto(u)); // fire-and-forget cleanup
+  // Upload any new pending photos
+  const finalUrls = await uploadPendingPhotos(currentPhotos.edit, id, 'ops');
+  state.operations[idx].photos = finalUrls;
   const {error} = await supa.from('pitchops_operations').update(opToDb(state.operations[idx])).eq('id',id);
   if(error){ showToast('Error: '+error.message); return; }
   closeModal('modal-edit-op');
@@ -4456,6 +4494,9 @@ async function deleteOperation(){
   if(!confirm(t('confirm_delete_op'))) return;
   const {error} = await supa.from('pitchops_operations').delete().eq('id',id);
   if(error){ showToast('Error: '+error.message); return; }
+  // Clean up photos from Storage before removing from state
+  const delOp = state.operations.find(o=>o.id===id);
+  if(delOp?.photos?.length) delOp.photos.forEach(url=>deletePhoto(url));
   state.operations=state.operations.filter(o=>o.id!==id);
   closeModal('modal-edit-op');
   renderVenueHistory();
@@ -4521,8 +4562,11 @@ async function addOpType(){
 }
 async function removeOpType(i){
   const name=state.opTypes[i];
-  await supa.from('pitchops_op_types').delete().eq('name',name);
+  if(!confirm('Remove type "'+name+'"?')) return;
+  const {error}=await supa.from('pitchops_op_types').delete().eq('name',name);
+  if(error){ showToast('Error: '+error.message); return; }
   state.opTypes.splice(i,1); renderOpTypesList(); populateOpTypeSelects();
+  showToast(t('toast_type_removed')||'Type removed');
 }
 
 // ════════════════════════════════════════
@@ -4569,49 +4613,127 @@ window.addEventListener('load',function(){
 // ════════════════════════════════════════
 // PHOTOS
 // ════════════════════════════════════════
-const currentPhotos={new:[],edit:[]};
-const MAX_PHOTOS=4;
-function handlePhotoSelect(input,ctx){
-  const files=Array.from(input.files);
-  const allowed=MAX_PHOTOS-currentPhotos[ctx].length;
-  if(allowed<=0){showToast(t('toast_max_photos'));input.value='';return;}
-  files.slice(0,allowed).forEach(file=>{
-    const reader=new FileReader();
-    reader.onload=e=>compressImage(e.target.result,1200,.82,dataUrl=>{
-      currentPhotos[ctx].push({dataUrl,name:file.name});renderPhotoPreviews(ctx);
-    });
-    reader.readAsDataURL(file);
+// ════════════════════════════════════════
+// PHOTO STORAGE — Supabase Storage (no base64)
+// Photos stored as URLs in photo_urls TEXT[] column
+// ════════════════════════════════════════
+const PHOTO_BUCKET = 'pitchops-photos';
+const MAX_PHOTOS = 8;
+const PHOTO_MAX_DIM = 1200;
+const PHOTO_QUALITY = 0.82;
+
+// currentPhotos holds pending uploads per context:
+// { url: string (preview blob URL or final URL), file: File|null, uploaded: bool }
+const currentPhotos = { new: [], edit: [] };
+
+// ── Compress image before upload ──
+function compressImageToBlob(file, maxDim, quality) {
+  return new Promise(resolve => {
+    const img = new Image();
+    const blobUrl = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(blobUrl);
+      let w = img.width, h = img.height;
+      if(w > maxDim || h > maxDim){
+        if(w > h){ h = Math.round(h * maxDim / w); w = maxDim; }
+        else { w = Math.round(w * maxDim / h); h = maxDim; }
+      }
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      c.toBlob(blob => resolve(blob), 'image/jpeg', quality);
+    };
+    img.src = blobUrl;
   });
-  if(files.length>allowed) showToast('Only '+allowed+' more photo(s) added');
-  input.value='';
 }
-function compressImage(dataUrl,maxDim,quality,cb){
-  const img=new Image(); img.onload=()=>{
-    let w=img.width,h=img.height;
-    if(w>maxDim||h>maxDim){ if(w>h){h=Math.round(h*maxDim/w);w=maxDim;}else{w=Math.round(w*maxDim/h);h=maxDim;} }
-    const c=document.createElement('canvas'); c.width=w; c.height=h;
-    c.getContext('2d').drawImage(img,0,0,w,h); cb(c.toDataURL('image/jpeg',quality));
-  }; img.src=dataUrl;
+
+// ── Upload a single photo to Supabase Storage ──
+async function uploadPhoto(file, recordId, index, table) {
+  const blob = await compressImageToBlob(file, PHOTO_MAX_DIM, PHOTO_QUALITY);
+  const path = `${table}/${recordId}/photo_${index}_${Date.now()}.jpg`;
+  const { error } = await supa.storage.from(PHOTO_BUCKET).upload(path, blob, {
+    contentType: 'image/jpeg', upsert: true
+  });
+  if(error) throw error;
+  const { data: { publicUrl } } = supa.storage.from(PHOTO_BUCKET).getPublicUrl(path);
+  return publicUrl;
 }
-function renderPhotoPreviews(ctx){
-  const container=document.getElementById(ctx+'-photo-previews'); if(!container) return;
-  container.innerHTML=currentPhotos[ctx].map((p,i)=>`
+
+// ── Delete a photo from Storage by URL ──
+async function deletePhoto(url) {
+  try {
+    const marker = '/object/public/' + PHOTO_BUCKET + '/';
+    const idx = url.indexOf(marker);
+    if(idx === -1) return;
+    const path = url.slice(idx + marker.length);
+    await supa.storage.from(PHOTO_BUCKET).remove([path]);
+  } catch(e) { console.warn('deletePhoto:', e); }
+}
+
+// ── Upload all pending photos for a record, return URL array ──
+async function uploadPendingPhotos(photos, recordId, table) {
+  const urls = [];
+  for(let i = 0; i < photos.length; i++) {
+    const p = photos[i];
+    if(p.uploaded) { urls.push(p.url); continue; } // already in Storage
+    try {
+      const url = await uploadPhoto(p.file, recordId, i, table);
+      urls.push(url);
+    } catch(e) { showToast('Photo upload failed: ' + e.message); }
+  }
+  return urls;
+}
+
+// ── Handle file selection (preview only, upload happens on save) ──
+function handlePhotoSelect(input, ctx) {
+  const files = Array.from(input.files);
+  const allowed = MAX_PHOTOS - currentPhotos[ctx].length;
+  if(allowed <= 0){ showToast(t('toast_max_photos')); input.value = ''; return; }
+  files.slice(0, allowed).forEach(file => {
+    const url = URL.createObjectURL(file); // temporary preview URL
+    currentPhotos[ctx].push({ url, file, uploaded: false });
+    renderPhotoPreviews(ctx);
+  });
+  if(files.length > allowed) showToast('Only ' + allowed + ' more photo(s) added');
+  input.value = '';
+}
+
+// ── Render photo preview thumbnails ──
+function renderPhotoPreviews(ctx) {
+  const container = document.getElementById(ctx + '-photo-previews'); if(!container) return;
+  container.innerHTML = currentPhotos[ctx].map((p, i) => `
     <div class="photo-thumb">
-      <img src="${p.dataUrl}" onclick="openLightboxFromPreview('${ctx}',${i})"/>
+      <img src="${p.url}" onclick="openLightboxFromPreview('${ctx}',${i})"/>
+      ${p.uploaded ? '' : '<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(24,95,165,.7);color:white;font-size:8px;text-align:center;padding:1px">pending</div>'}
       <button class="photo-thumb-remove" onclick="removePhoto('${ctx}',${i})">✕</button>
     </div>`).join('');
 }
-function removePhoto(ctx,idx){ currentPhotos[ctx].splice(idx,1); renderPhotoPreviews(ctx); }
+
+// ── Remove photo from pending list (revoke blob URL if not yet uploaded) ──
+function removePhoto(ctx, idx) {
+  const p = currentPhotos[ctx][idx];
+  if(p && !p.uploaded) URL.revokeObjectURL(p.url);
+  currentPhotos[ctx].splice(idx, 1);
+  renderPhotoPreviews(ctx);
+}
+
+// ── Load existing photo URLs into edit context ──
+function loadPhotosForEdit(ctx, photoUrls) {
+  // Revoke any previous pending blob URLs
+  currentPhotos[ctx].forEach(p => { if(!p.uploaded) URL.revokeObjectURL(p.url); });
+  currentPhotos[ctx] = (photoUrls || []).map(url => ({ url, file: null, uploaded: true }));
+  renderPhotoPreviews(ctx);
+}
 
 // lightbox
-let _lbPhotos=[],_lbIdx=0;
-function openLightbox(photos,idx){_lbPhotos=photos;_lbIdx=idx;updateLightbox();document.getElementById('lightbox').classList.add('open');}
-function openLightboxFromPreview(ctx,idx){openLightbox(currentPhotos[ctx].map(p=>p.dataUrl),idx);}
-function openLightboxFromOp(opId,idx){const op=state.operations.find(o=>o.id===opId);if(op?.photos?.length)openLightbox(op.photos.map(p=>p.dataUrl),idx);}
-function updateLightbox(){document.getElementById('lightbox-img').src=_lbPhotos[_lbIdx];document.getElementById('lightbox-counter').textContent=(_lbIdx+1)+' / '+_lbPhotos.length;document.querySelector('.lightbox-nav').style.display=_lbPhotos.length>1?'flex':'none';}
-function lightboxNav(d){_lbIdx=(_lbIdx+d+_lbPhotos.length)%_lbPhotos.length;updateLightbox();}
-function closeLightbox(e){if(e.target===document.getElementById('lightbox'))closeLightboxBtn();}
-function closeLightboxBtn(){document.getElementById('lightbox').classList.remove('open');}
+let _lbPhotos = [], _lbIdx = 0;
+function openLightbox(urls, idx){ _lbPhotos = urls; _lbIdx = idx; updateLightbox(); document.getElementById('lightbox').classList.add('open'); }
+function openLightboxFromPreview(ctx, idx){ openLightbox(currentPhotos[ctx].map(p => p.url), idx); }
+function openLightboxFromOp(opId, idx){ const op = state.operations.find(o => o.id === opId); if(op?.photos?.length) openLightbox(op.photos, idx); }
+function updateLightbox(){ document.getElementById('lightbox-img').src = _lbPhotos[_lbIdx]; document.getElementById('lightbox-counter').textContent = (_lbIdx+1) + ' / ' + _lbPhotos.length; document.querySelector('.lightbox-nav').style.display = _lbPhotos.length > 1 ? 'flex' : 'none'; }
+function lightboxNav(d){ _lbIdx = (_lbIdx + d + _lbPhotos.length) % _lbPhotos.length; updateLightbox(); }
+function closeLightbox(e){ if(e.target === document.getElementById('lightbox')) closeLightboxBtn(); }
+function closeLightboxBtn(){ document.getElementById('lightbox').classList.remove('open'); }
 
 // ════════════════════════════════════════
 // EXPORT CSV
@@ -4721,6 +4843,7 @@ async function deleteVenue(){
 function toggleCustomZone(){ document.getElementById('zone-custom-wrap').style.display=document.getElementById('new-op-zone').value==='Custom'?'block':'none'; }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function genId(prefix){ return prefix+Date.now()+'_'+Math.random().toString(36).slice(2,6); }
 function formatDate(dt){ if(!dt) return '—'; const d=new Date(dt); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); }
 function formatDateOnly(dt){
   if(!dt) return '—';
@@ -4970,7 +5093,26 @@ function ganttFilter(f,btn){
 
 function dStrOf(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 
-async function renderGantt(){
+// ── Gantt chip builder helpers ──
+function _buildOpChip(o, dStr, vid, chipStyle, cls='gantt-chip'){
+  const cs=chipStyle[o.status]||chipStyle.planned;
+  const tl=o.timeFrom&&o.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${o.timeFrom}–${o.timeTo}</span>`:'';
+  return `<div draggable="true" class="${cls}" ondragstart="onDragStart(event,'op','${o.id}','${dStr}','${vid}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditModal('${o.id}')" style="${cs}">${esc(o.type)}${tl}</div>`;
+}
+function _buildUsageChip(u, dStr, vid, usageChipStyle, cls='gantt-chip'){
+  const cs=usageChipStyle[u.status]||usageChipStyle.planned;
+  const tl=u.timeFrom&&u.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${u.timeFrom}–${u.timeTo}</span>`:'';
+  return `<div draggable="true" class="${cls}" ondragstart="onDragStart(event,'usage','${u.id}','${dStr}','${vid}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditUsageModal('${u.id}')" style="${cs}">⚽ ${esc(u.usageType)}${tl}</div>`;
+}
+function _buildChipDisplay(items, buildFn, maxVisible, overflowColor, overflowBg){
+  const visible = items.slice(0, maxVisible);
+  const overflow = items.length > maxVisible
+    ? `<div style="font-size:8px;color:${overflowColor};padding:1px 3px;background:${overflowBg};border-radius:3px;display:inline-block;margin-top:1px">+${items.length-maxVisible} ${t('more_suffix')}</div>`
+    : '';
+  return visible.map(buildFn).join('')+overflow;
+}
+
+function renderGantt(){
   const pid=state.currentProjectId; if(!pid) return;
   const weekStart=ganttWeekStart(ganttWeekOffset);
   const days=Array.from({length:7},(_,i)=>{ const d=new Date(weekStart); d.setDate(weekStart.getDate()+i); return d; });
@@ -5082,22 +5224,8 @@ async function renderGantt(){
       });
       const dayUsage=allUsage.filter(u=>u.venueId===v.id&&(u.date||'').slice(0,10)===dStr);
 
-      const opsChips=dayOps.map(o=>{
-        const cs=chipStyle[o.status]||chipStyle.planned;
-        const tl=o.timeFrom&&o.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${o.timeFrom}–${o.timeTo}</span>`:'';
-        return `<div draggable="true" class="gantt-chip" ondragstart="onDragStart(event,'op','${o.id}','${dStr}','${v.id}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditModal('${o.id}')" style="${cs}">${esc(o.type)}${tl}</div>`;
-      }).join('');
-
-      const usageChips=dayUsage.map(u=>{
-        const cs=usageChipStyle[u.status]||usageChipStyle.planned;
-        const tl=u.timeFrom&&u.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${u.timeFrom}–${u.timeTo}</span>`:'';
-        return `<div draggable="true" class="gantt-chip" ondragstart="onDragStart(event,'usage','${u.id}','${dStr}','${v.id}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditUsageModal('${u.id}')" style="${cs}">⚽ ${esc(u.usageType)}${tl}</div>`;
-      }).join('');
-
-      const opsOverflow=dayOps.length>3?`<div style="font-size:8px;color:#185FA5;padding:1px 3px;background:#E6F1FB;border-radius:3px;display:inline-block;margin-top:1px">+${dayOps.length-3} ${t('more_suffix')}</div>`:'';
-      const usageOverflow=dayUsage.length>3?`<div style="font-size:8px;color:#7C3AED;padding:1px 3px;background:#F3E8FF;border-radius:3px;display:inline-block;margin-top:1px">+${dayUsage.length-3} ${t('more_suffix')}</div>`:'';
-      const opsDisplay=dayOps.length>3?dayOps.slice(0,3).map(o=>{const cs=chipStyle[o.status]||chipStyle.planned;const tl=o.timeFrom&&o.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${o.timeFrom}–${o.timeTo}</span>`:'';return `<div draggable="true" class="gantt-chip" ondragstart="onDragStart(event,'op','${o.id}','${dStr}','${v.id}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditModal('${o.id}')" style="${cs}">${esc(o.type)}${tl}</div>`;}).join('')+opsOverflow:opsChips;
-      const usageDisplay=dayUsage.length>3?dayUsage.slice(0,3).map(u=>{const cs=usageChipStyle[u.status]||usageChipStyle.planned;const tl=u.timeFrom&&u.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${u.timeFrom}–${u.timeTo}</span>`:'';return `<div draggable="true" class="gantt-chip" ondragstart="onDragStart(event,'usage','${u.id}','${dStr}','${v.id}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditUsageModal('${u.id}')" style="${cs}">⚽ ${esc(u.usageType)}${tl}</div>`;}).join('')+usageOverflow:usageChips;
+      const opsDisplay=_buildChipDisplay(dayOps, o=>_buildOpChip(o,dStr,v.id,chipStyle), 3, '#185FA5','#E6F1FB');
+      const usageDisplay=_buildChipDisplay(dayUsage, u=>_buildUsageChip(u,dStr,v.id,usageChipStyle), 3, '#7C3AED','#F3E8FF');
       cells+=`<td onclick="if(!document.querySelector('.modal-overlay.open'))openAdminLogTaskModal('${dStr}','${v.id}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px;border-right:1px dashed rgba(0,0,0,0.06);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgT};min-height:40px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsDisplay}</td>
       <td onclick="if(!document.querySelector('.modal-overlay.open'))openAdminLogUsageModal('${dStr}','${v.id}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:40px;min-width:65px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageDisplay}</td>`;
     });
@@ -5253,17 +5381,8 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
     const dayUsage=usage.filter(u=>(u.date||'').slice(0,10)===dStr)
       .sort((a,b)=>(a.timeFrom||'').localeCompare(b.timeFrom||''));
 
-    const opsChips=dayOps.map(o=>{
-      const cs=chipStyle[o.status]||chipStyle.planned;
-      const tl=o.timeFrom&&o.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${o.timeFrom}–${o.timeTo}</span>`:'';
-      return `<div draggable="true" class="sched-chip" ondragstart="onDragStart(event,'op','${o.id}','${dStr}','${venueId}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditModal('${o.id}')" style="${cs}">${esc(o.type)}${tl}</div>`;
-    }).join('');
-
-    const usageChips=dayUsage.map(u=>{
-      const cs=usageChipStyle[u.status]||usageChipStyle.planned;
-      const tl=u.timeFrom&&u.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${u.timeFrom}–${u.timeTo}</span>`:'';
-      return `<div draggable="true" class="sched-chip" ondragstart="onDragStart(event,'usage','${u.id}','${dStr}','${venueId}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditUsageModal('${u.id}')" style="${cs}">⚽ ${esc(u.usageType)}${tl}</div>`;
-    }).join('');
+    const opsChips=dayOps.map(o=>_buildOpChip(o,dStr,venueId,chipStyle,'sched-chip')).join('');
+    const usageChips=dayUsage.map(u=>_buildUsageChip(u,dStr,venueId,usageChipStyle,'sched-chip')).join('');
 
     cells+=`<td onclick="openLogTaskModal('${dStr}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${venueId}')" style="padding:4px;border-right:1px dashed rgba(0,0,0,0.07);vertical-align:top;cursor:pointer;background:${bgT};min-height:120px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsChips||''}</td>
     <td onclick="openLogUsageModal('${dStr}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${venueId}')" style="padding:4px;border-right:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:120px;min-width:65px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageChips||''}</td>`;
@@ -5352,7 +5471,7 @@ function switchVenueTab(tab){
     venueMonthOffset=0;
     const vid=state.currentVenueId;
     if(vid){
-      renderVenueSched();
+      // Refresh data silently, then render once
       Promise.all([refreshVenueOps(vid,true), refreshVenueUsage(vid,true)]).then(()=>renderVenueSched());
     }
   }
@@ -5679,7 +5798,7 @@ function dbToUsage(r){
     teamName:r.team_name||'', zone:r.zone||'', weather:r.weather||'',
     notes:r.notes||'', date:d, timeFrom:r.time_from||'08:00',
     timeTo:r.time_to||'17:00', status:r.status||autoStatus,
-    photos:r.photos||[], createdAt:r.created_at
+    photos:r.photo_urls||[], createdAt:r.created_at
   };
 }
 function usageToDb(u){
@@ -5687,7 +5806,7 @@ function usageToDb(u){
     id:u.id, venue_id:u.venueId, usage_type:u.usageType,
     team_name:u.teamName, zone:u.zone, weather:u.weather,
     notes:u.notes, usage_date:u.date, time_from:u.timeFrom,
-    time_to:u.timeTo, status:u.status, photos:u.photos
+    time_to:u.timeTo, status:u.status, photo_urls:u.photos||[]
   };
 }
 
@@ -5757,7 +5876,7 @@ function renderVenueUsageHistory(){
           <div style="font-size:13px;font-weight:600;color:var(--navy)">${esc(u.usageType)}</div>
           ${u.teamName?`<div style="font-size:11px;color:var(--text-muted);margin-top:1px">👕 ${esc(u.teamName)}</div>`:''}
           ${u.notes?`<div style="font-size:11px;color:var(--text-hint);font-style:italic;margin-top:2px">${esc(u.notes)}</div>`:''}
-          ${u.photos&&u.photos.length?`<div class="admin-photo-strip" style="margin-top:6px">${u.photos.map((p,i)=>`<img src="${p.dataUrl}" style="border-radius:6px">`).join('')}</div>`:''}
+          ${u.photos&&u.photos.length?`<div class="admin-photo-strip" style="margin-top:6px">${u.photos.map((p,i)=>`<img src="${p}" style="border-radius:6px">`).join('')}</div>`:''}
         </div>
         <div style="flex-shrink:0;text-align:right;min-width:90px">
           <div style="font-size:12px;font-weight:500;color:var(--text)">${formatDateOnly(u.date)}</div>
@@ -5789,31 +5908,38 @@ function openLogUsageModal(dateStr){
 }
 
 function renderUsagePhotoPreviews(mode){
-  const id=mode==='new'?'usage-photo-previews':'edit-usage-photo-previews';
-  const el=document.getElementById(id); if(!el) return;
-  el.innerHTML=(currentUsagePhotos[mode]||[]).map((p,i)=>`
+  const elId = mode==='new' ? 'usage-photo-previews' : 'edit-usage-photo-previews';
+  const el = document.getElementById(elId); if(!el) return;
+  el.innerHTML = (currentUsagePhotos[mode]||[]).map((p,i)=>`
     <div style="position:relative">
-      <img src="${p.dataUrl}" style="width:56px;height:56px;object-fit:cover;border-radius:8px;border:1px solid var(--border)"/>
+      <img src="${p.url}" onclick="openLightboxFromUsagePreview('${mode}',${i})" style="width:56px;height:56px;object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:pointer"/>
+      ${p.uploaded ? '' : '<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(24,95,165,.7);color:white;font-size:7px;text-align:center;border-radius:0 0 8px 8px">pending</div>'}
       <button onclick="removeUsagePhoto('${mode}',${i})" style="position:absolute;top:-4px;right:-4px;background:#dc2626;color:white;border:none;border-radius:50%;width:16px;height:16px;font-size:10px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center">×</button>
     </div>`).join('');
 }
-function removeUsagePhoto(mode,i){ currentUsagePhotos[mode].splice(i,1); renderUsagePhotoPreviews(mode); }
-async function handleUsagePhotos(input){
-  const files=Array.from(input.files);
-  const remaining=4-(currentUsagePhotos.new||[]).length;
-  for(const f of files.slice(0,remaining)){
-    const dataUrl=await new Promise(res=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.readAsDataURL(f);});
-    currentUsagePhotos.new.push({dataUrl,name:f.name});
-  }
+function removeUsagePhoto(mode, i){
+  const p = currentUsagePhotos[mode][i];
+  if(p && !p.uploaded) URL.revokeObjectURL(p.url);
+  currentUsagePhotos[mode].splice(i, 1);
+  renderUsagePhotoPreviews(mode);
+}
+function openLightboxFromUsagePreview(mode, idx){ openLightbox(currentUsagePhotos[mode].map(p=>p.url), idx); }
+function handleUsagePhotos(input){
+  const files = Array.from(input.files);
+  const allowed = MAX_PHOTOS - (currentUsagePhotos.new||[]).length;
+  if(allowed<=0){ showToast(t('toast_max_photos')); input.value=''; return; }
+  files.slice(0, allowed).forEach(file=>{
+    currentUsagePhotos.new.push({ url: URL.createObjectURL(file), file, uploaded: false });
+  });
   renderUsagePhotoPreviews('new'); input.value='';
 }
-async function handleEditUsagePhotos(input){
-  const files=Array.from(input.files);
-  const remaining=4-(currentUsagePhotos.edit||[]).length;
-  for(const f of files.slice(0,remaining)){
-    const dataUrl=await new Promise(res=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.readAsDataURL(f);});
-    currentUsagePhotos.edit.push({dataUrl,name:f.name});
-  }
+function handleEditUsagePhotos(input){
+  const files = Array.from(input.files);
+  const allowed = MAX_PHOTOS - (currentUsagePhotos.edit||[]).length;
+  if(allowed<=0){ showToast(t('toast_max_photos')); input.value=''; return; }
+  files.slice(0, allowed).forEach(file=>{
+    currentUsagePhotos.edit.push({ url: URL.createObjectURL(file), file, uploaded: false });
+  });
   renderUsagePhotoPreviews('edit'); input.value='';
 }
 
@@ -5822,8 +5948,9 @@ async function logUsage(){
   const zone=document.getElementById('usage-zone-select').value==='Custom'
     ?document.getElementById('usage-zone-custom').value.trim()
     :document.getElementById('usage-zone-select').value;
+  const uId = genId('u_');
   const u={
-    id:'u_'+Date.now(),
+    id:uId,
     venueId, usageType:document.getElementById('usage-type-select').value,
     teamName:document.getElementById('usage-team').value.trim(),
     zone, weather:document.getElementById('usage-weather').value.trim(),
@@ -5832,11 +5959,19 @@ async function logUsage(){
     timeFrom:document.getElementById('usage-time-from').value||'08:00',
     timeTo:document.getElementById('usage-time-to').value||'17:00',
     status:document.getElementById('usage-status').value||'planned',
-    photos:currentUsagePhotos.new.map(p=>({dataUrl:p.dataUrl,name:p.name||'photo'})),
+    photos:[],
     createdAt:new Date().toISOString()
   };
   const {error}=await supa.from('pitchops_usage').insert(usageToDb(u));
   if(error){ showToast('Error: '+error.message); return; }
+  if(currentUsagePhotos.new.some(p=>!p.uploaded)){
+    const urls = await uploadPendingPhotos(currentUsagePhotos.new, uId, 'usage');
+    if(urls.length){
+      await supa.from('pitchops_usage').update({photo_urls:urls}).eq('id',uId);
+      u.photos = urls;
+    }
+  }
+  currentUsagePhotos.new = [];
   state_usage.unshift(u);
   closeModal('modal-log-usage');
   renderVenueUsageToday(); renderVenueUsageHistory();
@@ -5859,7 +5994,9 @@ function openEditUsageModal(id){
   document.getElementById('edit-usage-time-from').value=u.timeFrom||'08:00';
   document.getElementById('edit-usage-time-to').value=u.timeTo||'17:00';
   document.getElementById('edit-usage-status').value=u.status||'planned';
-  currentUsagePhotos.edit=[...(u.photos||[])];
+  loadPhotosForEdit('edit_usage', u.photos || []);
+  // Mirror into currentUsagePhotos.edit for saving
+  currentUsagePhotos.edit = (u.photos||[]).map(url=>({url,file:null,uploaded:true}));
   renderUsagePhotoPreviews('edit');
   openModal('modal-edit-usage');
 }
@@ -5885,8 +6022,13 @@ async function saveEditUsage(){
     timeFrom:document.getElementById('edit-usage-time-from').value||'08:00',
     timeTo:document.getElementById('edit-usage-time-to').value||'17:00',
     status:document.getElementById('edit-usage-status').value,
-    photos:currentUsagePhotos.edit.map(p=>({dataUrl:p.dataUrl,name:p.name||'photo'})),
+    photos:[], // set after upload
   };
+  const oldUrls = arr[idx].photos || [];
+  const keptUrls = currentUsagePhotos.edit.filter(p=>p.uploaded).map(p=>p.url);
+  oldUrls.filter(u=>!keptUrls.includes(u)).forEach(u=>deletePhoto(u));
+  const finalUrls = await uploadPendingPhotos(currentUsagePhotos.edit, id, 'usage');
+  arr[idx].photos = finalUrls;
   const {error}=await supa.from('pitchops_usage').update(usageToDb(arr[idx])).eq('id',id);
   if(error){ showToast('Error: '+error.message); return; }
   closeModal('modal-edit-usage');
@@ -5903,6 +6045,8 @@ async function deleteUsage(){
   if(!confirm(t('confirm_delete_usage'))) return;
   const {error}=await supa.from('pitchops_usage').delete().eq('id',id);
   if(error){ showToast('Error: '+error.message); return; }
+  const delU = state_usage.find(u=>u.id===id) || (typeof state_admin_usage!=='undefined' ? state_admin_usage.find(u=>u.id===id) : null);
+  if(delU?.photos?.length) delU.photos.forEach(url=>deletePhoto(url));
   state_usage=state_usage.filter(u=>u.id!==id);
   if(typeof state_admin_usage!=='undefined') state_admin_usage=state_admin_usage.filter(u=>u.id!==id);
   closeModal('modal-edit-usage');
@@ -5982,7 +6126,7 @@ function renderDetailUsage(){
         ${u.notes?`<div style="white-space:pre-wrap;word-break:break-word;line-height:1.4;margin-bottom:4px">${esc(u.notes)}</div>`:''}
         <input type="text" placeholder="Comment..." value="${esc(u.adminComment||'')}" onchange="saveUsageComment('${u.id}',this.value)" style="width:100%;font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:5px;font-family:'DM Sans',sans-serif;outline:none"/>
       </td>
-      <td>${u.photos&&u.photos.length?`<div class="admin-photo-strip">${u.photos.map((p,i)=>`<img src="${p.dataUrl}" onclick="openLightboxFromUsage('${u.id}',${i})">`).join('')}</div>`:'<span style="color:var(--text-hint);font-size:12px">—</span>'}</td>
+      <td>${u.photos&&u.photos.length?`<div class="admin-photo-strip">${u.photos.map((p,i)=>`<img src="${p}" onclick="openLightboxFromUsage('${u.id}',${i})">`).join('')}</div>`:'<span style="color:var(--text-hint);font-size:12px">—</span>'}</td>
       <td><button class="flag-btn ${u.flagged?'flagged':''}" onclick="toggleUsageFlag('${u.id}',this)">🚩</button></td>
     </tr>`;
   }).join('');
@@ -6052,8 +6196,9 @@ function exportUsageCSV(){
 }
 
 function openLightboxFromUsage(id, i){
-  const u=state_admin_usage.find(x=>x.id===id); if(!u||!u.photos) return;
-  openLightbox(u.photos.map(p=>p.dataUrl), i);
+  const u=state_admin_usage.find(x=>x.id===id)||state_usage.find(x=>x.id===id);
+  if(!u?.photos?.length) return;
+  openLightbox(u.photos, i);
 }
 
 // ── ADMIN LOG TASK MODAL ──
@@ -6099,7 +6244,7 @@ async function adminLogTask(){
   const venueId=document.getElementById('admin-task-venue').value;
   if(!venueId){ showToast(t('lbl_venue_field')+' required'); return; }
   const op={
-    id:'op_'+Date.now(), venueId,
+    id:genId('op_'), venueId,
     type:document.getElementById('admin-task-type').value,
     zone:(document.getElementById('admin-task-zone-select').value==='Custom'
       ?document.getElementById('admin-task-zone-custom').value.trim()
@@ -6152,7 +6297,7 @@ async function adminLogUsage(){
   const venueId=document.getElementById('admin-usage-venue').value;
   if(!venueId){ showToast(t('lbl_venue_field')+' required'); return; }
   const u={
-    id:'u_'+Date.now(), venueId,
+    id:genId('u_'), venueId,
     usageType:document.getElementById('admin-usage-type').value,
     teamName:document.getElementById('admin-usage-team').value.trim(),
     zone:(document.getElementById('admin-usage-zone-select').value==='Custom'
@@ -6239,7 +6384,7 @@ async function executeDrop(dragData, newDate, newVenueId, copy){
     if(idx === -1){ showToast(t('toast_task_not_found')); return; }
     const op = state.operations[idx];
     if(copy){
-      const newOp = {...op, id:'op_'+Date.now(), date:newDate, venueId:targetVenueId, createdAt:new Date().toISOString()};
+      const newOp = {...op, id:genId('op_'), date:newDate, venueId:targetVenueId, createdAt:new Date().toISOString()};
       const {error} = await supa.from('pitchops_operations').insert(opToDb(newOp));
       if(error){ showToast('Error: '+error.message); return; }
       state.operations.push(newOp);
@@ -6251,24 +6396,28 @@ async function executeDrop(dragData, newDate, newVenueId, copy){
       showToast('✅ Task moved to '+formatDateOnly(newDate));
     }
   } else if(type === 'usage'){
-    const arrays = [state_usage];
-    if(typeof state_admin_usage !== 'undefined') arrays.push(state_admin_usage);
-    let found=null, foundArr=null, foundIdx=-1;
-    for(const arr of arrays){
-      const i = arr.findIndex(u=>u.id===id);
-      if(i>-1){ found=arr[i]; foundArr=arr; foundIdx=i; break; }
-    }
+    // Search both arrays, use first match as source of truth
+    let found=null, foundIdx=-1;
+    const inVenue = state_usage.findIndex(u=>u.id===id);
+    const inAdmin = (typeof state_admin_usage!=='undefined') ? state_admin_usage.findIndex(u=>u.id===id) : -1;
+    if(inVenue>-1){ found=state_usage[inVenue]; foundIdx=inVenue; }
+    else if(inAdmin>-1){ found=state_admin_usage[inAdmin]; foundIdx=inAdmin; }
     if(!found){ showToast(t('toast_usage_not_found')); return; }
     if(copy){
-      const newU = {...found, id:'u_'+Date.now(), date:newDate, venueId:targetVenueId, createdAt:new Date().toISOString()};
+      const newU = {...found, id:genId('u_'), date:newDate, venueId:targetVenueId, createdAt:new Date().toISOString()};
       const {error} = await supa.from('pitchops_usage').insert(usageToDb(newU));
       if(error){ showToast('Error: '+error.message); return; }
-      foundArr.push(newU);
+      // Keep both arrays in sync
+      state_usage.push(newU);
+      if(typeof state_admin_usage!=='undefined') state_admin_usage.push(newU);
       showToast('✅ Usage copied to '+formatDateOnly(newDate));
     } else {
       const {error} = await supa.from('pitchops_usage').update({usage_date:newDate, venue_id:targetVenueId}).eq('id',id);
       if(error){ showToast('Error: '+error.message); return; }
-      foundArr[foundIdx] = {...found, date:newDate, venueId:targetVenueId};
+      const updated = {...found, date:newDate, venueId:targetVenueId};
+      // Update both arrays in sync
+      if(inVenue>-1) state_usage[inVenue]=updated;
+      if(inAdmin>-1 && typeof state_admin_usage!=='undefined') state_admin_usage[inAdmin]=updated;
       showToast('✅ Usage moved to '+formatDateOnly(newDate));
     }
   }
@@ -6299,8 +6448,10 @@ async function executeDrop(dragData, newDate, newVenueId, copy){
 
 function calcHours(timeFrom, timeTo){
   if(!timeFrom || !timeTo) return 0;
-  const [fh,fm] = timeFrom.split(':').map(Number);
-  const [th,tm] = timeTo.split(':').map(Number);
+  const fp = timeFrom.split(':'); const tp = timeTo.split(':');
+  if(fp.length<2 || tp.length<2) return 0;
+  const [fh,fm] = fp.map(Number); const [th,tm] = tp.map(Number);
+  if(isNaN(fh)||isNaN(fm)||isNaN(th)||isNaN(tm)) return 0;
   const mins = (th*60+tm) - (fh*60+fm);
   return Math.max(0, mins/60);
 }
