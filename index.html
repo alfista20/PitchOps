@@ -1345,12 +1345,12 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
         </select>
       </div>
       <div class="field">
-        <label>Photos (max 4)</label>
-        <div class="photo-upload-area">
-          <input type="file" accept="image/*" multiple id="edit-photo-input" onchange="handlePhotoSelect(this,'edit')"/>
+        <label data-i18n="op_photos">Photos (max 8)</label>
+        <div class="photo-upload-area" onclick="document.getElementById('edit-photo-input').click()">
+          <input type="file" accept="image/*" multiple id="edit-photo-input" style="display:none" onchange="handlePhotoSelect(this,'edit')"/>
           <div class="photo-upload-icon">📷</div>
-          <div class="photo-upload-text">Tap to add / replace photos</div>
-          <div class="photo-upload-hint">JPG, PNG · max 4 photos</div>
+          <div class="photo-upload-text" data-i18n="photo_tap">Tap to add photos</div>
+          <div class="photo-upload-hint" data-i18n="photo_hint">JPG, PNG · max 8 photos</div>
         </div>
         <div class="photo-previews" id="edit-photo-previews"></div>
       </div>
@@ -1428,12 +1428,12 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
         <p style="font-size:11px;color:var(--text-hint);margin-top:4px" data-i18n="status_manual_hint">Completed must be set manually by you or admin</p>
       </div>
       <div class="field">
-        <label data-i18n="op_photos">Photos (max 4)</label>
-        <div class="photo-upload-area" id="new-photo-drop">
-          <input type="file" accept="image/*" multiple id="new-photo-input" onchange="handlePhotoSelect(this,'new')"/>
+        <label data-i18n="op_photos">Photos (max 8)</label>
+        <div class="photo-upload-area" onclick="document.getElementById('new-photo-input').click()">
+          <input type="file" accept="image/*" multiple id="new-photo-input" style="display:none" onchange="handlePhotoSelect(this,'new')"/>
           <div class="photo-upload-icon">📷</div>
           <div class="photo-upload-text" data-i18n="photo_tap">Tap to add photos</div>
-          <div class="photo-upload-hint" data-i18n="photo_hint">JPG, PNG · max 4 photos</div>
+          <div class="photo-upload-hint" data-i18n="photo_hint">JPG, PNG · max 8 photos</div>
         </div>
         <div class="photo-previews" id="new-photo-previews"></div>
       </div>
@@ -1723,7 +1723,7 @@ const i18n = {
     op_staff:'Done by (staff)',op_staff_hint:'You can add multiple staff members',
     op_notes:'Notes / observations',op_date:'Task date',btn_log:'Log task',
     history:'Task history',op_photos:'Photos (max 8)',photo_tap:'Tap to add photos',
-    photo_hint:'JPG, PNG · max 4 photos',
+    photo_hint:'JPG, PNG · max 8 photos',
     // tabs & buttons
     tab_log:'🗒 Log task',tab_usage:'⏱ Log usage',tab_schedule:'📅 Schedule',tab_stats:'📊 Stats',
     btn_log_task:'+ Log task',btn_log_usage:'+ Log usage',
@@ -1943,7 +1943,7 @@ const i18n = {
     op_staff:'Wykonał/a',op_staff_hint:'Możesz dodać kilka osób',
     op_notes:'Notatki',op_date:'Data zadania',btn_log:'Zapisz zadanie',
     history:'Historia zadań',op_photos:'Zdjęcia (max 8)',photo_tap:'Dotknij aby dodać zdjęcia',
-    photo_hint:'JPG, PNG · max 4 zdjęcia',
+    photo_hint:'JPG, PNG · max 8 zdjęć',
     tab_log:'🗒 Zadanie',tab_usage:'⏱ Użycie',tab_schedule:'📅 Harmonogram',tab_stats:'📊 Statystyki',
     btn_log_task:'+ Dodaj zadanie',btn_log_usage:'+ Dodaj użycie',
     today:'Dziś',history_lbl:'Historia',usage_history:'Historia użycia',
@@ -2069,7 +2069,7 @@ const i18n = {
     lbl_notes_short:'Notatki',
     lbl_status:'Status',
     lbl_priority:'Priorytet',
-    lbl_photos:'Zdjęcia (max 4)',
+    lbl_photos:'Zdjęcia (max 8)',
     lbl_time_of_day:'Pora dnia',
     lbl_email:'E-mail',
     lbl_password:'Hasło',
@@ -2454,7 +2454,7 @@ const i18n = {
     op_staff:'Done by (staff)',
     op_zone_custom:'Custom zone',
     period_week:'Week',
-    photo_hint:'JPG, PNG · max 4 photos',
+    photo_hint:'JPG, PNG · max 8 photos',
     ptab_schedule:'📅 Schedule',
     ptab_stats:'📊 Stats',
     ptab_tasks:'📋 Tasks',
@@ -2543,7 +2543,7 @@ const i18n = {
     op_notes:'Notes / observations',
     op_staff:'Done by (staff)',
     period_week:'Week',
-    photo_hint:'JPG, PNG · max 4 photos',
+    photo_hint:'JPG, PNG · max 8 photos',
     stats_total_tasks:'Total tasks',
     stats_usage_hours:'Usage hours',
     stats_venues_active:'Venues active',
@@ -2777,7 +2777,7 @@ const i18n = {
     op_staff:'Réalisé par',op_staff_hint:'Vous pouvez ajouter plusieurs agents',
     op_notes:'Notes / observations',op_date:'Date de la tâche',btn_log:'Enregistrer',
     history:'Historique',op_photos:'Photos (max 8)',photo_tap:'Appuyer pour ajouter des photos',
-    photo_hint:'JPG, PNG · max 4 photos',
+    photo_hint:'JPG, PNG · max 8 photos',
     tab_log:'🗒 Enregistrer',tab_usage:'⏱ Utilisation',tab_schedule:'📅 Planning',tab_stats:'📊 Statistiques',
     btn_log_task:'+ Enregistrer tâche',btn_log_usage:'+ Enregistrer usage',
     today:"Aujourd'hui",history_lbl:'Historique',usage_history:"Historique d'utilisation",
@@ -2987,8 +2987,8 @@ const i18n = {
     op_zone_custom:'Benutzerdefinierter Bereich',op_equipment:'Geräte',op_weather:'Wetterbedingungen',
     op_staff:'Durchgeführt von',op_staff_hint:'Mehrere Mitarbeiter möglich',
     op_notes:'Notizen',op_date:'Aufgabendatum',btn_log:'Aufgabe speichern',
-    history:'Aufgabenhistorie',op_photos:'Fotos (max 4)',photo_tap:'Tippen um Fotos hinzuzufügen',
-    photo_hint:'JPG, PNG · max 4 Fotos',
+    history:'Aufgabenhistorie',op_photos:'Fotos (max 8)',photo_tap:'Tippen um Fotos hinzuzufügen',
+    photo_hint:'JPG, PNG · max 8 Fotos',
     tab_log:'🗒 Aufgabe',tab_usage:'⏱ Nutzung',tab_schedule:'📅 Zeitplan',tab_stats:'📊 Statistiken',
     btn_log_task:'+ Aufgabe erfassen',btn_log_usage:'+ Nutzung erfassen',
     today:'Heute',history_lbl:'Historie',usage_history:'Nutzungshistorie',
@@ -4624,7 +4624,7 @@ const PHOTO_QUALITY = 0.82;
 
 // currentPhotos holds pending uploads per context:
 // { url: string (preview blob URL or final URL), file: File|null, uploaded: bool }
-const currentPhotos = { new: [], edit: [] };
+const currentPhotos = { new: [], edit: [], 'admin-task': [] };
 
 // ── Compress image before upload ──
 function compressImageToBlob(file, maxDim, quality) {
@@ -5665,8 +5665,6 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
   const labelEl = document.getElementById('venue-sched-label');
   const today = todayStr();
 
-  // Events are loaded on venue entry - just render with what we have
-
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth()+monthOffset, 1);
   if(labelEl) labelEl.textContent = monthStart.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
@@ -5682,12 +5680,17 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
   const venueEvents = state_events.filter(e=>e.venueId===venueId);
 
   const CS = {
-    planned:'background:#FAEEDA;color:#854F0B;border-left:2px solid #EF9F27',
-    inprogress:'background:#E6F1FB;color:#185FA5;border-left:2px solid #378ADD',
-    completed:'background:#EAF3DE;color:#3B6D11;border-left:2px solid #3B6D11',
-    missed:'background:#FCEBEB;color:#A32D2D;border-left:2px solid #A32D2D',
+    planned:'background:#FAEEDA;color:#854F0B;border-left:3px solid #EF9F27',
+    inprogress:'background:#E6F1FB;color:#185FA5;border-left:3px solid #378ADD',
+    completed:'background:#EAF3DE;color:#3B6D11;border-left:3px solid #3B6D11',
+    missed:'background:#FCEBEB;color:#A32D2D;border-left:3px solid #A32D2D',
   };
-  const UB = 'background:#F3E8FF;color:#6B21A8;border-left:2px solid #A855F7';
+  const UB = 'background:#F3E8FF;color:#6B21A8;border-left:3px solid #A855F7';
+
+  const CELL_H = 90;     // min cell height px — must match CSS below
+  const BAR_H  = 18;     // multiday bar height px
+  const BAR_GAP = 2;     // gap between bars px
+  const BAR_TOP = 28;    // top offset inside cell (below day number row)
 
   const header = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>
     `<div style="text-align:center;font-size:11px;font-weight:700;color:#96a6bb;text-transform:uppercase;padding:8px 0;border-bottom:1px solid var(--border);border-right:1px solid var(--border);box-sizing:border-box">${d}</div>`
@@ -5699,36 +5702,76 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
     const week = cells.slice(w*7,(w+1)*7);
     const wStart = dStrOf(week[0]);
     const wEnd   = dStrOf(week[6]);
-    const wkEvs  = venueEvents.filter(ev=>ev.dateStart<=wEnd&&ev.dateEnd>=wStart).sort((a,b)=>a.dateStart.localeCompare(b.dateStart));
 
-    // Build event bar HTML per column index
-    const EB = ['','','','','','',''];
-    wkEvs.forEach(ev=>{
-      const cIdx = [];
-      week.forEach((d,i)=>{ if(ev.dateStart<=dStrOf(d)&&ev.dateEnd>=dStrOf(d)) cIdx.push(i); });
-      if(!cIdx.length) return;
-      const mid = cIdx[Math.floor(cIdx.length/2)];
-      cIdx.forEach(ci=>{
-        const iS = ev.dateStart===dStrOf(week[ci]);
-        const iE = ev.dateEnd===dStrOf(week[ci]);
-        const sN = ci===mid;
-        const r  = `${iS?'3px':'0'} ${iE?'3px':'0'} ${iE?'3px':'0'} ${iS?'3px':'0'}`;
-        const mR=iE?'2px':'0', mL=iS?'2px':'-1px';
-        const ovf=sN?'overflow:visible;text-align:center;position:relative;z-index:6;':'overflow:hidden;';
-        const barW = !iE ? 'calc(100% + 1px)' : '100%';
-        EB[ci] += `<div
-          onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')"
-          onmouseover="this.style.filter='brightness(.92)'"
-          onmouseout="this.style.filter=''"
-          style="height:16px;line-height:16px;margin:0 0 2px ${iS?'1px':'-1px'};width:${barW};background:${ev.colorBg};color:${ev.colorFg};font-size:9px;font-weight:700;padding:0 4px;border-radius:${r};white-space:nowrap;${ovf}cursor:pointer;"
-        >${sN?esc(ev.name):''}</div>`;
+    // ── Multi-day events for this week row ──
+    // Sorted by start date, then by duration desc (longer events on top)
+    const wkEvs = venueEvents
+      .filter(ev=>ev.dateStart<=wEnd&&ev.dateEnd>=wStart)
+      .sort((a,b)=>{
+        const aS=a.dateStart<wStart?wStart:a.dateStart;
+        const bS=b.dateStart<wStart?wStart:b.dateStart;
+        if(aS!==bS) return aS.localeCompare(bS);
+        // longer spans first = fewer row conflicts
+        const aLen=(a.dateEnd<wEnd?a.dateEnd:wEnd).localeCompare(a.dateStart<wStart?wStart:a.dateStart);
+        const bLen=(b.dateEnd<wEnd?b.dateEnd:wEnd).localeCompare(b.dateStart<wStart?wStart:b.dateStart);
+        return bLen-aLen;
       });
+
+    // Assign a row slot to each event (0, 1, 2...) — greedy no-overlap packing
+    const rowSlots = []; // [endColIdx] per slot
+    const evSlot = wkEvs.map(ev=>{
+      const c1 = week.findIndex(d=>dStrOf(d)>=ev.dateStart && dStrOf(d)<=ev.dateEnd);
+      const c2 = week.reduce((acc,d,i)=>dStrOf(d)<=ev.dateEnd&&dStrOf(d)>=ev.dateStart?i:acc,-1);
+      if(c1<0||c2<0) return {c1:0,c2:0,slot:-1};
+      // find first slot that ends before c1
+      let slot = rowSlots.findIndex(endCol=>endCol<c1);
+      if(slot===-1){ slot=rowSlots.length; rowSlots.push(c2); }
+      else rowSlots[slot]=c2;
+      return {c1,c2,slot};
     });
 
+    // Build overlay bars HTML (absolutely positioned over the week row)
+    // Each bar spans from c1 to c2 as a single continuous rectangle
+    const maxSlot = evSlot.reduce((m,s)=>Math.max(m,s.slot),-1);
+    const overlayH = maxSlot>=0 ? BAR_TOP + (maxSlot+1)*(BAR_H+BAR_GAP) : BAR_TOP;
+    const effectiveCellH = Math.max(CELL_H, overlayH+10);
+
+    const bars = wkEvs.map((ev,ei)=>{
+      const {c1,c2,slot} = evSlot[ei];
+      if(slot<0) return '';
+      const pctL = (c1/7*100).toFixed(3);
+      const pctW = ((c2-c1+1)/7*100).toFixed(3);
+      const top  = BAR_TOP + slot*(BAR_H+BAR_GAP);
+      // Rounded caps: left cap only if event starts in this week, right cap only if it ends
+      const startsHere = ev.dateStart>=wStart;
+      const endsHere   = ev.dateEnd<=wEnd;
+      const rL = startsHere?`${BAR_H/2}px`:'0';
+      const rR = endsHere?`${BAR_H/2}px`:'0';
+      // Slight inset so bars don't bleed into cell borders
+      const insetL = startsHere?'3px':'0';
+      const insetR = endsHere?'3px':'0';
+      return `<div
+        onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')"
+        onmouseover="this.style.filter='brightness(.9)';this.style.boxShadow='0 2px 8px rgba(0,0,0,.18)'"
+        onmouseout="this.style.filter='';this.style.boxShadow='none'"
+        title="${esc(ev.name)}"
+        style="position:absolute;left:calc(${pctL}% + ${insetL});width:calc(${pctW}% - ${insetL} - ${insetR});top:${top}px;height:${BAR_H}px;
+          background:${ev.colorBg};color:${ev.colorFg};
+          border-radius:${rL} ${rR} ${rR} ${rL};
+          font-size:10px;font-weight:700;line-height:${BAR_H}px;
+          padding:0 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+          cursor:pointer;box-sizing:border-box;z-index:5;
+          box-shadow:0 1px 3px rgba(0,0,0,.12);
+          transition:filter .1s,box-shadow .1s"
+      >${esc(ev.name)}</div>`;
+    }).join('');
+
+    // ── Day cells for this week row ──
+    const paddingTop = overlayH + 2; // push chips below the event bars
     const dayCells = week.map((d,wi)=>{
-      const dStr = dStrOf(d);
-      const isT  = dStr===today;
-      const inM  = d.getMonth()===monthStart.getMonth();
+      const dStr  = dStrOf(d);
+      const isT   = dStr===today;
+      const inM   = d.getMonth()===monthStart.getMonth();
       const isPast = dStr<today;
       const dOps = ops.filter(o=>(o.date||'').slice(0,10)===dStr).map(o=>isPast&&o.status==='planned'?{...o,status:'missed'}:o);
       const dUse = usage.filter(u=>(u.date||'').slice(0,10)===dStr);
@@ -5737,7 +5780,11 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
         ...dUse.map(u=>({fn:`openEditUsageModal('${u.id}')`,label:u.usageType||'Usage',st:UB})),
       ];
       const chips = items.map(it=>
-        `<div onclick="event.stopPropagation();${it.fn}" onmouseover="this.style.filter='brightness(.93)'" onmouseout="this.style.filter=''" style="font-size:10px;font-weight:600;padding:2px 5px;border-radius:3px;margin-bottom:2px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;${it.st}">${esc(it.label)}</div>`
+        `<div onclick="event.stopPropagation();${it.fn}"
+          onmouseover="this.style.filter='brightness(.93)'"
+          onmouseout="this.style.filter=''"
+          style="font-size:10px;font-weight:600;padding:2px 5px;border-radius:3px;margin-bottom:2px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;${it.st}"
+         >${esc(it.label)}</div>`
       ).join('');
       const bg  = isT?'#EBF4FF':inM?'white':'#f8fafc';
       const brd = isT?'1px solid #185FA5':'1px solid rgba(0,0,0,0.06)';
@@ -5745,17 +5792,30 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
         ? 'background:#185FA5;color:white;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;'
         : `color:${inM?'#0C2340':'#c0c8d4'};font-size:12px;font-weight:600;`;
       const plus = inM
-        ? `<span onclick="event.stopPropagation();openMultidayModal('${dStr}','${venueId}')" onmouseover="this.style.color='#185FA5'" onmouseout="this.style.color='#d0d5dd'" style="font-size:16px;line-height:1;color:#d0d5dd;cursor:pointer;padding:0 2px" title="Add event">+</span>`
+        ? `<span onclick="event.stopPropagation();openMultidayModal('${dStr}','${venueId}')"
+            onmouseover="this.style.color='#185FA5'" onmouseout="this.style.color='#d0d5dd'"
+            style="font-size:16px;line-height:1;color:#d0d5dd;cursor:pointer;padding:0 2px" title="Add event">+</span>`
         : '';
       const hoverBg = isT?'#dbeeff':'#f0f7ff';
       const bShadow = isT?'box-shadow:inset 0 0 0 2px #185FA5;':'';
-      return `<div onclick="openLogTaskModal('${dStr}')" onmouseover="this.style.background='${hoverBg}'" onmouseout="this.style.background='${bg}'" style="border:${brd};background:${bg};padding:6px;min-height:80px;cursor:pointer;box-sizing:border-box;${bShadow}">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px"><span style="${ns}">${d.getDate()}</span>${plus}</div>
-        ${EB[wi]}${chips}
+      return `<div
+        onclick="openLogTaskModal('${dStr}')"
+        onmouseover="this.style.background='${hoverBg}'"
+        onmouseout="this.style.background='${bg}'"
+        style="border:${brd};background:${bg};padding:6px;min-height:${effectiveCellH}px;cursor:pointer;box-sizing:border-box;${bShadow}"
+      >
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
+          <span style="${ns}">${d.getDate()}</span>${plus}
+        </div>
+        <div style="margin-top:${paddingTop - 26}px">${chips}</div>
       </div>`;
     }).join('');
 
-    gridHTML += `<div style="display:grid;grid-template-columns:repeat(7,1fr)">${dayCells}</div>`;
+    // Week row: position:relative so absolute bars overlay correctly
+    gridHTML += `<div style="display:grid;grid-template-columns:repeat(7,1fr);position:relative">
+      ${bars}
+      ${dayCells}
+    </div>`;
   }
 
   grid.innerHTML = `<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%"><div style="min-width:560px">${gridHTML}</div></div>`;
@@ -5786,7 +5846,7 @@ function toggleVenueMenu(){
 // ════════════════════════════════════════
 // USAGE — STATE & DB
 // ════════════════════════════════════════
-let currentUsagePhotos = { new: [], edit: [] };
+const currentUsagePhotos = { new: [], edit: [], 'admin-usage': [] };
 let state_usage = []; // all usage for current venue
 
 function dbToUsage(r){
@@ -5908,7 +5968,8 @@ function openLogUsageModal(dateStr){
 }
 
 function renderUsagePhotoPreviews(mode){
-  const elId = mode==='new' ? 'usage-photo-previews' : 'edit-usage-photo-previews';
+  const idMap = { 'new':'usage-photo-previews', 'edit':'edit-usage-photo-previews', 'admin-usage':'admin-usage-photo-previews' };
+  const elId = idMap[mode] || (mode+'-photo-previews');
   const el = document.getElementById(elId); if(!el) return;
   el.innerHTML = (currentUsagePhotos[mode]||[]).map((p,i)=>`
     <div style="position:relative">
@@ -5924,23 +5985,18 @@ function removeUsagePhoto(mode, i){
   renderUsagePhotoPreviews(mode);
 }
 function openLightboxFromUsagePreview(mode, idx){ openLightbox(currentUsagePhotos[mode].map(p=>p.url), idx); }
-function handleUsagePhotos(input){
+function handleUsagePhotos(input, mode='new'){
   const files = Array.from(input.files);
-  const allowed = MAX_PHOTOS - (currentUsagePhotos.new||[]).length;
+  if(!currentUsagePhotos[mode]) currentUsagePhotos[mode] = [];
+  const allowed = MAX_PHOTOS - currentUsagePhotos[mode].length;
   if(allowed<=0){ showToast(t('toast_max_photos')); input.value=''; return; }
   files.slice(0, allowed).forEach(file=>{
-    currentUsagePhotos.new.push({ url: URL.createObjectURL(file), file, uploaded: false });
+    currentUsagePhotos[mode].push({ url: URL.createObjectURL(file), file, uploaded: false });
   });
-  renderUsagePhotoPreviews('new'); input.value='';
+  renderUsagePhotoPreviews(mode); input.value='';
 }
 function handleEditUsagePhotos(input){
-  const files = Array.from(input.files);
-  const allowed = MAX_PHOTOS - (currentUsagePhotos.edit||[]).length;
-  if(allowed<=0){ showToast(t('toast_max_photos')); input.value=''; return; }
-  files.slice(0, allowed).forEach(file=>{
-    currentUsagePhotos.edit.push({ url: URL.createObjectURL(file), file, uploaded: false });
-  });
-  renderUsagePhotoPreviews('edit'); input.value='';
+  handleUsagePhotos(input, 'edit');
 }
 
 async function logUsage(){
@@ -6204,6 +6260,10 @@ function openLightboxFromUsage(id, i){
 // ── ADMIN LOG TASK MODAL ──
 function openAdminLogTaskModal(dateStr, venueId){
   try {
+  // Reset photo context
+  currentPhotos['admin-task'].forEach(p=>{ if(!p.uploaded) URL.revokeObjectURL(p.url); });
+  currentPhotos['admin-task'] = [];
+  renderPhotoPreviews('admin-task');
   const pid=state.currentProjectId; if(!pid) return;
   const venues=projectVenues(pid);
   const vsel=document.getElementById('admin-task-venue');
@@ -6261,6 +6321,11 @@ async function adminLogTask(){
   };
   const {error}=await supa.from('pitchops_operations').insert(opToDb(op));
   if(error){ showToast('Error: '+error.message); return; }
+  if(currentPhotos['admin-task']?.some(p=>!p.uploaded)){
+    const urls = await uploadPendingPhotos(currentPhotos['admin-task'], op.id, 'ops');
+    if(urls.length){ await supa.from('pitchops_operations').update({photo_urls:urls}).eq('id',op.id); op.photos=urls; }
+  }
+  currentPhotos['admin-task'] = [];
   state.operations.unshift(op);
   closeModal('modal-admin-log-task');
   renderDetailOps(); updateDetailStats();
@@ -6273,6 +6338,10 @@ async function adminLogTask(){
 // ── ADMIN LOG USAGE MODAL ──
 function openAdminLogUsageModal(dateStr, venueId){
   try {
+  // Reset photo context
+  currentUsagePhotos['admin-usage'].forEach(p=>{ if(!p.uploaded) URL.revokeObjectURL(p.url); });
+  currentUsagePhotos['admin-usage'] = [];
+  renderUsagePhotoPreviews('admin-usage');
   const pid=state.currentProjectId; if(!pid) return;
   const venues=projectVenues(pid);
   const vsel=document.getElementById('admin-usage-venue');
@@ -6313,6 +6382,11 @@ async function adminLogUsage(){
   };
   const {error}=await supa.from('pitchops_usage').insert(usageToDb(u));
   if(error){ showToast('Error: '+error.message); return; }
+  if(currentUsagePhotos['admin-usage']?.some(p=>!p.uploaded)){
+    const urls = await uploadPendingPhotos(currentUsagePhotos['admin-usage'], u.id, 'usage');
+    if(urls.length){ await supa.from('pitchops_usage').update({photo_urls:urls}).eq('id',u.id); u.photos=urls; }
+  }
+  currentUsagePhotos['admin-usage'] = [];
   state_admin_usage.unshift(u);
   // Also sync to state_usage so venue calendar reflects the new entry immediately
   if(u.venueId===state.currentVenueId) state_usage.unshift(u);
@@ -7435,11 +7509,14 @@ init();
         </select>
       </div>
       <div class="field">
-        <label>Photos (max 4)</label>
-        <div id="usage-photo-previews" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"></div>
-        <label style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#f1f5f9;border-radius:8px;cursor:pointer;font-size:12px;color:var(--text-muted)">
-          📷 Add photos <input type="file" accept="image/*" multiple style="display:none" onchange="handleUsagePhotos(this)"/>
-        </label>
+        <label data-i18n="op_photos">Photos (max 8)</label>
+        <div class="photo-upload-area" onclick="document.getElementById('usage-photo-input').click()">
+          <input type="file" accept="image/*" multiple id="usage-photo-input" style="display:none" onchange="handleUsagePhotos(this,'new')"/>
+          <div class="photo-upload-icon">📷</div>
+          <div class="photo-upload-text" data-i18n="photo_tap">Tap to add photos</div>
+          <div class="photo-upload-hint" data-i18n="photo_hint">JPG, PNG · max 8 photos</div>
+        </div>
+        <div class="photo-previews" id="usage-photo-previews"></div>
       </div>
     </div>
     <div class="modal-footer">
@@ -7499,11 +7576,14 @@ init();
         </select>
       </div>
       <div class="field">
-        <label>Photos (max 4)</label>
-        <div id="edit-usage-photo-previews" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"></div>
-        <label style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#f1f5f9;border-radius:8px;cursor:pointer;font-size:12px;color:var(--text-muted)">
-          📷 Add photos <input type="file" accept="image/*" multiple style="display:none" onchange="handleEditUsagePhotos(this)"/>
-        </label>
+        <label data-i18n="op_photos">Photos (max 8)</label>
+        <div class="photo-upload-area" onclick="document.getElementById('edit-usage-photo-input').click()">
+          <input type="file" accept="image/*" multiple id="edit-usage-photo-input" style="display:none" onchange="handleEditUsagePhotos(this)"/>
+          <div class="photo-upload-icon">📷</div>
+          <div class="photo-upload-text" data-i18n="photo_tap">Tap to add photos</div>
+          <div class="photo-upload-hint" data-i18n="photo_hint">JPG, PNG · max 8 photos</div>
+        </div>
+        <div class="photo-previews" id="edit-usage-photo-previews"></div>
       </div>
     </div>
     <div class="modal-footer">
@@ -7563,6 +7643,16 @@ init();
           <option value="completed">Completed</option>
         </select>
       </div>
+      <div class="field">
+        <label data-i18n="op_photos">Photos (max 8)</label>
+        <div class="photo-upload-area" onclick="document.getElementById('admin-task-photo-input').click()">
+          <input type="file" accept="image/*" multiple id="admin-task-photo-input" style="display:none" onchange="handlePhotoSelect(this,'admin-task')"/>
+          <div class="photo-upload-icon">📷</div>
+          <div class="photo-upload-text" data-i18n="photo_tap">Tap to add photos</div>
+          <div class="photo-upload-hint" data-i18n="photo_hint">JPG, PNG · max 8 photos</div>
+        </div>
+        <div class="photo-previews" id="admin-task-photo-previews"></div>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-admin-log-task')" data-i18n="btn_cancel">Cancel</button>
@@ -7616,6 +7706,16 @@ init();
           <option value="inprogress">In progress</option>
           <option value="completed">Completed</option>
         </select>
+      </div>
+      <div class="field">
+        <label data-i18n="op_photos">Photos (max 8)</label>
+        <div class="photo-upload-area" onclick="document.getElementById('admin-usage-photo-input').click()">
+          <input type="file" accept="image/*" multiple id="admin-usage-photo-input" style="display:none" onchange="handleUsagePhotos(this,'admin-usage')"/>
+          <div class="photo-upload-icon">📷</div>
+          <div class="photo-upload-text" data-i18n="photo_tap">Tap to add photos</div>
+          <div class="photo-upload-hint" data-i18n="photo_hint">JPG, PNG · max 8 photos</div>
+        </div>
+        <div class="photo-previews" id="admin-usage-photo-previews"></div>
       </div>
     </div>
     <div class="modal-footer">
