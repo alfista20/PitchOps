@@ -1007,7 +1007,19 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     <div style="background:white;border-radius:16px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);overflow:hidden">
       <div style="padding:1rem 1.25rem .75rem;display:flex;align-items:center;justify-content:space-between">
         <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif" data-i18n="history_lbl">History</div>
-        <input type="text" id="venue-hist-search" placeholder="🔍 Search..." oninput="renderVenueHistory()" style="padding:7px 12px;border:1px solid rgba(0,0,0,.1);border-radius:10px;font-size:12px;outline:none;width:140px;font-family:'DM Sans',sans-serif;background:#f8fafc"/>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          <input type="text" id="venue-hist-search" placeholder="🔍 Search..." oninput="renderVenueHistory()" style="padding:6px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:12px;outline:none;width:120px;font-family:'DM Sans',sans-serif;background:#f8fafc"/>
+          <select id="venue-hist-status" onchange="renderVenueHistory()" style="padding:6px 8px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;background:#f8fafc;outline:none">
+            <option value="">All status</option>
+            <option value="completed">Completed</option>
+            <option value="missed">Missed</option>
+            <option value="inprogress">In progress</option>
+            <option value="planned">Planned</option>
+          </select>
+          <input type="date" id="venue-hist-from" onchange="renderVenueHistory()" style="padding:6px 8px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;background:#f8fafc;outline:none"/>
+          <input type="date" id="venue-hist-to" onchange="renderVenueHistory()" style="padding:6px 8px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;background:#f8fafc;outline:none"/>
+          <button onclick="exportVenueHistoryCSV('tasks')" style="padding:6px 12px;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">⬇ CSV</button>
+        </div>
       </div>
       <div id="venue-history-list" style="max-height:520px;overflow-y:auto"></div>
     </div>
@@ -1034,7 +1046,18 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     <div style="background:white;border-radius:16px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);overflow:hidden">
       <div style="padding:1rem 1.25rem .75rem;display:flex;align-items:center;justify-content:space-between">
         <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif" data-i18n="usage_history">Usage history</div>
-        <input type="text" id="venue-usage-search" placeholder="🔍 Search..." oninput="renderVenueUsageHistory()" style="padding:7px 12px;border:1px solid rgba(0,0,0,.1);border-radius:10px;font-size:12px;outline:none;width:140px;font-family:'DM Sans',sans-serif;background:#f8fafc"/>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          <input type="text" id="venue-usage-search" placeholder="🔍 Search..." oninput="renderVenueUsageHistory()" style="padding:6px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:12px;outline:none;width:120px;font-family:'DM Sans',sans-serif;background:#f8fafc"/>
+          <select id="venue-usage-filter-type" onchange="renderVenueUsageHistory()" style="padding:6px 8px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;background:#f8fafc;outline:none">
+            <option value="">All types</option>
+            <option value="Match Day">Match Day</option>
+            <option value="Training Session">Training Session</option>
+            <option value="Other">Other</option>
+          </select>
+          <input type="date" id="venue-usage-from" onchange="renderVenueUsageHistory()" style="padding:6px 8px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;background:#f8fafc;outline:none"/>
+          <input type="date" id="venue-usage-to" onchange="renderVenueUsageHistory()" style="padding:6px 8px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;background:#f8fafc;outline:none"/>
+          <button onclick="exportVenueHistoryCSV('usage')" style="padding:6px 12px;background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">⬇ CSV</button>
+        </div>
       </div>
       <div id="venue-usage-history-list" style="max-height:520px;overflow-y:auto"></div>
     </div>
@@ -1656,7 +1679,7 @@ async function refreshProjectOps(projectId, silent=false){
   if(document.getElementById('screen-project-detail')?.classList.contains('active')){
     updateDetailStats();
     renderDetailOps();
-    if(document.getElementById('ptab-calendar-content')?.style.display==='block') renderGantt();
+    _refreshCalendars();
   }
 }
 
@@ -1810,8 +1833,7 @@ const i18n = {
     modal_edit_op:'Edit operation',
     modal_log_usage:'Log pitch usage',
     modal_edit_usage:'Edit usage',
-    modal_admin_log_task:'Log task',
-    modal_admin_log_usage:'Log usage',
+
     modal_op_types:'Manage task types',
     modal_dnd:'Move or Copy?',
     modal_contact:'My contact details',
@@ -2021,8 +2043,7 @@ const i18n = {
     modal_edit_op:'Edytuj zadanie',
     modal_log_usage:'Rejestruj użycie boiska',
     modal_edit_usage:'Edytuj użycie',
-    modal_admin_log_task:'Dodaj zadanie',
-    modal_admin_log_usage:'Dodaj użycie',
+
     modal_op_types:'Zarządzaj typami zadań',
     modal_dnd:'Przenieść czy skopiować?',
     modal_contact:'Moje dane kontaktowe',
@@ -2239,8 +2260,7 @@ const i18n = {
     lbl_zone:'Pitch area / zone',
     lbl_zone_custom_lbl:'Custom zone',
     modal_add_venue:'Add venue to project',
-    modal_admin_log_task:'Log task',
-    modal_admin_log_usage:'Log usage',
+
     modal_change_pass:'Change admin password',
     modal_contact:'My contact details',
     modal_dnd:'Move or Copy?',
@@ -2429,8 +2449,7 @@ const i18n = {
     loading:'Loading...',
     log_op:'Log new task',
     modal_add_venue:'Add venue to project',
-    modal_admin_log_task:'Log task',
-    modal_admin_log_usage:'Log usage',
+
     modal_change_pass:'Change admin password',
     modal_contact:'My contact details',
     modal_dnd:'Move or Copy?',
@@ -2692,8 +2711,7 @@ const i18n = {
     lbl_zone:'Pitch area / zone',
     lbl_zone_custom_lbl:'Custom zone',
     modal_add_venue:'Add venue to project',
-    modal_admin_log_task:'Log task',
-    modal_admin_log_usage:'Log usage',
+
     modal_change_pass:'Change admin password',
     modal_contact:'My contact details',
     modal_dnd:'Move or Copy?',
@@ -2903,8 +2921,7 @@ const i18n = {
     lbl_zone:'Pitch area / zone',
     lbl_zone_custom_lbl:'Custom zone',
     modal_add_venue:'Add venue to project',
-    modal_admin_log_task:'Log task',
-    modal_admin_log_usage:'Log usage',
+
     modal_change_pass:'Change admin password',
     modal_contact:'My contact details',
     modal_dnd:'Move or Copy?',
@@ -3114,8 +3131,7 @@ const i18n = {
     lbl_zone:'Pitch area / zone',
     lbl_zone_custom_lbl:'Custom zone',
     modal_add_venue:'Add venue to project',
-    modal_admin_log_task:'Log task',
-    modal_admin_log_usage:'Log usage',
+
     modal_change_pass:'Change admin password',
     modal_contact:'My contact details',
     modal_dnd:'Move or Copy?',
@@ -3325,8 +3341,7 @@ const i18n = {
     lbl_zone:'Pitch area / zone',
     lbl_zone_custom_lbl:'Custom zone',
     modal_add_venue:'Add venue to project',
-    modal_admin_log_task:'Log task',
-    modal_admin_log_usage:'Log usage',
+
     modal_change_pass:'Change admin password',
     modal_contact:'My contact details',
     modal_dnd:'Move or Copy?',
@@ -3748,7 +3763,7 @@ function _handleRealtimeUsage(payload) {
 function _realtimeRefresh(type) {
   // Re-render Gantt if calendar tab is visible
   const calContent = document.getElementById('ptab-calendar-content');
-  if (calContent && calContent.style.display === 'block') renderGantt();
+  _refreshCalendars();
   // Update task/usage lists if visible
   const tasksContent = document.getElementById('ptab-tasks-content');
   if (tasksContent && tasksContent.style.display === 'block') renderDetailOps();
@@ -4322,8 +4337,14 @@ function renderVenueStats(){
 
 function renderVenueHistory(){
   const search=(document.getElementById('venue-hist-search')?.value||'').toLowerCase();
+  const statusF=document.getElementById('venue-hist-status')?.value||'';
+  const fromF=document.getElementById('venue-hist-from')?.value||'';
+  const toF=document.getElementById('venue-hist-to')?.value||'';
   const ops=venueOps()
-    .filter(o=>o.status==='completed'||o.status==='missed')
+    .filter(o=>o.status==='completed'||o.status==='missed'||o.status==='inprogress'||o.status==='planned')
+    .filter(o=>!statusF||o.status===statusF)
+    .filter(o=>!fromF||o.date>=fromF)
+    .filter(o=>!toF||o.date<=toF)
     .filter(o=>!search||o.type.toLowerCase().includes(search)||(o.notes||'').toLowerCase().includes(search)||(o.staff||[]).join(' ').toLowerCase().includes(search));
   const container=document.getElementById('venue-history-list');
   if(!ops.length){ if(container) container.innerHTML=`<div class="empty-state"><div class="ico">📋</div><div>${t('no_tasks_logged')}</div></div>`; return; }
@@ -4409,13 +4430,10 @@ async function logOperation(){
   state.currentStaff=[]; currentPhotos.new=[];
   renderStaffTags(); renderPhotoPreviews('new');
   // Always refresh Gantt if visible
-  if(document.getElementById('ptab-calendar-content')?.style.display==='block') renderGantt();
+  _refreshCalendars();
   // Admin: refresh project detail views
   if(isAdminLog){
     renderDetailOps(); updateDetailStats();
-    if(document.getElementById('venue-cal-view')?.style.display==='block' && state.currentVenueCalId)
-      if(venueCalViewMode==='month') renderMonthCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
-      else renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
   } else if(state.currentVenueId){
     await refreshVenueOps(state.currentVenueId, true);
   }
@@ -4488,14 +4506,12 @@ async function saveEditOperation(){
   renderVenueUpcoming();
   renderDetailOps();
   // Always re-render schedule if visible — use venueId from op
-  if(document.getElementById('vtab-schedule-content')?.style.display==='block'){
-    renderVenueSched();
-  }
+  _refreshCalendars();
   // Also re-render venue cal drill-down if visible (admin)
   if(document.getElementById('venue-cal-view')?.style.display==='block' && state.currentVenueCalId){
     if(venueCalViewMode==='month') renderMonthCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset); else renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
   }
-  if(document.getElementById('ptab-calendar-content')?.style.display==='block') renderGantt();
+  _refreshCalendars();
   showToast(t('toast_task_updated'));
   } catch(err){ console.error('saveEditOperation:',err); showToast('Error: '+err.message); }
 }
@@ -4520,7 +4536,7 @@ async function deleteOperation(){
   if(document.getElementById('venue-cal-view')?.style.display==='block' && state.currentVenueCalId){
     if(venueCalViewMode==='month') renderMonthCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset); else renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
   }
-  if(document.getElementById('ptab-calendar-content')?.style.display==='block') renderGantt();
+  _refreshCalendars();
   showToast(t('toast_task_deleted'));
 }
 
@@ -5242,8 +5258,8 @@ function renderGantt(){
 
       const opsDisplay=_buildChipDisplay(dayOps, o=>_buildOpChip(o,dStr,v.id,chipStyle), 3, '#185FA5','#E6F1FB');
       const usageDisplay=_buildChipDisplay(dayUsage, u=>_buildUsageChip(u,dStr,v.id,usageChipStyle), 3, '#7C3AED','#F3E8FF');
-      cells+=`<td onclick="if(!document.querySelector('.modal-overlay.open'))openLogTaskModal('${dStr}',null,null,null,'${v.id}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px 3px 20px 3px;border-right:1px dashed rgba(0,0,0,0.06);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgT};min-height:60px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsDisplay}</td>
-      <td onclick="if(!document.querySelector('.modal-overlay.open'))openLogUsageModal('${dStr}','${v.id}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px 3px 20px 3px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:60px;min-width:65px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageDisplay}</td>`;
+      cells+=`<td onclick="if(!document.querySelector('.modal-overlay.open'))openLogTaskModal('${dStr}',null,null,null,'${v.id}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px 3px 20px 3px;border-right:1px dashed rgba(0,0,0,0.06);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgT};min-height:60px;min-width:90px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsDisplay}</td>
+      <td onclick="if(!document.querySelector('.modal-overlay.open'))openLogUsageModal('${dStr}','${v.id}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px 3px 20px 3px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:60px;min-width:90px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageDisplay}</td>`;
     });
     rows+=evRow+`<tr>${cells}</tr>`;
   });
@@ -5322,7 +5338,6 @@ function renderVenueUpcoming(){
 // ════════════════════════════════════════
 // UNIFIED VENUE CALENDAR — one source of truth
 // ════════════════════════════════════════
-let unifiedCalOffset = {};
 
 function renderWeekCalendar(venueId, gridId, weekOffset){
   const grid=document.getElementById(gridId); if(!grid) return;
@@ -5400,8 +5415,8 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
     const opsChips=dayOps.map(o=>_buildOpChip(o,dStr,venueId,chipStyle,'sched-chip')).join('');
     const usageChips=dayUsage.map(u=>_buildUsageChip(u,dStr,venueId,usageChipStyle,'sched-chip')).join('');
 
-    cells+=`<td onclick="openLogTaskModal('${dStr}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${venueId}')" style="padding:4px 4px 20px 4px;border-right:1px dashed rgba(0,0,0,0.07);vertical-align:top;cursor:pointer;background:${bgT};min-height:120px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsChips||''}</td>
-    <td onclick="openLogUsageModal('${dStr}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${venueId}')" style="padding:4px 4px 20px 4px;border-right:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:120px;min-width:65px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageChips||''}</td>`;
+    cells+=`<td onclick="openLogTaskModal('${dStr}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${venueId}')" style="padding:4px 4px 20px 4px;border-right:1px dashed rgba(0,0,0,0.07);vertical-align:top;cursor:pointer;background:${bgT};min-height:120px;min-width:90px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsChips||''}</td>
+    <td onclick="openLogUsageModal('${dStr}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${venueId}')" style="padding:4px 4px 20px 4px;border-right:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:120px;min-width:90px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageChips||''}</td>`;
   });
 
   // ── Multi-day event row for week view ──
@@ -5909,9 +5924,7 @@ async function refreshVenueUsage(venueId, silent=false){
   renderVenueUsageToday();
   renderVenueUsageHistory();
   // Re-render calendar if visible
-  if(document.getElementById('vtab-schedule-content')?.style.display==='block'){
-    renderVenueSched();
-  }
+  _refreshCalendars();
 }
 
 // ── RENDER TODAY ──
@@ -5946,10 +5959,58 @@ function renderVenueUsageToday(){
 }
 
 // ── RENDER HISTORY ──
+
+function exportVenueHistoryCSV(type){
+  var venue=state.venues.find(function(v){return v.id===state.currentVenueId;});
+  var vname=venue?venue.name.replace(/[^a-z0-9]/gi,'_'):'venue';
+  var today=todayStr();
+  function toCSV(rows){
+    return rows.map(function(r){return r.map(function(v){return '"'+String(v).replace(/"/g,'""')+'"';}).join(',');}).join('\r\n');
+  }
+  function dl(csv,fname){
+    var a=document.createElement('a');
+    a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+    a.download=fname; a.click();
+    showToast(t('toast_csv_exported'));
+  }
+  if(type==='tasks'){
+    var search=(document.getElementById('venue-hist-search')?.value||'').toLowerCase();
+    var statusF=document.getElementById('venue-hist-status')?.value||'';
+    var fromF=document.getElementById('venue-hist-from')?.value||'';
+    var toF=document.getElementById('venue-hist-to')?.value||'';
+    var ops=venueOps()
+      .filter(function(o){return !statusF||o.status===statusF;})
+      .filter(function(o){return !fromF||o.date>=fromF;})
+      .filter(function(o){return !toF||o.date<=toF;})
+      .filter(function(o){return !search||o.type.toLowerCase().includes(search);});
+    var rows=[['Date','Type','Status','Zone','Time from','Time to','Staff','Equipment','Weather','Notes']];
+    ops.forEach(function(o){rows.push([o.date,o.type,o.status,o.zone||'',o.timeFrom||'',o.timeTo||'',(o.staff||[]).join(';'),o.equipment||'',o.weather||'',o.notes||'']);});
+    dl(toCSV(rows),vname+'_tasks_'+today+'.csv');
+  } else {
+    var search2=(document.getElementById('venue-usage-search')?.value||'').toLowerCase();
+    var typeF=document.getElementById('venue-usage-filter-type')?.value||'';
+    var fromF2=document.getElementById('venue-usage-from')?.value||'';
+    var toF2=document.getElementById('venue-usage-to')?.value||'';
+    var items=state_usage
+      .filter(function(u){return !typeF||u.usageType===typeF;})
+      .filter(function(u){return !fromF2||u.date>=fromF2;})
+      .filter(function(u){return !toF2||u.date<=toF2;})
+      .filter(function(u){return !search2||u.usageType.toLowerCase().includes(search2)||(u.teamName||'').toLowerCase().includes(search2);});
+    var rows2=[['Date','Usage type','Team','Status','Zone','Time from','Time to','Weather','Notes']];
+    items.forEach(function(u){rows2.push([u.date,u.usageType,u.teamName||'',u.status,u.zone||'',u.timeFrom||'',u.timeTo||'',u.weather||'',u.notes||'']);});
+    dl(toCSV(rows2),vname+'_usage_'+today+'.csv');
+  }
+}
+
 function renderVenueUsageHistory(){
   const search=(document.getElementById('venue-usage-search')?.value||'').toLowerCase();
+  const typeF=document.getElementById('venue-usage-filter-type')?.value||'';
+  const fromF=document.getElementById('venue-usage-from')?.value||'';
+  const toF=document.getElementById('venue-usage-to')?.value||'';
   const items=state_usage
-    .filter(u=>u.status==='completed'||u.status==='missed')
+    .filter(u=>!typeF||u.usageType===typeF)
+    .filter(u=>!fromF||u.date>=fromF)
+    .filter(u=>!toF||u.date<=toF)
     .filter(u=>!search||u.usageType.toLowerCase().includes(search)||(u.teamName||'').toLowerCase().includes(search)||(u.notes||'').toLowerCase().includes(search));
   const container=document.getElementById('venue-usage-history-list');
   if(!container) return;
@@ -6076,7 +6137,7 @@ async function logUsage(){
     state_admin_usage.unshift(u);
     if(u.venueId===state.currentVenueId) state_usage.unshift(u);
     renderDetailUsage();
-    if(document.getElementById('ptab-calendar-content')?.style.display==='block') renderGantt();
+    _refreshCalendars();
     if(document.getElementById('venue-cal-view')?.style.display==='block' && state.currentVenueCalId)
       if(venueCalViewMode==='month') renderMonthCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
       else renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
@@ -6144,9 +6205,7 @@ async function saveEditUsage(){
   if(error){ showToast('Error: '+error.message); return; }
   closeModal('modal-edit-usage');
   renderVenueUsageToday(); renderVenueUsageHistory();
-  if(document.getElementById('vtab-schedule-content')?.style.display==='block'){
-    renderVenueSched();
-  }
+  _refreshCalendars();
   showToast(t('toast_usage_updated'));
   } catch(err){ console.error('saveEditUsage:',err); showToast('Error: '+err.message); }
 }
@@ -6163,9 +6222,10 @@ async function deleteUsage(){
   closeModal('modal-edit-usage');
   renderVenueUsageToday(); renderVenueUsageHistory();
   renderDetailUsage();
-  if(document.getElementById('vtab-schedule-content')?.style.display==='block'){
-    renderVenueSched();
-  }
+  // Refresh all calendar views immediately
+  if(document.getElementById('vtab-schedule-content')?.style.display==='block') renderVenueSched();
+  _refreshCalendars();
+  _refreshCalendars();
   showToast(t('toast_usage_deleted'));
 }
 
@@ -6173,7 +6233,6 @@ async function deleteUsage(){
 // ADMIN USAGE — STATE
 // ════════════════════════════════════════
 let state_admin_usage = [];
-let adminTaskStaff = [];
 
 function dbToAdminUsage(r){
   return {
@@ -6420,7 +6479,7 @@ async function executeDrop(dragData, newDate, newVenueId, copy){
   }
   if(pid){
     renderDetailOps(); renderDetailUsage();
-    if(document.getElementById('ptab-calendar-content')?.style.display==='block') renderGantt();
+    _refreshCalendars();
     // Admin drill-down venue calendar
     if(document.getElementById('venue-cal-view')?.style.display==='block' && state.currentVenueCalId)
       if(venueCalViewMode==='month') renderMonthCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset); else renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
