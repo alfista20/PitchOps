@@ -782,7 +782,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
           </div>
           <div style="display:flex;align-items:center;gap:8px">
             <span id="venue-cal-name" style="font-size:13px;font-weight:600;color:var(--text)"></span>
-            <button onclick="openLogTaskModal(null,state.currentVenueCalId)" style="padding:5px 12px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 2px 6px rgba(24,95,165,.3)" data-i18n="btn_log_task">+ Log task</button>
+            <button onclick="openLogTaskModal(null,null,null,null,state.currentVenueCalId)" style="padding:5px 12px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 2px 6px rgba(24,95,165,.3)" data-i18n="btn_log_task">+ Log task</button>
             <button onclick="openLogUsageModal(null,state.currentVenueCalId)" style="padding:5px 12px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 2px 6px rgba(124,58,237,.3)" data-i18n="btn_log_usage">+ Log usage</button>
           </div>
         </div>
@@ -4370,9 +4370,14 @@ async function logOperation(){
   const autoStatus = isFutureOp ? 'planned' : 'inprogress';
   const manualStatus = selectedStatus === 'auto' ? autoStatus : selectedStatus;
   const opId = genId('op_');
+  const isAdminLog = !!state.currentProjectId;
+  const resolvedVenueId = isAdminLog
+    ? (document.getElementById('new-op-venue-id')?.value || state.currentVenueId)
+    : state.currentVenueId;
+  if(!resolvedVenueId){ showToast(t('toast_venue_required')); return; }
   const op={
     id:opId,
-    venueId:state.currentVenueId,
+    venueId:resolvedVenueId,
     type:document.getElementById('new-op-type').value,
     zone, equipment:document.getElementById('new-op-equipment').value.trim(),
     weather:document.getElementById('new-op-weather').value.trim(),
@@ -4403,11 +4408,17 @@ async function logOperation(){
   document.getElementById('new-op-date').value=todayStr();
   state.currentStaff=[]; currentPhotos.new=[];
   renderStaffTags(); renderPhotoPreviews('new');
-  if(state.currentVenueId){
-    // refreshVenueOps already re-renders stats/history/upcoming/schedule internally
+  // Always refresh Gantt if visible
+  if(document.getElementById('ptab-calendar-content')?.style.display==='block') renderGantt();
+  // Admin: refresh project detail views
+  if(isAdminLog){
+    renderDetailOps(); updateDetailStats();
+    if(document.getElementById('venue-cal-view')?.style.display==='block' && state.currentVenueCalId)
+      if(venueCalViewMode==='month') renderMonthCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
+      else renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
+  } else if(state.currentVenueId){
     await refreshVenueOps(state.currentVenueId, true);
   }
-  if(document.getElementById('ptab-calendar-content')?.style.display==='block') renderGantt();
   closeModal('modal-log-task');
   showToast(t('toast_task_logged'));
 }
@@ -4517,7 +4528,7 @@ async function deleteOperation(){
 // OP TYPES
 // ════════════════════════════════════════
 function populateOpTypeSelects(){
-  ['new-op-type','edit-op-type','admin-task-type','edit-plan-op-type'].forEach(id=>{
+  ['new-op-type','edit-op-type','edit-plan-op-type'].forEach(id=>{
     const s=document.getElementById(id); if(!s) return;
     s.innerHTML=state.opTypes.map(tp=>`<option value="${esc(tp)}">${esc(tp)}</option>`).join('');
   });
@@ -4624,7 +4635,7 @@ const PHOTO_QUALITY = 0.82;
 
 // currentPhotos holds pending uploads per context:
 // { url: string (preview blob URL or final URL), file: File|null, uploaded: bool }
-const currentPhotos = { new: [], edit: [], 'admin-task': [] };
+const currentPhotos = { new: [], edit: [] };
 
 // ── Compress image before upload ──
 function compressImageToBlob(file, maxDim, quality) {
@@ -4935,7 +4946,7 @@ function setVenueCalView(mode) {
   });
   if(state.currentVenueCalId){
     if(mode==='month') renderMonthCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
-    else if(venueCalViewMode==='month') renderMonthCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset); else renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
+    else renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
   }
 }
 
@@ -5229,7 +5240,7 @@ function renderGantt(){
 
       const opsDisplay=_buildChipDisplay(dayOps, o=>_buildOpChip(o,dStr,v.id,chipStyle), 3, '#185FA5','#E6F1FB');
       const usageDisplay=_buildChipDisplay(dayUsage, u=>_buildUsageChip(u,dStr,v.id,usageChipStyle), 3, '#7C3AED','#F3E8FF');
-      cells+=`<td onclick="if(!document.querySelector('.modal-overlay.open'))openLogTaskModal('${dStr}','${v.id}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px;border-right:1px dashed rgba(0,0,0,0.06);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgT};min-height:40px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsDisplay}</td>
+      cells+=`<td onclick="if(!document.querySelector('.modal-overlay.open'))openLogTaskModal('${dStr}',null,null,null,'${v.id}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px;border-right:1px dashed rgba(0,0,0,0.06);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgT};min-height:40px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsDisplay}</td>
       <td onclick="if(!document.querySelector('.modal-overlay.open'))openLogUsageModal('${dStr}','${v.id}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:40px;min-width:65px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageDisplay}</td>`;
     });
     rows+=evRow+`<tr>${cells}</tr>`;
@@ -5485,7 +5496,7 @@ function switchVenueTab(tab){
 }
 
 
-function openLogTaskModal(dateStr, timeStr, prefillType, prefillStatus){
+function openLogTaskModal(dateStr, timeStr, prefillType, prefillStatus, venueId){
   populateOpTypeSelects();
   document.getElementById('new-op-date').value = dateStr||todayStr();
   document.getElementById('new-op-time-from').value = timeStr||'08:00';
@@ -5637,7 +5648,7 @@ function _refreshCalendars(){
   const venueCalView = document.getElementById('venue-cal-view');
   if(venueCalView && venueCalView.style.display==='block' && state.currentVenueCalId){
     if(venueCalViewMode==='month') renderMonthCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
-    else if(venueCalViewMode==='month') renderMonthCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset); else renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
+    else renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
   }
 }
 
@@ -5751,30 +5762,32 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
         const dStr=dStrOf(d);
         return dStr===today?'1px solid #185FA5':'1px solid rgba(0,0,0,0.06)';
       });
+      const todayCol = week.findIndex(d=>dStrOf(d)===today);
       let tableRows='';
       for(let s=0;s<=maxSlot;s++){
         const rowEvs=evMeta.filter(x=>x.slot===s).sort((a,b)=>a.c1-b.c1);
         // Build cell-by-cell so each empty cell gets correct column background
         let tds='';
         for(let ci=0;ci<7;ci++){
+          const isTodayCol = ci===todayCol;
+          const todaySide = isTodayCol ? 'border-left:2px solid #185FA5;border-right:2px solid #185FA5;' : '';
           const evHere=rowEvs.find(x=>x.c1===ci);
           if(evHere){
             const {ev,c1,c2}=evHere;
             const span=c2-c1+1, startsHere=ev.dateStart>=wStart, endsHere=ev.dateEnd<=wEnd;
             const rL=startsHere?`${BAR_H/2}px`:'0', rR=endsHere?`${BAR_H/2}px`:'0';
-            tds+=`<td colspan="${span}" style="border:none;padding:0 0 ${BAR_GAP}px 0;background:${colBg[ci]}"><div onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')" onmouseover="this.style.filter='brightness(.9)'" onmouseout="this.style.filter=''" title="${esc(ev.name)}" style="height:${BAR_H}px;line-height:${BAR_H}px;background:${ev.colorBg};color:${ev.colorFg};border-radius:${rL} ${rR} ${rR} ${rL};font-size:10px;font-weight:700;padding:0 ${endsHere?'10px':'6px'} 0 ${startsHere?'10px':'6px'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.1);transition:filter .1s">${esc(ev.name)}</div></td>`;
-            ci=c2; // skip to after this event
+            tds+=`<td colspan="${span}" style="border:none;padding:0 0 ${BAR_GAP}px 0;background:${colBg[ci]};${isTodayCol&&span===1?todaySide:''}"><div onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')" onmouseover="this.style.filter='brightness(.9)'" onmouseout="this.style.filter=''" title="${esc(ev.name)}" style="height:${BAR_H}px;line-height:${BAR_H}px;background:${ev.colorBg};color:${ev.colorFg};border-radius:${rL} ${rR} ${rR} ${rL};font-size:10px;font-weight:700;padding:0 ${endsHere?'10px':'6px'} 0 ${startsHere?'10px':'6px'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.1);transition:filter .1s">${esc(ev.name)}</div></td>`;
+            ci=c2;
           } else {
-            // Check if this cell is spanned by an event (middle/end of span)
             const spanning=evMeta.find(x=>x.slot===s&&x.c1<ci&&x.c2>=ci);
             if(!spanning){
-              tds+=`<td style="border:none;padding:0 0 ${BAR_GAP}px 0;background:${colBg[ci]}"></td>`;
+              tds+=`<td style="padding:0 0 ${BAR_GAP}px 0;background:${colBg[ci]};${todaySide}border-top:none;border-bottom:none"></td>`;
             }
           }
         }
         tableRows+=`<tr>${tds}</tr>`;
       }
-      barRowHTML=`<div style="border-left:${colBrd[0]};border-right:${colBrd[6]};"><table style="width:100%;border-collapse:collapse;table-layout:fixed">${tableRows}</table></div>`;
+      barRowHTML=`<div><table style="width:100%;border-collapse:collapse;table-layout:fixed">${tableRows}</table></div>`;
     }
 
     // ROW 3: task/usage chips
@@ -5785,7 +5798,7 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
       const items=[...dOps.map(o=>({fn:`openEditModal('${o.id}')`,label:o.type,st:CS[o.status]||CS.planned})),...dUse.map(u=>({fn:`openEditUsageModal('${u.id}')`,label:u.usageType||'Usage',st:UB}))];
       const chips=items.map(it=>`<div onclick="event.stopPropagation();${it.fn}" onmouseover="this.style.filter='brightness(.93)'" onmouseout="this.style.filter=''" style="font-size:10px;font-weight:600;padding:2px 5px;border-radius:3px;margin-bottom:2px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;${it.st}">${esc(it.label)}</div>`).join('');
       const bg=isT?'#EBF4FF':inM?'white':'#f8fafc', brd=isT?'2px solid #185FA5':'1px solid rgba(0,0,0,0.06)';
-      const clickFn=state.currentProjectId?`openLogTaskModal('${dStr}','${venueId}')`:`openLogTaskModal('${dStr}')`;
+      const clickFn=state.currentProjectId?`openLogTaskModal('${dStr}',null,null,null,'${venueId}')`:`openLogTaskModal('${dStr}')`;
       return `<div onclick="${clickFn}" onmouseover="this.style.background='${isT?'#dbeeff':'#f0f7ff'}'" onmouseout="this.style.background='${bg}'" style="border:${brd};border-top:none;background:${bg};padding:4px 5px 6px;min-height:${CELL_H}px;cursor:pointer;box-sizing:border-box">${chips}</div>`;
     }).join('');
 
@@ -5810,7 +5823,7 @@ function toggleVenueMenu(){
 // ════════════════════════════════════════
 // USAGE — STATE & DB
 // ════════════════════════════════════════
-const currentUsagePhotos = { new: [], edit: [], 'admin-usage': [] };
+const currentUsagePhotos = { new: [], edit: [] };
 let state_usage = []; // all usage for current venue
 
 function dbToUsage(r){
@@ -5914,13 +5927,13 @@ function renderVenueUsageHistory(){
 }
 
 // ── LOG USAGE MODAL ──
-function openLogUsageModal(dateStr){
+function openLogUsageModal(dateStr, venueId){
   document.getElementById('usage-date').value=dateStr||todayStr();
   document.getElementById('usage-time-from').value='08:00';
   document.getElementById('usage-time-to').value='17:00';
   document.getElementById('usage-type-select').value='Training Session';
   document.getElementById('usage-team').value='';
-  document.getElementById('usage-zone-select').value='';
+  document.getElementById('usage-zone-select').value='Full pitch';
   document.getElementById('usage-zone-custom').value='';
   document.getElementById('usage-zone-custom-wrap').style.display='none';
   document.getElementById('usage-weather').value='';
@@ -5928,11 +5941,22 @@ function openLogUsageModal(dateStr){
   document.getElementById('usage-status').value='planned';
   currentUsagePhotos.new=[];
   renderUsagePhotoPreviews('new');
+  // Admin mode: show venue selector
+  const vsel=document.getElementById('modal-usage-venue-selector');
+  const vselect=document.getElementById('new-usage-venue-id');
+  const isAdmin=!!state.currentProjectId;
+  if(isAdmin && vsel && vselect){
+    const venues=projectVenues(state.currentProjectId).filter(v=>v.id);
+    vselect.innerHTML=venues.map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('');
+    const vid=venueId||state.currentVenueCalId||state.currentVenueId;
+    if(vid && vselect.querySelector(`option[value="${vid}"]`)) vselect.value=vid;
+    vsel.style.display='block';
+  } else if(vsel){ vsel.style.display='none'; }
   openModal('modal-log-usage');
 }
 
 function renderUsagePhotoPreviews(mode){
-  const idMap = { 'new':'usage-photo-previews', 'edit':'edit-usage-photo-previews', 'admin-usage':'admin-usage-photo-previews' };
+  const idMap = { 'new':'usage-photo-previews', 'edit':'edit-usage-photo-previews' };
   const elId = idMap[mode] || (mode+'-photo-previews');
   const el = document.getElementById(elId); if(!el) return;
   el.innerHTML = (currentUsagePhotos[mode]||[]).map((p,i)=>`
@@ -6008,9 +6032,10 @@ async function logUsage(){
     state_usage.unshift(u);
   }
   closeModal('modal-log-usage');
-  renderVenueUsageToday(); renderVenueUsageHistory();
-  if(document.getElementById('vtab-schedule-content')?.style.display==='block'){
-    renderVenueSched();
+  if(!isAdminLog){
+    // Venue mode: refresh venue-specific views
+    renderVenueUsageToday(); renderVenueUsageHistory();
+    if(document.getElementById('vtab-schedule-content')?.style.display==='block') renderVenueSched();
   }
   showToast(t('toast_usage_logged'));
 }
@@ -7288,6 +7313,7 @@ init();
       <button class="modal-close" onclick="closeModal('modal-log-usage')">✕</button>
     </div>
     <div class="modal-body">
+      <div id="modal-usage-venue-selector" style="display:none" class="field"><label data-i18n="lbl_venue_field">Venue</label><select id="new-usage-venue-id" style="width:100%"></select></div>
       <div class="field">
         <label data-i18n="lbl_usage_type">Usage type</label>
         <select id="usage-type-select" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px">
