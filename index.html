@@ -24,6 +24,7 @@
   --shadow:0 2px 12px rgba(12,35,64,0.08);--shadow-lg:0 8px 32px rgba(12,35,64,0.14);
 }
 body{background:var(--surface);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5}
+body,button,input,select,textarea,div,span,p,td,th,a,label{font-family:'DM Sans',sans-serif}
 h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 
 /* SCREENS */
@@ -5264,7 +5265,7 @@ function renderGantt(){
 
   let rows='';
   venues.forEach(v=>{
-    let cells=`<td colspan="2" onclick="openVenueCal('${v.id}')" style="padding:8px 10px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;white-space:nowrap;background:white">
+    let cells=`<td colspan="2" data-action="open-venue-cal" data-venue="${v.id}" style="padding:8px 10px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;white-space:nowrap;background:white">
       <div style="font-size:12px;font-weight:600;color:#185FA5">${esc(v.name)}</div>
       <div style="font-size:10px;color:#96a6bb">${v.venueType==='Training Site'?'⬜':'🏟'} ${esc(v.venueType||'Stadium')}</div>
       <div style="font-size:9px;color:#96a6bb;margin-top:1px">tap to drill in →</div>
@@ -5289,7 +5290,7 @@ function renderGantt(){
       const iE = ev.dateEnd<=wE2;
       const r = (iS?'3px':'0')+' '+(iE?'3px':'0')+' '+(iE?'3px':'0')+' '+(iS?'3px':'0');
       const top = ei*20;
-      return `<div onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')"
+      return `<div data-action="edit-event" data-id="${ev.id}"
         onmouseover="this.style.filter='brightness(.92)'" onmouseout="this.style.filter=''"
         style="position:absolute;top:${top}px;left:${left}%;width:${width}%;height:18px;line-height:18px;
           background:${ev.colorBg};color:${ev.colorFg};font-size:9px;font-weight:700;
@@ -5321,8 +5322,8 @@ function renderGantt(){
 
       const opsDisplay=_buildChipDisplay(dayOps, o=>_buildOpChip(o,dStr,v.id,chipStyle), 3, '#185FA5','#E6F1FB');
       const usageDisplay=_buildChipDisplay(dayUsage, u=>_buildUsageChip(u,dStr,v.id,usageChipStyle), 3, '#7C3AED','#F3E8FF');
-      cells+=`<td onclick="if(!document.querySelector('.modal-overlay.open'))openLogTaskModal('${dStr}',null,null,null,'${v.id}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px 3px 20px 3px;border-right:1px dashed rgba(0,0,0,0.06);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgT};min-height:60px;min-width:90px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsDisplay}</td>
-      <td onclick="if(!document.querySelector('.modal-overlay.open'))openLogUsageModal('${dStr}','${v.id}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px 3px 20px 3px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:60px;min-width:90px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageDisplay}</td>`;
+      cells+=`<td data-action="new-task" data-date="${dStr}" data-venue="${v.id}" data-admin="true" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px 3px 20px 3px;border-right:1px dashed rgba(0,0,0,0.06);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgT};min-height:60px;min-width:90px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsDisplay}</td>
+      <td data-action="new-usage" data-date="${dStr}" data-venue="${v.id}" data-admin="true" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px 3px 20px 3px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:60px;min-width:90px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageDisplay}</td>`;
     });
     rows+=evRow+`<tr>${cells}</tr>`;
   });
@@ -5478,8 +5479,8 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
     const opsChips=dayOps.map(o=>_buildOpChip(o,dStr,venueId,chipStyle,'sched-chip')).join('');
     const usageChips=dayUsage.map(u=>_buildUsageChip(u,dStr,venueId,usageChipStyle,'sched-chip')).join('');
 
-    cells+=`<td onclick="openLogTaskModal('${dStr}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${venueId}')" style="padding:4px 4px 20px 4px;border-right:1px dashed rgba(0,0,0,0.07);vertical-align:top;cursor:pointer;background:${bgT};min-height:120px;min-width:90px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsChips||''}</td>
-    <td onclick="openLogUsageModal('${dStr}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${venueId}')" style="padding:4px 4px 20px 4px;border-right:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:120px;min-width:90px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageChips||''}</td>`;
+    cells+=`<td data-action="new-task" data-date="${dStr}" data-venue="${venueId}" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${venueId}')" style="padding:4px 4px 20px 4px;border-right:1px dashed rgba(0,0,0,0.07);vertical-align:top;cursor:pointer;background:${bgT};min-height:120px;min-width:90px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsChips||''}</td>
+    <td data-action="new-usage" data-date="${dStr}" data-venue="${venueId}" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${venueId}')" style="padding:4px 4px 20px 4px;border-right:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:120px;min-width:90px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageChips||''}</td>`;
   });
 
   // ── Multi-day event row for week view ──
@@ -5505,7 +5506,7 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
     const lft=(c1*colW2).toFixed(2);
     const wid=((c2-c1+1)*colW2).toFixed(2);
     const top=ei*22;
-    return `<div onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')"
+    return `<div data-action="edit-event" data-id="${ev.id}"
       onmouseover="this.style.filter='brightness(.92)'" onmouseout="this.style.filter=''"
       style="position:absolute;top:${top}px;left:${lft}%;width:${wid}%;height:20px;line-height:20px;
         background:${ev.colorBg};color:${ev.colorFg};font-size:10px;font-weight:700;
@@ -5784,11 +5785,24 @@ function _refreshCalendars(){
 
       case 'new-task':
         if(document.querySelector('.modal-overlay.open')) return;
-        if(isAdmin && venue && date) {
+        if((isAdmin || el.dataset.admin==='true') && venue && date) {
           openLogTaskModal(date, null, null, null, venue);
         } else if(date) {
           openLogTaskModal(date);
         }
+        break;
+
+      case 'new-usage':
+        if(document.querySelector('.modal-overlay.open')) return;
+        if(el.dataset.admin==='true' && venue && date) {
+          openLogUsageModal(date, venue);
+        } else if(date) {
+          openLogUsageModal(date);
+        }
+        break;
+
+      case 'open-venue-cal':
+        if(venue) openVenueCal(venue);
         break;
     }
   });
