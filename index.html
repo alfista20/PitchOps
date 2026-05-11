@@ -5176,7 +5176,9 @@ function renderGantt(){
 
   // Sub-header: Tasks | Usage per day
   let subHeaderCols=`<th colspan="2" style="background:#fafbfc;border-right:1px solid rgba(0,0,0,0.09)"></th>`;
-  days.forEach(()=>{
+  days.forEach((d,i)=>{
+    const dStr=dStrOf(d);
+    const vid=null; // set per-venue in cell clicks
     subHeaderCols+=`<th style="padding:3px 4px;text-align:center;font-size:9px;font-weight:700;color:#5a6a82;text-transform:uppercase;background:#f4f6f8;border-right:1px dashed rgba(0,0,0,0.08)">${t('col_tasks')}</th>
     <th style="padding:3px 4px;text-align:center;font-size:9px;font-weight:700;color:#7C3AED;text-transform:uppercase;background:#faf5ff;border-right:1px solid rgba(0,0,0,0.09)">${t('col_usage')}</th>`;
   });
@@ -5240,8 +5242,8 @@ function renderGantt(){
 
       const opsDisplay=_buildChipDisplay(dayOps, o=>_buildOpChip(o,dStr,v.id,chipStyle), 3, '#185FA5','#E6F1FB');
       const usageDisplay=_buildChipDisplay(dayUsage, u=>_buildUsageChip(u,dStr,v.id,usageChipStyle), 3, '#7C3AED','#F3E8FF');
-      cells+=`<td onclick="if(!document.querySelector('.modal-overlay.open'))openLogTaskModal('${dStr}',null,null,null,'${v.id}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px;border-right:1px dashed rgba(0,0,0,0.06);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgT};min-height:40px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsDisplay}</td>
-      <td onclick="if(!document.querySelector('.modal-overlay.open'))openLogUsageModal('${dStr}','${v.id}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:40px;min-width:65px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageDisplay}</td>`;
+      cells+=`<td onclick="if(!document.querySelector('.modal-overlay.open'))openLogTaskModal('${dStr}',null,null,null,'${v.id}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px 3px 20px 3px;border-right:1px dashed rgba(0,0,0,0.06);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgT};min-height:60px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsDisplay}</td>
+      <td onclick="if(!document.querySelector('.modal-overlay.open'))openLogUsageModal('${dStr}','${v.id}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${v.id}')" style="padding:3px 3px 20px 3px;border-right:1px solid rgba(0,0,0,0.09);border-bottom:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:60px;min-width:65px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageDisplay}</td>`;
     });
     rows+=evRow+`<tr>${cells}</tr>`;
   });
@@ -5398,8 +5400,8 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
     const opsChips=dayOps.map(o=>_buildOpChip(o,dStr,venueId,chipStyle,'sched-chip')).join('');
     const usageChips=dayUsage.map(u=>_buildUsageChip(u,dStr,venueId,usageChipStyle,'sched-chip')).join('');
 
-    cells+=`<td onclick="openLogTaskModal('${dStr}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${venueId}')" style="padding:4px;border-right:1px dashed rgba(0,0,0,0.07);vertical-align:top;cursor:pointer;background:${bgT};min-height:120px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsChips||''}</td>
-    <td onclick="openLogUsageModal('${dStr}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${venueId}')" style="padding:4px;border-right:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:120px;min-width:65px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageChips||''}</td>`;
+    cells+=`<td onclick="openLogTaskModal('${dStr}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${venueId}')" style="padding:4px 4px 20px 4px;border-right:1px dashed rgba(0,0,0,0.07);vertical-align:top;cursor:pointer;background:${bgT};min-height:120px;min-width:65px" onmouseover="this.style.background='#E6F1FB'" onmouseout="this.style.background='${bgT}'">${opsChips||''}</td>
+    <td onclick="openLogUsageModal('${dStr}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${dStr}','${venueId}')" style="padding:4px 4px 20px 4px;border-right:1px solid rgba(0,0,0,0.09);vertical-align:top;cursor:pointer;background:${bgU};min-height:120px;min-width:65px" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='${bgU}'">${usageChips||''}</td>`;
   });
 
   // ── Multi-day event row for week view ──
@@ -6092,7 +6094,8 @@ async function logUsage(){
 
 // ── EDIT USAGE ──
 function openEditUsageModal(id){
-  const u=state_usage.find(x=>x.id===id)||(true?state_admin_usage.find(x=>x.id===id):null); if(!u) return;
+  try {
+  const u=state_usage.find(x=>x.id===id)||state_admin_usage.find(x=>x.id===id); if(!u){ console.warn('openEditUsageModal: id not found:',id); return; }
   document.getElementById('edit-usage-id').value=u.id;
   document.getElementById('edit-usage-type').value=u.usageType;
   document.getElementById('edit-usage-team').value=u.teamName||'';
@@ -6106,6 +6109,7 @@ function openEditUsageModal(id){
   currentUsagePhotos.edit = (u.photos||[]).map(url=>({url,file:null,uploaded:true}));
   renderUsagePhotoPreviews('edit');
   openModal('modal-edit-usage');
+  } catch(err){ console.error('openEditUsageModal error:',err); }
 }
 
 async function saveEditUsage(){
@@ -6177,7 +6181,7 @@ function dbToAdminUsage(r){
     teamName:r.team_name||'', zone:r.zone||'', weather:r.weather||'',
     notes:r.notes||'', date:(r.usage_date||'').slice(0,10),
     timeFrom:r.time_from||'08:00', timeTo:r.time_to||'17:00',
-    status:r.status||'planned', photos:r.photos||[], flagged:r.flagged||false,
+    status:r.status||'planned', photos:r.photo_urls||[], flagged:r.flagged||false,
     adminComment:r.admin_comment||'', createdAt:r.created_at
   };
 }
