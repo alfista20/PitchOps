@@ -3727,7 +3727,7 @@ function _handleRealtimeUsage(payload) {
   const newU = rec ? dbToUsage(rec) : null;
   const oldId = oldRec ? oldRec.id : null;
 
-  if (typeof state_admin_usage === 'undefined') return;
+  if (!state.currentProjectId) return; // only in admin context
 
   if (eventType === 'INSERT' && newU) {
     if (!state_admin_usage.find(u => u.id === newU.id)) {
@@ -4917,7 +4917,7 @@ function openVenueCal(venueId) {
   window.scrollTo({top:0,behavior:'smooth'});
   if(venueCalViewMode==='month') renderMonthCalendar(venueId,'venue-cal-grid',venueCalOffset); else renderWeekCalendar(venueId, 'venue-cal-grid', venueCalOffset);
   // Ensure admin_usage is loaded for this venue
-  if(typeof state_admin_usage!=='undefined' && state.currentProjectId){
+  if(state.currentProjectId){
     refreshProjectUsage(state.currentProjectId, true);
   }
 }
@@ -5146,7 +5146,7 @@ function renderGantt(){
   const vids=venues.map(v=>v.id);
   const allOps=state.operations.filter(o=>vids.includes(o.venueId)&&(ganttStatusFilter==='all'||o.status===ganttStatusFilter));
   // Usage for this project
-  const allUsage=(typeof state_admin_usage!=='undefined'?state_admin_usage:[]).filter(u=>vids.includes(u.venueId));
+  const allUsage=state_admin_usage.filter(u=>vids.includes(u.venueId));
 
   const chipStyle={
     planned:'background:#FAEEDA;color:#854F0B;border-left:3px solid #EF9F27',
@@ -5333,7 +5333,7 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
 
   const ops=state.operations.filter(o=>o.venueId===venueId);
   // Merge venue usage + admin usage (for admin drill-down view)
-  const allUsageSrc=[...state_usage, ...(typeof state_admin_usage!=='undefined'?state_admin_usage:[])];
+  const allUsageSrc=[...state_usage, ...state_admin_usage];
   const usage=allUsageSrc.filter((u,i,arr)=>u.venueId===venueId&&arr.findIndex(x=>x.id===u.id)===i);
 
 
@@ -5409,7 +5409,7 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
     window._eventsLoaded[venueId] = true;
     loadVenueEvents(venueId).then(()=>renderWeekCalendar(venueId,gridId,weekOffset));
   }
-  const venueEventsWeek = (typeof state_events!=='undefined') ? state_events.filter(e=>e.venueId===venueId) : [];
+  const venueEventsWeek = state_events.filter(e=>e.venueId===venueId);
   const weekStartStr = weekDayStrs[0];
   const weekEndStr   = weekDayStrs[6];
   const activeWeekEvs = venueEventsWeek.filter(ev=>ev.dateStart<=weekEndStr&&ev.dateEnd>=weekStartStr);
@@ -5525,7 +5525,7 @@ function openLogTaskModal(dateStr, timeStr, prefillType, prefillStatus, venueId)
 // ════════════════════════════════════════
 // MULTI-DAY EVENTS (pitchops_events table)
 // ════════════════════════════════════════
-let state_events = []; // {id, venueId, name, dateStart, dateEnd, colorBg, colorFg}
+let state_events = [];
 
 async function loadAllVenueEvents(pid){
   // Load events for all venues in a project with one query
@@ -5702,7 +5702,7 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
   const cells = Array.from({length:42},(_,i)=>{ const d=new Date(firstDay); d.setDate(firstDay.getDate()+i); return d; });
 
   const ops   = state.operations.filter(o=>o.venueId===venueId);
-  const allUsageSrc = [...state_usage,...(typeof state_admin_usage!=='undefined'?state_admin_usage:[])];
+  const allUsageSrc = [...state_usage,...state_admin_usage];
   const usage = allUsageSrc.filter((u,i,arr)=>u.venueId===venueId&&arr.findIndex(x=>x.id===u.id)===i);
   const venueEvents = state_events.filter(e=>e.venueId===venueId);
 
@@ -5874,7 +5874,7 @@ function toggleVenueMenu(){
 // USAGE — STATE & DB
 // ════════════════════════════════════════
 const currentUsagePhotos = { new: [], edit: [] };
-let state_usage = []; // all usage for current venue
+let state_usage = [];
 
 function dbToUsage(r){
   const d=(r.usage_date||'').slice(0,10);
@@ -6092,7 +6092,7 @@ async function logUsage(){
 
 // ── EDIT USAGE ──
 function openEditUsageModal(id){
-  const u=state_usage.find(x=>x.id===id)||(typeof state_admin_usage!=='undefined'?state_admin_usage.find(x=>x.id===id):null); if(!u) return;
+  const u=state_usage.find(x=>x.id===id)||(true?state_admin_usage.find(x=>x.id===id):null); if(!u) return;
   document.getElementById('edit-usage-id').value=u.id;
   document.getElementById('edit-usage-type').value=u.usageType;
   document.getElementById('edit-usage-team').value=u.teamName||'';
@@ -6116,7 +6116,7 @@ async function saveEditUsage(){
   // Find in state_usage (venue context) or state_admin_usage (admin context)
   let idx=state_usage.findIndex(u=>u.id===id);
   let arr=state_usage;
-  if(idx===-1 && typeof state_admin_usage!=='undefined'){
+  if(idx===-1 && true){
     idx=state_admin_usage.findIndex(u=>u.id===id);
     arr=state_admin_usage;
   }
@@ -6154,10 +6154,10 @@ async function deleteUsage(){
   if(!confirm(t('confirm_delete_usage'))) return;
   const {error}=await supa.from('pitchops_usage').delete().eq('id',id);
   if(error){ showToast('Error: '+error.message); return; }
-  const delU = state_usage.find(u=>u.id===id) || (typeof state_admin_usage!=='undefined' ? state_admin_usage.find(u=>u.id===id) : null);
+  const delU = state_usage.find(u=>u.id===id) || (true ? state_admin_usage.find(u=>u.id===id) : null);
   if(delU?.photos?.length) delU.photos.forEach(url=>deletePhoto(url));
   state_usage=state_usage.filter(u=>u.id!==id);
-  if(typeof state_admin_usage!=='undefined') state_admin_usage=state_admin_usage.filter(u=>u.id!==id);
+  if(true) state_admin_usage=state_admin_usage.filter(u=>u.id!==id);
   closeModal('modal-edit-usage');
   renderVenueUsageToday(); renderVenueUsageHistory();
   renderDetailUsage();
@@ -6170,7 +6170,7 @@ async function deleteUsage(){
 // ════════════════════════════════════════
 // ADMIN USAGE — STATE
 // ════════════════════════════════════════
-let state_admin_usage = []; // usage for current project
+let state_admin_usage = [];
 let adminTaskStaff = [];
 
 function dbToAdminUsage(r){
@@ -6385,7 +6385,7 @@ async function executeDrop(dragData, newDate, newVenueId, copy){
     // Search both arrays, use first match as source of truth
     let found=null, foundIdx=-1;
     const inVenue = state_usage.findIndex(u=>u.id===id);
-    const inAdmin = (typeof state_admin_usage!=='undefined') ? state_admin_usage.findIndex(u=>u.id===id) : -1;
+    const inAdmin = (true) ? state_admin_usage.findIndex(u=>u.id===id) : -1;
     if(inVenue>-1){ found=state_usage[inVenue]; foundIdx=inVenue; }
     else if(inAdmin>-1){ found=state_admin_usage[inAdmin]; foundIdx=inAdmin; }
     if(!found){ showToast(t('toast_usage_not_found')); return; }
@@ -6395,7 +6395,7 @@ async function executeDrop(dragData, newDate, newVenueId, copy){
       if(error){ showToast('Error: '+error.message); return; }
       // Keep both arrays in sync
       state_usage.push(newU);
-      if(typeof state_admin_usage!=='undefined') state_admin_usage.push(newU);
+      if(true) state_admin_usage.push(newU);
       showToast('✅ Usage copied to '+formatDateOnly(newDate));
     } else {
       const {error} = await supa.from('pitchops_usage').update({usage_date:newDate, venue_id:targetVenueId}).eq('id',id);
@@ -6403,7 +6403,7 @@ async function executeDrop(dragData, newDate, newVenueId, copy){
       const updated = {...found, date:newDate, venueId:targetVenueId};
       // Update both arrays in sync
       if(inVenue>-1) state_usage[inVenue]=updated;
-      if(inAdmin>-1 && typeof state_admin_usage!=='undefined') state_admin_usage[inAdmin]=updated;
+      if(inAdmin>-1 && true) state_admin_usage[inAdmin]=updated;
       showToast('✅ Usage moved to '+formatDateOnly(newDate));
     }
   }
