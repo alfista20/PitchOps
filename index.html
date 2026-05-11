@@ -4482,7 +4482,7 @@ async function saveEditOperation(){
   }
   // Also re-render venue cal drill-down if visible (admin)
   if(document.getElementById('venue-cal-view')?.style.display==='block' && state.currentVenueCalId){
-    renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
+    if(venueCalViewMode==='month') renderMonthCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset); else renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
   }
   if(document.getElementById('ptab-calendar-content')?.style.display==='block') renderGantt();
   showToast(t('toast_task_updated'));
@@ -4507,7 +4507,7 @@ async function deleteOperation(){
     renderVenueSched();
   }
   if(document.getElementById('venue-cal-view')?.style.display==='block' && state.currentVenueCalId){
-    renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
+    if(venueCalViewMode==='month') renderMonthCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset); else renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
   }
   if(document.getElementById('ptab-calendar-content')?.style.display==='block') renderGantt();
   showToast(t('toast_task_deleted'));
@@ -4904,7 +4904,7 @@ function openVenueCal(venueId) {
   document.getElementById('gantt-view').style.display = 'none';
   document.getElementById('venue-cal-view').style.display = 'block';
   window.scrollTo({top:0,behavior:'smooth'});
-  renderWeekCalendar(venueId, 'venue-cal-grid', venueCalOffset);
+  if(venueCalViewMode==='month') renderMonthCalendar(venueId,'venue-cal-grid',venueCalOffset); else renderWeekCalendar(venueId, 'venue-cal-grid', venueCalOffset);
   // Ensure admin_usage is loaded for this venue
   if(typeof state_admin_usage!=='undefined' && state.currentProjectId){
     refreshProjectUsage(state.currentProjectId, true);
@@ -4920,8 +4920,8 @@ function exitVenueCal() {
   renderGantt();
 }
 
-function venueCalNav(dir) { venueCalOffset += dir; renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset); }
-function venueCalGoToday() { venueCalOffset = 0; renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',0); }
+function venueCalNav(dir) { venueCalOffset += dir; if(venueCalViewMode==='month') renderMonthCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset); else renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset); }
+function venueCalGoToday() { venueCalOffset = 0; if(venueCalViewMode==='month') renderMonthCalendar(state.currentVenueCalId,'venue-cal-grid',0); else renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',0); }
 
 function setVenueCalView(mode) {
   venueCalViewMode = mode;
@@ -4933,7 +4933,10 @@ function setVenueCalView(mode) {
     btn.style.background = active ? 'var(--navy)' : 'white';
     btn.style.color = active ? 'white' : 'var(--text-muted)';
   });
-  if(state.currentVenueCalId) renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
+  if(state.currentVenueCalId){
+    if(mode==='month') renderMonthCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
+    else if(venueCalViewMode==='month') renderMonthCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset); else renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
+  }
 }
 
 function venueTypeDot(type, color){
@@ -5626,10 +5629,11 @@ function _refreshCalendars(){
   // Venue schedule — month OR week, driven by venueSchedView variable
   const schedContent = document.getElementById('vtab-schedule-content');
   if(schedContent && schedContent.style.display==='block') renderVenueSched();
-  // Venue week calendar (drill-in per venue)
+  // Venue calendar (drill-in per venue) - month or week
   const venueCalView = document.getElementById('venue-cal-view');
   if(venueCalView && venueCalView.style.display==='block' && state.currentVenueCalId){
-    renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
+    if(venueCalViewMode==='month') renderMonthCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
+    else if(venueCalViewMode==='month') renderMonthCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset); else renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
   }
 }
 
@@ -6349,7 +6353,7 @@ async function adminLogTask(){
   renderDetailOps(); updateDetailStats();
   if(document.getElementById('ptab-calendar-content')?.style.display==='block') renderGantt();
   if(document.getElementById('venue-cal-view')?.style.display==='block' && state.currentVenueCalId)
-    renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
+    if(venueCalViewMode==='month') renderMonthCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset); else renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
   showToast(t('toast_task_logged'));
 }
 
@@ -6412,7 +6416,7 @@ async function adminLogUsage(){
   renderDetailUsage();
   if(document.getElementById('ptab-calendar-content')?.style.display==='block') renderGantt();
   if(document.getElementById('venue-cal-view')?.style.display==='block' && state.currentVenueCalId)
-    renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
+    if(venueCalViewMode==='month') renderMonthCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset); else renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
   showToast(t('toast_usage_logged'));
 }
 
@@ -6527,11 +6531,11 @@ async function executeDrop(dragData, newDate, newVenueId, copy){
     if(document.getElementById('ptab-calendar-content')?.style.display==='block') renderGantt();
     // Admin drill-down venue calendar
     if(document.getElementById('venue-cal-view')?.style.display==='block' && state.currentVenueCalId)
-      renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
+      if(venueCalViewMode==='month') renderMonthCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset); else renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
   }
   // Also handle case where admin is in drill-down but pid not set (shouldn't happen but safety)
   if(!pid && state.currentVenueCalId && document.getElementById('venue-cal-view')?.style.display==='block')
-    renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
+    if(venueCalViewMode==='month') renderMonthCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset); else renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
 }
 
 // ════════════════════════════════════════
