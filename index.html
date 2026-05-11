@@ -5688,139 +5688,143 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
   const venueEvents = state_events.filter(e=>e.venueId===venueId);
 
   const CS = {
-    planned:'background:#FAEEDA;color:#854F0B;border-left:3px solid #EF9F27',
+    planned:  'background:#FAEEDA;color:#854F0B;border-left:3px solid #EF9F27',
     inprogress:'background:#E6F1FB;color:#185FA5;border-left:3px solid #378ADD',
-    completed:'background:#EAF3DE;color:#3B6D11;border-left:3px solid #3B6D11',
-    missed:'background:#FCEBEB;color:#A32D2D;border-left:3px solid #A32D2D',
+    completed: 'background:#EAF3DE;color:#3B6D11;border-left:3px solid #3B6D11',
+    missed:    'background:#FCEBEB;color:#A32D2D;border-left:3px solid #A32D2D',
   };
   const UB = 'background:#F3E8FF;color:#6B21A8;border-left:3px solid #A855F7';
 
-  const CELL_H = 90;     // min cell height px — must match CSS below
-  const BAR_H  = 18;     // multiday bar height px
-  const BAR_GAP = 2;     // gap between bars px
-  const BAR_TOP = 28;    // top offset inside cell (below day number row)
+  const BAR_H  = 20;
+  const BAR_GAP = 3;
+  const CELL_H  = 88;
 
+  // ── Header row ──
   const header = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>
     `<div style="text-align:center;font-size:11px;font-weight:700;color:#96a6bb;text-transform:uppercase;padding:8px 0;border-bottom:1px solid var(--border);border-right:1px solid var(--border);box-sizing:border-box">${d}</div>`
   ).join('');
-
   let gridHTML = `<div style="display:grid;grid-template-columns:repeat(7,1fr)">${header}</div>`;
 
   for(let w=0;w<6;w++){
-    const week = cells.slice(w*7,(w+1)*7);
-    const wStart = dStrOf(week[0]);
-    const wEnd   = dStrOf(week[6]);
+    const week  = cells.slice(w*7,(w+1)*7);
+    const wStart= dStrOf(week[0]);
+    const wEnd  = dStrOf(week[6]);
 
-    // ── Multi-day events for this week row ──
-    // Sorted by start date, then by duration desc (longer events on top)
+    // ── Events active this week ──
     const wkEvs = venueEvents
-      .filter(ev=>ev.dateStart<=wEnd&&ev.dateEnd>=wStart)
-      .sort((a,b)=>{
-        const aS=a.dateStart<wStart?wStart:a.dateStart;
-        const bS=b.dateStart<wStart?wStart:b.dateStart;
-        if(aS!==bS) return aS.localeCompare(bS);
-        // longer spans first = fewer row conflicts
-        const aLen=(a.dateEnd<wEnd?a.dateEnd:wEnd).localeCompare(a.dateStart<wStart?wStart:a.dateStart);
-        const bLen=(b.dateEnd<wEnd?b.dateEnd:wEnd).localeCompare(b.dateStart<wStart?wStart:b.dateStart);
-        return bLen-aLen;
+      .filter(ev => ev.dateStart <= wEnd && ev.dateEnd >= wStart)
+      .sort((a,b) => {
+        const as = a.dateStart < wStart ? wStart : a.dateStart;
+        const bs = b.dateStart < wStart ? wStart : b.dateStart;
+        if(as !== bs) return as < bs ? -1 : 1;
+        return 0;
       });
 
-    // Assign a row slot to each event (0, 1, 2...) — greedy no-overlap packing
-    const rowSlots = []; // [endColIdx] per slot
-    const evSlot = wkEvs.map(ev=>{
-      const c1 = week.findIndex(d=>dStrOf(d)>=ev.dateStart && dStrOf(d)<=ev.dateEnd);
-      const c2 = week.reduce((acc,d,i)=>dStrOf(d)<=ev.dateEnd&&dStrOf(d)>=ev.dateStart?i:acc,-1);
-      if(c1<0||c2<0) return {c1:0,c2:0,slot:-1};
-      // find first slot that ends before c1
-      let slot = rowSlots.findIndex(endCol=>endCol<c1);
-      if(slot===-1){ slot=rowSlots.length; rowSlots.push(c2); }
-      else rowSlots[slot]=c2;
-      return {c1,c2,slot};
-    });
+    // Greedy slot assignment (no overlapping bars in same row)
+    // slotEnd[s] = last column index occupied by the bar in slot s
+    const slotEnd = [];
+    const evMeta = wkEvs.map(ev => {
+      // clamp to this week
+      const evS = ev.dateStart < wStart ? wStart : ev.dateStart;
+      const evE = ev.dateEnd   > wEnd   ? wEnd   : ev.dateEnd;
+      // find column indices
+      const c1 = week.findIndex(d => dStrOf(d) === evS);
+      const c2 = week.findIndex(d => dStrOf(d) === evE);
+      if(c1 < 0 || c2 < 0) return null; // shouldn't happen after filter
+      // assign slot
+      let slot = slotEnd.findIndex(e => e < c1);
+      if(slot < 0){ slot = slotEnd.length; slotEnd.push(c2); }
+      else slotEnd[slot] = c2;
+      return { ev, c1, c2, slot };
+    }).filter(Boolean);
 
-    // ── Bar row: dedicated row above day cells ──
-    // Bars live in their own row (not as absolute children of grid),
-    // using position:relative + absolute children — same approach as admin Gantt evRow.
-    // This avoids CSS Grid absolute-child placement bugs.
-    const maxSlot = evSlot.reduce((m,s)=>Math.max(m,s.slot),-1);
-    const barsRowH = maxSlot>=0 ? (maxSlot+1)*(BAR_H+BAR_GAP)+4 : 0;
+    // ── Build bar row using a TABLE — guaranteed correct spanning ──
+    // Use table with 7 equal columns. Each event bar is a <td colspan=N>.
+    // Empty cells fill gaps. One <tr> per slot.
+    const maxSlot = evMeta.reduce((m,x)=>Math.max(m,x.slot), -1);
 
-    const bars = wkEvs.map((ev,ei)=>{
-      const {c1,c2,slot} = evSlot[ei];
-      if(slot<0) return '';
-      const pctL = (c1/7*100).toFixed(3);
-      const pctW = ((c2-c1+1)/7*100).toFixed(3);
-      const top  = slot*(BAR_H+BAR_GAP);
-      const startsHere = ev.dateStart>=wStart;
-      const endsHere   = ev.dateEnd<=wEnd;
-      const rL = startsHere?`${BAR_H/2}px`:'0';
-      const rR = endsHere?`${BAR_H/2}px`:'0';
-      const insetL = startsHere?'3px':'0';
-      const insetR = endsHere?'3px':'0';
-      return `<div
-        onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')"
-        onmouseover="this.style.filter='brightness(.9)';this.style.boxShadow='0 2px 8px rgba(0,0,0,.18)'"
-        onmouseout="this.style.filter='';this.style.boxShadow='none'"
-        title="${esc(ev.name)}"
-        style="position:absolute;
-          left:calc(${pctL}% + ${insetL});
-          width:calc(${pctW}% - ${insetL} - ${insetR});
-          top:${top}px;height:${BAR_H}px;
-          background:${ev.colorBg};color:${ev.colorFg};
-          border-radius:${rL} ${rR} ${rR} ${rL};
-          font-size:10px;font-weight:700;line-height:${BAR_H}px;
-          padding:0 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-          cursor:pointer;box-sizing:border-box;
-          box-shadow:0 1px 3px rgba(0,0,0,.12);
-          transition:filter .1s,box-shadow .1s"
-      >${esc(ev.name)}</div>`;
-    }).join('');
-
-    // Bar row: single full-width cell spanning all 7 columns, height = bar slots needed
-    const barRow = barsRowH > 0
-      ? `<div style="display:grid;grid-template-columns:repeat(7,1fr)">
-          <div style="grid-column:1/-1;position:relative;height:${barsRowH}px;background:white;border-bottom:1px solid rgba(0,0,0,0.04)">
-            ${bars}
-          </div>
-        </div>`
-      : '';
+    let barRowHTML = '';
+    if(maxSlot >= 0){
+      let tableRows = '';
+      for(let s=0;s<=maxSlot;s++){
+        const rowEvents = evMeta.filter(x=>x.slot===s).sort((a,b)=>a.c1-b.c1);
+        let cells7 = '';
+        let col = 0;
+        rowEvents.forEach(({ev, c1, c2}) => {
+          // gap before this event
+          if(c1 > col) cells7 += `<td colspan="${c1-col}" style="padding:0;border:none"></td>`;
+          const span = c2 - c1 + 1;
+          const startsHere = ev.dateStart >= wStart;
+          const endsHere   = ev.dateEnd   <= wEnd;
+          const rL = startsHere ? `${BAR_H/2}px` : '0';
+          const rR = endsHere   ? `${BAR_H/2}px` : '0';
+          const pl = startsHere ? '8px' : '4px';
+          const pr = endsHere   ? '8px' : '4px';
+          cells7 += `<td colspan="${span}" style="padding:${BAR_GAP/2}px 1px;border:none">
+            <div onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')"
+              onmouseover="this.style.filter='brightness(.9)'"
+              onmouseout="this.style.filter=''"
+              title="${esc(ev.name)}"
+              style="height:${BAR_H}px;line-height:${BAR_H}px;
+                background:${ev.colorBg};color:${ev.colorFg};
+                border-radius:${rL} ${rR} ${rR} ${rL};
+                font-size:10px;font-weight:700;
+                padding:0 ${pr} 0 ${pl};
+                overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+                cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.12);
+                transition:filter .1s"
+            >${esc(ev.name)}</div>
+          </td>`;
+          col = c2 + 1;
+        });
+        // fill remaining columns
+        if(col < 7) cells7 += `<td colspan="${7-col}" style="padding:0;border:none"></td>`;
+        tableRows += `<tr style="height:${BAR_H+BAR_GAP}px">${cells7}</tr>`;
+      }
+      barRowHTML = `<div style="background:white;border-bottom:1px solid rgba(0,0,0,0.05)">
+        <table style="width:100%;border-collapse:collapse;table-layout:fixed">
+          ${tableRows}
+        </table>
+      </div>`;
+    }
 
     // ── Day cells row ──
-    const dayCells = week.map((d,wi)=>{
-      const dStr  = dStrOf(d);
-      const isT   = dStr===today;
-      const inM   = d.getMonth()===monthStart.getMonth();
-      const isPast = dStr<today;
-      const dOps = ops.filter(o=>(o.date||'').slice(0,10)===dStr).map(o=>isPast&&o.status==='planned'?{...o,status:'missed'}:o);
+    const dayCells = week.map(d => {
+      const dStr   = dStrOf(d);
+      const isT    = dStr === today;
+      const inM    = d.getMonth() === monthStart.getMonth();
+      const isPast = dStr < today;
+      const dOps = ops.filter(o=>(o.date||'').slice(0,10)===dStr)
+                      .map(o=>isPast&&o.status==='planned'?{...o,status:'missed'}:o);
       const dUse = usage.filter(u=>(u.date||'').slice(0,10)===dStr);
       const items = [
-        ...dOps.map(o=>({fn:`openEditModal('${o.id}')`,label:o.type,st:CS[o.status]||CS.planned})),
+        ...dOps.map(o=>({fn:`openEditModal('${o.id}')`,  label:o.type,          st:CS[o.status]||CS.planned})),
         ...dUse.map(u=>({fn:`openEditUsageModal('${u.id}')`,label:u.usageType||'Usage',st:UB})),
       ];
       const chips = items.map(it=>
         `<div onclick="event.stopPropagation();${it.fn}"
           onmouseover="this.style.filter='brightness(.93)'"
           onmouseout="this.style.filter=''"
-          style="font-size:10px;font-weight:600;padding:2px 5px;border-radius:3px;margin-bottom:2px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;${it.st}"
-         >${esc(it.label)}</div>`
+          style="font-size:10px;font-weight:600;padding:2px 5px;border-radius:3px;margin-bottom:2px;
+            cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;${it.st}"
+        >${esc(it.label)}</div>`
       ).join('');
       const bg  = isT?'#EBF4FF':inM?'white':'#f8fafc';
-      const brd = isT?'1px solid #185FA5':'1px solid rgba(0,0,0,0.06)';
+      const brd = isT?'2px solid #185FA5':'1px solid rgba(0,0,0,0.06)';
       const ns  = isT
         ? 'background:#185FA5;color:white;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;'
         : `color:${inM?'#0C2340':'#c0c8d4'};font-size:12px;font-weight:600;`;
       const plus = inM
         ? `<span onclick="event.stopPropagation();openMultidayModal('${dStr}','${venueId}')"
             onmouseover="this.style.color='#185FA5'" onmouseout="this.style.color='#d0d5dd'"
-            style="font-size:16px;line-height:1;color:#d0d5dd;cursor:pointer;padding:0 2px" title="Add event">+</span>`
+            style="font-size:16px;line-height:1;color:#d0d5dd;cursor:pointer;padding:0 2px">+</span>`
         : '';
-      const hoverBg = isT?'#dbeeff':'#f0f7ff';
-      const bShadow = isT?'box-shadow:inset 0 0 0 2px #185FA5;':'';
       return `<div
         onclick="openLogTaskModal('${dStr}')"
-        onmouseover="this.style.background='${hoverBg}'"
+        onmouseover="this.style.background='${isT?'#dbeeff':'#f0f7ff'}'"
         onmouseout="this.style.background='${bg}'"
-        style="border:${brd};background:${bg};padding:6px;min-height:${CELL_H}px;cursor:pointer;box-sizing:border-box;${bShadow}"
+        style="border:${brd};background:${bg};padding:6px;min-height:${CELL_H}px;
+          cursor:pointer;box-sizing:border-box;"
       >
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
           <span style="${ns}">${d.getDate()}</span>${plus}
@@ -5829,7 +5833,7 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
       </div>`;
     }).join('');
 
-    gridHTML += `${barRow}<div style="display:grid;grid-template-columns:repeat(7,1fr)">${dayCells}</div>`;
+    gridHTML += `<div style="display:grid;grid-template-columns:repeat(7,1fr)">${dayCells}</div>` + barRowHTML;
   }
 
   grid.innerHTML = `<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%"><div style="min-width:560px">${gridHTML}</div></div>`;
