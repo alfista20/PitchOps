@@ -23,7 +23,7 @@
   --radius:12px;--radius-sm:8px;
   --shadow:0 2px 12px rgba(12,35,64,0.08);--shadow-lg:0 8px 32px rgba(12,35,64,0.14);
 }
-body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5}
+body{background:var(--surface);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5}
 h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 
 /* SCREENS */
@@ -44,12 +44,12 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 /* FORMS */
 .field{margin-bottom:1rem}
 .field label{display:block;font-size:12px;color:var(--text-muted);margin-bottom:5px;font-weight:500;letter-spacing:.3px}
-.field input,.field select,.field textarea{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:#fafbfc;outline:none;transition:border-color .15s}
+.field input,.field select,.field textarea{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14px;color:var(--text);background:#fafbfc;outline:none;transition:border-color .15s}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue-light);background:white}
 .field textarea{resize:vertical;min-height:72px}
 
 /* BUTTONS */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 20px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;border:none;transition:all .15s}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 20px;border-radius:var(--radius-sm);font-size:14px;font-weight:500;cursor:pointer;border:none;transition:all .15s}
 .btn-primary{background:var(--navy);color:white}.btn-primary:hover{background:var(--navy-mid)}
 .btn-blue{background:var(--blue);color:white}.btn-blue:hover{background:var(--blue-light)}
 .btn-ghost{background:transparent;color:var(--text-muted);border:1px solid var(--border)}.btn-ghost:hover{background:var(--surface)}
@@ -64,9 +64,9 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 .topnav-badge{font-size:10px;font-weight:500;background:rgba(255,255,255,.15);color:rgba(255,255,255,.85);border-radius:20px;padding:2px 8px;white-space:nowrap}
 .topnav-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
 @media(max-width:600px){.topnav-badge{display:none}.breadcrumb{font-size:11px}}
-.lang-select{background:rgba(255,255,255,.15);border:none;color:white;font-family:'DM Sans',sans-serif;font-size:13px;border-radius:6px;padding:4px 8px;cursor:pointer;outline:none}
+.lang-select{background:rgba(255,255,255,.15);border:none;color:white;font-size:13px;border-radius:6px;padding:4px 8px;cursor:pointer;outline:none}
 .breadcrumb{font-size:12px;color:var(--blue-mid);display:flex;align-items:center;gap:4px;min-width:0;overflow:hidden}
-.breadcrumb button{background:none;border:none;color:var(--blue-mid);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;text-decoration:underline;padding:0;white-space:nowrap}
+.breadcrumb button{background:none;border:none;color:var(--blue-mid);cursor:pointer;font-size:12px;text-decoration:underline;padding:0;white-space:nowrap}
 .breadcrumb button:hover{color:white}
 .breadcrumb span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
 
@@ -134,7 +134,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 /* ops table */
 .filter-bar{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;padding:.65rem 1rem;border-bottom:1px solid var(--border);background:#fafbfc;-webkit-overflow-scrolling:touch}
 .filter-bar::-webkit-scrollbar{display:none}
-.filter-bar select,.filter-bar input{padding:5px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text);background:white;outline:none;flex-shrink:0;max-width:130px}
+.filter-bar select,.filter-bar input{padding:5px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;color:var(--text);background:white;outline:none;flex-shrink:0;max-width:130px}
 .ops-table{width:100%;border-collapse:collapse;font-size:12px;min-width:560px}
 .ops-table th{text-align:left;padding:7px 10px;font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border);background:#fafbfc;white-space:nowrap}
 .ops-table td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:top}
@@ -142,7 +142,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 .ops-table tr:hover td{background:var(--surface)}
 .flag-btn{background:none;border:none;cursor:pointer;font-size:16px;opacity:.4;transition:opacity .15s}
 .flag-btn:hover,.flag-btn.flagged{opacity:1}
-.comment-box input{width:100%;font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;margin-top:4px}
+.comment-box input{width:100%;font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;color:var(--text);outline:none;margin-top:4px}
 .comment-text{font-size:12px;color:var(--text-muted);font-style:italic;margin-top:2px}
 
 /* ── VENUE DASHBOARD ── */
@@ -222,12 +222,12 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--navy);color:white;padding:12px 20px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;box-shadow:var(--shadow-lg);z-index:200;opacity:0;transform:translateY(8px);transition:all .2s;pointer-events:none}
 .toast.show{opacity:1;transform:translateY(0)}
 .tabs{display:flex;border-bottom:1px solid var(--border)}
-.tab-btn{padding:12px 18px;background:none;border:none;border-bottom:3px solid transparent;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;transition:all .15s;margin:0}
+.tab-btn{padding:12px 18px;background:none;border:none;border-bottom:3px solid transparent;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;transition:all .15s;margin:0}
 .tab-btn.active{color:var(--blue);border-bottom-color:var(--blue);background:rgba(24,95,165,0.04)}
 /* Venue tabs — one scrollable line */
 .vtab-bar{display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;border-bottom:1px solid var(--border);background:white;flex-shrink:0}
 .vtab-bar::-webkit-scrollbar{display:none}
-.vtab-btn{flex-shrink:0;white-space:nowrap;padding:14px 18px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:color .15s,border-color .15s}
+.vtab-btn{flex-shrink:0;white-space:nowrap;padding:14px 18px;font-size:13px;font-weight:600;border:none;border-bottom:3px solid transparent;background:white;color:var(--text-muted);cursor:pointer;transition:color .15s,border-color .15s}
 .vtab-btn.active{color:var(--blue);border-bottom-color:var(--blue);background:white}
 .color-opts{display:flex;gap:8px;flex-wrap:wrap}
 .color-opt{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:border-color .15s}
@@ -355,7 +355,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 .vcal-week-cell:hover{background:var(--blue-pale)}
 
 
-.stats-period-btn{padding:5px 12px;border:1px solid var(--border);border-radius:20px;background:white;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text-muted);transition:all .15s}
+.stats-period-btn{padding:5px 12px;border:1px solid var(--border);border-radius:20px;background:white;font-size:12px;cursor:pointer;color:var(--text-muted);transition:all .15s}
 .stats-period-btn:hover{border-color:var(--blue);color:var(--blue)}
 .stats-period-active{background:var(--blue)!important;color:white!important;border-color:var(--blue)!important}
 .stats-card{background:white;border-radius:12px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);padding:1.25rem;position:relative;overflow:hidden}
@@ -363,6 +363,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 .chart-type-btn{transition:all .15s}
 .stats-card-title{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:1rem;font-family:'Syne',sans-serif}
 
+button,input,select,textarea{}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
@@ -450,20 +451,20 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     <div style="padding:.5rem 0">
       <div style="padding:.5rem 1rem;font-size:10px;font-weight:700;color:var(--text-hint);text-transform:uppercase;letter-spacing:.5px">Language</div>
       <div style="padding:.25rem 1rem .75rem">
-        <select class="lang-select" onchange="setLang(this.value)" id="lang-select-detail" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#f8fafc;color:var(--text)"><option value="en">🌐 English</option><option value="pl">🌐 Polski</option><option value="es">🌐 Español</option><option value="fr">🌐 Français</option><option value="de">🌐 Deutsch</option><option value="pt">🌐 Português</option></select>
+        <select class="lang-select" onchange="setLang(this.value)" id="lang-select-detail" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#f8fafc;color:var(--text)"><option value="en">🌐 English</option><option value="pl">🌐 Polski</option><option value="es">🌐 Español</option><option value="fr">🌐 Français</option><option value="de">🌐 Deutsch</option><option value="pt">🌐 Português</option></select>
       </div>
       <div style="height:1px;background:var(--border)"></div>
-      <button onclick="openViewerLinkModal();toggleAdminMenu()" style="display:flex;align-items:center;gap:10px;width:100%;padding:.75rem 1rem;background:none;border:none;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);cursor:pointer" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='none'">
+      <button onclick="openViewerLinkModal();toggleAdminMenu()" style="display:flex;align-items:center;gap:10px;width:100%;padding:.75rem 1rem;background:none;border:none;font-size:14px;color:var(--text);cursor:pointer" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='none'">
         <span>🔗</span> Share
       </button>
-      <button onclick="openAddVenueModal();toggleAdminMenu()" style="display:flex;align-items:center;gap:10px;width:100%;padding:.75rem 1rem;background:none;border:none;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);cursor:pointer" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='none'">
+      <button onclick="openAddVenueModal();toggleAdminMenu()" style="display:flex;align-items:center;gap:10px;width:100%;padding:.75rem 1rem;background:none;border:none;font-size:14px;color:var(--text);cursor:pointer" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='none'">
         <span>➕</span> Add venue
       </button>
-      <button onclick="openManageTypesModal();toggleAdminMenu()" style="display:flex;align-items:center;gap:10px;width:100%;padding:.75rem 1rem;background:none;border:none;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);cursor:pointer" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='none'">
+      <button onclick="openManageTypesModal();toggleAdminMenu()" style="display:flex;align-items:center;gap:10px;width:100%;padding:.75rem 1rem;background:none;border:none;font-size:14px;color:var(--text);cursor:pointer" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='none'">
         <span>⚙️</span> <span data-i18n="tasks_bank">Tasks bank</span>
       </button>
       <div style="height:1px;background:var(--border)"></div>
-      <button onclick="logout()" style="display:flex;align-items:center;gap:10px;width:100%;padding:.75rem 1rem;background:none;border:none;font-size:14px;font-family:'DM Sans',sans-serif;color:#dc2626;cursor:pointer" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'">
+      <button onclick="logout()" style="display:flex;align-items:center;gap:10px;width:100%;padding:.75rem 1rem;background:none;border:none;font-size:14px;color:#dc2626;cursor:pointer" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'">
         <span>🚪</span> Sign out
       </button>
     </div>
@@ -582,8 +583,8 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 
     <!-- MODE SELECTOR -->
     <div style="display:flex;gap:8px;margin-bottom:1rem">
-      <button onclick="setStatsMode('single')" id="stats-mode-single" style="padding:8px 20px;border-radius:20px;border:2px solid var(--blue);background:var(--blue);color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">📊 Single venue</button>
-      <button onclick="setStatsMode('compare')" id="stats-mode-compare" style="padding:8px 20px;border-radius:20px;border:2px solid var(--border);background:white;color:var(--text-muted);font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">⚖️ Compare venues</button>
+      <button onclick="setStatsMode('single')" id="stats-mode-single" style="padding:8px 20px;border-radius:20px;border:2px solid var(--blue);background:var(--blue);color:white;font-size:13px;font-weight:600;cursor:pointer">📊 Single venue</button>
+      <button onclick="setStatsMode('compare')" id="stats-mode-compare" style="padding:8px 20px;border-radius:20px;border:2px solid var(--border);background:white;color:var(--text-muted);font-size:13px;font-weight:600;cursor:pointer">⚖️ Compare venues</button>
     </div>
 
     <!-- SINGLE VENUE MODE -->
@@ -597,25 +598,25 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
           <button onclick="setStatsPeriod('custom',this)" class="stats-period-btn" data-i18n="period_custom">Custom</button>
         </div>
         <div id="stats-custom-dates" style="display:none;gap:6px;align-items:center">
-          <input type="date" id="stats-from" onchange="renderStatsSingle()" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif"/>
+          <input type="date" id="stats-from" onchange="renderStatsSingle()" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px"/>
           <span style="font-size:12px;color:var(--text-muted)">→</span>
-          <input type="date" id="stats-to" onchange="renderStatsSingle()" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif"/>
+          <input type="date" id="stats-to" onchange="renderStatsSingle()" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px"/>
         </div>
         <div style="display:flex;align-items:center;gap:6px">
           <span style="font-size:12px;font-weight:600;color:var(--text-muted)">Venue:</span>
-          <select id="stats-venue-filter" onchange="renderStatsSingle()" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif;min-width:160px">
+          <select id="stats-venue-filter" onchange="renderStatsSingle()" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;min-width:160px">
             <option value="">All venues</option>
           </select>
         </div>
         <div style="display:flex;align-items:center;gap:6px">
           <span style="font-size:12px;font-weight:600;color:var(--text-muted)">Show:</span>
-          <select id="stats-data-filter" onchange="renderStatsSingle()" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif">
+          <select id="stats-data-filter" onchange="renderStatsSingle()" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px">
             <option value="both">Tasks & Usage</option>
             <option value="tasks">Tasks only</option>
             <option value="usage">Usage only</option>
           </select>
         </div>
-        <button id="stats-pdf-btn" onclick="toggleStatsPDFSelect(false)" style="margin-left:auto;padding:7px 16px;background:linear-gradient(135deg,#0C2340,#185FA5);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">⬇ Export PDF</button>
+        <button id="stats-pdf-btn" onclick="toggleStatsPDFSelect(false)" style="margin-left:auto;padding:7px 16px;background:linear-gradient(135deg,#0C2340,#185FA5);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">⬇ Export PDF</button>
       </div>
       <div style="font-size:12px;color:var(--text-muted);margin-bottom:.5rem;padding:0 2px">💡 Drag cards to rearrange · Click Export PDF to select charts</div>
       <div id="stats-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.75rem;margin-bottom:1rem"></div>
@@ -629,7 +630,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       <div style="background:white;border-radius:12px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);padding:1rem 1.25rem;margin-bottom:1rem">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
           <span style="font-size:14px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif">📌 Saved presets</span>
-          <button onclick="saveComparePreset()" style="padding:5px 12px;background:#f1f5f9;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text-muted)" data-i18n="btn_save_preset">+ Save current</button>
+          <button onclick="saveComparePreset()" style="padding:5px 12px;background:#f1f5f9;border:none;border-radius:6px;font-size:12px;cursor:pointer;color:var(--text-muted)" data-i18n="btn_save_preset">+ Save current</button>
         </div>
         <div id="compare-presets-list" style="display:flex;flex-wrap:wrap;gap:6px">
           <span style="font-size:12px;color:var(--text-hint);font-style:italic">No saved presets yet</span>
@@ -646,8 +647,8 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
           <div>
             <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">1. Select venues</div>
             <div style="display:flex;gap:6px;margin-bottom:6px">
-              <button onclick="selectAllCompareVenues(true)" style="padding:3px 10px;font-size:11px;border:1px solid var(--border);border-radius:4px;background:white;cursor:pointer;font-family:'DM Sans',sans-serif">All</button>
-              <button onclick="selectAllCompareVenues(false)" style="padding:3px 10px;font-size:11px;border:1px solid var(--border);border-radius:4px;background:white;cursor:pointer;font-family:'DM Sans',sans-serif">None</button>
+              <button onclick="selectAllCompareVenues(true)" style="padding:3px 10px;font-size:11px;border:1px solid var(--border);border-radius:4px;background:white;cursor:pointer">All</button>
+              <button onclick="selectAllCompareVenues(false)" style="padding:3px 10px;font-size:11px;border:1px solid var(--border);border-radius:4px;background:white;cursor:pointer">None</button>
             </div>
             <div id="compare-venue-checkboxes" style="max-height:180px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;padding:2px"></div>
           </div>
@@ -655,7 +656,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
           <!-- Step 2: Metric -->
           <div>
             <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">2. Compare by</div>
-            <select id="compare-metric" onchange="updateCompareMetricDetail()" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;margin-bottom:6px">
+            <select id="compare-metric" onchange="updateCompareMetricDetail()" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;margin-bottom:6px">
               <option value="task-hours-total">Task hours — total</option>
               <option value="task-hours-type">Task hours — by type</option>
               <option value="task-count">Number of tasks</option>
@@ -665,10 +666,10 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
               <option value="tasks-vs-usage">Tasks vs Usage hours</option>
             </select>
             <div id="compare-metric-detail" style="display:none">
-              <select id="compare-task-type" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif"></select>
+              <select id="compare-task-type" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px"></select>
             </div>
             <div id="compare-usage-type-wrap" style="display:none;margin-top:6px">
-              <select id="compare-usage-type" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif">
+              <select id="compare-usage-type" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px">
                 <option value="all">All types</option>
                 <option value="Match Day">Match Day</option>
                 <option value="Training Session">Training Session</option>
@@ -680,7 +681,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
           <!-- Step 3: Period -->
           <div>
             <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">3. Time period</div>
-            <select id="compare-period" onchange="updateComparePeriodCustom()" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;margin-bottom:6px">
+            <select id="compare-period" onchange="updateComparePeriodCustom()" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;margin-bottom:6px">
               <option value="week">This week</option>
               <option value="month" selected>This month</option>
               <option value="quarter">This quarter</option>
@@ -688,8 +689,8 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
               <option value="custom">Custom range</option>
             </select>
             <div id="compare-custom-dates" style="display:none;display:flex;flex-direction:column;gap:4px">
-              <input type="date" id="compare-from" style="padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif"/>
-              <input type="date" id="compare-to" style="padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif"/>
+              <input type="date" id="compare-from" style="padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px"/>
+              <input type="date" id="compare-to" style="padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px"/>
             </div>
           </div>
 
@@ -702,11 +703,11 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
               <button onclick="setCompareChartType('pie',this)" class="chart-type-btn" style="padding:10px;border:2px solid var(--border);border-radius:8px;background:white;font-size:18px;cursor:pointer">🥧</button>
               <button onclick="setCompareChartType('doughnut',this)" class="chart-type-btn" style="padding:10px;border:2px solid var(--border);border-radius:8px;background:white;font-size:18px;cursor:pointer">🍩</button>
             </div>
-            <input type="text" id="compare-chart-title" placeholder="Chart title (optional)" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;margin-top:8px;box-sizing:border-box"/>
+            <input type="text" id="compare-chart-title" placeholder="Chart title (optional)" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px;margin-top:8px;box-sizing:border-box"/>
           </div>
         </div>
 
-        <button onclick="addCompareChart()" style="margin-top:1rem;padding:9px 24px;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 2px 8px rgba(24,95,165,.3)" data-i18n="btn_add_chart">+ Add chart</button>
+        <button onclick="addCompareChart()" style="margin-top:1rem;padding:9px 24px;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(24,95,165,.3)" data-i18n="btn_add_chart">+ Add chart</button>
       </div>
 
       <!-- GENERATED CHARTS -->
@@ -714,8 +715,8 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
         <span id="compare-charts-count" style="font-size:12px;color:var(--text-hint)"></span>
         <div style="display:flex;gap:8px">
-          <button onclick="clearCompareCharts()" style="padding:5px 12px;background:#f1f5f9;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text-muted)">Clear all</button>
-          <button id="compare-pdf-btn" onclick="toggleStatsPDFSelect('compare')" style="padding:7px 16px;background:linear-gradient(135deg,#0C2340,#185FA5);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">⬇ Export PDF</button>
+          <button onclick="clearCompareCharts()" style="padding:5px 12px;background:#f1f5f9;border:none;border-radius:6px;font-size:12px;cursor:pointer;color:var(--text-muted)">Clear all</button>
+          <button id="compare-pdf-btn" onclick="toggleStatsPDFSelect('compare')" style="padding:7px 16px;background:linear-gradient(135deg,#0C2340,#185FA5);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">⬇ Export PDF</button>
         </div>
       </div>
       <div id="compare-charts" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:1rem"></div>
@@ -749,7 +750,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
               <span id="gantt-week-label" style="font-size:12px;font-weight:500;min-width:150px;text-align:center">—</span>
               <button onclick="ganttNav(1)" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--text-muted);padding:0 2px">→</button>
             </div>
-            <button onclick="ganttGoToday()" style="padding:4px 10px;font-size:11px;background:white;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text-muted)" data-i18n="today" data-i18n="today">Today</button>
+            <button onclick="ganttGoToday()" style="padding:4px 10px;font-size:11px;background:white;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;color:var(--text-muted)" data-i18n="today" data-i18n="today">Today</button>
             <div style="display:flex;gap:4px;flex-wrap:wrap" id="gantt-status-pills">
               <button onclick="ganttFilter('all',this)" class="sf-pill sf-active" data-i18n="filter_all">All</button>
               <button onclick="ganttFilter('planned',this)" class="sf-pill" data-i18n="legend_planned">Planned</button>
@@ -773,22 +774,22 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       <div style="background:white;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden">
         <div style="padding:.6rem .75rem;border-bottom:1px solid var(--border);background:#fafbfc;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-            <button onclick="exitVenueCal()" style="padding:5px 10px;font-size:12px;background:white;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text-muted)" data-i18n="all_venues_back">← All venues</button>
+            <button onclick="exitVenueCal()" style="padding:5px 10px;font-size:12px;background:white;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;color:var(--text-muted)" data-i18n="all_venues_back">← All venues</button>
             <div style="display:flex;align-items:center;background:white;border:1px solid var(--border);border-radius:var(--radius-sm);padding:2px 8px;gap:6px">
               <button onclick="venueCalNav(-1)" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--text-muted);padding:0 2px">←</button>
               <span id="venue-cal-label" style="font-size:12px;font-weight:500;min-width:140px;text-align:center">—</span>
               <button onclick="venueCalNav(1)" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--text-muted);padding:0 2px">→</button>
             </div>
-            <button onclick="venueCalGoToday()" style="padding:4px 10px;font-size:11px;background:white;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text-muted)" data-i18n="today">Today</button>
+            <button onclick="venueCalGoToday()" style="padding:4px 10px;font-size:11px;background:white;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;color:var(--text-muted)" data-i18n="today">Today</button>
             <div style="display:flex;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">
-              <button id="vcv-week" data-i18n="view_week" onclick="setVenueCalView('week')" style="padding:5px 12px;font-size:12px;font-weight:600;border:none;background:var(--navy);cursor:pointer;color:white;font-family:'DM Sans',sans-serif;border-right:1px solid var(--border)">Week</button>
-              <button id="vcv-month" data-i18n="view_month" onclick="setVenueCalView('month')" style="padding:5px 12px;font-size:12px;font-weight:400;border:none;background:white;cursor:pointer;color:var(--text-muted);font-family:'DM Sans',sans-serif">Month</button>
+              <button id="vcv-week" data-i18n="view_week" onclick="setVenueCalView('week')" style="padding:5px 12px;font-size:12px;font-weight:600;border:none;background:var(--navy);cursor:pointer;color:white;border-right:1px solid var(--border)">Week</button>
+              <button id="vcv-month" data-i18n="view_month" onclick="setVenueCalView('month')" style="padding:5px 12px;font-size:12px;font-weight:400;border:none;background:white;cursor:pointer;color:var(--text-muted)">Month</button>
             </div>
           </div>
           <div style="display:flex;align-items:center;gap:8px">
             <span id="venue-cal-name" style="font-size:13px;font-weight:600;color:var(--text)"></span>
-            <button onclick="openLogTaskModal(null,null,null,null,state.currentVenueCalId)" style="padding:5px 12px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 2px 6px rgba(24,95,165,.3)" data-i18n="btn_log_task">+ Log task</button>
-            <button onclick="openLogUsageModal(null,state.currentVenueCalId)" style="padding:5px 12px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 2px 6px rgba(124,58,237,.3)" data-i18n="btn_log_usage">+ Log usage</button>
+            <button onclick="openLogTaskModal(null,null,null,null,state.currentVenueCalId)" style="padding:5px 12px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:8px;cursor:pointer;box-shadow:0 2px 6px rgba(24,95,165,.3)" data-i18n="btn_log_task">+ Log task</button>
+            <button onclick="openLogUsageModal(null,state.currentVenueCalId)" style="padding:5px 12px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;border:none;border-radius:8px;cursor:pointer;box-shadow:0 2px 6px rgba(124,58,237,.3)" data-i18n="btn_log_usage">+ Log usage</button>
           </div>
         </div>
         <div id="venue-cal-grid" style="overflow-x:auto"></div>
@@ -887,7 +888,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
           <line x1="38" y1="34" x2="38" y2="42" stroke="white" stroke-width="2" stroke-linecap="round"/>
           <line x1="34" y1="38" x2="42" y2="38" stroke="white" stroke-width="2" stroke-linecap="round"/>
         </svg>
-        <div style="font-size:13px;font-weight:600;color:#0C2340;font-family:'DM Sans',sans-serif" data-i18n="tab_log_short">Log task</div>
+        <div style="font-size:13px;font-weight:600;color:#0C2340" data-i18n="tab_log_short">Log task</div>
       </div>
 
       <!-- Log Usage -->
@@ -903,7 +904,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
           <line x1="40" y1="34.5" x2="40" y2="41.5" stroke="white" stroke-width="2" stroke-linecap="round"/>
           <line x1="36.5" y1="38" x2="43.5" y2="38" stroke="white" stroke-width="2" stroke-linecap="round"/>
         </svg>
-        <div style="font-size:13px;font-weight:600;color:#0C2340;font-family:'DM Sans',sans-serif" data-i18n="tab_usage_short">Log usage</div>
+        <div style="font-size:13px;font-weight:600;color:#0C2340" data-i18n="tab_usage_short">Log usage</div>
       </div>
 
       <!-- Schedule -->
@@ -922,7 +923,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
           <rect x="20" y="19.5" width="4" height="2.5" rx="1" fill="#3B6D11"/>
           <rect x="26" y="21" width="4" height="4" rx="1" fill="#3B6D11"/>
         </svg>
-        <div style="font-size:13px;font-weight:600;color:#0C2340;font-family:'DM Sans',sans-serif" data-i18n="tab_schedule_short">Schedule</div>
+        <div style="font-size:13px;font-weight:600;color:#0C2340" data-i18n="tab_schedule_short">Schedule</div>
       </div>
 
       <!-- Stats -->
@@ -935,7 +936,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
           <rect x="25" y="11" width="5" height="22" rx="1.5" fill="#854F0B"/>
           <polyline points="12.5,27 20,21 27.5,14" stroke="#854F0B" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 2"/>
         </svg>
-        <div style="font-size:13px;font-weight:600;color:#0C2340;font-family:'DM Sans',sans-serif" data-i18n="tab_stats_short">Stats</div>
+        <div style="font-size:13px;font-weight:600;color:#0C2340" data-i18n="tab_stats_short">Stats</div>
       </div>
 
     </div>
@@ -947,14 +948,14 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     <div style="padding:.5rem 0">
       <div style="padding:.5rem 1rem;font-size:10px;font-weight:700;color:var(--text-hint);text-transform:uppercase;letter-spacing:.5px">Language</div>
       <div style="padding:.25rem 1rem .75rem">
-        <select class="lang-select" onchange="setLang(this.value)" id="lang-select-venue" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#f8fafc;color:var(--text)"><option value="en">🌐 English</option><option value="pl">🌐 Polski</option><option value="es">🌐 Español</option><option value="fr">🌐 Français</option><option value="de">🌐 Deutsch</option><option value="pt">🌐 Português</option></select>
+        <select class="lang-select" onchange="setLang(this.value)" id="lang-select-venue" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#f8fafc;color:var(--text)"><option value="en">🌐 English</option><option value="pl">🌐 Polski</option><option value="es">🌐 Español</option><option value="fr">🌐 Français</option><option value="de">🌐 Deutsch</option><option value="pt">🌐 Português</option></select>
       </div>
       <div style="height:1px;background:var(--border)"></div>
-      <button onclick="openVenueContactModal();toggleVenueMenu()" style="display:flex;align-items:center;gap:10px;width:100%;padding:.75rem 1rem;background:none;border:none;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);cursor:pointer" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='none'">
+      <button onclick="openVenueContactModal();toggleVenueMenu()" style="display:flex;align-items:center;gap:10px;width:100%;padding:.75rem 1rem;background:none;border:none;font-size:14px;color:var(--text);cursor:pointer" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='none'">
         <span>✏️</span> My contact info
       </button>
       <div style="height:1px;background:var(--border)"></div>
-      <button onclick="logout()" style="display:flex;align-items:center;gap:10px;width:100%;padding:.75rem 1rem;background:none;border:none;font-size:14px;font-family:'DM Sans',sans-serif;color:#dc2626;cursor:pointer" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'">
+      <button onclick="logout()" style="display:flex;align-items:center;gap:10px;width:100%;padding:.75rem 1rem;background:none;border:none;font-size:14px;color:#dc2626;cursor:pointer" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'">
         <span>🚪</span> Sign out
       </button>
     </div>
@@ -996,7 +997,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       <div style="padding:1rem 1.25rem .75rem;display:flex;align-items:center;justify-content:space-between">
         <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif" data-i18n="today">Today</div>
         <div style="display:flex;gap:6px">
-          <button onclick="openLogTaskModal()" style="background:linear-gradient(135deg,#185FA5,#1d4ed8);border:none;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;color:white;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 3px 10px rgba(24,95,165,.35)" data-i18n="btn_log_task">+ Log task</button>
+          <button onclick="openLogTaskModal()" style="background:linear-gradient(135deg,#185FA5,#1d4ed8);border:none;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;color:white;cursor:pointer;box-shadow:0 3px 10px rgba(24,95,165,.35)" data-i18n="btn_log_task">+ Log task</button>
         </div>
       </div>
       <div id="venue-upcoming" style="display:none">
@@ -1013,8 +1014,8 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       <div style="padding:1rem 1.25rem .75rem">
         <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif;margin-bottom:.6rem" data-i18n="history_lbl">History</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%">
-          <input type="text" id="venue-hist-search" placeholder="🔍 Search..." oninput="renderVenueHistory()" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;outline:none;font-family:'DM Sans',sans-serif;background:#f8fafc;width:100%;box-sizing:border-box"/>
-          <select id="venue-hist-status" onchange="renderVenueHistory()" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#f8fafc;outline:none;width:100%;box-sizing:border-box">
+          <input type="text" id="venue-hist-search" placeholder="🔍 Search..." oninput="renderVenueHistory()" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;outline:none;background:#f8fafc;width:100%;box-sizing:border-box"/>
+          <select id="venue-hist-status" onchange="renderVenueHistory()" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;background:#f8fafc;outline:none;width:100%;box-sizing:border-box">
             <option value="">All status</option>
             <option value="completed">Completed</option>
             <option value="missed">Missed</option>
@@ -1024,12 +1025,12 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
           <input type="text" id="venue-hist-from" placeholder="From date"
           onfocus="this.type='date'" onblur="if(!this.value)this.type='text'"
           onchange="renderVenueHistory()"
-          style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#f8fafc;outline:none;width:100%;box-sizing:border-box;color:var(--text)"/>
+          style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;background:#f8fafc;outline:none;width:100%;box-sizing:border-box;color:var(--text)"/>
           <input type="text" id="venue-hist-to" placeholder="To date"
           onfocus="this.type='date'" onblur="if(!this.value)this.type='text'"
           onchange="renderVenueHistory()"
-          style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#f8fafc;outline:none;width:100%;box-sizing:border-box;color:var(--text)"/>
-          <button onclick="exportVenueHistoryCSV('tasks')" style="grid-column:1/-1;padding:10px;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;width:100%">⬇ Export CSV</button>
+          style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;background:#f8fafc;outline:none;width:100%;box-sizing:border-box;color:var(--text)"/>
+          <button onclick="exportVenueHistoryCSV('tasks')" style="grid-column:1/-1;padding:10px;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;width:100%">⬇ Export CSV</button>
         </div>
       </div>
       <div id="venue-history-list" style="max-height:520px;overflow-y:auto"></div>
@@ -1042,7 +1043,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     <div style="background:white;border-radius:16px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);margin-bottom:1rem;overflow:hidden">
       <div style="padding:1rem 1.25rem .75rem;display:flex;align-items:center;justify-content:space-between">
         <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif" data-i18n="today">Today</div>
-        <button onclick="openLogUsageModal()" style="background:linear-gradient(135deg,#7C3AED,#6D28D9);border:none;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;color:white;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 3px 10px rgba(124,58,237,.35)" data-i18n="btn_log_usage">+ Log usage</button>
+        <button onclick="openLogUsageModal()" style="background:linear-gradient(135deg,#7C3AED,#6D28D9);border:none;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;color:white;cursor:pointer;box-shadow:0 3px 10px rgba(124,58,237,.35)" data-i18n="btn_log_usage">+ Log usage</button>
       </div>
       <div id="venue-usage-today" style="display:none">
         <div id="venue-usage-today-list" style="padding:0 .75rem .75rem"></div>
@@ -1058,8 +1059,8 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
       <div style="padding:1rem 1.25rem .75rem">
         <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif;margin-bottom:.6rem" data-i18n="usage_history">Usage history</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%">
-          <input type="text" id="venue-usage-search" placeholder="🔍 Search..." oninput="renderVenueUsageHistory()" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;outline:none;font-family:'DM Sans',sans-serif;background:#f8fafc;width:100%;box-sizing:border-box"/>
-          <select id="venue-usage-filter-type" onchange="renderVenueUsageHistory()" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#f8fafc;outline:none;width:100%;box-sizing:border-box">
+          <input type="text" id="venue-usage-search" placeholder="🔍 Search..." oninput="renderVenueUsageHistory()" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;outline:none;background:#f8fafc;width:100%;box-sizing:border-box"/>
+          <select id="venue-usage-filter-type" onchange="renderVenueUsageHistory()" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;background:#f8fafc;outline:none;width:100%;box-sizing:border-box">
             <option value="">All types</option>
             <option value="Match Day">Match Day</option>
             <option value="Training Session">Training Session</option>
@@ -1068,12 +1069,12 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
           <input type="text" id="venue-usage-from" placeholder="From date"
           onfocus="this.type='date'" onblur="if(!this.value)this.type='text'"
           onchange="renderVenueUsageHistory()"
-          style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#f8fafc;outline:none;width:100%;box-sizing:border-box;color:var(--text)"/>
+          style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;background:#f8fafc;outline:none;width:100%;box-sizing:border-box;color:var(--text)"/>
           <input type="text" id="venue-usage-to" placeholder="To date"
           onfocus="this.type='date'" onblur="if(!this.value)this.type='text'"
           onchange="renderVenueUsageHistory()"
-          style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#f8fafc;outline:none;width:100%;box-sizing:border-box;color:var(--text)"/>
-          <button onclick="exportVenueHistoryCSV('usage')" style="grid-column:1/-1;padding:10px;background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;width:100%">⬇ Export CSV</button>
+          style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;background:#f8fafc;outline:none;width:100%;box-sizing:border-box;color:var(--text)"/>
+          <button onclick="exportVenueHistoryCSV('usage')" style="grid-column:1/-1;padding:10px;background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;width:100%">⬇ Export CSV</button>
         </div>
       </div>
       <div id="venue-usage-history-list" style="max-height:520px;overflow-y:auto"></div>
@@ -1097,19 +1098,19 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
         <button onclick="setVenueStatsPeriod('custom',this)" class="stats-period-btn" data-i18n="period_custom">Custom</button>
       </div>
       <div id="vstats-custom-dates" style="display:none;gap:6px;align-items:center">
-        <input type="date" id="vstats-from" onchange="renderVenueStats_tab()" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif"/>
+        <input type="date" id="vstats-from" onchange="renderVenueStats_tab()" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px"/>
         <span style="font-size:12px;color:var(--text-muted)">→</span>
-        <input type="date" id="vstats-to" onchange="renderVenueStats_tab()" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif"/>
+        <input type="date" id="vstats-to" onchange="renderVenueStats_tab()" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px"/>
       </div>
       <div style="display:flex;align-items:center;gap:6px">
         <span style="font-size:12px;font-weight:600;color:var(--text-muted)">Show:</span>
-        <select id="vstats-data-filter" onchange="renderVenueStats_tab()" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif">
+        <select id="vstats-data-filter" onchange="renderVenueStats_tab()" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px">
           <option value="both">Tasks & Usage</option>
           <option value="tasks">Tasks only</option>
           <option value="usage">Usage only</option>
         </select>
       </div>
-      <button id="vstats-pdf-btn" onclick="toggleStatsPDFSelect(true)" style="margin-left:auto;padding:7px 16px;background:linear-gradient(135deg,#0C2340,#185FA5);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">⬇ Export PDF</button>
+      <button id="vstats-pdf-btn" onclick="toggleStatsPDFSelect(true)" style="margin-left:auto;padding:7px 16px;background:linear-gradient(135deg,#0C2340,#185FA5);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">⬇ Export PDF</button>
     </div>
 
     <!-- SUMMARY CARDS -->
@@ -1130,17 +1131,17 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
           <button onclick="venueSchedNav(1)" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--text-muted);padding:0;line-height:1">→</button>
         </div>
         <!-- Today -->
-        <button onclick="venueSchedToday()" style="flex-shrink:0;padding:5px 10px;font-size:12px;font-weight:500;background:white;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text-muted);white-space:nowrap" data-i18n="today">Today</button>
+        <button onclick="venueSchedToday()" style="flex-shrink:0;padding:5px 10px;font-size:12px;font-weight:500;background:white;border:1px solid var(--border);border-radius:8px;cursor:pointer;color:var(--text-muted);white-space:nowrap" data-i18n="today">Today</button>
         <!-- View switcher -->
         <div style="flex-shrink:0;display:flex;background:#f1f3f5;border-radius:8px;padding:2px;gap:2px">
-          <button id="vsched-btn-month" onclick="setVenueSchedView('month')" style="padding:4px 10px;font-size:11px;font-weight:600;border:none;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;background:transparent;color:var(--text-muted);white-space:nowrap" data-i18n="view_month">Month</button>
-          <button id="vsched-btn-week" onclick="setVenueSchedView('week')" style="padding:4px 10px;font-size:11px;font-weight:600;border:none;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;background:#185FA5;color:white;white-space:nowrap" data-i18n="view_week">Week</button>
+          <button id="vsched-btn-month" onclick="setVenueSchedView('month')" style="padding:4px 10px;font-size:11px;font-weight:600;border:none;border-radius:6px;cursor:pointer;background:transparent;color:var(--text-muted);white-space:nowrap" data-i18n="view_month">Month</button>
+          <button id="vsched-btn-week" onclick="setVenueSchedView('week')" style="padding:4px 10px;font-size:11px;font-weight:600;border:none;border-radius:6px;cursor:pointer;background:#185FA5;color:white;white-space:nowrap" data-i18n="view_week">Week</button>
         </div>
         <!-- Spacer -->
         <div style="flex:1;min-width:8px"></div>
         <!-- Log buttons -->
-        <button onclick="openLogTaskModal()" style="flex-shrink:0;padding:6px 12px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;box-shadow:0 2px 6px rgba(24,95,165,.3)" data-i18n="btn_log_task">+ Log task</button>
-        <button onclick="openLogUsageModal()" style="flex-shrink:0;padding:6px 12px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;box-shadow:0 2px 6px rgba(124,58,237,.3)" data-i18n="btn_log_usage">+ Log usage</button>
+        <button onclick="openLogTaskModal()" style="flex-shrink:0;padding:6px 12px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:8px;cursor:pointer;white-space:nowrap;box-shadow:0 2px 6px rgba(24,95,165,.3)" data-i18n="btn_log_task">+ Log task</button>
+        <button onclick="openLogUsageModal()" style="flex-shrink:0;padding:6px 12px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;border:none;border-radius:8px;cursor:pointer;white-space:nowrap;box-shadow:0 2px 6px rgba(124,58,237,.3)" data-i18n="btn_log_usage">+ Log usage</button>
       </div>
       <!-- GRID -->
       <div id="venue-sched-grid"></div>
@@ -1410,7 +1411,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     <div class="modal-body">
       <div id="op-types-list" style="margin-bottom:1rem"></div>
       <div style="display:flex;gap:8px">
-        <input id="new-op-type-input" type="text" placeholder="New operation type..." style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;outline:none"/>
+        <input id="new-op-type-input" type="text" placeholder="New operation type..." style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;outline:none"/>
         <button class="btn btn-blue btn-sm" onclick="addOpType()">Add</button>
       </div>
     </div>
@@ -3573,6 +3574,8 @@ function copyViewerLink(){
 }
 
 async function revokeViewerLink(){
+
+  try {
   if(!confirm(t('confirm_regen_link'))) return;
   const pid=state.currentProjectId; if(!pid) return;
   const proj=state.projects.find(p=>p.id===pid); if(!proj) return;
@@ -3581,6 +3584,8 @@ async function revokeViewerLink(){
   const link=window.location.href.split('?')[0]+'?view='+proj.viewerToken;
   document.getElementById('viewer-link-text').textContent=link;
   showToast(t('toast_link_new'));
+
+  } catch(err){ showToast('Error: '+err.message); console.error('revokeViewerLink:', err); }
 }
 
 // ── VIEWER DASHBOARD ──
@@ -4103,7 +4108,7 @@ function renderDetailOps(){
       <td style="font-size:12px;max-width:220px">
         ${op.notes?`<div style="white-space:pre-wrap;word-break:break-word;line-height:1.4;margin-bottom:4px">${esc(op.notes)}</div>`:''}
         ${comment?`<div class="comment-text">💬 ${esc(comment)}</div>`:''}
-        <input type="text" placeholder="Comment..." value="${esc(comment)}" onchange="saveComment('${op.id}',this.value)" style="width:100%;font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:5px;font-family:'DM Sans',sans-serif;outline:none;margin-top:3px"/>
+        <input type="text" placeholder="Comment..." value="${esc(comment)}" onchange="saveComment('${op.id}',this.value)" style="width:100%;font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:5px;outline:none;margin-top:3px"/>
       </td>
       <td>${op.photos&&op.photos.length?`<div class="admin-photo-strip">${op.photos.map((p,i)=>`<img src="${p}" onclick="openLightboxFromOp('${op.id}',${i})">`).join('')}</div>`:'<span style="color:var(--text-hint);font-size:12px">—</span>'}</td>
       <td><button class="flag-btn ${flagged?'flagged':''}" onclick="toggleFlag('${op.id}',this)">🚩</button></td>
@@ -4138,6 +4143,8 @@ function openAddVenueModal(){
 }
 
 async function createVenue(){
+
+  try {
   const name=document.getElementById('new-venue-name').value.trim();
   if(!name){ showToast(t('lbl_venue_name')+' '+t('lbl_required')||'Please enter a venue name'); return; }
   const token=genToken();
@@ -4157,6 +4164,8 @@ async function createVenue(){
   document.getElementById('venue-link-result').style.display='block';
   renderProjectDetail(pid);
   showToast(t('toast_venue_added'));
+
+  } catch(err){ showToast('Error: '+err.message); console.error('createVenue:', err); }
 }
 
 function copyVenueLinkById(e,token){
@@ -4168,6 +4177,8 @@ function copyVenueLink(){
 }
 
 async function removeVenueFromProject(e,vid){
+
+  try {
   e.stopPropagation();
   if(!confirm(t('confirm_remove_venue'))) return;
   const v=state.venues.find(x=>x.id===vid); if(!v) return;
@@ -4175,6 +4186,8 @@ async function removeVenueFromProject(e,vid){
   const {error} = await supa.from('pitchops_venues').update({project_ids:v.projectIds}).eq('id',vid);
   if(error){ showToast('Error: '+error.message); return; }
   renderProjectDetail(state.currentProjectId); showToast(t('toast_venue_removed'));
+
+  } catch(err){ showToast('Error: '+err.message); console.error('removeVenueFromProject:', err); }
 }
 
 // ════════════════════════════════════════
@@ -4284,7 +4297,6 @@ function weatherIcon(code){
 }
 
 async function enterVenueDashboard(venue){
-  console.log('[ENTER] enterVenueDashboard for:', venue.name, venue.id);
   try {
   state.currentVenueId = venue.id;
   document.getElementById('venue-hero-name').textContent=venue.name;
@@ -4316,9 +4328,7 @@ async function enterVenueDashboard(venue){
   window._eventsLoaded[venue.id] = false;
   loadVenueEvents(venue.id).catch(()=>{});
   // Show welcome screen first, not directly the log tab
-  console.log('[ENTER] calling showVenueWelcome()');
   showVenueWelcome();
-  console.log('[ENTER] showVenueWelcome done');
   // Set welcome screen venue name and project
   const wname=document.getElementById('welcome-venue-name');
   const wtag=document.getElementById('welcome-proj-tag');
@@ -4332,7 +4342,6 @@ async function enterVenueDashboard(venue){
     wtag.textContent=proj2?proj2.name:'';
   }
   applyTranslations(state.lang);
-  console.log('[ENTER] done');
   } catch(err) {
     console.error('[ENTER] CRASHED:', err);
     // Force show welcome even if crash
@@ -4384,7 +4393,7 @@ function renderVenueHistory(){
         <div style="flex-shrink:0;text-align:right;min-width:90px">
           <div style="font-size:12px;font-weight:500;color:var(--text)">${formatDateOnly(op.date)}</div>
           <div style="font-size:10px;color:var(--text-hint);margin-top:1px">logged ${formatDate(op.createdAt||op.date)}</div>
-          <button onclick="openEditModal('${op.id}')" style="margin-top:5px;background:#f1f5f9;border:none;border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text-muted)">Edit</button>
+          <button onclick="openEditModal('${op.id}')" style="margin-top:5px;background:#f1f5f9;border:none;border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;color:var(--text-muted)">Edit</button>
         </div>
       </div>
     </div>`;
@@ -4534,6 +4543,8 @@ async function saveEditOperation(){
 }
 
 async function deleteOperation(){
+
+  try {
   const id=document.getElementById('edit-op-id').value;
   if(!confirm(t('confirm_delete_op'))) return;
   const {error} = await supa.from('pitchops_operations').delete().eq('id',id);
@@ -4555,6 +4566,8 @@ async function deleteOperation(){
   }
   _refreshCalendars();
   showToast(t('toast_task_deleted'));
+
+  } catch(err){ showToast('Error: '+err.message); console.error('deleteOperation:', err); }
 }
 
 // ════════════════════════════════════════
@@ -4573,7 +4586,7 @@ function renderOpTypesList(){
   document.getElementById('op-types-list').innerHTML=state.opTypes.map((tp,i)=>`
     <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
       <input value="${esc(tp)}" data-orig="${esc(tp)}"
-        style="flex:1;font-size:13px;padding:5px 8px;border:1px solid transparent;border-radius:6px;font-family:'DM Sans',sans-serif;background:transparent;outline:none"
+        style="flex:1;font-size:13px;padding:5px 8px;border:1px solid transparent;border-radius:6px;background:transparent;outline:none"
         onfocus="this.style.border='1px solid var(--blue)';this.style.background='white'"
         onblur="renameOpType(${i},this)"
         onkeydown="if(event.key==='Enter')this.blur()"
@@ -4582,6 +4595,8 @@ function renderOpTypesList(){
     </div>`).join('');
 }
 async function renameOpType(i, input){
+
+  try {
   input.style.border='1px solid transparent';
   input.style.background='transparent';
   const oldName=input.dataset.orig;
@@ -4594,8 +4609,12 @@ async function renameOpType(i, input){
   input.dataset.orig=newName;
   populateOpTypeSelects();
   showToast(t('toast_type_renamed'));
+
+  } catch(err){ showToast('Error: '+err.message); console.error('renameOpType:', err); }
 }
 async function addOpType(){
+
+  try {
   const val=document.getElementById('new-op-type-input').value.trim();
   if(!val||state.opTypes.includes(val)){ showToast(val?t('toast_type_exists'):t('toast_type_add_hint')||'Enter a type name'); return; }
   const {error} = await supa.from('pitchops_op_types').insert({name:val});
@@ -4603,14 +4622,20 @@ async function addOpType(){
   state.opTypes.push(val);
   document.getElementById('new-op-type-input').value='';
   renderOpTypesList(); populateOpTypeSelects(); showToast(t('toast_type_added'));
+
+  } catch(err){ showToast('Error: '+err.message); console.error('addOpType:', err); }
 }
 async function removeOpType(i){
+
+  try {
   const name=state.opTypes[i];
   if(!confirm('Remove type "'+name+'"?')) return;
   const {error}=await supa.from('pitchops_op_types').delete().eq('name',name);
   if(error){ showToast('Error: '+error.message); return; }
   state.opTypes.splice(i,1); renderOpTypesList(); populateOpTypeSelects();
   showToast(t('toast_type_removed')||'Type removed');
+
+  } catch(err){ showToast('Error: '+err.message); console.error('removeOpType:', err); }
 }
 
 // ════════════════════════════════════════
@@ -4801,14 +4826,22 @@ function exportCSV(){
 // FLAGS & COMMENTS
 // ════════════════════════════════════════
 async function toggleFlag(opId,btn){
+
+  try {
   const op=state.operations.find(o=>o.id===opId); if(!op) return;
   op.flagged=!op.flagged; btn.classList.toggle('flagged',op.flagged);
   await supa.from('pitchops_operations').update({flagged:op.flagged}).eq('id',opId);
+
+  } catch(err){ showToast('Error: '+err.message); console.error('toggleFlag:', err); }
 }
 async function saveComment(opId,val){
+
+  try {
   const op=state.operations.find(o=>o.id===opId); if(!op) return;
   op.adminComment=val.trim();
   await supa.from('pitchops_operations').update({admin_comment:op.adminComment}).eq('id',opId);
+
+  } catch(err){ showToast('Error: '+err.message); console.error('saveComment:', err); }
 }
 
 // ════════════════════════════════════════
@@ -4842,6 +4875,8 @@ function copyEditVenueLink(){
 }
 
 async function saveEditVenue(){
+
+  try {
   const id=document.getElementById('edit-venue-id').value;
   const idx=state.venues.findIndex(v=>v.id===id); if(idx===-1) return;
   const vtype=state.selectedEditVenueType;
@@ -4865,9 +4900,13 @@ async function saveEditVenue(){
   closeModal('modal-edit-venue');
   renderProjectDetail(state.currentProjectId);
   showToast(t('toast_venue_updated'));
+
+  } catch(err){ showToast('Error: '+err.message); console.error('saveEditVenue:', err); }
 }
 
 async function deleteVenue(){
+
+  try {
   const id=document.getElementById('edit-venue-id').value;
   if(!confirm(t('confirm_delete_venue'))) return;
   const {error}=await supa.from('pitchops_operations').delete().eq('venue_id',id);
@@ -4879,6 +4918,8 @@ async function deleteVenue(){
   closeModal('modal-edit-venue');
   renderProjectDetail(state.currentProjectId);
   showToast(t('toast_venue_deleted'));
+
+  } catch(err){ showToast('Error: '+err.message); console.error('deleteVenue:', err); }
 }
 
 // ════════════════════════════════════════
@@ -4912,6 +4953,8 @@ function openVenueContactModal(){
 }
 
 async function saveVenueContact(){
+
+  try {
   const vid=state.currentVenueId;
   const idx=state.venues.findIndex(v=>v.id===vid); if(idx===-1) return;
   const person=document.getElementById('vc-person').value.trim();
@@ -4925,6 +4968,8 @@ async function saveVenueContact(){
   closeModal('modal-venue-contact');
   renderVenueContactInfo();
   showToast(t('toast_contact_saved'));
+
+  } catch(err){ showToast('Error: '+err.message); console.error('saveVenueContact:', err); }
 }
 
 function renderVenueContactInfo(){
@@ -5091,7 +5136,8 @@ function switchProjectTab(tab){
         refreshProjectOps(pid, true),
         refreshProjectUsage(pid, true),
         loadAllVenueEvents(pid)
-      ]).then(()=>renderGantt());
+      ]);
+    _refreshCalendars();
     }
   }
   if(tab==='stats'){
@@ -5520,7 +5566,8 @@ function switchVenueTab(tab){
     const vid=state.currentVenueId;
     if(vid){
       // Refresh data silently, then render once
-      Promise.all([refreshVenueOps(vid,true), refreshVenueUsage(vid,true)]).then(()=>renderVenueSched());
+      Promise.all([refreshVenueOps(vid,true), refreshVenueUsage(vid,true)]);
+    renderVenueSched();
     }
   }
   if(tab==='usage'){
@@ -5562,6 +5609,8 @@ function openLogTaskModal(dateStr, timeStr, prefillType, prefillStatus, venueId)
 let state_events = [];
 
 async function loadAllVenueEvents(pid){
+
+  try {
   // Load events for all venues in a project with one query
   const vids = projectVenues(pid).map(v=>v.id);
   if(!vids.length) return;
@@ -5576,9 +5625,13 @@ async function loadAllVenueEvents(pid){
     dateEnd: (r.date_end||'').slice(0,10),
     colorBg: r.color_bg||'#F59E0B', colorFg: r.color_fg||'#FFFFFF'
   })));
+
+  } catch(err){ showToast('Error: '+err.message); console.error('loadAllVenueEvents:', err); }
 }
 
 async function loadVenueEvents(venueId){
+
+  try {
   const {data} = await supa.from('pitchops_events').select('*').eq('venue_id', venueId);
   state_events = (data||[]).map(r=>({
     id: r.id, venueId: r.venue_id, name: r.name,
@@ -5586,6 +5639,8 @@ async function loadVenueEvents(venueId){
     dateEnd: (r.date_end||'').slice(0,10),
     colorBg: r.color_bg||'#F59E0B', colorFg: r.color_fg||'#FFFFFF'
   }));
+
+  } catch(err){ showToast('Error: '+err.message); console.error('loadVenueEvents:', err); }
 }
 
 function selectMultidayColor(el, bg, fg){
@@ -5629,6 +5684,8 @@ function openMultidayEditModal(id){
 }
 
 async function saveMultidayEvent(){
+
+  try {
   const id = document.getElementById('multiday-id').value;
   const name = document.getElementById('multiday-name').value.trim();
   const dateStart = document.getElementById('multiday-start').value;
@@ -5658,6 +5715,8 @@ async function saveMultidayEvent(){
   }
   closeModal('modal-multiday');
   _refreshCalendars();
+
+  } catch(err){ showToast('Error: '+err.message); console.error('saveMultidayEvent:', err); }
 }
 
 async function deleteMultidayEvent(){
@@ -6057,7 +6116,7 @@ function renderVenueUsageHistory(){
           <div style="font-size:12px;font-weight:500;color:var(--text)">${formatDateOnly(u.date)}</div>
           <div style="font-size:10px;color:var(--text-hint);margin-top:1px">${u.timeFrom}–${u.timeTo}</div>
           <div style="font-size:10px;color:var(--text-hint);margin-top:1px">logged ${formatDate(u.createdAt||u.date)}</div>
-          <button onclick="openEditUsageModal('${u.id}')" style="margin-top:5px;background:#f1f5f9;border:none;border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text-muted)">Edit</button>
+          <button onclick="openEditUsageModal('${u.id}')" style="margin-top:5px;background:#f1f5f9;border:none;border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;color:var(--text-muted)">Edit</button>
         </div>
       </div>
     </div>`;
@@ -6236,14 +6295,16 @@ async function saveEditUsage(){
 }
 
 async function deleteUsage(){
+
+  try {
   const id=document.getElementById('edit-usage-id').value;
   if(!confirm(t('confirm_delete_usage'))) return;
   const {error}=await supa.from('pitchops_usage').delete().eq('id',id);
   if(error){ showToast('Error: '+error.message); return; }
-  const delU = state_usage.find(u=>u.id===id) || (true ? state_admin_usage.find(u=>u.id===id) : null);
+  const delU = state_usage.find(u=>u.id===id) || state_admin_usage.find(u=>u.id===id);
   if(delU?.photos?.length) delU.photos.forEach(url=>deletePhoto(url));
   state_usage=state_usage.filter(u=>u.id!==id);
-  if(true) state_admin_usage=state_admin_usage.filter(u=>u.id!==id);
+  state_admin_usage=state_admin_usage.filter(u=>u.id!==id);
   closeModal('modal-edit-usage');
   renderVenueUsageToday(); renderVenueUsageHistory();
   renderDetailUsage();
@@ -6252,6 +6313,8 @@ async function deleteUsage(){
   _refreshCalendars();
   _refreshCalendars();
   showToast(t('toast_usage_deleted'));
+
+  } catch(err){ showToast('Error: '+err.message); console.error('deleteUsage:', err); }
 }
 
 // ════════════════════════════════════════
@@ -6319,7 +6382,7 @@ function renderDetailUsage(){
       <td style="font-size:12px">${esc(u.weather||'—')}</td>
       <td style="font-size:12px;max-width:220px">
         ${u.notes?`<div style="white-space:pre-wrap;word-break:break-word;line-height:1.4;margin-bottom:4px">${esc(u.notes)}</div>`:''}
-        <input type="text" placeholder="Comment..." value="${esc(u.adminComment||'')}" onchange="saveUsageComment('${u.id}',this.value)" style="width:100%;font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:5px;font-family:'DM Sans',sans-serif;outline:none"/>
+        <input type="text" placeholder="Comment..." value="${esc(u.adminComment||'')}" onchange="saveUsageComment('${u.id}',this.value)" style="width:100%;font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:5px;outline:none"/>
       </td>
       <td>${u.photos&&u.photos.length?`<div class="admin-photo-strip">${u.photos.map((p,i)=>`<img src="${p}" onclick="openLightboxFromUsage('${u.id}',${i})">`).join('')}</div>`:'<span style="color:var(--text-hint);font-size:12px">—</span>'}</td>
       <td><button class="flag-btn ${u.flagged?'flagged':''}" onclick="toggleUsageFlag('${u.id}',this)">🚩</button></td>
@@ -6362,16 +6425,24 @@ function clearUsageFilters(){
 }
 
 async function toggleUsageFlag(id, btn){
+
+  try {
   const u=state_admin_usage.find(x=>x.id===id); if(!u) return;
   u.flagged=!u.flagged;
   btn.classList.toggle('flagged', u.flagged);
   await supa.from('pitchops_usage').update({flagged:u.flagged}).eq('id',id);
+
+  } catch(err){ showToast('Error: '+err.message); console.error('toggleUsageFlag:', err); }
 }
 
 async function saveUsageComment(id, val){
+
+  try {
   const u=state_admin_usage.find(x=>x.id===id); if(!u) return;
   u.adminComment=val;
   await supa.from('pitchops_usage').update({admin_comment:val}).eq('id',id);
+
+  } catch(err){ showToast('Error: '+err.message); console.error('saveUsageComment:', err); }
 }
 
 
@@ -6481,7 +6552,7 @@ async function executeDrop(dragData, newDate, newVenueId, copy){
       if(error){ showToast('Error: '+error.message); return; }
       // Keep both arrays in sync
       state_usage.push(newU);
-      if(true) state_admin_usage.push(newU);
+      state_admin_usage.push(newU);
       showToast('✅ Usage copied to '+formatDateOnly(newDate));
     } else {
       const {error} = await supa.from('pitchops_usage').update({usage_date:newDate, venue_id:targetVenueId}).eq('id',id);
@@ -7401,7 +7472,7 @@ function loadComparePresets(){
     if(!saved.length){ list.innerHTML='<span style="font-size:12px;color:var(--text-hint);font-style:italic">No saved presets yet</span>'; return; }
     list.innerHTML=saved.map((p,i)=>`
       <div style="display:flex;align-items:center;gap:4px">
-        <button onclick="applyComparePreset(${i})" style="padding:5px 12px;background:#EBF3FF;border:1px solid var(--blue);border-radius:6px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--blue)">${esc(p.name)}</button>
+        <button onclick="applyComparePreset(${i})" style="padding:5px 12px;background:#EBF3FF;border:1px solid var(--blue);border-radius:6px;font-size:12px;cursor:pointer;color:var(--blue)">${esc(p.name)}</button>
         <button onclick="deleteComparePreset(${i})" style="padding:4px 8px;background:#fee2e2;border:none;border-radius:4px;font-size:11px;cursor:pointer;color:#dc2626">✕</button>
       </div>`).join('');
   } catch(e){}
@@ -7452,7 +7523,7 @@ init();
       <div id="modal-usage-venue-selector" style="display:none" class="field"><label data-i18n="lbl_venue_field">Venue</label><select id="new-usage-venue-id" style="width:100%"></select></div>
       <div class="field">
         <label data-i18n="lbl_usage_type">Usage type</label>
-        <select id="usage-type-select" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px">
+        <select id="usage-type-select" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14px">
           <option value="Match Day">Match Day</option>
           <option value="Training Session">Training Session</option>
           <option value="Other">Other</option>
@@ -7483,7 +7554,7 @@ init();
       </div>
       <div class="field">
         <label>Notes / observations</label>
-        <textarea id="usage-notes" rows="2" placeholder="Any notes..." style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;resize:vertical;box-sizing:border-box"></textarea>
+        <textarea id="usage-notes" rows="2" placeholder="Any notes..." style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14px;resize:vertical;box-sizing:border-box"></textarea>
       </div>
       <div class="field">
         <label data-i18n="lbl_usage_date">Usage date</label>
@@ -7556,7 +7627,7 @@ init();
       </div>
       <div class="field">
         <label data-i18n="lbl_notes_short">Notes</label>
-        <textarea id="edit-usage-notes" rows="2" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;resize:vertical;box-sizing:border-box"></textarea>
+        <textarea id="edit-usage-notes" rows="2" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14px;resize:vertical;box-sizing:border-box"></textarea>
       </div>
       <div class="field">
         <label data-i18n="lbl_usage_date">Usage date</label>
@@ -7602,10 +7673,10 @@ init();
     <div class="modal-body" style="padding:1rem 1.5rem">
       <p style="font-size:14px;color:var(--text-muted);margin-bottom:1.25rem">Target date: <strong id="dnd-new-date"></strong></p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <button onclick="dndChoose(false)" style="padding:12px;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">
+        <button onclick="dndChoose(false)" style="padding:12px;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer">
           ✂️ Move
         </button>
-        <button onclick="dndChoose(true)" style="padding:12px;background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">
+        <button onclick="dndChoose(true)" style="padding:12px;background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer">
           📋 Copy
         </button>
       </div>
@@ -7638,17 +7709,17 @@ init();
     </div>
     <div class="modal-body">
       <label>Event name</label>
-      <input id="multiday-name" type="text" placeholder="e.g. Site visits Poland" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;box-sizing:border-box"/>
+      <input id="multiday-name" type="text" placeholder="e.g. Site visits Poland" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;box-sizing:border-box"/>
       <input type="hidden" id="multiday-id"/>
       <input type="hidden" id="multiday-venue-id"/>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
         <div>
           <label>Start date</label>
-          <input id="multiday-start" type="date" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;box-sizing:border-box"/>
+          <input id="multiday-start" type="date" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;box-sizing:border-box"/>
         </div>
         <div>
           <label>End date</label>
-          <input id="multiday-end" type="date" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;box-sizing:border-box"/>
+          <input id="multiday-end" type="date" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;box-sizing:border-box"/>
         </div>
       </div>
       <div style="margin-top:12px">
@@ -7672,7 +7743,7 @@ init();
     </div>
   </div>
 </div>
-  <div id="offline-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#0C2340;color:white;text-align:center;padding:10px;font-size:13px;font-family:'DM Sans',sans-serif;z-index:9999;font-weight:500">
+  <div id="offline-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#0C2340;color:white;text-align:center;padding:10px;font-size:13px;z-index:9999;font-weight:500">
     📡 You are offline — viewing cached data
   </div>
   <script>
