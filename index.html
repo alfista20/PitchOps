@@ -5714,11 +5714,11 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
   };
   const UB = 'background:#F3E8FF;color:#6B21A8;border-left:3px solid #A855F7';
 
-  const DATE_ROW_H = 30;  // px — height of the date number row inside each cell
-  const BAR_H      = 20;  // px — height of each multiday bar
-  const BAR_GAP    = 3;   // px — gap between bars
-  const BAR_TOP    = DATE_ROW_H + 4; // px from top of cell where bars start
-  const CELL_MIN_H = 90;  // px minimum cell height
+  const DATE_ROW_H = 30;
+  const BAR_H      = 20;
+  const BAR_GAP    = 3;
+  const BAR_TOP    = DATE_ROW_H + 6;
+  const CELL_MIN_H = 90;
 
   const header = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>
     `<div style="text-align:center;font-size:11px;font-weight:700;color:#96a6bb;
@@ -5733,62 +5733,57 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
     const wStart = dStrOf(week[0]);
     const wEnd   = dStrOf(week[6]);
 
-    // ── Greedy slot packing ──
+    // Greedy slot packing
     const wkEvs = venueEvents
       .filter(ev=>ev.dateStart<=wEnd&&ev.dateEnd>=wStart)
       .sort((a,b)=>{ const as=a.dateStart<wStart?wStart:a.dateStart,bs=b.dateStart<wStart?wStart:b.dateStart; return as<bs?-1:as>bs?1:0; });
     const slotEnd = [];
     const evMeta = wkEvs.map(ev=>{
-      const evS=ev.dateStart<wStart?wStart:ev.dateStart, evE=ev.dateEnd>wEnd?wEnd:ev.dateEnd;
-      const c1=week.findIndex(d=>dStrOf(d)===evS), c2=week.findIndex(d=>dStrOf(d)===evE);
+      const evS=ev.dateStart<wStart?wStart:ev.dateStart;
+      const evE=ev.dateEnd>wEnd?wEnd:ev.dateEnd;
+      const c1=week.findIndex(d=>dStrOf(d)===evS);
+      const c2=week.findIndex(d=>dStrOf(d)===evE);
       if(c1<0||c2<0) return null;
       let slot=slotEnd.findIndex(e=>e<c1);
       if(slot<0){slot=slotEnd.length;slotEnd.push(c2);}else slotEnd[slot]=c2;
       return {ev,c1,c2,slot};
     }).filter(Boolean);
     const numSlots = evMeta.length>0 ? evMeta.reduce((m,x)=>Math.max(m,x.slot),0)+1 : 0;
-
-    // ── Absolute overlay bars ──
-    // left/width in % of the row wrapper (7 equal columns = 100/7% each)
-    const COL_W = 100/7;
-    const barsOverlay = evMeta.map(({ev,c1,c2,slot})=>{
-      const startsHere = ev.dateStart>=wStart;
-      const endsHere   = ev.dateEnd<=wEnd;
-      const left = (c1 * COL_W).toFixed(4);
-      const width= ((c2-c1+1) * COL_W).toFixed(4);
-      const top  = BAR_TOP + slot*(BAR_H+BAR_GAP);
-      const rL   = startsHere ? `${BAR_H/2}px` : '0';
-      const rR   = endsHere   ? `${BAR_H/2}px` : '0';
-      // Small horizontal padding to not touch cell borders
-      const pl   = startsHere ? '2px' : '0';
-      const pr   = endsHere   ? '2px' : '0';
-      const innerL = startsHere ? '10px' : '6px';
-      const innerR = endsHere   ? '10px' : '6px';
-      return `<div
-        onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')"
-        onmouseover="this.style.filter='brightness(.88)'"
-        onmouseout="this.style.filter=''"
-        title="${esc(ev.name)}"
-        style="position:absolute;
-          left:calc(${left}% + ${pl});
-          width:calc(${width}% - ${pl} - ${pr});
-          top:${top}px;
-          height:${BAR_H}px;line-height:${BAR_H}px;
-          background:${ev.colorBg};color:${ev.colorFg};
-          border-radius:${rL} ${rR} ${rR} ${rL};
-          font-size:10px;font-weight:700;
-          padding:0 ${innerR} 0 ${innerL};
-          overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-          cursor:pointer;pointer-events:auto;
-          box-shadow:0 1px 3px rgba(0,0,0,.12);
-          box-sizing:border-box"
-      >${esc(ev.name)}</div>`;
-    }).join('');
-
-    // ── Day cells (date number + chips only, bars are in overlay) ──
     const barsAreaH = numSlots*(BAR_H+BAR_GAP);
     const cellH = Math.max(CELL_MIN_H, BAR_TOP + barsAreaH + 40);
 
+    // Absolute overlay bars — positioned relative to the week wrapper (not the grid)
+    const COL_W = 100/7;
+    const barsHTML = evMeta.map(({ev,c1,c2,slot})=>{
+      const startsHere = ev.dateStart>=wStart;
+      const endsHere   = ev.dateEnd<=wEnd;
+      const left  = (c1*COL_W).toFixed(4);
+      const width = ((c2-c1+1)*COL_W).toFixed(4);
+      const top   = BAR_TOP + slot*(BAR_H+BAR_GAP);
+      const rL    = startsHere?`${BAR_H/2}px`:'0';
+      const rR    = endsHere?`${BAR_H/2}px`:'0';
+      return `<div
+        onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')"
+        onmouseover="this.style.opacity='.85'"
+        onmouseout="this.style.opacity='1'"
+        title="${esc(ev.name)}"
+        style="position:absolute;
+          left:${left}%;width:${width}%;
+          top:${top}px;height:${BAR_H}px;line-height:${BAR_H}px;
+          background:${ev.colorBg};color:${ev.colorFg};
+          border-radius:${rL} ${rR} ${rR} ${rL};
+          font-size:10px;font-weight:700;
+          padding:0 8px;
+          overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+          cursor:pointer;
+          box-shadow:0 1px 3px rgba(0,0,0,.15);
+          box-sizing:border-box;
+          pointer-events:auto"
+      >${esc(ev.name)}</div>`;
+    }).join('');
+
+    // Day cells — date number + chips, NO bars inside cell
+    // position:relative + z-index:1 so they stay BELOW the overlay (z-index:3)
     const dayCells = week.map((d,wi)=>{
       const dStr   = dStrOf(d);
       const isT    = dStr===today;
@@ -5827,6 +5822,7 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
         ? `openLogTaskModal('${dStr}',null,null,null,'${venueId}')`
         : `openLogTaskModal('${dStr}')`;
 
+      // Chips pushed down by barsAreaH to sit below the bar overlay
       return `<div
         onclick="${clickFn}"
         onmouseover="this.style.background='${isT?'#dbeeff':'#f0f7ff'}'"
@@ -5834,20 +5830,27 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
         style="border:${brd};background:${bg};
           padding:5px 5px 5px 5px;
           height:${cellH}px;
-          cursor:pointer;box-sizing:border-box"
+          cursor:pointer;box-sizing:border-box;
+          position:relative;z-index:1"
       >
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
           <span style="${ns}">${d.getDate()}</span>${plus}
         </div>
-        <div style="margin-top:${barsAreaH+8}px">${chips}</div>
+        <div style="margin-top:${barsAreaH+6}px">${chips}</div>
       </div>`;
     }).join('');
 
-    // ── Week row: position:relative wrapper → grid → absolute overlay ──
+    // STRUCTURE:
+    // position:relative wrapper (no explicit size — sizes to grid)
+    //   display:grid with 7 cells (z-index:1, position:relative)
+    //   position:absolute overlay (z-index:3, pointer-events:none)
+    //     bars (pointer-events:auto)
     gridHTML += `<div style="position:relative">
-      <div style="display:grid;grid-template-columns:repeat(7,1fr)">${dayCells}</div>
-      <div style="position:absolute;top:0;left:0;width:100%;height:${cellH}px;pointer-events:none;z-index:2">
-        ${barsOverlay}
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);position:relative;z-index:1">
+        ${dayCells}
+      </div>
+      <div style="position:absolute;top:0;left:0;width:100%;height:${cellH}px;pointer-events:none;z-index:3;overflow:visible">
+        ${barsHTML}
       </div>
     </div>`;
   }
