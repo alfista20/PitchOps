@@ -6112,6 +6112,7 @@ function dbToUsage(r){
   const autoStatus=d>today?'planned':'inprogress';
   return {
     id:r.id, venueId:r.venue_id, usageType:r.usage_type||'Training Session',
+    date:d,
     teamName:r.team_name||'', zone:r.zone||'', weather:r.weather||'',
     notes:r.notes||'', date:d, timeFrom:r.time_from||'08:00',
     timeTo:r.time_to||'17:00', status:r.status||autoStatus,
