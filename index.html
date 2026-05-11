@@ -5831,7 +5831,10 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
         ...dOps.map(o=>({fn:`openEditModal('${o.id}')`,label:o.type,st:CS[o.status]||CS.planned})),
         ...dUse.map(u=>({fn:`openEditUsageModal('${u.id}')`,label:u.usageType||'Usage',st:UB})),
       ];
-      const MAX_CHIPS = 4;
+      // Dynamic chip limit: how many chips fit in remaining space after bars
+      const CHIP_H = 20; // chip height + margin (2px padding*2 + font + margin-bottom)
+      const availableH = cellH - DATE_ROW_H - barsAreaH - 2 - 4; // 2=bar-chip gap, 4=bottom pad
+      const MAX_CHIPS = Math.max(1, Math.floor(availableH / CHIP_H));
       const visibleItems = items.slice(0, MAX_CHIPS);
       const overflowCount = items.length - MAX_CHIPS;
       const chips = visibleItems.map(it=>
