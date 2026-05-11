@@ -5619,11 +5619,18 @@ async function deleteMultidayEvent(){
 }
 
 function _refreshCalendars(){
-  // Re-render whichever calendar view is currently visible
+  // Re-render ALL calendar views that are currently visible
+  // Admin project Gantt
   const calContent = document.getElementById('ptab-calendar-content');
-  const schedContent = document.getElementById('vtab-schedule-content');
   if(calContent && calContent.style.display==='block') renderGantt();
+  // Venue schedule — month OR week, driven by venueSchedView variable
+  const schedContent = document.getElementById('vtab-schedule-content');
   if(schedContent && schedContent.style.display==='block') renderVenueSched();
+  // Venue week calendar (drill-in per venue)
+  const venueCalView = document.getElementById('venue-cal-view');
+  if(venueCalView && venueCalView.style.display==='block' && state.currentVenueCalId){
+    renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
+  }
 }
 
 // ════════════════════════════════════════
@@ -5731,24 +5738,23 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
       return {c1,c2,slot};
     });
 
-    // Build overlay bars HTML (absolutely positioned over the week row)
-    // Each bar spans from c1 to c2 as a single continuous rectangle
+    // ── Bar row: dedicated row above day cells ──
+    // Bars live in their own row (not as absolute children of grid),
+    // using position:relative + absolute children — same approach as admin Gantt evRow.
+    // This avoids CSS Grid absolute-child placement bugs.
     const maxSlot = evSlot.reduce((m,s)=>Math.max(m,s.slot),-1);
-    const overlayH = maxSlot>=0 ? BAR_TOP + (maxSlot+1)*(BAR_H+BAR_GAP) : BAR_TOP;
-    const effectiveCellH = Math.max(CELL_H, overlayH+10);
+    const barsRowH = maxSlot>=0 ? (maxSlot+1)*(BAR_H+BAR_GAP)+4 : 0;
 
     const bars = wkEvs.map((ev,ei)=>{
       const {c1,c2,slot} = evSlot[ei];
       if(slot<0) return '';
       const pctL = (c1/7*100).toFixed(3);
       const pctW = ((c2-c1+1)/7*100).toFixed(3);
-      const top  = BAR_TOP + slot*(BAR_H+BAR_GAP);
-      // Rounded caps: left cap only if event starts in this week, right cap only if it ends
+      const top  = slot*(BAR_H+BAR_GAP);
       const startsHere = ev.dateStart>=wStart;
       const endsHere   = ev.dateEnd<=wEnd;
       const rL = startsHere?`${BAR_H/2}px`:'0';
       const rR = endsHere?`${BAR_H/2}px`:'0';
-      // Slight inset so bars don't bleed into cell borders
       const insetL = startsHere?'3px':'0';
       const insetR = endsHere?'3px':'0';
       return `<div
@@ -5756,19 +5762,30 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
         onmouseover="this.style.filter='brightness(.9)';this.style.boxShadow='0 2px 8px rgba(0,0,0,.18)'"
         onmouseout="this.style.filter='';this.style.boxShadow='none'"
         title="${esc(ev.name)}"
-        style="position:absolute;left:calc(${pctL}% + ${insetL});width:calc(${pctW}% - ${insetL} - ${insetR});top:${top}px;height:${BAR_H}px;
+        style="position:absolute;
+          left:calc(${pctL}% + ${insetL});
+          width:calc(${pctW}% - ${insetL} - ${insetR});
+          top:${top}px;height:${BAR_H}px;
           background:${ev.colorBg};color:${ev.colorFg};
           border-radius:${rL} ${rR} ${rR} ${rL};
           font-size:10px;font-weight:700;line-height:${BAR_H}px;
           padding:0 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-          cursor:pointer;box-sizing:border-box;z-index:5;pointer-events:auto;
+          cursor:pointer;box-sizing:border-box;
           box-shadow:0 1px 3px rgba(0,0,0,.12);
           transition:filter .1s,box-shadow .1s"
       >${esc(ev.name)}</div>`;
     }).join('');
 
-    // ── Day cells for this week row ──
-    const paddingTop = overlayH + 2; // push chips below the event bars
+    // Bar row: single full-width cell spanning all 7 columns, height = bar slots needed
+    const barRow = barsRowH > 0
+      ? `<div style="display:grid;grid-template-columns:repeat(7,1fr)">
+          <div style="grid-column:1/-1;position:relative;height:${barsRowH}px;background:white;border-bottom:1px solid rgba(0,0,0,0.04)">
+            ${bars}
+          </div>
+        </div>`
+      : '';
+
+    // ── Day cells row ──
     const dayCells = week.map((d,wi)=>{
       const dStr  = dStrOf(d);
       const isT   = dStr===today;
@@ -5803,29 +5820,16 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
         onclick="openLogTaskModal('${dStr}')"
         onmouseover="this.style.background='${hoverBg}'"
         onmouseout="this.style.background='${bg}'"
-        style="border:${brd};background:${bg};padding:6px;min-height:${effectiveCellH}px;cursor:pointer;box-sizing:border-box;${bShadow}"
+        style="border:${brd};background:${bg};padding:6px;min-height:${CELL_H}px;cursor:pointer;box-sizing:border-box;${bShadow}"
       >
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
           <span style="${ns}">${d.getDate()}</span>${plus}
         </div>
-        <div style="margin-top:${paddingTop - 26}px">${chips}</div>
+        ${chips}
       </div>`;
     }).join('');
 
-    // Week row: outer wrapper is position:relative for the overlay
-    // Bars go in a SEPARATE absolutely-positioned div (not a grid child)
-    // so left:X% is relative to the full week width, not a single grid cell
-    // Outer wrapper: position:relative anchor
-    // Layer 1 (z-index:1): day cells grid — handles click for new task
-    // Layer 2 (z-index:5): overlay div with bars — separate from grid so left:% = full week width
-    gridHTML += `<div style="position:relative">
-      <div style="display:grid;grid-template-columns:repeat(7,1fr)">
-        ${dayCells}
-      </div>
-      <div style="position:absolute;top:0;left:0;width:100%;height:${effectiveCellH}px;pointer-events:none;z-index:5">
-        ${bars}
-      </div>
-    </div>`;
+    gridHTML += `${barRow}<div style="display:grid;grid-template-columns:repeat(7,1fr)">${dayCells}</div>`;
   }
 
   grid.innerHTML = `<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%"><div style="min-width:560px">${gridHTML}</div></div>`;
