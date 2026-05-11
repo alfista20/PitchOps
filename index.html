@@ -5834,7 +5834,7 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
         style="border:${brd};background:${bg};
           padding:5px 5px 5px 5px;
           height:${cellH}px;
-          cursor:pointer;box-sizing:border-box;overflow:hidden"
+          cursor:pointer;box-sizing:border-box"
       >
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
           <span style="${ns}">${d.getDate()}</span>${plus}
@@ -5846,7 +5846,7 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
     // ── Week row: position:relative wrapper → grid → absolute overlay ──
     gridHTML += `<div style="position:relative">
       <div style="display:grid;grid-template-columns:repeat(7,1fr)">${dayCells}</div>
-      <div style="position:absolute;top:0;left:0;width:100%;height:${cellH}px;pointer-events:none;overflow:visible">
+      <div style="position:absolute;top:0;left:0;width:100%;height:${cellH}px;pointer-events:none;z-index:2">
         ${barsOverlay}
       </div>
     </div>`;
