@@ -5971,7 +5971,10 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
     }).filter(Boolean);
     const numSlots = evMeta.length>0 ? evMeta.reduce((m,x)=>Math.max(m,x.slot),0)+1 : 0;
     const barsAreaH = numSlots*(BAR_H+BAR_GAP);
-    const cellH = Math.max(CELL_MIN_H, BAR_TOP + barsAreaH + 110);
+    // cellH grows with number of items so +more badge is always visible
+    const itemsCount = dOps.length + dUse.length;
+    const chipsAreaNeeded = Math.min(itemsCount, 5) * 20 + 30; // min 5 chips + badge space
+    const cellH = Math.max(CELL_MIN_H, BAR_TOP + barsAreaH + Math.max(110, chipsAreaNeeded));
 
     // Absolute overlay bars — positioned relative to the week wrapper (not the grid)
     const COL_W = 100/7;
