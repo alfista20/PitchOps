@@ -5713,8 +5713,9 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
     missed:    'background:#FCEBEB;color:#A32D2D;border-left:3px solid #A32D2D',
   };
   const UB = 'background:#F3E8FF;color:#6B21A8;border-left:3px solid #A855F7';
-  const BAR_H = 20; const BAR_GAP = 3; const CELL_H = 72;
+  const BAR_H = 20; const BAR_GAP = 3; const CELL_H = 80;
 
+  // ── Header ──
   const header = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>
     `<div style="text-align:center;font-size:11px;font-weight:700;color:#96a6bb;text-transform:uppercase;padding:8px 0;border-bottom:1px solid var(--border);border-right:1px solid var(--border);box-sizing:border-box">${d}</div>`
   ).join('');
@@ -5725,11 +5726,12 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
     const wStart = dStrOf(week[0]);
     const wEnd   = dStrOf(week[6]);
 
+    // ── Greedy slot packing ──
     const wkEvs = venueEvents
-      .filter(ev => ev.dateStart <= wEnd && ev.dateEnd >= wStart)
-      .sort((a,b) => { const as=a.dateStart<wStart?wStart:a.dateStart, bs=b.dateStart<wStart?wStart:b.dateStart; return as<bs?-1:as>bs?1:0; });
+      .filter(ev => ev.dateStart<=wEnd && ev.dateEnd>=wStart)
+      .sort((a,b)=>{ const as=a.dateStart<wStart?wStart:a.dateStart, bs=b.dateStart<wStart?wStart:b.dateStart; return as<bs?-1:as>bs?1:0; });
     const slotEnd = [];
-    const evMeta = wkEvs.map(ev => {
+    const evMeta = wkEvs.map(ev=>{
       const evS=ev.dateStart<wStart?wStart:ev.dateStart, evE=ev.dateEnd>wEnd?wEnd:ev.dateEnd;
       const c1=week.findIndex(d=>dStrOf(d)===evS), c2=week.findIndex(d=>dStrOf(d)===evE);
       if(c1<0||c2<0) return null;
@@ -5739,73 +5741,122 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
     }).filter(Boolean);
     const maxSlot = evMeta.reduce((m,x)=>Math.max(m,x.slot),-1);
 
-    // ROW 1: date numbers
-    const dateRow = week.map(d=>{
-      const dStr=dStrOf(d), isT=dStr===today, inM=d.getMonth()===monthStart.getMonth();
-      const bg=isT?'#EBF4FF':inM?'white':'#f8fafc';
-      const brd=isT?'2px solid #185FA5':'1px solid rgba(0,0,0,0.06)';
-      const ns=isT?'background:#185FA5;color:white;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;':`color:${inM?'#0C2340':'#c0c8d4'};font-size:12px;font-weight:600;`;
-      const plus=inM?`<span onclick="event.stopPropagation();openMultidayModal('${dStr}','${venueId}')" onmouseover="this.style.color='#185FA5'" onmouseout="this.style.color='#d0d5dd'" style="font-size:16px;line-height:1;color:#d0d5dd;cursor:pointer;padding:0 2px">+</span>`:'';
-      return `<div style="border:${brd};border-bottom:none;background:${bg};padding:5px 6px 3px;box-sizing:border-box"><div style="display:flex;justify-content:space-between;align-items:center"><span style="${ns}">${d.getDate()}</span>${plus}</div></div>`;
-    }).join('');
+    // ── Build per-column bar HTML (table with colspan per row slot) ──
+    // Returns HTML string for the bars section of a specific column
+    // We build bar HTML per-slot as a table, then inject per day cell
+    // APPROACH: one single grid row, each cell contains date + bars + chips
+    // Bars use absolute positioning within the cell — but we learned that's broken
+    // NEW APPROACH: Use a shared <table> for bars ONLY (no date/chip split)
+    // but inject it as part of the same grid row using CSS Grid subgrid trick
+    // 
+    // FINAL CORRECT APPROACH:
+    // Single grid row. Each day cell is ONE div. Inside: date header, then bars, then chips.
+    // Bars are rendered PER COLUMN — each day cell knows which bar slots it participates in.
+    // Each bar slot in a cell is either: empty spacer, left-end bar, middle bar, right-end bar.
+    // This is the "calendar cell contains its own bar fragment" approach but with
+    // FIXED HEIGHT spacers so all cells in the row have aligned bar rows.
 
-    // ROW 2: multiday bars — <table colspan> guarantees seamless continuous stripes
-    let barRowHTML='';
-    if(maxSlot>=0){
-      // Per-column background colors (matching day cells)
-      const colBg = week.map(d=>{
-        const dStr=dStrOf(d), isT=dStr===today, inM=d.getMonth()===monthStart.getMonth();
-        return isT?'#EBF4FF':inM?'white':'#f8fafc';
-      });
-      // Per-column border (today gets blue border)
-      const colBrd = week.map(d=>{
-        const dStr=dStrOf(d);
-        return dStr===today?'1px solid #185FA5':'1px solid rgba(0,0,0,0.06)';
-      });
-      const todayCol = week.findIndex(d=>dStrOf(d)===today);
-      let tableRows='';
-      for(let s=0;s<=maxSlot;s++){
-        const rowEvs=evMeta.filter(x=>x.slot===s).sort((a,b)=>a.c1-b.c1);
-        // Build cell-by-cell so each empty cell gets correct column background
-        let tds='';
-        for(let ci=0;ci<7;ci++){
-          const isTodayCol = ci===todayCol;
-          const todaySide = isTodayCol ? 'border-left:2px solid #185FA5;border-right:2px solid #185FA5;' : '';
-          const evHere=rowEvs.find(x=>x.c1===ci);
-          if(evHere){
-            const {ev,c1,c2}=evHere;
-            const span=c2-c1+1, startsHere=ev.dateStart>=wStart, endsHere=ev.dateEnd<=wEnd;
-            const rL=startsHere?`${BAR_H/2}px`:'0', rR=endsHere?`${BAR_H/2}px`:'0';
-            tds+=`<td colspan="${span}" style="border:none;padding:0 0 ${BAR_GAP}px 0;background:${colBg[ci]};${isTodayCol&&span===1?todaySide:''}"><div onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')" onmouseover="this.style.filter='brightness(.9)'" onmouseout="this.style.filter=''" title="${esc(ev.name)}" style="height:${BAR_H}px;line-height:${BAR_H}px;background:${ev.colorBg};color:${ev.colorFg};border-radius:${rL} ${rR} ${rR} ${rL};font-size:10px;font-weight:700;padding:0 ${endsHere?'10px':'6px'} 0 ${startsHere?'10px':'6px'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.1);transition:filter .1s">${esc(ev.name)}</div></td>`;
-            ci=c2;
-          } else {
-            const spanning=evMeta.find(x=>x.slot===s&&x.c1<ci&&x.c2>=ci);
-            if(!spanning){
-              tds+=`<td style="padding:0 0 ${BAR_GAP}px 0;background:${colBg[ci]};${todaySide}border-top:none;border-bottom:none"></td>`;
-            }
-          }
-        }
-        tableRows+=`<tr>${tds}</tr>`;
+    // Build per-column bar fragments
+    // colBars[ci] = array of maxSlot+1 HTML strings (one per slot)
+    const numSlots = maxSlot + 1;
+    const colBars = Array.from({length:7}, ()=> Array(numSlots).fill(''));
+
+    evMeta.forEach(({ev,c1,c2,slot})=>{
+      for(let ci=c1; ci<=c2; ci++){
+        const isFirst = ci===c1;
+        const isLast  = ci===c2;
+        const startsHere = ev.dateStart>=wStart && isFirst;
+        const endsHere   = ev.dateEnd<=wEnd   && isLast;
+        const rTL = startsHere?`${BAR_H/2}px`:'0';
+        const rBL = startsHere?`${BAR_H/2}px`:'0';
+        const rTR = endsHere?`${BAR_H/2}px`:'0';
+        const rBR = endsHere?`${BAR_H/2}px`:'0';
+        // Negative margins to bleed into borders between cells
+        const mL = startsHere?'2px':'-1px';
+        const mR = endsHere?'2px':'1px';
+        // Only show label on first visible cell
+        const showLabel = isFirst;
+        colBars[ci][slot] = `<div
+          onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')"
+          onmouseover="this.style.filter='brightness(.88)'"
+          onmouseout="this.style.filter=''"
+          title="${esc(ev.name)}"
+          style="height:${BAR_H}px;line-height:${BAR_H}px;
+            margin:1px ${mR} 1px ${mL};
+            background:${ev.colorBg};color:${ev.colorFg};
+            border-radius:${rTL} ${rTR} ${rBR} ${rBL};
+            font-size:10px;font-weight:700;
+            padding:0 6px;
+            overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+            cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.1)"
+        >${showLabel?esc(ev.name):''}</div>`;
       }
-      barRowHTML=`<div><table style="width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed">${tableRows}</table></div>`;
-    }
+    });
 
-    // ROW 3: task/usage chips
-    const chipRow = week.map(d=>{
-      const dStr=dStrOf(d), isT=dStr===today, inM=d.getMonth()===monthStart.getMonth(), isPast=dStr<today;
-      const dOps=ops.filter(o=>(o.date||'').slice(0,10)===dStr).map(o=>isPast&&o.status==='planned'?{...o,status:'missed'}:o);
-      const dUse=usage.filter(u=>(u.date||'').slice(0,10)===dStr);
-      const items=[...dOps.map(o=>({fn:`openEditModal('${o.id}')`,label:o.type,st:CS[o.status]||CS.planned})),...dUse.map(u=>({fn:`openEditUsageModal('${u.id}')`,label:u.usageType||'Usage',st:UB}))];
-      const chips=items.map(it=>`<div onclick="event.stopPropagation();${it.fn}" onmouseover="this.style.filter='brightness(.93)'" onmouseout="this.style.filter=''" style="font-size:10px;font-weight:600;padding:2px 5px;border-radius:3px;margin-bottom:2px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;${it.st}">${esc(it.label)}</div>`).join('');
-      const bg=isT?'#EBF4FF':inM?'white':'#f8fafc', brd=isT?'2px solid #185FA5':'1px solid rgba(0,0,0,0.06)';
-      const clickFn=state.currentProjectId?`openLogTaskModal('${dStr}',null,null,null,'${venueId}')`:`openLogTaskModal('${dStr}')`;
-      return `<div onclick="${clickFn}" onmouseover="this.style.background='${isT?'#dbeeff':'#f0f7ff'}'" onmouseout="this.style.background='${bg}'" style="border:${brd};border-top:none;background:${bg};padding:4px 5px 6px;min-height:${CELL_H}px;cursor:pointer;box-sizing:border-box">${chips}</div>`;
+    // ── Day cells — single unified div per day ──
+    const dayCells = week.map((d,wi)=>{
+      const dStr   = dStrOf(d);
+      const isT    = dStr===today;
+      const inM    = d.getMonth()===monthStart.getMonth();
+      const isPast = dStr<today;
+
+      // Bars for this column
+      const barsHTML = numSlots>0 ? colBars[wi].map(b=>
+        b || `<div style="height:${BAR_H}px;margin:1px 0"></div>`
+      ).join('') : '';
+
+      // Chips
+      const dOps = ops.filter(o=>(o.date||'').slice(0,10)===dStr)
+                      .map(o=>isPast&&o.status==='planned'?{...o,status:'missed'}:o);
+      const dUse = usage.filter(u=>(u.date||'').slice(0,10)===dStr);
+      const items = [
+        ...dOps.map(o=>({fn:`openEditModal('${o.id}')`,label:o.type,st:CS[o.status]||CS.planned})),
+        ...dUse.map(u=>({fn:`openEditUsageModal('${u.id}')`,label:u.usageType||'Usage',st:UB})),
+      ];
+      const chips = items.map(it=>
+        `<div onclick="event.stopPropagation();${it.fn}"
+          onmouseover="this.style.filter='brightness(.93)'"
+          onmouseout="this.style.filter=''"
+          style="font-size:10px;font-weight:600;padding:2px 5px;border-radius:3px;
+            margin-bottom:2px;cursor:pointer;white-space:nowrap;
+            overflow:hidden;text-overflow:ellipsis;${it.st}"
+        >${esc(it.label)}</div>`
+      ).join('');
+
+      const bg  = isT?'#EBF4FF':inM?'white':'#f8fafc';
+      const brd = isT?'2px solid #185FA5':'1px solid rgba(0,0,0,0.06)';
+      const ns  = isT
+        ? 'background:#185FA5;color:white;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;'
+        : `color:${inM?'#0C2340':'#c0c8d4'};font-size:12px;font-weight:600;`;
+      const plus = inM
+        ? `<span onclick="event.stopPropagation();openMultidayModal('${dStr}','${venueId}')"
+            onmouseover="this.style.color='#185FA5'" onmouseout="this.style.color='#d0d5dd'"
+            style="font-size:16px;line-height:1;color:#d0d5dd;cursor:pointer;padding:0 2px">+</span>`
+        : '';
+      const isAdminCtx = !!state.currentProjectId;
+      const clickFn = isAdminCtx ? `openLogTaskModal('${dStr}',null,null,null,'${venueId}')` : `openLogTaskModal('${dStr}')`;
+
+      return `<div
+        onclick="${clickFn}"
+        onmouseover="this.style.background='${isT?'#dbeeff':'#f0f7ff'}'"
+        onmouseout="this.style.background='${bg}'"
+        style="border:${brd};background:${bg};
+          padding:5px 5px 6px 5px;
+          min-height:${CELL_H + numSlots*(BAR_H+2)}px;
+          cursor:pointer;box-sizing:border-box;overflow:hidden"
+      >
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+          <span style="${ns}">${d.getDate()}</span>${plus}
+        </div>
+        ${barsHTML}
+        <div style="margin-top:3px">${chips}</div>
+      </div>`;
     }).join('');
 
-    gridHTML+=`<div style="display:grid;grid-template-columns:repeat(7,1fr)">${dateRow}</div>`+barRowHTML+`<div style="display:grid;grid-template-columns:repeat(7,1fr)">${chipRow}</div>`;
+    gridHTML += `<div style="display:grid;grid-template-columns:repeat(7,1fr)">${dayCells}</div>`;
   }
 
-  grid.innerHTML=`<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%"><div style="min-width:560px">${gridHTML}</div></div>`;
+  grid.innerHTML = `<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%"><div style="min-width:560px">${gridHTML}</div></div>`;
   } catch(err){
     console.error('renderMonthCalendar error:',err);
     const g=document.getElementById(gridId);
