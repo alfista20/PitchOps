@@ -776,14 +776,14 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
             </div>
             <button onclick="venueCalGoToday()" style="padding:4px 10px;font-size:11px;background:white;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text-muted)" data-i18n="today">Today</button>
             <div style="display:flex;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">
-              <button id="vcv-day" data-i18n="view_day" onclick="setVenueCalView('day')" style="padding:5px 12px;font-size:12px;font-weight:400;border:none;background:white;cursor:pointer;color:var(--text-muted);font-family:'DM Sans',sans-serif;border-right:1px solid var(--border)">Day</button>
               <button id="vcv-week" data-i18n="view_week" onclick="setVenueCalView('week')" style="padding:5px 12px;font-size:12px;font-weight:600;border:none;background:var(--navy);cursor:pointer;color:white;font-family:'DM Sans',sans-serif;border-right:1px solid var(--border)">Week</button>
               <button id="vcv-month" data-i18n="view_month" onclick="setVenueCalView('month')" style="padding:5px 12px;font-size:12px;font-weight:400;border:none;background:white;cursor:pointer;color:var(--text-muted);font-family:'DM Sans',sans-serif">Month</button>
             </div>
           </div>
           <div style="display:flex;align-items:center;gap:8px">
             <span id="venue-cal-name" style="font-size:13px;font-weight:600;color:var(--text)"></span>
-            
+            <button onclick="openAdminLogTaskModal(null,state.currentVenueCalId)" style="padding:5px 12px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 2px 6px rgba(24,95,165,.3)" data-i18n="btn_log_task">+ Log task</button>
+            <button onclick="openAdminLogUsageModal(null,state.currentVenueCalId)" style="padding:5px 12px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 2px 6px rgba(124,58,237,.3)" data-i18n="btn_log_usage">+ Log usage</button>
           </div>
         </div>
         <div id="venue-cal-grid" style="overflow-x:auto"></div>
@@ -5674,7 +5674,7 @@ function renderVenueSched(){
 function renderMonthCalendar(venueId, gridId, monthOffset){
   try {
   const grid = document.getElementById(gridId); if(!grid) return;
-  const labelEl = document.getElementById('venue-sched-label');
+  const labelEl = document.getElementById(gridId.replace('-grid','-label'));
   const today = todayStr();
 
   const now = new Date();
@@ -5698,165 +5698,84 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
     missed:    'background:#FCEBEB;color:#A32D2D;border-left:3px solid #A32D2D',
   };
   const UB = 'background:#F3E8FF;color:#6B21A8;border-left:3px solid #A855F7';
+  const BAR_H = 20; const BAR_GAP = 3; const CELL_H = 72;
 
-  const BAR_H  = 20;
-  const BAR_GAP = 3;
-  const CELL_H  = 88;
-
-  // ── Header row ──
   const header = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>
     `<div style="text-align:center;font-size:11px;font-weight:700;color:#96a6bb;text-transform:uppercase;padding:8px 0;border-bottom:1px solid var(--border);border-right:1px solid var(--border);box-sizing:border-box">${d}</div>`
   ).join('');
   let gridHTML = `<div style="display:grid;grid-template-columns:repeat(7,1fr)">${header}</div>`;
 
   for(let w=0;w<6;w++){
-    const week  = cells.slice(w*7,(w+1)*7);
-    const wStart= dStrOf(week[0]);
-    const wEnd  = dStrOf(week[6]);
+    const week   = cells.slice(w*7,(w+1)*7);
+    const wStart = dStrOf(week[0]);
+    const wEnd   = dStrOf(week[6]);
 
-    // ── Events active this week ──
     const wkEvs = venueEvents
       .filter(ev => ev.dateStart <= wEnd && ev.dateEnd >= wStart)
-      .sort((a,b) => {
-        const as = a.dateStart < wStart ? wStart : a.dateStart;
-        const bs = b.dateStart < wStart ? wStart : b.dateStart;
-        if(as !== bs) return as < bs ? -1 : 1;
-        return 0;
-      });
-
-    // Greedy slot assignment (no overlapping bars in same row)
-    // slotEnd[s] = last column index occupied by the bar in slot s
+      .sort((a,b) => { const as=a.dateStart<wStart?wStart:a.dateStart, bs=b.dateStart<wStart?wStart:b.dateStart; return as<bs?-1:as>bs?1:0; });
     const slotEnd = [];
     const evMeta = wkEvs.map(ev => {
-      // clamp to this week
-      const evS = ev.dateStart < wStart ? wStart : ev.dateStart;
-      const evE = ev.dateEnd   > wEnd   ? wEnd   : ev.dateEnd;
-      // find column indices
-      const c1 = week.findIndex(d => dStrOf(d) === evS);
-      const c2 = week.findIndex(d => dStrOf(d) === evE);
-      if(c1 < 0 || c2 < 0) return null; // shouldn't happen after filter
-      // assign slot
-      let slot = slotEnd.findIndex(e => e < c1);
-      if(slot < 0){ slot = slotEnd.length; slotEnd.push(c2); }
-      else slotEnd[slot] = c2;
-      return { ev, c1, c2, slot };
+      const evS=ev.dateStart<wStart?wStart:ev.dateStart, evE=ev.dateEnd>wEnd?wEnd:ev.dateEnd;
+      const c1=week.findIndex(d=>dStrOf(d)===evS), c2=week.findIndex(d=>dStrOf(d)===evE);
+      if(c1<0||c2<0) return null;
+      let slot=slotEnd.findIndex(e=>e<c1);
+      if(slot<0){slot=slotEnd.length;slotEnd.push(c2);}else slotEnd[slot]=c2;
+      return {ev,c1,c2,slot};
     }).filter(Boolean);
+    const maxSlot = evMeta.reduce((m,x)=>Math.max(m,x.slot),-1);
 
-    // ── Build bar row using a TABLE — guaranteed correct spanning ──
-    // Use table with 7 equal columns. Each event bar is a <td colspan=N>.
-    // Empty cells fill gaps. One <tr> per slot.
-    const maxSlot = evMeta.reduce((m,x)=>Math.max(m,x.slot), -1);
-
-    let barRowHTML = '';
-    if(maxSlot >= 0){
-      let tableRows = '';
-      for(let s=0;s<=maxSlot;s++){
-        const rowEvents = evMeta.filter(x=>x.slot===s).sort((a,b)=>a.c1-b.c1);
-        let cells7 = '';
-        let col = 0;
-        rowEvents.forEach(({ev, c1, c2}) => {
-          // gap before this event
-          if(c1 > col) cells7 += `<td colspan="${c1-col}" style="padding:0;border:none"></td>`;
-          const span = c2 - c1 + 1;
-          const startsHere = ev.dateStart >= wStart;
-          const endsHere   = ev.dateEnd   <= wEnd;
-          const rL = startsHere ? `${BAR_H/2}px` : '0';
-          const rR = endsHere   ? `${BAR_H/2}px` : '0';
-          const pl = startsHere ? '8px' : '4px';
-          const pr = endsHere   ? '8px' : '4px';
-          cells7 += `<td colspan="${span}" style="padding:${BAR_GAP/2}px 1px;border:none">
-            <div onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')"
-              onmouseover="this.style.filter='brightness(.9)'"
-              onmouseout="this.style.filter=''"
-              title="${esc(ev.name)}"
-              style="height:${BAR_H}px;line-height:${BAR_H}px;
-                background:${ev.colorBg};color:${ev.colorFg};
-                border-radius:${rL} ${rR} ${rR} ${rL};
-                font-size:10px;font-weight:700;
-                padding:0 ${pr} 0 ${pl};
-                overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-                cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.12);
-                transition:filter .1s"
-            >${esc(ev.name)}</div>
-          </td>`;
-          col = c2 + 1;
-        });
-        // fill remaining columns
-        if(col < 7) cells7 += `<td colspan="${7-col}" style="padding:0;border:none"></td>`;
-        tableRows += `<tr style="height:${BAR_H+BAR_GAP}px">${cells7}</tr>`;
-      }
-      barRowHTML = `<div style="background:white;border-bottom:1px solid rgba(0,0,0,0.05)">
-        <table style="width:100%;border-collapse:collapse;table-layout:fixed">
-          ${tableRows}
-        </table>
-      </div>`;
-    }
-
-    // ── Day cells row ──
-    const dayCells = week.map(d => {
-      const dStr   = dStrOf(d);
-      const isT    = dStr === today;
-      const inM    = d.getMonth() === monthStart.getMonth();
-      const isPast = dStr < today;
-      const dOps = ops.filter(o=>(o.date||'').slice(0,10)===dStr)
-                      .map(o=>isPast&&o.status==='planned'?{...o,status:'missed'}:o);
-      const dUse = usage.filter(u=>(u.date||'').slice(0,10)===dStr);
-      const items = [
-        ...dOps.map(o=>({fn:`openEditModal('${o.id}')`,  label:o.type,          st:CS[o.status]||CS.planned})),
-        ...dUse.map(u=>({fn:`openEditUsageModal('${u.id}')`,label:u.usageType||'Usage',st:UB})),
-      ];
-      const chips = items.map(it=>
-        `<div onclick="event.stopPropagation();${it.fn}"
-          onmouseover="this.style.filter='brightness(.93)'"
-          onmouseout="this.style.filter=''"
-          style="font-size:10px;font-weight:600;padding:2px 5px;border-radius:3px;margin-bottom:2px;
-            cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;${it.st}"
-        >${esc(it.label)}</div>`
-      ).join('');
-      const bg  = isT?'#EBF4FF':inM?'white':'#f8fafc';
-      const brd = isT?'2px solid #185FA5':'1px solid rgba(0,0,0,0.06)';
-      const ns  = isT
-        ? 'background:#185FA5;color:white;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;'
-        : `color:${inM?'#0C2340':'#c0c8d4'};font-size:12px;font-weight:600;`;
-      const plus = inM
-        ? `<span onclick="event.stopPropagation();openMultidayModal('${dStr}','${venueId}')"
-            onmouseover="this.style.color='#185FA5'" onmouseout="this.style.color='#d0d5dd'"
-            style="font-size:16px;line-height:1;color:#d0d5dd;cursor:pointer;padding:0 2px">+</span>`
-        : '';
-      return `<div
-        onclick="openLogTaskModal('${dStr}')"
-        onmouseover="this.style.background='${isT?'#dbeeff':'#f0f7ff'}'"
-        onmouseout="this.style.background='${bg}'"
-        style="border:${brd};background:${bg};padding:6px;min-height:${CELL_H}px;
-          cursor:pointer;box-sizing:border-box;"
-      >
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-          <span style="${ns}">${d.getDate()}</span>${plus}
-        </div>
-        ${chips}
-      </div>`;
+    // ROW 1: date numbers
+    const dateRow = week.map(d=>{
+      const dStr=dStrOf(d), isT=dStr===today, inM=d.getMonth()===monthStart.getMonth();
+      const bg=isT?'#EBF4FF':inM?'white':'#f8fafc';
+      const brd=isT?'2px solid #185FA5':'1px solid rgba(0,0,0,0.06)';
+      const ns=isT?'background:#185FA5;color:white;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;':`color:${inM?'#0C2340':'#c0c8d4'};font-size:12px;font-weight:600;`;
+      const plus=inM?`<span onclick="event.stopPropagation();openMultidayModal('${dStr}','${venueId}')" onmouseover="this.style.color='#185FA5'" onmouseout="this.style.color='#d0d5dd'" style="font-size:16px;line-height:1;color:#d0d5dd;cursor:pointer;padding:0 2px">+</span>`:'';
+      return `<div style="border:${brd};border-bottom:none;background:${bg};padding:5px 6px 3px;box-sizing:border-box"><div style="display:flex;justify-content:space-between;align-items:center"><span style="${ns}">${d.getDate()}</span>${plus}</div></div>`;
     }).join('');
 
-    gridHTML += `<div style="display:grid;grid-template-columns:repeat(7,1fr)">${dayCells}</div>` + barRowHTML;
+    // ROW 2: multiday bars — <table colspan> guarantees seamless continuous stripes
+    let barRowHTML='';
+    if(maxSlot>=0){
+      let tableRows='';
+      for(let s=0;s<=maxSlot;s++){
+        const rowEvs=evMeta.filter(x=>x.slot===s).sort((a,b)=>a.c1-b.c1);
+        let tds='',col=0;
+        rowEvs.forEach(({ev,c1,c2})=>{
+          if(c1>col) tds+=`<td colspan="${c1-col}" style="border:none;padding:0 0 ${BAR_GAP}px 0"></td>`;
+          const span=c2-c1+1, startsHere=ev.dateStart>=wStart, endsHere=ev.dateEnd<=wEnd;
+          const rL=startsHere?`${BAR_H/2}px`:'0', rR=endsHere?`${BAR_H/2}px`:'0';
+          tds+=`<td colspan="${span}" style="border:none;padding:0 0 ${BAR_GAP}px 0"><div onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')" onmouseover="this.style.filter='brightness(.9)'" onmouseout="this.style.filter=''" title="${esc(ev.name)}" style="height:${BAR_H}px;line-height:${BAR_H}px;background:${ev.colorBg};color:${ev.colorFg};border-radius:${rL} ${rR} ${rR} ${rL};font-size:10px;font-weight:700;padding:0 ${endsHere?'10px':'6px'} 0 ${startsHere?'10px':'6px'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.1);transition:filter .1s">${esc(ev.name)}</div></td>`;
+          col=c2+1;
+        });
+        if(col<7) tds+=`<td colspan="${7-col}" style="border:none;padding:0 0 ${BAR_GAP}px 0"></td>`;
+        tableRows+=`<tr>${tds}</tr>`;
+      }
+      barRowHTML=`<div style="background:white;border-left:1px solid rgba(0,0,0,0.06);border-right:1px solid rgba(0,0,0,0.06);padding:2px 0 0"><table style="width:100%;border-collapse:collapse;table-layout:fixed">${tableRows}</table></div>`;
+    }
+
+    // ROW 3: task/usage chips
+    const chipRow = week.map(d=>{
+      const dStr=dStrOf(d), isT=dStr===today, inM=d.getMonth()===monthStart.getMonth(), isPast=dStr<today;
+      const dOps=ops.filter(o=>(o.date||'').slice(0,10)===dStr).map(o=>isPast&&o.status==='planned'?{...o,status:'missed'}:o);
+      const dUse=usage.filter(u=>(u.date||'').slice(0,10)===dStr);
+      const items=[...dOps.map(o=>({fn:`openEditModal('${o.id}')`,label:o.type,st:CS[o.status]||CS.planned})),...dUse.map(u=>({fn:`openEditUsageModal('${u.id}')`,label:u.usageType||'Usage',st:UB}))];
+      const chips=items.map(it=>`<div onclick="event.stopPropagation();${it.fn}" onmouseover="this.style.filter='brightness(.93)'" onmouseout="this.style.filter=''" style="font-size:10px;font-weight:600;padding:2px 5px;border-radius:3px;margin-bottom:2px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;${it.st}">${esc(it.label)}</div>`).join('');
+      const bg=isT?'#EBF4FF':inM?'white':'#f8fafc', brd=isT?'2px solid #185FA5':'1px solid rgba(0,0,0,0.06)';
+      const clickFn=state.currentProjectId?`openAdminLogTaskModal('${dStr}','${venueId}')`:`openLogTaskModal('${dStr}')`;
+      return `<div onclick="${clickFn}" onmouseover="this.style.background='${isT?'#dbeeff':'#f0f7ff'}'" onmouseout="this.style.background='${bg}'" style="border:${brd};border-top:none;background:${bg};padding:4px 5px 6px;min-height:${CELL_H}px;cursor:pointer;box-sizing:border-box">${chips}</div>`;
+    }).join('');
+
+    gridHTML+=`<div style="display:grid;grid-template-columns:repeat(7,1fr)">${dateRow}</div>`+barRowHTML+`<div style="display:grid;grid-template-columns:repeat(7,1fr)">${chipRow}</div>`;
   }
 
-  grid.innerHTML = `<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%"><div style="min-width:560px">${gridHTML}</div></div>`;
-  } catch(err) {
-    console.error('renderMonthCalendar error:', err);
-    const grid2 = document.getElementById(gridId);
-    if(grid2) grid2.innerHTML = `<div style="padding:2rem;color:red;font-size:12px">Error: ${err.message}</div>`;
+  grid.innerHTML=`<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%"><div style="min-width:560px">${gridHTML}</div></div>`;
+  } catch(err){
+    console.error('renderMonthCalendar error:',err);
+    const g=document.getElementById(gridId);
+    if(g) g.innerHTML=`<div style="padding:2rem;color:red;font-size:12px">Error: ${err.message}</div>`;
   }
 }
-
-
-function toggleAdminMenu(){
-  const menu=document.getElementById('admin-menu');
-  const overlay=document.getElementById('admin-menu-overlay');
-  const open=menu.style.display==='none'||!menu.style.display;
-  menu.style.display=open?'block':'none';
-  overlay.style.display=open?'block':'none';
-}
-
 function toggleVenueMenu(){
   const menu=document.getElementById('venue-menu');
   const overlay=document.getElementById('venue-menu-overlay');
