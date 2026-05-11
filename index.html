@@ -4078,7 +4078,10 @@ function focusDetailVenue(vid){
   event.currentTarget.classList.add('selected');
 }
 
-function renderDetailOps(){
+let _detailOpsPage = 0;
+const DETAIL_OPS_PAGE_SIZE = 50;
+
+function renderDetailOps(resetPage=true){
   const pid=state.currentProjectId; if(!pid) return;
   const fVenue=document.getElementById('filter-venue')?.value||'';
   const fType=document.getElementById('filter-type')?.value||'';
@@ -4090,11 +4093,19 @@ function renderDetailOps(){
   if(fFrom) ops=ops.filter(o=>new Date(o.date)>=new Date(fFrom));
   if(fTo) ops=ops.filter(o=>new Date(o.date)<=new Date(fTo+'T23:59:59'));
 
+  if(resetPage) _detailOpsPage = 0;
+
   const tbody=document.getElementById('detail-ops-tbody');
   const empty=document.getElementById('detail-ops-empty');
   if(!ops.length){ tbody.innerHTML=''; empty.style.display='block'; return; }
   empty.style.display='none';
-  tbody.innerHTML=ops.map(op=>{
+
+  const total = ops.length;
+  const pageEnd = (_detailOpsPage + 1) * DETAIL_OPS_PAGE_SIZE;
+  const visible = ops.slice(0, pageEnd);
+  const hasMore = pageEnd < total;
+
+  tbody.innerHTML=visible.map(op=>{
     const venue=state.venues.find(v=>v.id===op.venueId);
     const badge=opBadge(op.type);
     const flagged=op.flagged||false;
@@ -4115,7 +4126,22 @@ function renderDetailOps(){
       <td><button class="flag-btn ${flagged?'flagged':''}" onclick="toggleFlag('${op.id}',this)">🚩</button></td>
     </tr>`;
   }).join('');
+
+  // Load more button
+  const existingBtn = document.getElementById('detail-ops-load-more');
+  if(existingBtn) existingBtn.remove();
+  if(hasMore){
+    const tr = document.createElement('tr');
+    tr.id = 'detail-ops-load-more';
+    tr.innerHTML = `<td colspan="8" style="text-align:center;padding:12px">
+      <button onclick="_detailOpsPage++;renderDetailOps(false)"
+        style="padding:8px 24px;background:var(--navy);color:white;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600">
+        Load more (${total - pageEnd} remaining)
+      </button></td>`;
+    tbody.appendChild(tr);
+  }
 }
+
 
 function clearDetailFilters(){
   document.getElementById('filter-venue').value='';
@@ -4362,7 +4388,10 @@ function renderVenueStats(){
   else document.getElementById('stat-common').textContent='—';
 }
 
-function renderVenueHistory(){
+let _venueHistPage = 0;
+const VENUE_HIST_PAGE_SIZE = 30;
+
+function renderVenueHistory(resetPage=true){
   const search=(document.getElementById('venue-hist-search')?.value||'').toLowerCase();
   const statusF=document.getElementById('venue-hist-status')?.value||'';
   const fromF=document.getElementById('venue-hist-from')?.value||'';
@@ -4375,8 +4404,15 @@ function renderVenueHistory(){
     .filter(o=>!search||o.type.toLowerCase().includes(search)||(o.notes||'').toLowerCase().includes(search)||(o.staff||[]).join(' ').toLowerCase().includes(search));
   const container=document.getElementById('venue-history-list');
   if(!ops.length){ if(container) container.innerHTML=`<div class="empty-state"><div class="ico">📋</div><div>${t('no_tasks_logged')}</div></div>`; return; }
+
+  if(resetPage) _venueHistPage = 0;
+  const total = ops.length;
+  const pageEnd = (_venueHistPage + 1) * VENUE_HIST_PAGE_SIZE;
+  const visible = ops.slice(0, pageEnd);
+  const hasMore = pageEnd < total;
+
   const statusBar={completed:'#3B6D11',missed:'#A32D2D',inprogress:'#378ADD',planned:'#EF9F27'};
-  const histHTML=ops.map(op=>{
+  const histHTML=visible.map(op=>{
     const badge=opBadge(op.type);
     const staffStr=(op.staff&&op.staff.length)?op.staff.join(', '):'';
     const bar=statusBar[op.status]||'#888';
@@ -4400,6 +4436,19 @@ function renderVenueHistory(){
     </div>`;
   }).join('');
   if(container) container.innerHTML=histHTML;
+
+  // Load more button
+  const existingBtn2 = document.getElementById('venue-hist-load-more');
+  if(existingBtn2) existingBtn2.remove();
+  if(hasMore && container){
+    const btn = document.createElement('div');
+    btn.id = 'venue-hist-load-more';
+    btn.style.cssText = 'text-align:center;padding:12px';
+    btn.innerHTML = `<button onclick="_venueHistPage++;renderVenueHistory(false)"
+      style="padding:8px 24px;background:var(--navy);color:white;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600">
+      Load more (${total - pageEnd} remaining)</button>`;
+    container.appendChild(btn);
+  }
 }
 
 // ════════════════════════════════════════
@@ -5119,6 +5168,12 @@ let ganttStatusFilter = 'all';
 // ── LOAD PLANS ──
 // ── TAB SWITCHING ──
 function switchProjectTab(tab){
+  if(tab!=='stats'){
+    Object.values(statsChartInstances).forEach(c=>{try{c.destroy();}catch(e){}});
+    statsChartInstances={};
+    Object.values(compareChartInstances).forEach(c=>{try{c.destroy();}catch(e){}});
+    compareChartInstances={};
+  }
   ['ops','usage','calendar','stats'].forEach(t=>{
     const btn=document.getElementById('ptab-'+t);
     const content=document.getElementById('ptab-'+t+'-content');
@@ -5549,6 +5604,10 @@ function renderWeekCalendar(venueId, gridId, weekOffset){
 let venueSchedOffset = 0;
 
 function switchVenueTab(tab){
+  if(tab!=='stats'){
+    Object.values(venueStatsCharts).forEach(c=>{try{c.destroy();}catch(e){}});
+    venueStatsCharts={};
+  }
   const tabs=['log','usage','schedule','stats'];
   tabs.forEach(t=>{
     const btn=document.getElementById('vtab-'+t);
@@ -6817,6 +6876,7 @@ function renderVenueStats_tab(){
   setTimeout(()=>{
     charts.forEach(ch=>{
       const canvas=document.getElementById(ch.id); if(!canvas) return;
+      if(venueStatsCharts[ch.id]){try{venueStatsCharts[ch.id].destroy();}catch(e){}}
       venueStatsCharts[ch.id]=new Chart(canvas,{type:ch.type,data:ch.data,options:{responsive:true,maintainAspectRatio:true,...ch.opts,plugins:{...(ch.opts?.plugins||{}),tooltip:{callbacks:{label:ctx=>{const v=ctx.parsed?.y??ctx.parsed??ctx.raw;return typeof v==='number'?v+'h':String(v);}}}}}});
     });
   },50);
@@ -7317,6 +7377,7 @@ function renderStatsSingle(){
   setTimeout(()=>{
     charts.forEach(ch=>{
       const canvas=document.getElementById(ch.id); if(!canvas) return;
+      if(statsChartInstances[ch.id]){try{statsChartInstances[ch.id].destroy();}catch(e){}}
       statsChartInstances[ch.id]=new Chart(canvas,{type:ch.type,data:ch.data,options:{responsive:true,maintainAspectRatio:true,...ch.opts,plugins:{...(ch.opts?.plugins||{}),tooltip:{callbacks:{label:ctx=>{const v=ctx.parsed?.y??ctx.raw;return typeof v==='number'?v+'h':String(v);}}}}}});
     });
   },50);
@@ -7468,6 +7529,7 @@ function addCompareChart(){
 
   setTimeout(()=>{
     const canvas=document.getElementById(chartId); if(!canvas) return;
+    if(compareChartInstances[chartId]){try{compareChartInstances[chartId].destroy();}catch(e){}}
     compareChartInstances[chartId]=new Chart(canvas,{type:chartType,data:chartData,options:{responsive:true,maintainAspectRatio:true,...chartOpts}});
   },50);
 
