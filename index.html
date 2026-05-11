@@ -5701,7 +5701,7 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
   firstDay.setDate(firstDay.getDate() - dow + 1);
   const cells = Array.from({length:42},(_,i)=>{ const d=new Date(firstDay); d.setDate(firstDay.getDate()+i); return d; });
 
-  const ops = state.operations.filter(o=>o.venueId===venueId);
+  const ops   = state.operations.filter(o=>o.venueId===venueId);
   const allUsageSrc = [...state_usage,...(typeof state_admin_usage!=='undefined'?state_admin_usage:[])];
   const usage = allUsageSrc.filter((u,i,arr)=>u.venueId===venueId&&arr.findIndex(x=>x.id===u.id)===i);
   const venueEvents = state_events.filter(e=>e.venueId===venueId);
@@ -5713,10 +5713,18 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
     missed:    'background:#FCEBEB;color:#A32D2D;border-left:3px solid #A32D2D',
   };
   const UB = 'background:#F3E8FF;color:#6B21A8;border-left:3px solid #A855F7';
-  const BAR_H = 20; const BAR_GAP = 2; const CELL_H = 80;
+
+  const DATE_ROW_H = 30;  // px — height of the date number row inside each cell
+  const BAR_H      = 20;  // px — height of each multiday bar
+  const BAR_GAP    = 3;   // px — gap between bars
+  const BAR_TOP    = DATE_ROW_H + 4; // px from top of cell where bars start
+  const CELL_MIN_H = 90;  // px minimum cell height
 
   const header = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>
-    `<div style="text-align:center;font-size:11px;font-weight:700;color:#96a6bb;text-transform:uppercase;padding:8px 0;border-bottom:1px solid var(--border);border-right:1px solid var(--border);box-sizing:border-box">${d}</div>`
+    `<div style="text-align:center;font-size:11px;font-weight:700;color:#96a6bb;
+      text-transform:uppercase;padding:8px 0;
+      border-bottom:1px solid var(--border);border-right:1px solid var(--border);
+      box-sizing:border-box">${d}</div>`
   ).join('');
   let gridHTML = `<div style="display:grid;grid-template-columns:repeat(7,1fr)">${header}</div>`;
 
@@ -5725,7 +5733,7 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
     const wStart = dStrOf(week[0]);
     const wEnd   = dStrOf(week[6]);
 
-    // Greedy slot packing
+    // ── Greedy slot packing ──
     const wkEvs = venueEvents
       .filter(ev=>ev.dateStart<=wEnd&&ev.dateEnd>=wStart)
       .sort((a,b)=>{ const as=a.dateStart<wStart?wStart:a.dateStart,bs=b.dateStart<wStart?wStart:b.dateStart; return as<bs?-1:as>bs?1:0; });
@@ -5738,51 +5746,54 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
       if(slot<0){slot=slotEnd.length;slotEnd.push(c2);}else slotEnd[slot]=c2;
       return {ev,c1,c2,slot};
     }).filter(Boolean);
-    const numSlots = evMeta.reduce((m,x)=>Math.max(m,x.slot),-1)+1;
+    const numSlots = evMeta.length>0 ? evMeta.reduce((m,x)=>Math.max(m,x.slot),0)+1 : 0;
 
-    // Build per-column bar fragments
-    // Each cell gets its own array of bar-slot divs (or empty spacers)
-    // Bar div fills 100% width of cell — no margins, no insets
-    // First cell of event: left border-radius
-    // Last cell of event: right border-radius
-    // Middle cells: no border-radius, full width rectangle
-    const colBars = Array.from({length:7},()=>Array(numSlots).fill(''));
+    // ── Absolute overlay bars ──
+    // left/width in % of the row wrapper (7 equal columns = 100/7% each)
+    const COL_W = 100/7;
+    const barsOverlay = evMeta.map(({ev,c1,c2,slot})=>{
+      const startsHere = ev.dateStart>=wStart;
+      const endsHere   = ev.dateEnd<=wEnd;
+      const left = (c1 * COL_W).toFixed(4);
+      const width= ((c2-c1+1) * COL_W).toFixed(4);
+      const top  = BAR_TOP + slot*(BAR_H+BAR_GAP);
+      const rL   = startsHere ? `${BAR_H/2}px` : '0';
+      const rR   = endsHere   ? `${BAR_H/2}px` : '0';
+      // Small horizontal padding to not touch cell borders
+      const pl   = startsHere ? '2px' : '0';
+      const pr   = endsHere   ? '2px' : '0';
+      const innerL = startsHere ? '10px' : '6px';
+      const innerR = endsHere   ? '10px' : '6px';
+      return `<div
+        onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')"
+        onmouseover="this.style.filter='brightness(.88)'"
+        onmouseout="this.style.filter=''"
+        title="${esc(ev.name)}"
+        style="position:absolute;
+          left:calc(${left}% + ${pl});
+          width:calc(${width}% - ${pl} - ${pr});
+          top:${top}px;
+          height:${BAR_H}px;line-height:${BAR_H}px;
+          background:${ev.colorBg};color:${ev.colorFg};
+          border-radius:${rL} ${rR} ${rR} ${rL};
+          font-size:10px;font-weight:700;
+          padding:0 ${innerR} 0 ${innerL};
+          overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+          cursor:pointer;pointer-events:auto;
+          box-shadow:0 1px 3px rgba(0,0,0,.12);
+          box-sizing:border-box"
+      >${esc(ev.name)}</div>`;
+    }).join('');
 
-    evMeta.forEach(({ev,c1,c2,slot})=>{
-      for(let ci=c1;ci<=c2;ci++){
-        const isFirst = ci===c1;
-        const isLast  = ci===c2;
-        const startsHere = ev.dateStart>=wStart && isFirst;
-        const endsHere   = ev.dateEnd<=wEnd     && isLast;
-        const rL = startsHere ? `${BAR_H/2}px` : '0';
-        const rR = endsHere   ? `${BAR_H/2}px` : '0';
-        colBars[ci][slot] = `<div
-          onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')"
-          onmouseover="this.style.filter='brightness(.88)'"
-          onmouseout="this.style.filter=''"
-          title="${esc(ev.name)}"
-          style="height:${BAR_H}px;line-height:${BAR_H}px;
-            width:100%;box-sizing:border-box;
-            background:${ev.colorBg};color:${ev.colorFg};
-            border-radius:${rL} ${rR} ${rR} ${rL};
-            font-size:10px;font-weight:700;
-            padding:0 6px;
-            overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-            cursor:pointer;margin-bottom:${BAR_GAP}px"
-        >${isFirst?esc(ev.name):''}</div>`;
-      }
-    });
+    // ── Day cells (date number + chips only, bars are in overlay) ──
+    const barsAreaH = numSlots*(BAR_H+BAR_GAP);
+    const cellH = Math.max(CELL_MIN_H, BAR_TOP + barsAreaH + 40);
 
-    // Day cells — single div, date + bars + chips inside
     const dayCells = week.map((d,wi)=>{
       const dStr   = dStrOf(d);
       const isT    = dStr===today;
       const inM    = d.getMonth()===monthStart.getMonth();
       const isPast = dStr<today;
-
-      const barsHTML = numSlots>0 ? colBars[wi].map(b=>
-        b||`<div style="height:${BAR_H+BAR_GAP}px"></div>`
-      ).join('') : '';
 
       const dOps = ops.filter(o=>(o.date||'').slice(0,10)===dStr)
                       .map(o=>isPast&&o.status==='planned'?{...o,status:'missed'}:o);
@@ -5821,19 +5832,24 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
         onmouseover="this.style.background='${isT?'#dbeeff':'#f0f7ff'}'"
         onmouseout="this.style.background='${bg}'"
         style="border:${brd};background:${bg};
-          padding:5px 4px 5px 4px;
-          min-height:${CELL_H + numSlots*(BAR_H+BAR_GAP)}px;
+          padding:5px 5px 5px 5px;
+          height:${cellH}px;
           cursor:pointer;box-sizing:border-box;overflow:hidden"
       >
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
           <span style="${ns}">${d.getDate()}</span>${plus}
         </div>
-        ${barsHTML}
-        <div style="margin-top:2px">${chips}</div>
+        <div style="margin-top:${barsAreaH+8}px">${chips}</div>
       </div>`;
     }).join('');
 
-    gridHTML += `<div style="display:grid;grid-template-columns:repeat(7,1fr)">${dayCells}</div>`;
+    // ── Week row: position:relative wrapper → grid → absolute overlay ──
+    gridHTML += `<div style="position:relative">
+      <div style="display:grid;grid-template-columns:repeat(7,1fr)">${dayCells}</div>
+      <div style="position:absolute;top:0;left:0;width:100%;height:${cellH}px;pointer-events:none;overflow:visible">
+        ${barsOverlay}
+      </div>
+    </div>`;
   }
 
   grid.innerHTML = `<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%"><div style="min-width:560px">${gridHTML}</div></div>`;
