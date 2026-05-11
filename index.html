@@ -1684,7 +1684,7 @@ async function refreshProjectOps(projectId, silent=false){
   if(!silent) showLoading(true);
   try {
     const [ops, types] = await Promise.all([
-      supa.from('pitchops_operations').select('*').in('venue_id', vids).order('operation_date',{ascending:false}),
+      supa.from('pitchops_operations').select('*').in('venue_id', vids).gte('operation_date',new Date(Date.now()-90*24*60*60*1000).toISOString().slice(0,10)).order('operation_date',{ascending:false}),
       supa.from('pitchops_op_types').select('*').order('name'),
     ]);
     // Merge: keep ops from other venues, replace ops for this project's venues
@@ -1711,7 +1711,7 @@ async function refreshVenueOps(venueId, silent=false){
   if(!silent) showLoading(true);
   try {
     const [ops, types] = await Promise.all([
-      supa.from('pitchops_operations').select('*').eq('venue_id', venueId).order('operation_date', {ascending:false}),
+      supa.from('pitchops_operations').select('*').eq('venue_id', venueId).gte('operation_date',new Date(Date.now()-90*24*60*60*1000).toISOString().slice(0,10)).order('operation_date', {ascending:false}),
       supa.from('pitchops_op_types').select('*').order('name'),
     ]);
     state.operations = state.operations.filter(o=>o.venueId!==venueId).concat((ops.data||[]).map(dbToOp));
@@ -3605,7 +3605,7 @@ async function enterViewerDashboard(proj){
   state.venues = allVenues;
   const vids = allVenues.map(v=>v.id);
   if(vids.length){
-    const ops_res = await supa.from('pitchops_operations').select('*').in('venue_id',vids).order('operation_date',{ascending:false});
+    const ops_res = await supa.from('pitchops_operations').select('*').in('venue_id',vids).gte('operation_date',new Date(Date.now()-90*24*60*60*1000).toISOString().slice(0,10)).order('operation_date',{ascending:false});
     state.operations = (ops_res.data||[]).map(dbToOp);
   } else { state.operations=[]; }
   const types_res = await supa.from('pitchops_op_types').select('*').order('name');
@@ -3783,20 +3783,26 @@ function _handleRealtimeUsage(payload) {
   _realtimeRefresh('usage');
 }
 
-function _realtimeRefresh(type) {
-  // Re-render Gantt if calendar tab is visible
-  const calContent = document.getElementById('ptab-calendar-content');
-  _refreshCalendars();
-  // Update task/usage lists if visible
-  const tasksContent = document.getElementById('ptab-tasks-content');
-  if (tasksContent && tasksContent.style.display === 'block') renderDetailOps();
-  const usageContent = document.getElementById('ptab-usage-content');
-  if (usageContent && usageContent.style.display === 'block') renderDetailUsage();
-  // Also update task/usage counts in project header
-  if (state.currentProjectId) updateDetailStats();
+function _debounce(fn, delay) {
+  let timer;
+  return function(...args) { clearTimeout(timer); timer = setTimeout(()=>fn.apply(this,args), delay); };
 }
+function _realtimeRefreshRaw(type) {
+  _refreshCalendars();
+  const tasksContent = document.getElementById('ptab-tasks-content');
+  if(tasksContent && tasksContent.style.display==='block') renderDetailOps();
+  const usageContent = document.getElementById('ptab-usage-content');
+  if(usageContent && usageContent.style.display==='block') renderDetailUsage();
+  if(state.currentProjectId) updateDetailStats();
+}
+const _realtimeRefresh = _debounce(_realtimeRefreshRaw, 150);
 
+const _lastNotifyTime = {};
 function _realtimeNotify(type, event, item) {
+  const now = Date.now();
+  const key = type+'_'+event;
+  if(_lastNotifyTime[key] && now-_lastNotifyTime[key] < 3000) return;
+  _lastNotifyTime[key] = now;
   // Find venue name for the toast
   const venue = state.venues.find(v => v.id === item.venueId);
   const vName = venue ? venue.name : '';
@@ -6013,8 +6019,8 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
         ...dUse.map(u=>({action:'edit-usage',id:u.id,label:u.usageType||'Usage',st:UB})),
       ];
       // Dynamic chip limit: how many chips fit in remaining space after bars
-      const CHIP_H = 18; // chip height + margin
-      const availableH = cellH - DATE_ROW_H - barsAreaH - 2 - 4; // 2=bar-chip gap, 4=bottom pad
+      const CHIP_H = 20; // chip: 10px font + 4px padding + 2px margin + 4px buffer
+      const availableH = cellH - DATE_ROW_H - barsAreaH - 16; // conservative: gap + padding + overflow badge
       const MAX_CHIPS = Math.max(1, Math.floor(availableH / CHIP_H));
       const visibleItems = items.slice(0, MAX_CHIPS);
       const overflowCount = items.length - MAX_CHIPS;
@@ -6123,7 +6129,7 @@ function usageToDb(u){
 async function refreshVenueUsage(venueId, silent=false){
   if(!silent) showLoading(true);
   try {
-    const {data} = await supa.from('pitchops_usage').select('*').eq('venue_id',venueId).order('usage_date',{ascending:false});
+    const {data} = await supa.from('pitchops_usage').select('*').eq('venue_id',venueId).gte('usage_date',new Date(Date.now()-90*24*60*60*1000).toISOString().slice(0,10)).order('usage_date',{ascending:false});
     state_usage = (data||[]).map(dbToUsage);
   } catch(e){ showToast('Error loading usage: '+e.message); }
   if(!silent) showLoading(false);
@@ -6461,7 +6467,7 @@ async function refreshProjectUsage(projectId, silent=false){
   if(!vids.length){ state_admin_usage=[]; return; }
   if(!silent) showLoading(true);
   try {
-    const {data}=await supa.from('pitchops_usage').select('*').in('venue_id',vids).order('usage_date',{ascending:false});
+    const {data}=await supa.from('pitchops_usage').select('*').in('venue_id',vids).gte('usage_date',new Date(Date.now()-90*24*60*60*1000).toISOString().slice(0,10)).order('usage_date',{ascending:false});
     state_admin_usage=(data||[]).map(dbToAdminUsage);
   } catch(e){ showToast('Error loading usage: '+e.message); }
   if(!silent) showLoading(false);
