@@ -6103,8 +6103,6 @@ function openEditUsageModal(id){
   document.getElementById('edit-usage-time-from').value=u.timeFrom||'08:00';
   document.getElementById('edit-usage-time-to').value=u.timeTo||'17:00';
   document.getElementById('edit-usage-status').value=u.status||'planned';
-  loadPhotosForEdit('edit_usage', u.photos || []);
-  // Mirror into currentUsagePhotos.edit for saving
   currentUsagePhotos.edit = (u.photos||[]).map(url=>({url,file:null,uploaded:true}));
   renderUsagePhotoPreviews('edit');
   openModal('modal-edit-usage');
