@@ -5784,7 +5784,7 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
     }).filter(Boolean);
     const numSlots = evMeta.length>0 ? evMeta.reduce((m,x)=>Math.max(m,x.slot),0)+1 : 0;
     const barsAreaH = numSlots*(BAR_H+BAR_GAP);
-    const cellH = Math.max(CELL_MIN_H, BAR_TOP + barsAreaH + 70);
+    const cellH = Math.max(CELL_MIN_H, BAR_TOP + barsAreaH + 110);
 
     // Absolute overlay bars — positioned relative to the week wrapper (not the grid)
     const COL_W = 100/7;
@@ -5832,7 +5832,7 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
         ...dUse.map(u=>({fn:`openEditUsageModal('${u.id}')`,label:u.usageType||'Usage',st:UB})),
       ];
       // Dynamic chip limit: how many chips fit in remaining space after bars
-      const CHIP_H = 20; // chip height + margin (2px padding*2 + font + margin-bottom)
+      const CHIP_H = 18; // chip height + margin
       const availableH = cellH - DATE_ROW_H - barsAreaH - 2 - 4; // 2=bar-chip gap, 4=bottom pad
       const MAX_CHIPS = Math.max(1, Math.floor(availableH / CHIP_H));
       const visibleItems = items.slice(0, MAX_CHIPS);
