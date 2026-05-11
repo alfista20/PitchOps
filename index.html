@@ -1021,8 +1021,14 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
             <option value="inprogress">In progress</option>
             <option value="planned">Planned</option>
           </select>
-          <input type="date" id="venue-hist-from" onchange="renderVenueHistory()" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#f8fafc;outline:none;width:100%;box-sizing:border-box"/>
-          <input type="date" id="venue-hist-to" onchange="renderVenueHistory()" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#f8fafc;outline:none;width:100%;box-sizing:border-box"/>
+          <input type="text" id="venue-hist-from" placeholder="From date"
+          onfocus="this.type='date'" onblur="if(!this.value)this.type='text'"
+          onchange="renderVenueHistory()"
+          style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#f8fafc;outline:none;width:100%;box-sizing:border-box;color:var(--text)"/>
+          <input type="text" id="venue-hist-to" placeholder="To date"
+          onfocus="this.type='date'" onblur="if(!this.value)this.type='text'"
+          onchange="renderVenueHistory()"
+          style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#f8fafc;outline:none;width:100%;box-sizing:border-box;color:var(--text)"/>
           <button onclick="exportVenueHistoryCSV('tasks')" style="grid-column:1/-1;padding:10px;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;width:100%">⬇ Export CSV</button>
         </div>
       </div>
@@ -1059,8 +1065,14 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
             <option value="Training Session">Training Session</option>
             <option value="Other">Other</option>
           </select>
-          <input type="date" id="venue-usage-from" onchange="renderVenueUsageHistory()" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#f8fafc;outline:none;width:100%;box-sizing:border-box"/>
-          <input type="date" id="venue-usage-to" onchange="renderVenueUsageHistory()" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#f8fafc;outline:none;width:100%;box-sizing:border-box"/>
+          <input type="text" id="venue-usage-from" placeholder="From date"
+          onfocus="this.type='date'" onblur="if(!this.value)this.type='text'"
+          onchange="renderVenueUsageHistory()"
+          style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#f8fafc;outline:none;width:100%;box-sizing:border-box;color:var(--text)"/>
+          <input type="text" id="venue-usage-to" placeholder="To date"
+          onfocus="this.type='date'" onblur="if(!this.value)this.type='text'"
+          onchange="renderVenueUsageHistory()"
+          style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#f8fafc;outline:none;width:100%;box-sizing:border-box;color:var(--text)"/>
           <button onclick="exportVenueHistoryCSV('usage')" style="grid-column:1/-1;padding:10px;background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;width:100%">⬇ Export CSV</button>
         </div>
       </div>
