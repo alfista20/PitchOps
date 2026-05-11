@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="PitchOps">
-  <link rel="manifest" href="/manifest.json">
+  <link rel="manifest" href="manifest.json">
 <title>PitchOps</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Syne:wght@500;700&display=swap" rel="stylesheet"/>
 <style>
@@ -1010,20 +1010,20 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     </div>
     <!-- HISTORY -->
     <div style="background:white;border-radius:16px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);overflow:hidden">
-      <div style="padding:1rem 1.25rem .75rem;display:flex;align-items:center;justify-content:space-between">
-        <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif" data-i18n="history_lbl">History</div>
-        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-          <input type="text" id="venue-hist-search" placeholder="🔍 Search..." oninput="renderVenueHistory()" style="padding:6px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:12px;outline:none;width:120px;font-family:'DM Sans',sans-serif;background:#f8fafc"/>
-          <select id="venue-hist-status" onchange="renderVenueHistory()" style="padding:6px 8px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;background:#f8fafc;outline:none">
+      <div style="padding:1rem 1.25rem .75rem">
+        <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif;margin-bottom:.6rem" data-i18n="history_lbl">History</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%">
+          <input type="text" id="venue-hist-search" placeholder="🔍 Search..." oninput="renderVenueHistory()" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;outline:none;font-family:'DM Sans',sans-serif;background:#f8fafc;width:100%;box-sizing:border-box"/>
+          <select id="venue-hist-status" onchange="renderVenueHistory()" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#f8fafc;outline:none;width:100%;box-sizing:border-box">
             <option value="">All status</option>
             <option value="completed">Completed</option>
             <option value="missed">Missed</option>
             <option value="inprogress">In progress</option>
             <option value="planned">Planned</option>
           </select>
-          <input type="date" id="venue-hist-from" onchange="renderVenueHistory()" style="padding:6px 8px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;background:#f8fafc;outline:none"/>
-          <input type="date" id="venue-hist-to" onchange="renderVenueHistory()" style="padding:6px 8px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;background:#f8fafc;outline:none"/>
-          <button onclick="exportVenueHistoryCSV('tasks')" style="padding:6px 12px;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">⬇ CSV</button>
+          <input type="date" id="venue-hist-from" onchange="renderVenueHistory()" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#f8fafc;outline:none;width:100%;box-sizing:border-box"/>
+          <input type="date" id="venue-hist-to" onchange="renderVenueHistory()" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#f8fafc;outline:none;width:100%;box-sizing:border-box"/>
+          <button onclick="exportVenueHistoryCSV('tasks')" style="grid-column:1/-1;padding:10px;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;width:100%">⬇ Export CSV</button>
         </div>
       </div>
       <div id="venue-history-list" style="max-height:520px;overflow-y:auto"></div>
@@ -1049,19 +1049,19 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
     </div>
     <!-- USAGE HISTORY -->
     <div style="background:white;border-radius:16px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);overflow:hidden">
-      <div style="padding:1rem 1.25rem .75rem;display:flex;align-items:center;justify-content:space-between">
-        <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif" data-i18n="usage_history">Usage history</div>
-        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-          <input type="text" id="venue-usage-search" placeholder="🔍 Search..." oninput="renderVenueUsageHistory()" style="padding:6px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:12px;outline:none;width:120px;font-family:'DM Sans',sans-serif;background:#f8fafc"/>
-          <select id="venue-usage-filter-type" onchange="renderVenueUsageHistory()" style="padding:6px 8px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;background:#f8fafc;outline:none">
+      <div style="padding:1rem 1.25rem .75rem">
+        <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif;margin-bottom:.6rem" data-i18n="usage_history">Usage history</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%">
+          <input type="text" id="venue-usage-search" placeholder="🔍 Search..." oninput="renderVenueUsageHistory()" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;outline:none;font-family:'DM Sans',sans-serif;background:#f8fafc;width:100%;box-sizing:border-box"/>
+          <select id="venue-usage-filter-type" onchange="renderVenueUsageHistory()" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#f8fafc;outline:none;width:100%;box-sizing:border-box">
             <option value="">All types</option>
             <option value="Match Day">Match Day</option>
             <option value="Training Session">Training Session</option>
             <option value="Other">Other</option>
           </select>
-          <input type="date" id="venue-usage-from" onchange="renderVenueUsageHistory()" style="padding:6px 8px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;background:#f8fafc;outline:none"/>
-          <input type="date" id="venue-usage-to" onchange="renderVenueUsageHistory()" style="padding:6px 8px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;background:#f8fafc;outline:none"/>
-          <button onclick="exportVenueHistoryCSV('usage')" style="padding:6px 12px;background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">⬇ CSV</button>
+          <input type="date" id="venue-usage-from" onchange="renderVenueUsageHistory()" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#f8fafc;outline:none;width:100%;box-sizing:border-box"/>
+          <input type="date" id="venue-usage-to" onchange="renderVenueUsageHistory()" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#f8fafc;outline:none;width:100%;box-sizing:border-box"/>
+          <button onclick="exportVenueHistoryCSV('usage')" style="grid-column:1/-1;padding:10px;background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;width:100%">⬇ Export CSV</button>
         </div>
       </div>
       <div id="venue-usage-history-list" style="max-height:520px;overflow-y:auto"></div>
@@ -7658,7 +7658,7 @@ init();
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js')
+        navigator.serviceWorker.register('sw.js')
           .then(function(reg){ console.log('[PitchOps] SW registered:', reg.scope); })
           .catch(function(err){ console.warn('[PitchOps] SW registration failed:', err); });
       });
