@@ -5746,6 +5746,55 @@ function _refreshCalendars(){
 }
 
 // ════════════════════════════════════════
+// EVENT DELEGATION — Month Calendar
+// Single listener handles all month calendar interactions
+// ════════════════════════════════════════
+(function initMonthCalendarDelegation() {
+  document.addEventListener('click', function(e) {
+    // Find closest element with data-action
+    const el = e.target.closest('[data-action]');
+    if (!el) return;
+
+    const action  = el.dataset.action;
+    const id      = el.dataset.id;
+    const date    = el.dataset.date;
+    const venue   = el.dataset.venue;
+    const isAdmin = el.dataset.admin === 'true';
+
+    switch(action) {
+      case 'edit-event':
+        e.stopPropagation();
+        if(id) openMultidayEditModal(id);
+        break;
+
+      case 'edit-op':
+        e.stopPropagation();
+        if(id) openEditModal(id);
+        break;
+
+      case 'edit-usage':
+        e.stopPropagation();
+        if(id) openEditUsageModal(id);
+        break;
+
+      case 'new-event':
+        e.stopPropagation();
+        if(date && venue) openMultidayModal(date, venue);
+        break;
+
+      case 'new-task':
+        if(document.querySelector('.modal-overlay.open')) return;
+        if(isAdmin && venue && date) {
+          openLogTaskModal(date, null, null, null, venue);
+        } else if(date) {
+          openLogTaskModal(date);
+        }
+        break;
+    }
+  });
+})();
+
+// ════════════════════════════════════════
 // VENUE SCHEDULE — MONTH / WEEK VIEW
 // ════════════════════════════════════════
 let venueSchedView = 'week'; // 'month' | 'week'
@@ -5856,7 +5905,7 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
       const rL    = startsHere?`${BAR_H/2}px`:'0';
       const rR    = endsHere?`${BAR_H/2}px`:'0';
       return `<div
-        onclick="event.stopPropagation();openMultidayEditModal('${ev.id}')"
+        data-action="edit-event" data-id="${ev.id}"
         onmouseover="this.style.opacity='.85'"
         onmouseout="this.style.opacity='1'"
         title="${esc(ev.name)}"
@@ -5887,8 +5936,8 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
                       .map(o=>isPast&&o.status==='planned'?{...o,status:'missed'}:o);
       const dUse = usage.filter(u=>(u.date||'').slice(0,10)===dStr);
       const items = [
-        ...dOps.map(o=>({fn:`openEditModal('${o.id}')`,label:o.type,st:CS[o.status]||CS.planned})),
-        ...dUse.map(u=>({fn:`openEditUsageModal('${u.id}')`,label:u.usageType||'Usage',st:UB})),
+        ...dOps.map(o=>({action:'edit-op',id:o.id,label:o.type,st:CS[o.status]||CS.planned})),
+        ...dUse.map(u=>({action:'edit-usage',id:u.id,label:u.usageType||'Usage',st:UB})),
       ];
       // Dynamic chip limit: how many chips fit in remaining space after bars
       const CHIP_H = 18; // chip height + margin
@@ -5897,7 +5946,7 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
       const visibleItems = items.slice(0, MAX_CHIPS);
       const overflowCount = items.length - MAX_CHIPS;
       const chips = visibleItems.map(it=>
-        `<div onclick="event.stopPropagation();${it.fn}"
+        `<div data-action="${it.action}" data-id="${it.id}"
           onmouseover="this.style.filter='brightness(.93)'"
           onmouseout="this.style.filter=''"
           style="font-size:10px;font-weight:600;padding:2px 5px;border-radius:3px;
@@ -5914,7 +5963,7 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
         ? 'background:#185FA5;color:white;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;'
         : `color:${inM?'#0C2340':'#c0c8d4'};font-size:12px;font-weight:600;`;
       const plus = inM
-        ? `<span onclick="event.stopPropagation();openMultidayModal('${dStr}','${venueId}')"
+        ? `<span data-action="new-event" data-date="${dStr}" data-venue="${venueId}"
             onmouseover="this.style.color='#185FA5'" onmouseout="this.style.color='#d0d5dd'"
             style="font-size:16px;line-height:1;color:#d0d5dd;cursor:pointer;padding:0 2px">+</span>`
         : '';
@@ -5925,7 +5974,7 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
 
       // Chips pushed down by barsAreaH to sit below the bar overlay
       return `<div
-        onclick="${clickFn}"
+        data-action="new-task" data-date="${dStr}" data-venue="${venueId}" data-admin="${isAdminCtx}"
         onmouseover="this.style.background='${isT?'#dbeeff':'#f0f7ff'}'"
         onmouseout="this.style.background='${bg}'"
         style="border:${brd};background:${bg};
