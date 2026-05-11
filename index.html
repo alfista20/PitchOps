@@ -5596,12 +5596,13 @@ async function saveMultidayEvent(){
     const {error} = await supa.from('pitchops_events').update(row).eq('id',id);
     if(error){ showToast('Error: '+error.message); return; }
     const idx = state_events.findIndex(e=>e.id===id);
-    if(idx!==-1) state_events[idx] = {...state_events[idx],...row,id,venueId};
+    // Use camelCase keys that match state_events object shape
+    if(idx!==-1) state_events[idx] = {id, venueId, name, dateStart, dateEnd, colorBg, colorFg};
   } else {
-    const newId = 'ev_'+Date.now();
+    const newId = genId('ev_');
     const {error} = await supa.from('pitchops_events').insert({id:newId,...row});
     if(error){ showToast('Error: '+error.message); return; }
-    state_events.unshift({id:newId,venueId,name,dateStart,dateEnd,colorBg,colorFg});
+    state_events.unshift({id:newId, venueId, name, dateStart, dateEnd, colorBg, colorFg});
   }
   closeModal('modal-multiday');
   _refreshCalendars();
@@ -5760,7 +5761,7 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
           border-radius:${rL} ${rR} ${rR} ${rL};
           font-size:10px;font-weight:700;line-height:${BAR_H}px;
           padding:0 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-          cursor:pointer;box-sizing:border-box;z-index:5;
+          cursor:pointer;box-sizing:border-box;z-index:5;pointer-events:auto;
           box-shadow:0 1px 3px rgba(0,0,0,.12);
           transition:filter .1s,box-shadow .1s"
       >${esc(ev.name)}</div>`;
@@ -5811,10 +5812,19 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
       </div>`;
     }).join('');
 
-    // Week row: position:relative so absolute bars overlay correctly
-    gridHTML += `<div style="display:grid;grid-template-columns:repeat(7,1fr);position:relative">
-      ${bars}
-      ${dayCells}
+    // Week row: outer wrapper is position:relative for the overlay
+    // Bars go in a SEPARATE absolutely-positioned div (not a grid child)
+    // so left:X% is relative to the full week width, not a single grid cell
+    // Outer wrapper: position:relative anchor
+    // Layer 1 (z-index:1): day cells grid — handles click for new task
+    // Layer 2 (z-index:5): overlay div with bars — separate from grid so left:% = full week width
+    gridHTML += `<div style="position:relative">
+      <div style="display:grid;grid-template-columns:repeat(7,1fr)">
+        ${dayCells}
+      </div>
+      <div style="position:absolute;top:0;left:0;width:100%;height:${effectiveCellH}px;pointer-events:none;z-index:5">
+        ${bars}
+      </div>
     </div>`;
   }
 
