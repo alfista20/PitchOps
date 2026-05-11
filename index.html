@@ -5540,7 +5540,7 @@ async function loadAllVenueEvents(pid){
     id: r.id, venueId: r.venue_id, name: r.name,
     dateStart: (r.date_start||'').slice(0,10),
     dateEnd: (r.date_end||'').slice(0,10),
-    colorBg: r.color_bg||'#FDE68A', colorFg: r.color_fg||'#854F0B'
+    colorBg: r.color_bg||'#F59E0B', colorFg: r.color_fg||'#FFFFFF'
   })));
 }
 
@@ -5550,7 +5550,7 @@ async function loadVenueEvents(venueId){
     id: r.id, venueId: r.venue_id, name: r.name,
     dateStart: (r.date_start||'').slice(0,10),
     dateEnd: (r.date_end||'').slice(0,10),
-    colorBg: r.color_bg||'#FDE68A', colorFg: r.color_fg||'#854F0B'
+    colorBg: r.color_bg||'#F59E0B', colorFg: r.color_fg||'#FFFFFF'
   }));
 }
 
@@ -5572,7 +5572,7 @@ function openMultidayModal(dateStr, venueId){
   document.getElementById('multiday-end').value = dateStr||todayStr();
   document.getElementById('multiday-delete-btn').style.display = 'none';
   // Reset color to yellow
-  selectMultidayColor(document.querySelector('#multiday-colors div'), '#FDE68A', '#854F0B');
+  selectMultidayColor(document.querySelector('#multiday-colors div'), '#F59E0B', '#FFFFFF');
   openModal('modal-multiday');
 }
 
@@ -5750,7 +5750,7 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
     }).filter(Boolean);
     const numSlots = evMeta.length>0 ? evMeta.reduce((m,x)=>Math.max(m,x.slot),0)+1 : 0;
     const barsAreaH = numSlots*(BAR_H+BAR_GAP);
-    const cellH = Math.max(CELL_MIN_H, BAR_TOP + barsAreaH + 40);
+    const cellH = Math.max(CELL_MIN_H, BAR_TOP + barsAreaH + 70);
 
     // Absolute overlay bars — positioned relative to the week wrapper (not the grid)
     const COL_W = 100/7;
@@ -5836,7 +5836,7 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
           <span style="${ns}">${d.getDate()}</span>${plus}
         </div>
-        <div style="margin-top:${barsAreaH+6}px">${chips}</div>
+        <div style="margin-top:${BAR_TOP - DATE_ROW_H - 5 + barsAreaH + 4}px">${chips}</div>
       </div>`;
     }).join('');
 
@@ -7568,15 +7568,15 @@ init();
       <div style="margin-top:12px">
         <label>Colour</label>
         <div id="multiday-colors" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
-          <div onclick="selectMultidayColor(this,'#FDE68A','#854F0B')" data-bg="#FDE68A" data-fg="#854F0B" style="width:28px;height:28px;border-radius:50%;background:#FDE68A;cursor:pointer;border:3px solid #854F0B"></div>
-          <div onclick="selectMultidayColor(this,'#BFDBFE','#1D4ED8')" data-bg="#BFDBFE" data-fg="#1D4ED8" style="width:28px;height:28px;border-radius:50%;background:#BFDBFE;cursor:pointer;border:2px solid transparent"></div>
-          <div onclick="selectMultidayColor(this,'#BBF7D0','#065F46')" data-bg="#BBF7D0" data-fg="#065F46" style="width:28px;height:28px;border-radius:50%;background:#BBF7D0;cursor:pointer;border:2px solid transparent"></div>
-          <div onclick="selectMultidayColor(this,'#FECACA','#991B1B')" data-bg="#FECACA" data-fg="#991B1B" style="width:28px;height:28px;border-radius:50%;background:#FECACA;cursor:pointer;border:2px solid transparent"></div>
-          <div onclick="selectMultidayColor(this,'#E9D5FF','#6D28D9')" data-bg="#E9D5FF" data-fg="#6D28D9" style="width:28px;height:28px;border-radius:50%;background:#E9D5FF;cursor:pointer;border:2px solid transparent"></div>
-          <div onclick="selectMultidayColor(this,'#FED7AA','#C2410C')" data-bg="#FED7AA" data-fg="#C2410C" style="width:28px;height:28px;border-radius:50%;background:#FED7AA;cursor:pointer;border:2px solid transparent"></div>
+          <div onclick="selectMultidayColor(this,'#F59E0B','#FFFFFF')" data-bg="#F59E0B" data-fg="#FFFFFF" style="width:28px;height:28px;border-radius:50%;background:#F59E0B;cursor:pointer;border:3px solid #92400E"></div>
+          <div onclick="selectMultidayColor(this,'#2563EB','#FFFFFF')" data-bg="#2563EB" data-fg="#FFFFFF" style="width:28px;height:28px;border-radius:50%;background:#2563EB;cursor:pointer;border:2px solid transparent"></div>
+          <div onclick="selectMultidayColor(this,'#059669','#FFFFFF')" data-bg="#059669" data-fg="#FFFFFF" style="width:28px;height:28px;border-radius:50%;background:#059669;cursor:pointer;border:2px solid transparent"></div>
+          <div onclick="selectMultidayColor(this,'#DC2626','#FFFFFF')" data-bg="#DC2626" data-fg="#FFFFFF" style="width:28px;height:28px;border-radius:50%;background:#DC2626;cursor:pointer;border:2px solid transparent"></div>
+          <div onclick="selectMultidayColor(this,'#7C3AED','#FFFFFF')" data-bg="#7C3AED" data-fg="#FFFFFF" style="width:28px;height:28px;border-radius:50%;background:#7C3AED;cursor:pointer;border:2px solid transparent"></div>
+          <div onclick="selectMultidayColor(this,'#EA580C','#FFFFFF')" data-bg="#EA580C" data-fg="#FFFFFF" style="width:28px;height:28px;border-radius:50%;background:#EA580C;cursor:pointer;border:2px solid transparent"></div>
         </div>
-        <input type="hidden" id="multiday-color-bg" value="#FDE68A"/>
-        <input type="hidden" id="multiday-color-fg" value="#854F0B"/>
+        <input type="hidden" id="multiday-color-bg" value="#F59E0B"/>
+        <input type="hidden" id="multiday-color-fg" value="#FFFFFF"/>
       </div>
     </div>
     <div class="modal-footer">
