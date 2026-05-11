@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="theme-color" content="#0C2340">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="PitchOps">
+  <link rel="manifest" href="/manifest.json">
 <title>PitchOps</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Syne:wght@500;700&display=swap" rel="stylesheet"/>
 <style>
@@ -7647,5 +7652,24 @@ init();
     </div>
   </div>
 </div>
+  <div id="offline-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#0C2340;color:white;text-align:center;padding:10px;font-size:13px;font-family:'DM Sans',sans-serif;z-index:9999;font-weight:500">
+    📡 You are offline — viewing cached data
+  </div>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/sw.js')
+          .then(function(reg){ console.log('[PitchOps] SW registered:', reg.scope); })
+          .catch(function(err){ console.warn('[PitchOps] SW registration failed:', err); });
+      });
+    }
+    function updateOnlineStatus() {
+      var banner = document.getElementById('offline-banner');
+      if (banner) banner.style.display = navigator.onLine ? 'none' : 'block';
+    }
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+    updateOnlineStatus();
+  </script>
 </body>
 </html>
