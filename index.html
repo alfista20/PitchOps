@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="description" content="PitchOps — Pitch operations management for elite football venues"/>
+<meta property="og:title" content="PitchOps"/>
+<meta property="og:description" content="Pitch operations management for elite football venues"/>
+<meta property="og:type" content="website"/>
   <meta name="theme-color" content="#0C2340">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -23,7 +27,7 @@
   --radius:12px;--radius-sm:8px;
   --shadow:0 2px 12px rgba(12,35,64,0.08);--shadow-lg:0 8px 32px rgba(12,35,64,0.14);
 }
-body{background:var(--surface);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5}
+body{background:var(--surface);color:var(--text);min-height:100vh;min-height:100dvh;font-size:14px;line-height:1.5}
 body,button,input,select,textarea,div,span,p,td,th,a,label{font-family:'DM Sans',sans-serif}
 h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 
@@ -87,9 +91,6 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 .status-filter{display:flex;gap:6px;flex-wrap:wrap}
 .status-pill{padding:5px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:white;color:var(--text-muted);transition:all .15s}
 .status-pill.active-pill{background:var(--navy);color:white;border-color:var(--navy)}
-.status-pill
-.status-pill
-.status-pill
 
 .projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}
 
@@ -385,7 +386,7 @@ button,input,select,textarea{}
         Sign in as Master Admin
       </button>
       <div style="text-align:center;font-size:12px;color:var(--text-hint)">— or —</div>
-      <div class="field" style="margin:0"><label data-i18n="lbl_venue_token">Venue access token</label><input id="venue-token-input" type="text" placeholder="Paste your venue token..."/></div>
+      <div class="field" style="margin:0"><label data-i18n="lbl_venue_token">Venue access token</label><input id="venue-token-input" type="text" placeholder="Paste your venue token..." onkeydown="if(event.key==='Enter')venueTokenLogin()"/></div>
       <button class="btn btn-blue btn-full" onclick="venueTokenLogin()" data-i18n="btn_access_venue">Access Venue Dashboard</button>
     </div>
     <div style="text-align:center">
@@ -406,8 +407,8 @@ button,input,select,textarea{}
     </div>
     <p class="login-title">Master Admin</p>
     <p class="login-sub">Restricted access — authorised users only</p>
-    <div class="field"><label data-i18n="lbl_email">Email</label><input id="admin-email-input" type="email" placeholder="Enter your email..."/></div>
-    <div class="field"><label data-i18n="lbl_password">Password</label><input id="admin-pass-input" type="password" placeholder="Enter your password..."/></div>
+    <div class="field"><label data-i18n="lbl_email">Email</label><input id="admin-email-input" type="email" autocomplete="email" placeholder="Enter your email..." onkeydown="if(event.key==='Enter')document.getElementById('admin-pass-input').focus()"/></div>
+    <div class="field"><label data-i18n="lbl_password">Password</label><input id="admin-pass-input" type="password" autocomplete="current-password" placeholder="Enter your password..." onkeydown="if(event.key==='Enter')adminLogin()"/></div>
     <div id="admin-login-error" style="display:none;font-size:12px;color:var(--red);margin-bottom:.75rem;padding:8px 12px;background:var(--red-pale);border-radius:var(--radius-sm)"></div>
     <div style="display:flex;gap:8px">
       <button class="btn btn-ghost" onclick="showScreen('screen-login')" data-i18n="btn_back">Back</button>
@@ -418,16 +419,32 @@ button,input,select,textarea{}
 
 <!-- ══ PROJECTS HOME ══ -->
 <div id="screen-projects" class="screen">
+  <!-- PROJECTS HAMBURGER MENU -->
+  <div id="projects-menu" style="display:none;position:fixed;top:52px;right:0;width:200px;background:white;border-radius:0 0 0 16px;box-shadow:0 8px 32px rgba(0,0,0,.18);z-index:200;overflow:hidden">
+    <div style="padding:.5rem 0">
+      <div style="padding:.5rem 1rem;font-size:10px;font-weight:700;color:var(--text-hint);text-transform:uppercase;letter-spacing:.5px">Language</div>
+      <div style="padding:.25rem 1rem .75rem">
+        <select class="lang-select" onchange="setLang(this.value)" id="lang-select-admin" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#f8fafc;color:var(--text)"><option value="en">🌐 English</option><option value="pl">🌐 Polski</option><option value="es">🌐 Español</option><option value="fr">🌐 Français</option><option value="de">🌐 Deutsch</option><option value="pt">🌐 Português</option></select>
+      </div>
+      <div style="height:1px;background:var(--border)"></div>
+      <button onclick="openModal('modal-change-password');toggleProjectsMenu()" style="display:flex;align-items:center;gap:10px;width:100%;padding:.75rem 1rem;background:none;border:none;font-size:14px;color:var(--text);cursor:pointer" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='none'">
+        <span>🔑</span> Change password
+      </button>
+      <div style="height:1px;background:var(--border)"></div>
+      <button onclick="logout()" style="display:flex;align-items:center;gap:10px;width:100%;padding:.75rem 1rem;background:none;border:none;font-size:14px;color:#dc2626;cursor:pointer" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'">
+        <span>🚪</span> Sign out
+      </button>
+    </div>
+  </div>
+  <div id="projects-menu-overlay" onclick="toggleProjectsMenu()" style="display:none;position:fixed;inset:0;z-index:199"></div>
   <div class="topnav">
     <div class="topnav-brand">
       <span class="brand-name" style="color:white">Pitch<span style="color:var(--blue-light)">Ops</span></span>
       <span class="topnav-badge">Master Admin</span>
     </div>
     <div class="topnav-right">
-      <select class="lang-select" onchange="setLang(this.value)" id="lang-select-admin"><option value="en">EN</option><option value="pl">PL</option><option value="es">ES</option><option value="fr">FR</option><option value="de">DE</option><option value="pt">PT</option></select>
       <button class="btn btn-blue btn-sm" onclick="openModal('modal-add-project')" data-i18n="btn_new_project">+ New project</button>
-      <button class="btn btn-ghost btn-sm" style="color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.2)" onclick="openModal('modal-change-password')">🔑</button>
-      <button class="btn btn-ghost btn-sm" style="color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.2)" onclick="logout()" data-i18n="btn_sign_out">Sign out</button>
+      <button aria-label="Menu" onclick="toggleProjectsMenu()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;font-size:18px;line-height:1">☰</button>
     </div>
   </div>
   <div class="projects-home">
@@ -439,7 +456,7 @@ button,input,select,textarea{}
         <button class="status-pill" onclick="filterProjects('planned',this)">Planned</button>
         <button class="status-pill" onclick="filterProjects('finished',this)">Finished</button>
       </div>
-      <input type="text" id="project-search" placeholder="Search projects..." oninput="renderProjects()" style="padding:7px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;outline:none;width:180px"/>
+      <input type="text" id="project-search" placeholder="Search projects..." oninput="_dRenderProjects()" style="padding:7px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;outline:none;width:180px"/>
     </div>
     <div class="projects-grid" id="projects-grid"></div>
   </div>
@@ -483,7 +500,7 @@ button,input,select,textarea{}
       </div>
     </div>
     <div class="topnav-right">
-      <button onclick="toggleAdminMenu()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;font-size:18px;line-height:1">☰</button>
+      <button aria-label="Menu" onclick="toggleAdminMenu()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;font-size:18px;line-height:1">☰</button>
     </div>
   </div>
   <div id="project-hero" class="project-hero">
@@ -520,13 +537,13 @@ button,input,select,textarea{}
     <!-- ops panel -->
     <div class="card">
       <div class="filter-bar">
-        <select id="filter-venue" onchange="renderDetailOps()"><option value="">All venues</option></select>
-        <select id="filter-type" onchange="renderDetailOps()"><option value="">All types</option></select>
-        <input type="date" id="filter-from" onchange="renderDetailOps()"/>
-        <input type="date" id="filter-to" onchange="renderDetailOps()"/>
+        <select id="filter-venue" onchange="renderDetailOps(true)"><option value="">All venues</option></select>
+        <select id="filter-type" onchange="renderDetailOps(true)"><option value="">All types</option></select>
+        <input type="date" id="filter-from" onchange="renderDetailOps(true)"/>
+        <input type="date" id="filter-to" onchange="renderDetailOps(true)"/>
         <button class="btn btn-ghost btn-sm" onclick="clearDetailFilters()">Clear</button>
         <button class="btn btn-blue btn-sm" onclick="exportCSV()">CSV</button>
-        
+        <span id="detail-ops-count" style="margin-left:auto;font-size:11px;color:var(--text-hint);white-space:nowrap;align-self:center;padding-right:4px"></span>
       </div>
       <div style="overflow-x:auto">
         <table class="ops-table">
@@ -554,15 +571,15 @@ button,input,select,textarea{}
     <!-- usage panel -->
     <div class="card">
       <div class="filter-bar">
-        <select id="filter-usage-venue" onchange="renderDetailUsage()"><option value="">All venues</option></select>
-        <select id="filter-usage-type" onchange="renderDetailUsage()">
+        <select id="filter-usage-venue" onchange="renderDetailUsage(true)"><option value="">All venues</option></select>
+        <select id="filter-usage-type" onchange="renderDetailUsage(true)">
           <option value="">All types</option>
           <option value="Match Day">Match Day</option>
           <option value="Training Session">Training Session</option>
           <option value="Other">Other</option>
         </select>
-        <input type="date" id="filter-usage-from" onchange="renderDetailUsage()"/>
-        <input type="date" id="filter-usage-to" onchange="renderDetailUsage()"/>
+        <input type="date" id="filter-usage-from" onchange="renderDetailUsage(true)"/>
+        <input type="date" id="filter-usage-to" onchange="renderDetailUsage(true)"/>
         <button class="btn btn-ghost btn-sm" onclick="clearUsageFilters()">Clear</button>
         <button class="btn btn-blue btn-sm" onclick="exportUsageCSV()">CSV</button>
         
@@ -619,7 +636,11 @@ button,input,select,textarea{}
         </div>
         <button id="stats-pdf-btn" onclick="toggleStatsPDFSelect(false)" style="margin-left:auto;padding:7px 16px;background:linear-gradient(135deg,#0C2340,#185FA5);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer" data-i18n="btn_export_pdf">⬇ Export PDF</button>
       </div>
-      <div style="font-size:12px;color:var(--text-muted);margin-bottom:.5rem;padding:0 2px">💡 Drag cards to rearrange · Click Export PDF to select charts</div>
+      <div style="font-size:11px;color:var(--text-hint);margin-bottom:.75rem;padding:2px 4px;display:flex;align-items:center;gap:4px">
+        <span>↕</span> <span>Drag cards to reorder</span>
+        <span style="margin:0 6px;color:var(--border)">·</span>
+        <span>Click <strong>Export PDF</strong> to choose which charts to include</span>
+      </div>
       <div id="stats-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.75rem;margin-bottom:1rem"></div>
       <div id="stats-charts" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:1rem"></div>
     </div>
@@ -689,7 +710,7 @@ button,input,select,textarea{}
               <option value="year">This year</option>
               <option value="custom">Custom range</option>
             </select>
-            <div id="compare-custom-dates" style="display:none;display:flex;flex-direction:column;gap:4px">
+            <div id="compare-custom-dates" style="display:none;flex-direction:column;gap:4px">
               <input type="date" id="compare-from" style="padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px"/>
               <input type="date" id="compare-to" style="padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px"/>
             </div>
@@ -712,7 +733,11 @@ button,input,select,textarea{}
       </div>
 
       <!-- GENERATED CHARTS -->
-      <div style="font-size:12px;color:var(--text-muted);margin-bottom:.5rem;padding:0 2px">💡 Drag cards to rearrange · Click Export PDF to select charts</div>
+      <div style="font-size:11px;color:var(--text-hint);margin-bottom:.5rem;padding:2px 4px;display:flex;align-items:center;gap:4px">
+        <span>↕</span> <span>Drag cards to reorder</span>
+        <span style="margin:0 6px;color:var(--border)">·</span>
+        <span>Click <strong>Export PDF</strong> to choose which charts to include</span>
+      </div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
         <span id="compare-charts-count" style="font-size:12px;color:var(--text-hint)"></span>
         <div style="display:flex;gap:8px">
@@ -747,9 +772,9 @@ button,input,select,textarea{}
         <div style="padding:.6rem .75rem;border-bottom:1px solid var(--border);background:#fafbfc;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
             <div style="display:flex;align-items:center;background:white;border:1px solid var(--border);border-radius:var(--radius-sm);padding:2px 8px;gap:6px">
-              <button onclick="ganttNav(-1)" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--text-muted);padding:0 2px">←</button>
+              <button aria-label="Previous week" onclick="ganttNav(-1)" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--text-muted);padding:0 2px">←</button>
               <span id="gantt-week-label" style="font-size:12px;font-weight:500;min-width:150px;text-align:center">—</span>
-              <button onclick="ganttNav(1)" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--text-muted);padding:0 2px">→</button>
+              <button aria-label="Next week" onclick="ganttNav(1)" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--text-muted);padding:0 2px">→</button>
             </div>
             <button onclick="ganttGoToday()" style="padding:4px 10px;font-size:11px;background:white;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;color:var(--text-muted)" data-i18n="today" data-i18n="today">Today</button>
             <div style="display:flex;gap:4px;flex-wrap:wrap" id="gantt-status-pills">
@@ -777,9 +802,9 @@ button,input,select,textarea{}
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
             <button onclick="exitVenueCal()" style="padding:5px 10px;font-size:12px;background:white;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;color:var(--text-muted)" data-i18n="all_venues_back">← All venues</button>
             <div style="display:flex;align-items:center;background:white;border:1px solid var(--border);border-radius:var(--radius-sm);padding:2px 8px;gap:6px">
-              <button onclick="venueCalNav(-1)" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--text-muted);padding:0 2px">←</button>
+              <button aria-label="Previous period" onclick="venueCalNav(-1)" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--text-muted);padding:0 2px">←</button>
               <span id="venue-cal-label" style="font-size:12px;font-weight:500;min-width:140px;text-align:center">—</span>
-              <button onclick="venueCalNav(1)" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--text-muted);padding:0 2px">→</button>
+              <button aria-label="Next period" onclick="venueCalNav(1)" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--text-muted);padding:0 2px">→</button>
             </div>
             <button onclick="venueCalGoToday()" style="padding:4px 10px;font-size:11px;background:white;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;color:var(--text-muted)" data-i18n="today">Today</button>
             <div style="display:flex;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">
@@ -859,7 +884,7 @@ button,input,select,textarea{}
     <!-- TOP NAV (duplicate for welcome) -->
     <div style="background:#0C2340;padding:0 1.25rem;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:100">
       <span style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:white">PitchOps</span>
-      <button onclick="toggleVenueMenu()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;font-size:18px;line-height:1">☰</button>
+      <button aria-label="Menu" onclick="toggleVenueMenu()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;font-size:18px;line-height:1">☰</button>
     </div>
     <!-- CENTERED CONTENT WRAPPER -->
     <div style="max-width:480px;width:100%;margin:0 auto;display:flex;flex-direction:column;flex:1">
@@ -879,7 +904,8 @@ button,input,select,textarea{}
     <div style="padding:1.25rem;display:grid;grid-template-columns:1fr 1fr;gap:12px;background:#f0f2f5">
 
       <!-- Log Task -->
-      <div onclick="showVenueDashboard('log');openLogTaskModal()" style="background:white;border:0.5px solid rgba(0,0,0,0.08);border-radius:16px;cursor:pointer;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:transform .12s,box-shadow .12s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(24,95,165,.12)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+      <div onclick="showVenueDashboard('log');openLogTaskModal()" style="background:white;border:0.5px solid rgba(0,0,0,0.08);border-radius:16px;cursor:pointer;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:transform .12s,box-shadow .12s;position:relative" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(24,95,165,.12)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+        <div id="welcome-badge-tasks" style="display:none;position:absolute;top:10px;right:10px;background:#185FA5;color:white;border-radius:20px;padding:2px 9px;font-size:11px;font-weight:700;line-height:1.6"></div>
         <svg width="72" height="72" viewBox="0 0 52 52" fill="none">
           <rect x="12" y="8" width="22" height="28" rx="3" stroke="#185FA5" stroke-width="1.6"/>
           <line x1="18" y1="16" x2="28" y2="16" stroke="#185FA5" stroke-width="1.5" stroke-linecap="round"/>
@@ -893,7 +919,8 @@ button,input,select,textarea{}
       </div>
 
       <!-- Log Usage -->
-      <div onclick="showVenueDashboard('usage');openLogUsageModal()" style="background:white;border:0.5px solid rgba(0,0,0,0.08);border-radius:16px;cursor:pointer;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:transform .12s,box-shadow .12s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(124,58,237,.12)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+      <div onclick="showVenueDashboard('usage');openLogUsageModal()" style="background:white;border:0.5px solid rgba(0,0,0,0.08);border-radius:16px;cursor:pointer;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:transform .12s,box-shadow .12s;position:relative" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(124,58,237,.12)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+        <div id="welcome-badge-usage" style="display:none;position:absolute;top:10px;right:10px;background:#7C3AED;color:white;border-radius:20px;padding:2px 9px;font-size:11px;font-weight:700;line-height:1.6"></div>
         <svg width="72" height="72" viewBox="0 0 52 52" fill="none">
           <rect x="7" y="13" width="34" height="24" rx="2.5" stroke="#7C3AED" stroke-width="1.6"/>
           <line x1="24" y1="13" x2="24" y2="37" stroke="#7C3AED" stroke-width="1.2" stroke-dasharray="2.5 2"/>
@@ -909,7 +936,8 @@ button,input,select,textarea{}
       </div>
 
       <!-- Schedule -->
-      <div onclick="showVenueDashboard('schedule')" style="background:white;border:0.5px solid rgba(0,0,0,0.08);border-radius:16px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:22px;transition:transform .12s,box-shadow .12s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(59,109,17,.1)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+      <div onclick="showVenueDashboard('schedule')" style="background:white;border:0.5px solid rgba(0,0,0,0.08);border-radius:16px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:22px;transition:transform .12s,box-shadow .12s;position:relative" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(59,109,17,.1)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+        <div id="welcome-badge-schedule" style="display:none;position:absolute;top:10px;right:10px;background:#3B6D11;color:white;border-radius:20px;padding:2px 9px;font-size:11px;font-weight:700;line-height:1.6"></div>
         <svg width="52" height="52" viewBox="0 0 40 40" fill="none">
           <rect x="5" y="8" width="30" height="26" rx="2.5" stroke="#3B6D11" stroke-width="1.5"/>
           <line x1="5" y1="15" x2="35" y2="15" stroke="#3B6D11" stroke-width="1.5"/>
@@ -928,7 +956,8 @@ button,input,select,textarea{}
       </div>
 
       <!-- Stats -->
-      <div onclick="showVenueDashboard('stats')" style="background:white;border:0.5px solid rgba(0,0,0,0.08);border-radius:16px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:22px;transition:transform .12s,box-shadow .12s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(133,79,11,.1)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+      <div onclick="showVenueDashboard('stats')" style="background:white;border:0.5px solid rgba(0,0,0,0.08);border-radius:16px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:22px;transition:transform .12s,box-shadow .12s;position:relative" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(133,79,11,.1)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+        <div id="welcome-badge-stats" style="display:none;position:absolute;top:10px;right:10px;background:#854F0B;color:white;border-radius:20px;padding:2px 9px;font-size:11px;font-weight:700;line-height:1.6"></div>
         <svg width="52" height="52" viewBox="0 0 40 40" fill="none">
           <line x1="7" y1="33" x2="33" y2="33" stroke="#854F0B" stroke-width="1.5" stroke-linecap="round"/>
           <line x1="7" y1="8" x2="7" y2="33" stroke="#854F0B" stroke-width="1.5" stroke-linecap="round"/>
@@ -966,7 +995,7 @@ button,input,select,textarea{}
   <!-- TOP NAV -->
   <div style="background:#0C2340;padding:0 1.25rem;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:100">
     <span style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:white">PitchOps</span>
-    <button onclick="toggleVenueMenu()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;font-size:18px;line-height:1">☰</button>
+    <button aria-label="Menu" onclick="toggleVenueMenu()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;font-size:18px;line-height:1">☰</button>
   </div>
 
   <!-- HERO -->
@@ -1013,10 +1042,16 @@ button,input,select,textarea{}
     <!-- HISTORY -->
     <div style="background:white;border-radius:16px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);overflow:hidden">
       <div style="padding:1rem 1.25rem .75rem">
-        <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif;margin-bottom:.6rem" data-i18n="history_lbl">History</div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:4px;margin-bottom:.6rem">
+          <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif" data-i18n="history_lbl">History</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span id="venue-hist-count" style="font-size:11px;color:var(--text-hint)"></span>
+            <div style="font-size:11px;color:var(--text-hint)" data-i18n="hint_90days">Last 90 days</div>
+          </div>
+        </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%">
-          <input type="text" id="venue-hist-search" placeholder="🔍 Search..." oninput="renderVenueHistory()" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;outline:none;background:#f8fafc;width:100%;box-sizing:border-box"/>
-          <select id="venue-hist-status" onchange="renderVenueHistory()" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;background:#f8fafc;outline:none;width:100%;box-sizing:border-box">
+          <input type="text" id="venue-hist-search" placeholder="🔍 Search..." oninput="_dRenderVenueHistory()" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;outline:none;background:#f8fafc;width:100%;box-sizing:border-box"/>
+          <select id="venue-hist-status" onchange="renderVenueHistory(true)" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;background:#f8fafc;outline:none;width:100%;box-sizing:border-box">
             <option value="">All status</option>
             <option value="completed">Completed</option>
             <option value="missed">Missed</option>
@@ -1025,11 +1060,11 @@ button,input,select,textarea{}
           </select>
           <input type="text" id="venue-hist-from" placeholder="From date"
           onfocus="this.type='date'" onblur="if(!this.value)this.type='text'"
-          onchange="renderVenueHistory()"
+          onchange="renderVenueHistory(true)"
           style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;background:#f8fafc;outline:none;width:100%;box-sizing:border-box;color:var(--text)"/>
           <input type="text" id="venue-hist-to" placeholder="To date"
           onfocus="this.type='date'" onblur="if(!this.value)this.type='text'"
-          onchange="renderVenueHistory()"
+          onchange="renderVenueHistory(true)"
           style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;background:#f8fafc;outline:none;width:100%;box-sizing:border-box;color:var(--text)"/>
           <button onclick="exportVenueHistoryCSV('tasks')" style="grid-column:1/-1;padding:10px;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;width:100%" data-i18n="btn_export_csv">⬇ Export CSV</button>
         </div>
@@ -1058,10 +1093,13 @@ button,input,select,textarea{}
     <!-- USAGE HISTORY -->
     <div style="background:white;border-radius:16px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);overflow:hidden">
       <div style="padding:1rem 1.25rem .75rem">
-        <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif;margin-bottom:.6rem" data-i18n="usage_history">Usage history</div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:4px;margin-bottom:.6rem">
+          <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif" data-i18n="usage_history">Usage history</div>
+          <div style="font-size:11px;color:var(--text-hint)" data-i18n="hint_90days">Last 90 days</div>
+        </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%">
-          <input type="text" id="venue-usage-search" placeholder="🔍 Search..." oninput="renderVenueUsageHistory()" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;outline:none;background:#f8fafc;width:100%;box-sizing:border-box"/>
-          <select id="venue-usage-filter-type" onchange="renderVenueUsageHistory()" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;background:#f8fafc;outline:none;width:100%;box-sizing:border-box">
+          <input type="text" id="venue-usage-search" placeholder="🔍 Search..." oninput="_dRenderVenueUsageHistory()" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;outline:none;background:#f8fafc;width:100%;box-sizing:border-box"/>
+          <select id="venue-usage-filter-type" onchange="renderVenueUsageHistory(true)" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;background:#f8fafc;outline:none;width:100%;box-sizing:border-box">
             <option value="">All types</option>
             <option value="Match Day">Match Day</option>
             <option value="Training Session">Training Session</option>
@@ -1069,11 +1107,11 @@ button,input,select,textarea{}
           </select>
           <input type="text" id="venue-usage-from" placeholder="From date"
           onfocus="this.type='date'" onblur="if(!this.value)this.type='text'"
-          onchange="renderVenueUsageHistory()"
+          onchange="renderVenueUsageHistory(true)"
           style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;background:#f8fafc;outline:none;width:100%;box-sizing:border-box;color:var(--text)"/>
           <input type="text" id="venue-usage-to" placeholder="To date"
           onfocus="this.type='date'" onblur="if(!this.value)this.type='text'"
-          onchange="renderVenueUsageHistory()"
+          onchange="renderVenueUsageHistory(true)"
           style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;background:#f8fafc;outline:none;width:100%;box-sizing:border-box;color:var(--text)"/>
           <button onclick="exportVenueHistoryCSV('usage')" style="grid-column:1/-1;padding:10px;background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;width:100%" data-i18n="btn_export_csv">⬇ Export CSV</button>
         </div>
@@ -1127,9 +1165,9 @@ button,input,select,textarea{}
       <div style="padding:.6rem .75rem;border-bottom:1px solid var(--border);background:#f8fafc;display:flex;align-items:center;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-shrink:0">
         <!-- Nav arrows + label -->
         <div style="display:flex;align-items:center;background:white;border:1px solid var(--border);border-radius:8px;padding:3px 8px;gap:6px;flex-shrink:0">
-          <button onclick="venueSchedNav(-1)" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--text-muted);padding:0;line-height:1">←</button>
+          <button aria-label="Previous period" onclick="venueSchedNav(-1)" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--text-muted);padding:0;line-height:1">←</button>
           <span id="venue-sched-label" style="font-size:12px;font-weight:700;min-width:90px;text-align:center;color:var(--text);white-space:nowrap">—</span>
-          <button onclick="venueSchedNav(1)" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--text-muted);padding:0;line-height:1">→</button>
+          <button aria-label="Next period" onclick="venueSchedNav(1)" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--text-muted);padding:0;line-height:1">→</button>
         </div>
         <!-- Today -->
         <button onclick="venueSchedToday()" style="flex-shrink:0;padding:5px 10px;font-size:12px;font-weight:500;background:white;border:1px solid var(--border);border-radius:8px;cursor:pointer;color:var(--text-muted);white-space:nowrap" data-i18n="today">Today</button>
@@ -1191,7 +1229,7 @@ button,input,select,textarea{}
 
 <!-- EDIT PROJECT -->
 <div class="modal-overlay" id="modal-edit-project">
-  <div class="modal">
+  <div class="modal" oninput="markModalDirty('modal-edit-project')" onchange="markModalDirty('modal-edit-project')">
     <div class="modal-header"><span class="modal-title" data-i18n="modal_edit_project">Edit project</span><button class="modal-close" onclick="closeModal('modal-edit-project')">✕</button></div>
     <div class="modal-body">
       <input type="hidden" id="edit-proj-id"/>
@@ -1290,7 +1328,7 @@ button,input,select,textarea{}
 
 <!-- EDIT VENUE -->
 <div class="modal-overlay" id="modal-edit-venue">
-  <div class="modal">
+  <div class="modal" oninput="markModalDirty('modal-edit-venue')" onchange="markModalDirty('modal-edit-venue')">
     <div class="modal-header"><span class="modal-title" data-i18n="modal_edit_venue">Edit venue</span><button class="modal-close" onclick="closeModal('modal-edit-venue')">✕</button></div>
     <div class="modal-body">
       <input type="hidden" id="edit-venue-id"/>
@@ -1352,7 +1390,7 @@ button,input,select,textarea{}
 </div>
 <!-- EDIT OPERATION -->
 <div class="modal-overlay" id="modal-edit-op">
-  <div class="modal">
+  <div class="modal" oninput="markModalDirty('modal-edit-op')" onchange="markModalDirty('modal-edit-op')">
     <div class="modal-header"><span class="modal-title" data-i18n="modal_edit_op">Edit operation</span><button class="modal-close" onclick="closeModal('modal-edit-op')">✕</button></div>
     <div class="modal-body">
       <input type="hidden" id="edit-op-id"/>
@@ -1590,12 +1628,12 @@ button,input,select,textarea{}
 
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
-  <button class="lightbox-close" onclick="closeLightboxBtn()">✕</button>
-  <img id="lightbox-img" src="" alt=""/>
+  <button class="lightbox-close" aria-label="Close" onclick="closeLightboxBtn()">✕</button>
+  <img id="lightbox-img" src="" alt="Photo"/>
   <div class="lightbox-nav">
-    <button onclick="lightboxNav(-1)">←</button>
+    <button aria-label="Previous photo" onclick="lightboxNav(-1)">←</button>
     <span class="lightbox-counter" id="lightbox-counter"></span>
-    <button onclick="lightboxNav(1)">→</button>
+    <button aria-label="Next photo" onclick="lightboxNav(1)">→</button>
   </div>
 </div>
 
@@ -1659,21 +1697,48 @@ async function getAdminPassHash(){
 function save() { /* data saved to Supabase directly */ }
 
 // ── SUPABASE LOADERS ──
+
+// Helper: returns ISO date string for 90 days ago (local time, no UTC offset bug)
+function ninetyDaysAgoStr() {
+  const d = new Date();
+  d.setDate(d.getDate() - 90);
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
 async function loadAll() {
   showLoading(true);
+  const cutoff = ninetyDaysAgoStr();
   try {
-    const [proj, ven, ops, types] = await Promise.all([
+    const [proj, ven, ops, usage, types] = await Promise.all([
       supa.from('pitchops_projects').select('*').order('created_at'),
       supa.from('pitchops_venues').select('*').order('created_at'),
-      supa.from('pitchops_operations').select('*').order('operation_date', {ascending:false}),
+      supa.from('pitchops_operations').select('*').gte('operation_date', cutoff).order('operation_date',{ascending:false}).limit(2000),
+      supa.from('pitchops_usage').select('*').gte('usage_date', cutoff).order('usage_date',{ascending:false}).limit(2000),
       supa.from('pitchops_op_types').select('*').order('name'),
     ]);
     state.projects = (proj.data||[]).map(dbToProject);
     state.venues = (ven.data||[]).map(dbToVenue);
     state.operations = (ops.data||[]).map(dbToOp);
+    state_admin_usage = (usage.data||[]).map(dbToUsage);
     state.opTypes = (types.data||[]).map(tp=>tp.name);
-  } catch(e) { showToast('Error loading data: '+e.message); }
+    return true; // success
+  } catch(e) {
+    showLoading(false);
+    _showLoadError(e.message, loadAll);
+    return false;
+  }
   showLoading(false);
+}
+
+function _showLoadError(msg, retryFn){
+  // Show inline error with retry on the current screen
+  const existing = document.getElementById('load-error-banner');
+  if(existing) existing.remove();
+  const banner = document.createElement('div');
+  banner.id = 'load-error-banner';
+  banner.style.cssText = 'position:fixed;top:52px;left:0;right:0;background:#FCEBEB;border-bottom:1px solid #f7c1c1;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:150;font-size:13px;color:#A32D2D';
+  banner.innerHTML = `<span>⚠️ Failed to load data: ${esc(msg)}</span><button onclick="this.closest('#load-error-banner').remove();${retryFn.name}&&${retryFn.name}()" style="padding:5px 14px;background:#A32D2D;color:white;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Retry</button>`;
+  document.body.appendChild(banner);
 }
 
 // ── ADMIN: refresh ops for a project + re-render all admin views ──
@@ -1684,7 +1749,7 @@ async function refreshProjectOps(projectId, silent=false){
   if(!silent) showLoading(true);
   try {
     const [ops, types] = await Promise.all([
-      supa.from('pitchops_operations').select('*').in('venue_id', vids).gte('operation_date',new Date(Date.now()-90*24*60*60*1000).toISOString().slice(0,10)).order('operation_date',{ascending:false}),
+      supa.from('pitchops_operations').select('*').in('venue_id', vids).gte('operation_date',ninetyDaysAgoStr()).order('operation_date',{ascending:false}).limit(2000),
       supa.from('pitchops_op_types').select('*').order('name'),
     ]);
     // Merge: keep ops from other venues, replace ops for this project's venues
@@ -1711,12 +1776,14 @@ async function refreshVenueOps(venueId, silent=false){
   if(!silent) showLoading(true);
   try {
     const [ops, types] = await Promise.all([
-      supa.from('pitchops_operations').select('*').eq('venue_id', venueId).gte('operation_date',new Date(Date.now()-90*24*60*60*1000).toISOString().slice(0,10)).order('operation_date', {ascending:false}),
+      supa.from('pitchops_operations').select('*').eq('venue_id', venueId).gte('operation_date',ninetyDaysAgoStr()).order('operation_date', {ascending:false}).limit(2000),
       supa.from('pitchops_op_types').select('*').order('name'),
     ]);
     state.operations = state.operations.filter(o=>o.venueId!==venueId).concat((ops.data||[]).map(dbToOp));
     state.opTypes = (types.data||[]).map(tp=>tp.name);
-  } catch(e) { showToast('Error loading data: '+e.message); }
+  } catch(e) {
+    if(!silent) showToast('⚠️ Could not load data — check your connection');
+  }
   if(!silent) showLoading(false);
 
   // Re-render all venue views from fresh state
@@ -1753,6 +1820,35 @@ function showLoading(on){
   if(!el){ el=document.createElement('div'); el.id='global-loader'; el.style.cssText='position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#185FA5,#378ADD);z-index:999;transition:opacity .3s'; document.body.appendChild(el); }
   el.style.opacity=on?'1':'0';
 }
+
+// ── DOUBLE-SUBMIT GUARD ──
+// Usage: await withSaving(btnEl, async () => { ...your save logic... });
+// Pass null for btn when there's no specific button to disable.
+async function withSaving(btn, fn){
+  if(btn && btn._saving) return;
+  const origText = btn ? btn.textContent : '';
+  const origDisabled = btn ? btn.disabled : false;
+  if(btn){ btn._saving=true; btn.disabled=true; }
+  try {
+    await fn();
+  } finally {
+    if(btn){ btn._saving=false; btn.disabled=origDisabled; btn.textContent=origText; }
+  }
+}
+
+// Guard map for functions called without a direct button reference
+const _savingGuard = {};
+function _guardStart(key){
+  if(_savingGuard[key]) return false;
+  // Block saves when offline
+  if(!navigator.onLine){
+    showToast('⚡ You are offline — please reconnect and try again');
+    return false;
+  }
+  _savingGuard[key]=true;
+  return true;
+}
+function _guardEnd(key){ delete _savingGuard[key]; }
 
 // ════════════════════════════════════════
 // I18N
@@ -1983,6 +2079,7 @@ const i18n = {
     lbl_event_name:'Event name',
     lbl_start_date:'Start date',
     lbl_end_date:'End date',
+    hint_90days:'Last 90 days',
   },
   pl:{
     stat_total:'Ten miesiąc',stat_last:'Ostatnia op.',stat_common:'Dominuje',
@@ -2468,141 +2565,6 @@ const i18n = {
     btn_back:'Wstecz',
     btn_cancel:'Anuluj',
     btn_clear:'Wyczyść',
-    lbl_weather:'Warunki pogodowe',
-    lbl_zone:'Strefa boiska',
-    lbl_zone_custom_lbl:'Własna strefa',
-    legend_planned:'Planned',
-    loading:'Loading...',
-    log_op:'Log new task',
-    modal_add_venue:'Add venue to project',
-
-    modal_change_pass:'Change admin password',
-    modal_contact:'My contact details',
-    modal_dnd:'Move or Copy?',
-    modal_edit_op:'Edit operation',
-    modal_edit_plan:'Edit plan entry',
-    modal_edit_project:'Edit project',
-    modal_edit_usage:'Edit usage',
-    modal_edit_venue:'Edit venue',
-    modal_export_pdf:'Export PDF — select charts',
-    modal_log_task:'Log new task',
-    modal_log_usage:'Log pitch usage',
-    modal_new_project:'New project',
-    modal_op_types:'Manage task types',
-    modal_viewer_link:'Project viewer link',
-    more_suffix:'more',
-    no_tasks_logged:'No tasks logged yet.',
-    no_tasks_today:'No upcoming tasks',
-    no_usage_today:'No usage for today',
-    no_venues:'No venues in this project.',
-    op_notes:'Notes / observations',
-    op_staff:'Done by (staff)',
-    op_zone_custom:'Custom zone',
-    period_week:'Week',
-    photo_hint:'JPG, PNG · max 8 photos',
-    ptab_schedule:'📅 Harmonogram',
-    ptab_stats:'📊 Statystyki',
-    ptab_tasks:'📋 Zadania',
-    ptab_usage:'⏱ Użycie',
-    stat_total:'This month',
-    stats_total_tasks:'Total tasks',
-    stats_usage_hours:'Usage hours',
-    stats_venues_active:'Venues active',
-    status_active:'Aktywny',
-    status_manual_hint:'Completed must be set manually by you or admin',
-    status_planned:'Zaplanowane',
-    tab_log:'🗒 Log task',
-    tab_log_short:'Log task',
-    th_date:'Date',
-    th_flag:'Flag',
-    th_notes:'Notes',
-    th_photos:'Photos',
-    th_staff:'Staff',
-    th_team:'Team',
-    th_type:'Type',
-    th_usage_type:'Usage type',
-    th_venue:'Venue',
-    th_weather:'Weather',
-    th_zone:'Zone',
-    toast_chart_added:'Chart added!',
-    toast_completed_future:'Cannot mark as completed — date is in the future.',
-    toast_connection_error:'Connection error',
-    toast_contact_saved:'Contact details saved!',
-    toast_csv_exported:'CSV wyeksportowany',
-    toast_invalid_link:'Invalid or expired viewer link',
-    toast_invalid_token:'Invalid venue token',
-    toast_link_copied:'Link copied!',
-    toast_link_new:'New viewer link generated!',
-    toast_max_photos:'Maximum 8 photos per operation',
-    toast_no_charts:'No charts to export',
-    toast_pass_updated:'Password updated successfully!',
-    toast_popups:'Allow popups to export PDF',
-    toast_preset_applied:'Preset applied!',
-    toast_preset_error:'Could not save preset',
-    toast_preset_saved:'Preset saved!',
-    toast_project_created:'Project created!',
-    toast_project_deleted:'Project deleted',
-    toast_project_updated:'Project updated',
-    toast_select_chart:'Select at least one chart',
-    toast_select_venue:'Select at least one venue',
-    toast_task_deleted:'Zadanie usunięte',
-    toast_task_logged:'Zadanie zapisane',
-    toast_task_not_found:'Task not found',
-    toast_task_updated:'Zadanie zaktualizowane',
-    toast_token_not_found:'Token not found — please check and try again',
-    toast_type_added:'Type added',
-    toast_type_exists:'Type already exists',
-    toast_type_renamed:'Renamed',
-    toast_usage_deleted:'Użycie usunięte',
-    toast_usage_logged:'Użycie zapisane',
-    toast_usage_not_found:'Usage not found',
-    toast_usage_updated:'Użycie zaktualizowane',
-    toast_venue_added:'Venue added!',
-    toast_venue_deleted:'Venue deleted',
-    toast_venue_link_copied:'Venue link copied!',
-    toast_venue_removed:'Venue removed from project',
-    toast_venue_updated:'Venue updated!',
-    toast_viewer_link_copied:'Viewer link copied!',
-    today:'Today',
-    txt_contact_desc:'Update the contact information for this venue. Only you and the admin can see this.',
-    txt_regen_warning:'Old link will stop working',
-    txt_tap_to_drill:'tap to drill in →',
-    txt_viewer_desc:'Share this link to give read-only access to this project. Anyone with the link can view all venues and operations but cannot edit anything.',
-    usage_match:'Mecz',
-    vtype_other:'Other',
-    vtype_stadium:'Stadium',
-    vtype_training:'Training site',
-    zone_centre:'Centre circle',
-    zone_full:'Całe boisko',
-    zone_goal_n:'Goal mouth (N)',
-    zone_third_a:'Tercja A',bl_weather:'Weather conditions',
-    lbl_zone:'Strefa boiska',
-    lbl_zone_custom_lbl:'Własna strefa',
-    legend_planned:'Planned',
-    loading:'Loading...',
-    more_suffix:'more',
-    no_tasks_logged:'No tasks logged yet.',
-    no_tasks_today:'No upcoming tasks',
-    no_usage_today:'No usage for today',
-    no_venues:'No venues in this project.',
-    op_notes:'Notes / observations',
-    op_staff:'Done by (staff)',
-    period_week:'Week',
-    photo_hint:'JPG, PNG · max 8 photos',
-    stats_total_tasks:'Total tasks',
-    stats_usage_hours:'Usage hours',
-    stats_venues_active:'Venues active',
-    status_active:'Aktywny',
-    status_manual_hint:'Completed must be set manually by you or admin',
-    status_planned:'Zaplanowane',
-    tab_log:'🗒 Log task',
-    tab_log_short:'Log task',
-    today:'Today',
-    usage_match:'Mecz',
-    zone_centre:'Centre circle',
-    zone_full:'Całe boisko',
-    zone_goal_n:'Goal mouth (N)',
-    zone_third_a:'Tercja A',
     btn_edit:'Edytuj',
     btn_exit:'Wyjdź',
     btn_remove:'Usuń',
@@ -2613,6 +2575,7 @@ const i18n = {
     toast_copied:'Skopiowano',
     toast_saved:'Zapisano',
     toast_deleted:'Usunięto',
+    hint_90days:'Ostatnie 90 dni',
   },
   es:{
     stat_total:'Este mes',stat_last:'Última op.',stat_common:'Más común',
@@ -2822,7 +2785,8 @@ const i18n = {
     txt_viewer_desc:'Share this link to give read-only access to this project. Anyone with the link can view all venues and operations but cannot edit anything.',
     vtype_other:'Other',
     vtype_stadium:'Stadium',
-    vtype_training:'Training site'
+    vtype_training:'Training site',
+    hint_90days:'Últimos 90 días',
   },
   fr:{
     stat_total:'Ce mois',stat_last:'Dernière op.',stat_common:'Plus fréquent',
@@ -3032,7 +2996,8 @@ const i18n = {
     txt_viewer_desc:'Share this link to give read-only access to this project. Anyone with the link can view all venues and operations but cannot edit anything.',
     vtype_other:'Other',
     vtype_stadium:'Stadium',
-    vtype_training:'Training site'
+    vtype_training:'Training site',
+    hint_90days:'90 derniers jours',
   },
   de:{
     stat_total:'Diesen Monat',stat_last:'Letzte Op.',stat_common:'Häufigste',
@@ -3242,7 +3207,8 @@ const i18n = {
     txt_viewer_desc:'Share this link to give read-only access to this project. Anyone with the link can view all venues and operations but cannot edit anything.',
     vtype_other:'Other',
     vtype_stadium:'Stadium',
-    vtype_training:'Training site'
+    vtype_training:'Training site',
+    hint_90days:'Letzte 90 Tage',
   },
   pt:{
     stat_total:'Este mês',stat_last:'Última op.',stat_common:'Mais comum',
@@ -3453,6 +3419,7 @@ const i18n = {
     vtype_other:'Other',
     vtype_stadium:'Stadium',
     vtype_training:'Training site',
+    hint_90days:'Últimos 90 dias',
   }
 };
 function t(k){ return (i18n[state.lang]||i18n.en)[k]||k; }
@@ -3562,6 +3529,7 @@ function applyTranslations(l){
 
 function setLang(l){
   state.lang=l; try{localStorage.setItem('pitchops_lang',l);}catch(e){}
+  document.documentElement.lang=l;
   applyTranslations(l);
 }
 
@@ -3572,7 +3540,25 @@ function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
-function logout(){ stopAdminRealtime(); state.currentVenueId=null; state.currentProjectId=null; showScreen('screen-login'); }
+function logout(){
+  stopAdminRealtime();
+  // Clear all cached data so a subsequent session on the same device sees nothing
+  state.projects=[];
+  state.venues=[];
+  state.operations=[];
+  state.currentVenueId=null;
+  state.currentProjectId=null;
+  state.currentViewerProjectId=null;
+  state.currentVenueCalId=null;
+  state.currentStaff=[];
+  state.editStaff=[];
+  state.adminFlags={};
+  state.adminComments={};
+  try { state_admin_usage=[]; } catch(e){}
+  try { state_usage=[]; } catch(e){}
+  try { state_events=[]; } catch(e){}
+  showScreen('screen-login');
+}
 function backToProjects(){ state.currentProjectId=null; showScreen('screen-projects'); renderProjects(); }
 
 // ── VIEWER LINK ──
@@ -3622,7 +3608,7 @@ async function enterViewerDashboard(proj){
   state.venues = allVenues;
   const vids = allVenues.map(v=>v.id);
   if(vids.length){
-    const ops_res = await supa.from('pitchops_operations').select('*').in('venue_id',vids).gte('operation_date',new Date(Date.now()-90*24*60*60*1000).toISOString().slice(0,10)).order('operation_date',{ascending:false});
+    const ops_res = await supa.from('pitchops_operations').select('*').in('venue_id',vids).gte('operation_date',ninetyDaysAgoStr()).order('operation_date',{ascending:false}).limit(2000);
     state.operations = (ops_res.data||[]).map(dbToOp);
   } else { state.operations=[]; }
   const types_res = await supa.from('pitchops_op_types').select('*').order('name');
@@ -3699,7 +3685,7 @@ function renderViewerOps(){
       <td style="font-size:12px">${esc(op.zone||'—')}</td>
       <td style="font-size:12px">${esc(staffStr)}</td>
       <td style="font-size:12px;max-width:200px;white-space:pre-wrap;word-break:break-word">${esc(op.notes||'')}</td>
-      <td>${op.photos&&op.photos.length?`<div class="admin-photo-strip">${op.photos.map((p,i)=>`<img src="${p}" onclick="openLightboxFromOp('${op.id}',${i})">`).join('')}</div>`:'—'}</td>
+      <td>${op.photos&&op.photos.length?`<div class="admin-photo-strip">${op.photos.map((p,i)=>`<img src="${p}" loading="lazy" alt="Photo ${i+1}" onclick="openLightboxFromOp('${op.id}',${i})">`).join('')}</div>`:'—'}</td>
     </tr>`;
   }).join('');
 }
@@ -3717,6 +3703,7 @@ function clearViewerFilters(){
 // REALTIME SYNC (admin only)
 // ════════════════════════════════════════
 let _realtimeChannels = [];
+let _realtimeRetryTimer = null;
 
 function startAdminRealtime() {
   // Clean up any existing subscriptions first
@@ -3730,7 +3717,21 @@ function startAdminRealtime() {
     }, payload => {
       _handleRealtimeOp(payload);
     })
-    .subscribe();
+    .subscribe(status => {
+      if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+        console.warn('[PitchOps] Realtime ops channel error:', status);
+        // Auto-reconnect after 5s
+        if (!_realtimeRetryTimer) {
+          _realtimeRetryTimer = setTimeout(() => {
+            _realtimeRetryTimer = null;
+            if (document.getElementById('screen-project-detail')?.classList.contains('active') ||
+                document.getElementById('screen-projects')?.classList.contains('active')) {
+              startAdminRealtime();
+            }
+          }, 5000);
+        }
+      }
+    });
 
   const usageChannel = supa.channel('admin-usage-sync')
     .on('postgres_changes', {
@@ -3740,12 +3741,17 @@ function startAdminRealtime() {
     }, payload => {
       _handleRealtimeUsage(payload);
     })
-    .subscribe();
+    .subscribe(status => {
+      if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+        console.warn('[PitchOps] Realtime usage channel error:', status);
+      }
+    });
 
   _realtimeChannels = [opsChannel, usageChannel];
 }
 
 function stopAdminRealtime() {
+  if (_realtimeRetryTimer) { clearTimeout(_realtimeRetryTimer); _realtimeRetryTimer = null; }
   _realtimeChannels.forEach(ch => { try { supa.removeChannel(ch); } catch(e){} });
   _realtimeChannels = [];
 }
@@ -3804,6 +3810,10 @@ function _debounce(fn, delay) {
   let timer;
   return function(...args) { clearTimeout(timer); timer = setTimeout(()=>fn.apply(this,args), delay); };
 }
+// Debounced search wrappers — 150ms delay prevents re-render on every keystroke
+const _dRenderProjects = _debounce(()=>renderProjects(), 150);
+const _dRenderVenueHistory = _debounce(()=>renderVenueHistory(true), 150);
+const _dRenderVenueUsageHistory = _debounce(()=>renderVenueUsageHistory(true), 150);
 function _realtimeRefreshRaw(type) {
   _refreshCalendars();
   const tasksContent = document.getElementById('ptab-tasks-content');
@@ -3831,6 +3841,8 @@ function _realtimeNotify(type, event, item) {
 }
 
 async function adminLogin(){
+  if(!_guardStart('adminLogin')) return;
+  try {
   const email = document.getElementById('admin-email-input').value.trim().toLowerCase();
   const pass = document.getElementById('admin-pass-input').value;
   const errEl = document.getElementById('admin-login-error');
@@ -3845,10 +3857,13 @@ async function adminLogin(){
     errEl.textContent='Incorrect password.';
     errEl.style.display='block'; return;
   }
-  await loadAll();
+  const ok = await loadAll();
+  if(!ok) return;
+  document.getElementById('load-error-banner')?.remove();
   populateOpTypeSelects();
   showScreen('screen-projects'); renderProjects();
   startAdminRealtime();
+  } finally { _guardEnd('adminLogin'); }
 }
 
 async function changePassword(){
@@ -3911,7 +3926,18 @@ function renderProjects(){
 
   const grid = document.getElementById('projects-grid');
   if(!list.length){
-    grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="ico">🏆</div><div>No projects yet. Click "+ New project" to create your first one.</div></div>`;
+    if(!state.projects.length){
+      // First time - no projects at all
+      grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:3rem 1rem">
+        <div style="font-size:48px;margin-bottom:1rem">🏟️</div>
+        <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif;margin-bottom:.5rem">Welcome to PitchOps</div>
+        <div style="font-size:14px;color:var(--text-muted);margin-bottom:1.5rem;max-width:320px;margin-left:auto;margin-right:auto">No projects yet. Create your first project to start managing pitch operations.</div>
+        <button class="btn btn-primary" onclick="openModal('modal-add-project')" style="font-size:14px;padding:12px 28px">+ Create first project</button>
+      </div>`;
+    } else {
+      // Search/filter returned nothing
+      grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="ico">🔍</div><div>No projects match your search.</div></div>`;
+    }
     return;
   }
   grid.innerHTML = list.map(p=>{
@@ -3938,6 +3964,8 @@ function renderProjects(){
 }
 
 async function createProject(){
+  if(!_guardStart('createProject')) return;
+  try {
   const code = document.getElementById('new-proj-code').value.trim();
   const name = document.getElementById('new-proj-name').value.trim();
   if(!code||!name){ showToast(t('lbl_proj_code')+' & '+t('lbl_proj_name')); return; }
@@ -3956,6 +3984,8 @@ async function createProject(){
   document.getElementById('new-proj-name').value='';
   document.getElementById('new-proj-country').value='';
   renderProjects(); showToast(t('toast_project_created'));
+  } catch(err){ showToast('Error: '+esc(err.message)); }
+  finally { _guardEnd('createProject'); }
 }
 
 function editProjectModal(e, pid){
@@ -3974,6 +4004,8 @@ function editProjectModal(e, pid){
 }
 
 async function saveEditProject(){
+  if(!_guardStart('saveEditProject')) return;
+  try {
   const id=document.getElementById('edit-proj-id').value;
   const idx=state.projects.findIndex(p=>p.id===id); if(idx===-1) return;
   state.projects[idx]={...state.projects[idx],
@@ -3984,15 +4016,20 @@ async function saveEditProject(){
     color:state.editProjColor,
   };
   const {error} = await supa.from('pitchops_projects').update(projectToDb(state.projects[idx])).eq('id',id);
-  if(error){ showToast('Error: '+error.message); return; }
+  if(error){ showToast('Error: '+esc(error.message)); return; }
   closeModal('modal-edit-project'); renderProjects();
   if(state.currentProjectId===id) renderProjectDetail(id);
+  _clearDirty();
   showToast(t('toast_project_updated'));
+  } catch(err){ showToast('Error: '+esc(err.message)); }
+  finally { _guardEnd('saveEditProject'); }
 }
 
 async function deleteProject(){
+  if(!_guardStart('deleteProject')) return;
+  try {
   const id=document.getElementById('edit-proj-id').value;
-  if(!confirm(t('confirm_delete_project'))) return;
+  if(!confirm(t('confirm_delete_project'))){ return; }
   const {error} = await supa.from('pitchops_projects').delete().eq('id',id);
   if(error){ showToast('Error: '+error.message); return; }
   state.projects=state.projects.filter(p=>p.id!==id);
@@ -4004,6 +4041,8 @@ async function deleteProject(){
     }
   }
   closeModal('modal-edit-project'); renderProjects(); showToast(t('toast_project_deleted'));
+  } catch(err){ showToast('Error: '+esc(err.message)); }
+  finally { _guardEnd('deleteProject'); }
 }
 
 function openProject(pid){
@@ -4120,13 +4159,20 @@ function renderDetailOps(resetPage=true){
 
   const tbody=document.getElementById('detail-ops-tbody');
   const empty=document.getElementById('detail-ops-empty');
-  if(!ops.length){ tbody.innerHTML=''; empty.style.display='block'; return; }
+  const countEl=document.getElementById('detail-ops-count');
+  if(!ops.length){
+    tbody.innerHTML=''; empty.style.display='block';
+    if(countEl) countEl.textContent='0 tasks';
+    return;
+  }
   empty.style.display='none';
 
   const total = ops.length;
   const pageEnd = (_detailOpsPage + 1) * DETAIL_OPS_PAGE_SIZE;
   const visible = ops.slice(0, pageEnd);
   const hasMore = pageEnd < total;
+  const showing = Math.min(pageEnd, total);
+  if(countEl) countEl.textContent = showing === total ? `${total} task${total===1?'':'s'}` : `Showing ${showing} of ${total}`;
 
   tbody.innerHTML=visible.map(op=>{
     const venue=state.venues.find(v=>v.id===op.venueId);
@@ -4145,7 +4191,7 @@ function renderDetailOps(resetPage=true){
         ${comment?`<div class="comment-text">💬 ${esc(comment)}</div>`:''}
         <input type="text" placeholder="Comment..." value="${esc(comment)}" onchange="saveComment('${op.id}',this.value)" style="width:100%;font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:5px;outline:none;margin-top:3px"/>
       </td>
-      <td>${op.photos&&op.photos.length?`<div class="admin-photo-strip">${op.photos.map((p,i)=>`<img src="${p}" onclick="openLightboxFromOp('${op.id}',${i})">`).join('')}</div>`:'<span style="color:var(--text-hint);font-size:12px">—</span>'}</td>
+      <td>${op.photos&&op.photos.length?`<div class="admin-photo-strip">${op.photos.map((p,i)=>`<img src="${p}" loading="lazy" alt="Photo ${i+1}" onclick="openLightboxFromOp('${op.id}',${i})">`).join('')}</div>`:'<span style="color:var(--text-hint);font-size:12px">—</span>'}</td>
       <td><button class="flag-btn ${flagged?'flagged':''}" onclick="toggleFlag('${op.id}',this)">🚩</button></td>
     </tr>`;
   }).join('');
@@ -4193,7 +4239,7 @@ function openAddVenueModal(){
 }
 
 async function createVenue(){
-
+  if(!_guardStart('createVenue')) return;
   try {
   const name=document.getElementById('new-venue-name').value.trim();
   if(!name){ showToast(t('lbl_venue_name')+' '+t('lbl_required')||'Please enter a venue name'); return; }
@@ -4215,7 +4261,8 @@ async function createVenue(){
   renderProjectDetail(pid);
   showToast(t('toast_venue_added'));
 
-  } catch(err){ showToast('Error: '+err.message); console.error('createVenue:', err); }
+  } catch(err){ showToast('Error: '+esc(err.message)); console.error('createVenue:', err); }
+  finally { _guardEnd('createVenue'); }
 }
 
 function copyVenueLinkById(e,token){
@@ -4255,6 +4302,63 @@ function showVenueWelcome(){
   });
   const venue=state.venues.find(v=>v.id===state.currentVenueId);
   loadWelcomeWeather(venue?venue.city:'');
+  updateWelcomeBadges();
+}
+
+function updateWelcomeBadges(){
+  const today=todayStr();
+  const vid=state.currentVenueId;
+  const ops=state.operations.filter(o=>o.venueId===vid);
+  const usages=(state_usage||[]).filter(u=>u.venueId===vid);
+
+  // Tasks badge: planned/inprogress for today or future (upcoming)
+  const todayTasks=ops.filter(o=>o.date===today&&(o.status==='planned'||o.status==='inprogress'));
+  const weekTasks=ops.filter(o=>{const d=new Date(o.date);const now=new Date();const diff=(d-now)/864e5;return diff>0&&diff<=7&&(o.status==='planned'||o.status==='inprogress');});
+  const tbEl=document.getElementById('welcome-badge-tasks');
+  if(tbEl){
+    if(todayTasks.length>0){tbEl.textContent=todayTasks.length+' today';tbEl.style.display='block';}
+    else if(weekTasks.length>0){tbEl.textContent=weekTasks.length+' this week';tbEl.style.display='block';}
+    else{tbEl.style.display='none';}
+  }
+
+  // Usage badge: logged today
+  const todayUsage=usages.filter(u=>u.date===today);
+  const ubEl=document.getElementById('welcome-badge-usage');
+  if(ubEl){
+    if(todayUsage.length>0){ubEl.textContent=todayUsage.length+' today';ubEl.style.display='block';}
+    else{ubEl.style.display='none';}
+  }
+
+  // Schedule badge: upcoming in next 7 days
+  const upcomingAll=ops.filter(o=>{const d=new Date(o.date);const now=new Date(today);const diff=Math.round((d-now)/864e5);return diff>=0&&diff<=7;});
+  const sbEl=document.getElementById('welcome-badge-schedule');
+  if(sbEl){
+    if(upcomingAll.length>0){sbEl.textContent=upcomingAll.length+' upcoming';sbEl.style.display='block';}
+    else{sbEl.style.display='none';}
+  }
+
+  // Stats badge: total tasks this month
+  const monthStart=today.slice(0,8)+'01';
+  const monthTasks=ops.filter(o=>o.date>=monthStart&&o.date<=today);
+  const stEl=document.getElementById('welcome-badge-stats');
+  if(stEl){
+    if(monthTasks.length>0){stEl.textContent=monthTasks.length+' this month';stEl.style.display='block';}
+    else{stEl.style.display='none';}
+  }
+}
+
+function maybeShowOnboarding(venueId){
+  const key='pitchops_onboarded_'+venueId;
+  if(localStorage.getItem(key)) return;
+  const el=document.getElementById('onboarding-overlay');
+  if(el){ el.style.display='flex'; }
+}
+
+function closeOnboarding(){
+  const el=document.getElementById('onboarding-overlay');
+  if(el){ el.style.display='none'; }
+  const vid=state.currentVenueId;
+  if(vid){ try{ localStorage.setItem('pitchops_onboarded_'+vid,'1'); }catch(e){} }
 }
 
 function showVenueDashboard(tab){
@@ -4392,6 +4496,8 @@ async function enterVenueDashboard(venue){
     wtag.textContent=proj2?proj2.name:'';
   }
   applyTranslations(state.lang);
+  // Show onboarding for first-time venue users
+  maybeShowOnboarding(venue.id);
   } catch(err) {
     console.error('[ENTER] CRASHED:', err);
     // Force show welcome even if crash
@@ -4426,13 +4532,20 @@ function renderVenueHistory(resetPage=true){
     .filter(o=>!toF||o.date<=toF)
     .filter(o=>!search||o.type.toLowerCase().includes(search)||(o.notes||'').toLowerCase().includes(search)||(o.staff||[]).join(' ').toLowerCase().includes(search));
   const container=document.getElementById('venue-history-list');
-  if(!ops.length){ if(container) container.innerHTML=`<div class="empty-state"><div class="ico">📋</div><div>${t('no_tasks_logged')}</div></div>`; return; }
+  const countEl=document.getElementById('venue-hist-count');
+  if(!ops.length){
+    if(container) container.innerHTML=`<div class="empty-state"><div class="ico">📋</div><div>${t('no_tasks_logged')}</div></div>`;
+    if(countEl) countEl.textContent='';
+    return;
+  }
 
   if(resetPage) _venueHistPage = 0;
   const total = ops.length;
   const pageEnd = (_venueHistPage + 1) * VENUE_HIST_PAGE_SIZE;
   const visible = ops.slice(0, pageEnd);
   const hasMore = pageEnd < total;
+  const showing = Math.min(pageEnd, total);
+  if(countEl) countEl.textContent = showing === total ? `${total} task${total===1?'':'s'}` : `${showing} of ${total}`;
 
   const statusBar={completed:'#3B6D11',missed:'#A32D2D',inprogress:'#378ADD',planned:'#EF9F27'};
   const histHTML=visible.map(op=>{
@@ -4448,7 +4561,7 @@ function renderVenueHistory(resetPage=true){
           <div style="font-size:13px;font-weight:600;color:var(--navy)">${esc(op.type)}</div>
           ${meta?`<div style="font-size:11px;color:var(--text-muted);margin-top:2px">${esc(meta)}</div>`:''}
           ${op.notes?`<div style="font-size:11px;color:var(--text-hint);font-style:italic;margin-top:2px">${esc(op.notes)}</div>`:''}
-          ${op.photos&&op.photos.length?`<div class="admin-photo-strip" style="margin-top:6px">${op.photos.map((p,i)=>`<img src="${p}" onclick="openLightboxFromOp('${op.id}',${i})" style="border-radius:6px">`).join('')}</div>`:''}
+          ${op.photos&&op.photos.length?`<div class="admin-photo-strip" style="margin-top:6px">${op.photos.map((p,i)=>`<img src="${p}" loading="lazy" alt="Photo ${i+1}" onclick="openLightboxFromOp('${op.id}',${i})" style="border-radius:6px">`).join('')}</div>`:''}
         </div>
         <div style="flex-shrink:0;text-align:right;min-width:90px">
           <div style="font-size:12px;font-weight:500;color:var(--text)">${formatDateOnly(op.date)}</div>
@@ -4478,7 +4591,8 @@ function renderVenueHistory(resetPage=true){
 // LOG / EDIT / DELETE OPERATION
 // ════════════════════════════════════════
 async function logOperation(){
-
+  if(!_guardStart('logOperation')) return;
+  try {
   const zoneEl=document.getElementById('new-op-zone');
   const zone=zoneEl.value==='Custom'?(document.getElementById('new-op-zone-custom').value.trim()||'Custom'):zoneEl.value;
   const opDateOnly = document.getElementById('new-op-date').value||todayStr();
@@ -4538,6 +4652,7 @@ async function logOperation(){
   }
   closeModal('modal-log-task');
   showToast(t('toast_task_logged'));
+  } finally { _guardEnd('logOperation'); }
 }
 
 function openEditModal(opId){
@@ -4564,6 +4679,7 @@ function openEditModal(opId){
 }
 
 async function saveEditOperation(){
+  if(!_guardStart('saveEditOperation')) return;
   try {
   const id=document.getElementById('edit-op-id').value;
   const idx=state.operations.findIndex(o=>o.id===id); if(idx===-1) return;
@@ -4611,12 +4727,14 @@ async function saveEditOperation(){
     if(venueCalViewMode==='month') renderMonthCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset); else renderWeekCalendar(state.currentVenueCalId,'venue-cal-grid',venueCalOffset);
   }
   _refreshCalendars();
+  _clearDirty();
   showToast(t('toast_task_updated'));
-  } catch(err){ console.error('saveEditOperation:',err); showToast('Error: '+err.message); }
+  } catch(err){ console.error('saveEditOperation:',err); showToast('Error: '+esc(err.message)); }
+  finally { _guardEnd('saveEditOperation'); }
 }
 
 async function deleteOperation(){
-
+  if(!_guardStart('deleteOperation')) return;
   try {
   const id=document.getElementById('edit-op-id').value;
   if(!confirm(t('confirm_delete_op'))) return;
@@ -4640,7 +4758,8 @@ async function deleteOperation(){
   _refreshCalendars();
   showToast(t('toast_task_deleted'));
 
-  } catch(err){ showToast('Error: '+err.message); console.error('deleteOperation:', err); }
+  } catch(err){ showToast('Error: '+esc(err.message)); console.error('deleteOperation:', err); }
+  finally { _guardEnd('deleteOperation'); }
 }
 
 // ════════════════════════════════════════
@@ -4831,12 +4950,16 @@ function handlePhotoSelect(input, ctx) {
   const files = Array.from(input.files);
   const allowed = MAX_PHOTOS - currentPhotos[ctx].length;
   if(allowed <= 0){ showToast(t('toast_max_photos')); input.value = ''; return; }
+  const MAX_FILE_BYTES = 30 * 1024 * 1024; // 30MB per file
+  let added = 0;
   files.slice(0, allowed).forEach(file => {
-    const url = URL.createObjectURL(file); // temporary preview URL
+    if(file.size > MAX_FILE_BYTES){ showToast('File too large (max 30MB): '+file.name); return; }
+    const url = URL.createObjectURL(file);
     currentPhotos[ctx].push({ url, file, uploaded: false });
+    added++;
     renderPhotoPreviews(ctx);
   });
-  if(files.length > allowed) showToast('Only ' + allowed + ' more photo(s) added');
+  if(files.length > allowed && added < files.length) showToast('Only ' + allowed + ' more photo(s) added');
   input.value = '';
 }
 
@@ -4948,7 +5071,7 @@ function copyEditVenueLink(){
 }
 
 async function saveEditVenue(){
-
+  if(!_guardStart('saveEditVenue')) return;
   try {
   const id=document.getElementById('edit-venue-id').value;
   const idx=state.venues.findIndex(v=>v.id===id); if(idx===-1) return;
@@ -4972,27 +5095,30 @@ async function saveEditVenue(){
   if(error){showToast('Error: '+error.message);return;}
   closeModal('modal-edit-venue');
   renderProjectDetail(state.currentProjectId);
+  _clearDirty();
   showToast(t('toast_venue_updated'));
 
-  } catch(err){ showToast('Error: '+err.message); console.error('saveEditVenue:', err); }
+  } catch(err){ showToast('Error: '+esc(err.message)); console.error('saveEditVenue:', err); }
+  finally { _guardEnd('saveEditVenue'); }
 }
 
 async function deleteVenue(){
-
+  if(!_guardStart('deleteVenue')) return;
   try {
   const id=document.getElementById('edit-venue-id').value;
   if(!confirm(t('confirm_delete_venue'))) return;
   const {error}=await supa.from('pitchops_operations').delete().eq('venue_id',id);
-  if(error){showToast('Error: '+error.message);return;}
+  if(error){showToast('Error: '+esc(error.message));return;}
   const {error:e2}=await supa.from('pitchops_venues').delete().eq('id',id);
-  if(e2){showToast('Error: '+e2.message);return;}
+  if(e2){showToast('Error: '+esc(e2.message));return;}
   state.venues=state.venues.filter(v=>v.id!==id);
   state.operations=state.operations.filter(o=>o.venueId!==id);
   closeModal('modal-edit-venue');
   renderProjectDetail(state.currentProjectId);
   showToast(t('toast_venue_deleted'));
 
-  } catch(err){ showToast('Error: '+err.message); console.error('deleteVenue:', err); }
+  } catch(err){ showToast('Error: '+esc(err.message)); console.error('deleteVenue:', err); }
+  finally { _guardEnd('deleteVenue'); }
 }
 
 // ════════════════════════════════════════
@@ -5010,12 +5136,46 @@ function formatDateOnly(dt){
   if(p.length===3){ const d=new Date(+p[0],+p[1]-1,+p[2]); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
   return new Date(dt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
 }
-function openModal(id){document.getElementById(id).classList.add('open');}
+// ── DIRTY FLAG (unsaved changes warning) ──
+// Call markModalDirty() from oninput/onchange on edit modals.
+// closeModal() will confirm before discarding when dirty.
+let _dirtyModalId = null;
+function markModalDirty(id){
+  if(id) _dirtyModalId = id;
+  else {
+    // Auto-detect: find the currently open edit modal
+    const open = document.querySelector('.modal-overlay.open');
+    if(open) _dirtyModalId = open.id;
+  }
+}
+function _clearDirty(){ _dirtyModalId = null; }
+
+function openModal(id){
+  _clearDirty(); // fresh open = no dirty state
+  document.getElementById(id).classList.add('open');
+}
 function closeModal(id,e){
   if(e) e.stopPropagation();
+  // Only prompt for edit modals (those with "-edit-" in their id) when dirty
+  if(_dirtyModalId === id && id.includes('edit')){
+    if(!confirm('You have unsaved changes. Discard them?')) return;
+  }
+  _clearDirty();
   document.getElementById(id).classList.remove('open');
 }
-function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+const _toastQueue=[];let _toastBusy=false;
+function showToast(msg){
+  _toastQueue.push(msg);
+  if(!_toastBusy) _processToastQueue();
+}
+function _processToastQueue(){
+  if(!_toastQueue.length){ _toastBusy=false; return; }
+  _toastBusy=true;
+  const msg=_toastQueue.shift();
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>{ el.classList.remove('show'); setTimeout(_processToastQueue,250); },2200);
+}
 
 function openVenueContactModal(){
   const v=state.venues.find(x=>x.id===state.currentVenueId); if(!v) return;
@@ -5145,6 +5305,25 @@ function opBadge(type){const f=OP_COLORS.find(c=>c.key===type);if(f)return f;con
 // INIT
 // ════════════════════════════════════════
 async function init(){
+  // ── localStorage version check ──
+  // Bump APP_STORAGE_VERSION when localStorage format changes between deployments.
+  // This clears only pitchops_* keys (not lang, pass_hash) to avoid stale data bugs.
+  const APP_STORAGE_VERSION = '2';
+  const STORAGE_VER_KEY = 'pitchops_storage_ver';
+  try {
+    const storedVer = localStorage.getItem(STORAGE_VER_KEY);
+    if(storedVer !== APP_STORAGE_VERSION){
+      // Clear pitchops_ keys except lang, pass hash, and onboarding flags
+      const keep = new Set(['pitchops_lang', 'pitchops_admin_pass_hash']);
+      Object.keys(localStorage).forEach(k => {
+        if(k.startsWith('pitchops_') && !keep.has(k) && !k.startsWith('pitchops_onboarded_')){
+          localStorage.removeItem(k);
+        }
+      });
+      localStorage.setItem(STORAGE_VER_KEY, APP_STORAGE_VERSION);
+    }
+  } catch(e){ /* localStorage unavailable (private mode) — ignore */ }
+
   setLang(state.lang);
 
   const params=new URLSearchParams(window.location.search);
@@ -5697,7 +5876,7 @@ async function loadAllVenueEvents(pid){
   // Load events for all venues in a project with one query
   const vids = projectVenues(pid).map(v=>v.id);
   if(!vids.length) return;
-  const {data} = await supa.from('pitchops_events').select('*').in('venue_id', vids);
+  const {data} = await supa.from('pitchops_events').select('*').in('venue_id', vids).limit(500);
   // Merge into state_events (keep venue events, replace project ones)
   const projectEventIds = new Set((data||[]).map(r=>r.id));
   // Remove old events for these venues, add fresh ones
@@ -5715,7 +5894,7 @@ async function loadAllVenueEvents(pid){
 async function loadVenueEvents(venueId){
 
   try {
-  const {data} = await supa.from('pitchops_events').select('*').eq('venue_id', venueId);
+  const {data} = await supa.from('pitchops_events').select('*').eq('venue_id', venueId).limit(500);
   state_events = (data||[]).map(r=>({
     id: r.id, venueId: r.venue_id, name: r.name,
     dateStart: (r.date_start||'').slice(0,10),
@@ -6118,6 +6297,15 @@ function toggleAdminMenu(){
   overlay.style.display=open?'block':'none';
 }
 
+function toggleProjectsMenu(){
+  const menu=document.getElementById('projects-menu');
+  const overlay=document.getElementById('projects-menu-overlay');
+  if(!menu||!overlay) return;
+  const open=menu.style.display==='none'||!menu.style.display;
+  menu.style.display=open?'block':'none';
+  overlay.style.display=open?'block':'none';
+}
+
 function toggleVenueMenu(){
   const menu=document.getElementById('venue-menu');
   const overlay=document.getElementById('venue-menu-overlay');
@@ -6157,7 +6345,7 @@ function usageToDb(u){
 async function refreshVenueUsage(venueId, silent=false){
   if(!silent) showLoading(true);
   try {
-    const {data} = await supa.from('pitchops_usage').select('*').eq('venue_id',venueId).gte('usage_date',new Date(Date.now()-90*24*60*60*1000).toISOString().slice(0,10)).order('usage_date',{ascending:false});
+    const {data} = await supa.from('pitchops_usage').select('*').eq('venue_id',venueId).gte('usage_date',ninetyDaysAgoStr()).order('usage_date',{ascending:false}).limit(2000);
     state_usage = (data||[]).map(dbToUsage);
   } catch(e){ showToast('Error loading usage: '+e.message); }
   if(!silent) showLoading(false);
@@ -6266,7 +6454,7 @@ function renderVenueUsageHistory(){
           <div style="font-size:13px;font-weight:600;color:var(--navy)">${esc(u.usageType)}</div>
           ${u.teamName?`<div style="font-size:11px;color:var(--text-muted);margin-top:1px">👕 ${esc(u.teamName)}</div>`:''}
           ${u.notes?`<div style="font-size:11px;color:var(--text-hint);font-style:italic;margin-top:2px">${esc(u.notes)}</div>`:''}
-          ${u.photos&&u.photos.length?`<div class="admin-photo-strip" style="margin-top:6px">${u.photos.map((p,i)=>`<img src="${p}" style="border-radius:6px">`).join('')}</div>`:''}
+          ${u.photos&&u.photos.length?`<div class="admin-photo-strip" style="margin-top:6px">${u.photos.map((p,i)=>`<img src="${p}" loading="lazy" alt="Photo ${i+1}" style="border-radius:6px">`).join('')}</div>`:''}
         </div>
         <div style="flex-shrink:0;text-align:right;min-width:90px">
           <div style="font-size:12px;font-weight:500;color:var(--text)">${formatDateOnly(u.date)}</div>
@@ -6331,7 +6519,9 @@ function handleUsagePhotos(input, mode='new'){
   if(!currentUsagePhotos[mode]) currentUsagePhotos[mode] = [];
   const allowed = MAX_PHOTOS - currentUsagePhotos[mode].length;
   if(allowed<=0){ showToast(t('toast_max_photos')); input.value=''; return; }
+  const MAX_FILE_BYTES = 30 * 1024 * 1024;
   files.slice(0, allowed).forEach(file=>{
+    if(file.size > MAX_FILE_BYTES){ showToast('File too large (max 30MB): '+file.name); return; }
     currentUsagePhotos[mode].push({ url: URL.createObjectURL(file), file, uploaded: false });
   });
   renderUsagePhotoPreviews(mode); input.value='';
@@ -6341,6 +6531,8 @@ function handleEditUsagePhotos(input){
 }
 
 async function logUsage(){
+  if(!_guardStart('logUsage')) return;
+  try {
   const isAdminLog = !!state.currentProjectId;
   const venueId = isAdminLog
     ? document.getElementById('new-usage-venue-id')?.value
@@ -6391,6 +6583,8 @@ async function logUsage(){
     if(document.getElementById('vtab-schedule-content')?.style.display==='block') renderVenueSched();
   }
   showToast(t('toast_usage_logged'));
+  } catch(err){ showToast('Error: '+esc(err.message)); }
+  finally { _guardEnd('logUsage'); }
 }
 
 // ── EDIT USAGE ──
@@ -6414,6 +6608,7 @@ function openEditUsageModal(id){
 }
 
 async function saveEditUsage(){
+  if(!_guardStart('saveEditUsage')) return;
   try {
   const id=document.getElementById('edit-usage-id').value;
   // Find in state_usage (venue context) or state_admin_usage (admin context)
@@ -6446,17 +6641,19 @@ async function saveEditUsage(){
   closeModal('modal-edit-usage');
   renderVenueUsageToday(); renderVenueUsageHistory();
   _refreshCalendars();
+  _clearDirty();
   showToast(t('toast_usage_updated'));
-  } catch(err){ console.error('saveEditUsage:',err); showToast('Error: '+err.message); }
+  } catch(err){ console.error('saveEditUsage:',err); showToast('Error: '+esc(err.message)); }
+  finally { _guardEnd('saveEditUsage'); }
 }
 
 async function deleteUsage(){
-
+  if(!_guardStart('deleteUsage')) return;
   try {
   const id=document.getElementById('edit-usage-id').value;
   if(!confirm(t('confirm_delete_usage'))) return;
   const {error}=await supa.from('pitchops_usage').delete().eq('id',id);
-  if(error){ showToast('Error: '+error.message); return; }
+  if(error){ showToast('Error: '+esc(error.message)); return; }
   const delU = state_usage.find(u=>u.id===id) || state_admin_usage.find(u=>u.id===id);
   if(delU?.photos?.length) delU.photos.forEach(url=>deletePhoto(url));
   state_usage=state_usage.filter(u=>u.id!==id);
@@ -6464,13 +6661,12 @@ async function deleteUsage(){
   closeModal('modal-edit-usage');
   renderVenueUsageToday(); renderVenueUsageHistory();
   renderDetailUsage();
-  // Refresh all calendar views immediately
   if(document.getElementById('vtab-schedule-content')?.style.display==='block') renderVenueSched();
-  _refreshCalendars();
   _refreshCalendars();
   showToast(t('toast_usage_deleted'));
 
-  } catch(err){ showToast('Error: '+err.message); console.error('deleteUsage:', err); }
+  } catch(err){ showToast('Error: '+esc(err.message)); console.error('deleteUsage:', err); }
+  finally { _guardEnd('deleteUsage'); }
 }
 
 // ════════════════════════════════════════
@@ -6495,7 +6691,7 @@ async function refreshProjectUsage(projectId, silent=false){
   if(!vids.length){ state_admin_usage=[]; return; }
   if(!silent) showLoading(true);
   try {
-    const {data}=await supa.from('pitchops_usage').select('*').in('venue_id',vids).gte('usage_date',new Date(Date.now()-90*24*60*60*1000).toISOString().slice(0,10)).order('usage_date',{ascending:false});
+    const {data}=await supa.from('pitchops_usage').select('*').in('venue_id',vids).gte('usage_date',ninetyDaysAgoStr()).order('usage_date',{ascending:false}).limit(2000);
     state_admin_usage=(data||[]).map(dbToAdminUsage);
   } catch(e){ showToast('Error loading usage: '+e.message); }
   if(!silent) showLoading(false);
@@ -6540,7 +6736,7 @@ function renderDetailUsage(){
         ${u.notes?`<div style="white-space:pre-wrap;word-break:break-word;line-height:1.4;margin-bottom:4px">${esc(u.notes)}</div>`:''}
         <input type="text" placeholder="Comment..." value="${esc(u.adminComment||'')}" onchange="saveUsageComment('${u.id}',this.value)" style="width:100%;font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:5px;outline:none"/>
       </td>
-      <td>${u.photos&&u.photos.length?`<div class="admin-photo-strip">${u.photos.map((p,i)=>`<img src="${p}" onclick="openLightboxFromUsage('${u.id}',${i})">`).join('')}</div>`:'<span style="color:var(--text-hint);font-size:12px">—</span>'}</td>
+      <td>${u.photos&&u.photos.length?`<div class="admin-photo-strip">${u.photos.map((p,i)=>`<img src="${p}" loading="lazy" alt="Photo ${i+1}" onclick="openLightboxFromUsage('${u.id}',${i})">`).join('')}</div>`:'<span style="color:var(--text-hint);font-size:12px">—</span>'}</td>
       <td><button class="flag-btn ${u.flagged?'flagged':''}" onclick="toggleUsageFlag('${u.id}',this)">🚩</button></td>
     </tr>`;
   }).join('');
@@ -6777,6 +6973,8 @@ function getVenueStatsDates(){
     from=document.getElementById('vstats-from')?.value||'';
     to=document.getElementById('vstats-to')?.value||todayStr();
   }
+  // Ensure from <= to; swap silently if inverted
+  if(from && to && from > to){ const tmp=from; from=to; to=tmp; }
   return {from, to};
 }
 
@@ -7272,6 +7470,8 @@ function getStatsDates(){
   else if(statsPeriod==='month'){ from=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-01'; }
   else if(statsPeriod==='quarter'){ const q=new Date(now.getFullYear(),Math.floor(now.getMonth()/3)*3,1); from=q.getFullYear()+'-'+String(q.getMonth()+1).padStart(2,'0')+'-01'; }
   else { from=document.getElementById('stats-from')?.value||''; to=document.getElementById('stats-to')?.value||todayStr(); }
+  // Ensure from <= to; swap silently if inverted
+  if(from && to && from > to){ const tmp=from; from=to; to=tmp; }
   return {from,to};
 }
 
@@ -7283,6 +7483,8 @@ function getCompareDates(){
   else if(p==='quarter'){ const q=new Date(now.getFullYear(),Math.floor(now.getMonth()/3)*3,1); from=q.getFullYear()+'-'+String(q.getMonth()+1).padStart(2,'0')+'-01'; }
   else if(p==='year'){ from=now.getFullYear()+'-01-01'; }
   else { from=document.getElementById('compare-from')?.value||''; to=document.getElementById('compare-to')?.value||todayStr(); }
+  // Ensure from <= to
+  if(from && to && from > to){ const tmp=from; from=to; to=tmp; }
   return {from,to};
 }
 
@@ -7757,7 +7959,7 @@ init();
 
 <!-- EDIT USAGE MODAL -->
 <div class="modal-overlay" id="modal-edit-usage">
-  <div class="modal">
+  <div class="modal" oninput="markModalDirty('modal-edit-usage')" onchange="markModalDirty('modal-edit-usage')">
     <div class="modal-header">
       <span class="modal-title" data-i18n="modal_edit_usage">Edit usage</span>
       <button class="modal-close" onclick="closeModal('modal-edit-usage')">✕</button>
@@ -7902,6 +8104,44 @@ init();
     </div>
   </div>
 </div>
+
+<!-- VENUE ONBOARDING OVERLAY (shown only once on first login) -->
+<div id="onboarding-overlay" style="display:none;position:fixed;inset:0;background:rgba(12,35,64,.7);z-index:500;align-items:center;justify-content:center;padding:1rem">
+  <div style="background:white;border-radius:20px;width:100%;max-width:400px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+    <div style="background:linear-gradient(135deg,#0C2340,#185FA5);padding:1.5rem 1.5rem 1.25rem">
+      <div style="font-size:28px;margin-bottom:.5rem">👋</div>
+      <div style="font-size:20px;font-weight:700;color:white;font-family:'Syne',sans-serif" id="onboarding-title">Welcome to PitchOps</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.7);margin-top:4px" id="onboarding-sub">Here's how to get started</div>
+    </div>
+    <div style="padding:1.25rem 1.5rem">
+      <div style="display:flex;flex-direction:column;gap:1rem">
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="width:32px;height:32px;border-radius:50%;background:#E6F1FB;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px">📋</div>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:#0C2340">Log tasks</div>
+            <div style="font-size:12px;color:#5a6a82;margin-top:2px">Record pitch maintenance work — mowing, aeration, seeding and more</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="width:32px;height:32px;border-radius:50%;background:#EEEDFE;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px">⏱</div>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:#0C2340">Log pitch usage</div>
+            <div style="font-size:12px;color:#5a6a82;margin-top:2px">Track matches, training sessions and other pitch activity</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="width:32px;height:32px;border-radius:50%;background:#EAF3DE;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px">📅</div>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:#0C2340">View your schedule</div>
+            <div style="font-size:12px;color:#5a6a82;margin-top:2px">See planned tasks on a weekly or monthly calendar view</div>
+          </div>
+        </div>
+      </div>
+      <button onclick="closeOnboarding()" style="width:100%;margin-top:1.5rem;padding:12px;background:linear-gradient(135deg,#0C2340,#185FA5);color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer">Got it — let's go!</button>
+    </div>
+  </div>
+</div>
+
   <div id="offline-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#0C2340;color:white;text-align:center;padding:10px;font-size:13px;z-index:9999;font-weight:500">
     📡 You are offline — viewing cached data
   </div>
@@ -7909,7 +8149,7 @@ init();
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
         navigator.serviceWorker.register('sw.js')
-          .then(function(reg){ console.log('[PitchOps] SW registered:', reg.scope); })
+          .then(function(reg){ /* SW registered */ })
           .catch(function(err){ console.warn('[PitchOps] SW registration failed:', err); });
       });
     }
