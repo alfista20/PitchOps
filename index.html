@@ -456,7 +456,7 @@ button,input,select,textarea{}
         <button class="status-pill" onclick="filterProjects('planned',this)">Planned</button>
         <button class="status-pill" onclick="filterProjects('finished',this)">Finished</button>
       </div>
-      <input type="text" id="project-search" placeholder="Search projects..." oninput="_dRenderProjects()" style="padding:7px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;outline:none;width:180px"/>
+      <input type="text" id="project-search" placeholder="Search projects..." inputmode="search" oninput="_dRenderProjects()" style="padding:7px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;outline:none;width:180px"/>
     </div>
     <div class="projects-grid" id="projects-grid"></div>
   </div>
@@ -1050,7 +1050,7 @@ button,input,select,textarea{}
           </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%">
-          <input type="text" id="venue-hist-search" placeholder="🔍 Search..." oninput="_dRenderVenueHistory()" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;outline:none;background:#f8fafc;width:100%;box-sizing:border-box"/>
+          <input type="text" id="venue-hist-search" placeholder="🔍 Search..." inputmode="search" oninput="_dRenderVenueHistory()" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;outline:none;background:#f8fafc;width:100%;box-sizing:border-box"/>
           <select id="venue-hist-status" onchange="renderVenueHistory(true)" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;background:#f8fafc;outline:none;width:100%;box-sizing:border-box">
             <option value="">All status</option>
             <option value="completed">Completed</option>
@@ -1098,7 +1098,7 @@ button,input,select,textarea{}
           <div style="font-size:11px;color:var(--text-hint)" data-i18n="hint_90days">Last 90 days</div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%">
-          <input type="text" id="venue-usage-search" placeholder="🔍 Search..." oninput="_dRenderVenueUsageHistory()" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;outline:none;background:#f8fafc;width:100%;box-sizing:border-box"/>
+          <input type="text" id="venue-usage-search" placeholder="🔍 Search..." inputmode="search" oninput="_dRenderVenueUsageHistory()" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;outline:none;background:#f8fafc;width:100%;box-sizing:border-box"/>
           <select id="venue-usage-filter-type" onchange="renderVenueUsageHistory(true)" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;background:#f8fafc;outline:none;width:100%;box-sizing:border-box">
             <option value="">All types</option>
             <option value="Match Day">Match Day</option>
@@ -1518,9 +1518,18 @@ button,input,select,textarea{}
         <div class="photo-previews" id="new-photo-previews"></div>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-log-task')" data-i18n="btn_cancel">Cancel</button>
-      <button class="btn btn-blue" onclick="logOperation()" data-i18n="btn_log">Log task</button>
+    <div class="modal-footer" style="flex-direction:column;gap:8px;align-items:stretch">
+      <!-- Admin-only: log same task for all venues in this project -->
+      <div id="log-all-venues-wrap" style="display:none;background:var(--blue-pale);border-radius:8px;padding:8px 12px">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--blue)">
+          <input type="checkbox" id="log-all-venues-chk" style="width:15px;height:15px;cursor:pointer;accent-color:var(--blue)"/>
+          <span data-i18n="lbl_log_all_venues">Log same task for all venues in this project</span>
+        </label>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-ghost" onclick="closeModal('modal-log-task')" data-i18n="btn_cancel">Cancel</button>
+        <button class="btn btn-blue" onclick="logOperation()" data-i18n="btn_log">Log task</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1675,6 +1684,13 @@ let state = {
   adminComments: {},
   lang: localStorage.getItem('pitchops_lang')||'en',
   projectFilter: 'all',
+  // Module data — aliased to globals below for backward compat; new modules use state.*
+  get usage(){ return state_usage; },
+  set usage(v){ state_usage = v; },
+  get adminUsage(){ return state_admin_usage; },
+  set adminUsage(v){ state_admin_usage = v; },
+  get events(){ return state_events; },
+  set events(v){ state_events = v; },
 };
 
 async function sha256(str){
@@ -2080,6 +2096,7 @@ const i18n = {
     lbl_start_date:'Start date',
     lbl_end_date:'End date',
     hint_90days:'Last 90 days',
+    lbl_log_all_venues:'Log same task for all venues in this project',
   },
   pl:{
     stat_total:'Ten miesiąc',stat_last:'Ostatnia op.',stat_common:'Dominuje',
@@ -2576,6 +2593,7 @@ const i18n = {
     toast_saved:'Zapisano',
     toast_deleted:'Usunięto',
     hint_90days:'Ostatnie 90 dni',
+    lbl_log_all_venues:'Zaloguj to samo zadanie dla wszystkich boisk w projekcie',
   },
   es:{
     stat_total:'Este mes',stat_last:'Última op.',stat_common:'Más común',
@@ -3554,9 +3572,9 @@ function logout(){
   state.editStaff=[];
   state.adminFlags={};
   state.adminComments={};
-  try { state_admin_usage=[]; } catch(e){}
-  try { state_usage=[]; } catch(e){}
-  try { state_events=[]; } catch(e){}
+  try { state.adminUsage=[]; } catch(e){}
+  try { state.usage=[]; } catch(e){}
+  try { state.events=[]; } catch(e){}
   showScreen('screen-login');
 }
 function backToProjects(){ state.currentProjectId=null; showScreen('screen-projects'); renderProjects(); }
@@ -3580,7 +3598,7 @@ function copyViewerLink(){
 async function revokeViewerLink(){
 
   try {
-  if(!confirm(t('confirm_regen_link'))) return;
+  if(!await confirmAsync(t('confirm_regen_link'))) return;
   const pid=state.currentProjectId; if(!pid) return;
   const proj=state.projects.find(p=>p.id===pid); if(!proj) return;
   proj.viewerToken=genToken();
@@ -3887,12 +3905,14 @@ async function changePassword(){
 }
 
 async function venueTokenLogin(){
+  if(!_guardStart('venueTokenLogin')) return;
+  try {
   const tok = document.getElementById('venue-token-input').value.trim().replace(/\s/g,'');
   if(!tok){ showToast(t('lbl_venue_token')); return; }
   showLoading(true);
   const {data:venues, error} = await supa.from('pitchops_venues').select('*').eq('token',tok);
   showLoading(false);
-  if(error){ showToast(t('toast_connection_error')+': '+error.message); return; }
+  if(error){ showToast(t('toast_connection_error')+': '+esc(error.message)); return; }
   if(venues&&venues.length){
     const venue=dbToVenue(venues[0]);
     state.venues=[venue];
@@ -3901,6 +3921,8 @@ async function venueTokenLogin(){
   } else {
     showToast(t('toast_token_not_found'));
   }
+  } catch(err){ showToast('Error: '+esc(err.message)); }
+  finally { _guardEnd('venueTokenLogin'); }
 }
 
 // ════════════════════════════════════════
@@ -4029,7 +4051,7 @@ async function deleteProject(){
   if(!_guardStart('deleteProject')) return;
   try {
   const id=document.getElementById('edit-proj-id').value;
-  if(!confirm(t('confirm_delete_project'))){ return; }
+  if(!await confirmAsync(t('confirm_delete_project'))){ return; }
   const {error} = await supa.from('pitchops_projects').delete().eq('id',id);
   if(error){ showToast('Error: '+error.message); return; }
   state.projects=state.projects.filter(p=>p.id!==id);
@@ -4110,7 +4132,21 @@ function renderProjectDetail(pid){
   const fv=document.getElementById('filter-venue');
   fv.innerHTML=`<option value="">${t('all_venues')}</option>`+venues.map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('');
   populateOpTypeSelects();
-  renderDetailOps();
+
+  // Lazy tab rendering: only render the currently active tab's content
+  const activeTab = ['ops','usage','calendar','stats'].find(tab=>{
+    const el = document.getElementById('ptab-'+tab+'-content');
+    return el && el.style.display !== 'none';
+  }) || 'ops';
+
+  if(activeTab === 'ops') renderDetailOps();
+  else if(activeTab === 'usage'){
+    const fvu=document.getElementById('filter-usage-venue');
+    if(fvu) fvu.innerHTML='<option value="">All venues</option>'+venues.map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('');
+    renderDetailUsage();
+  }
+  else if(activeTab === 'calendar') _refreshCalendars();
+  // stats tab re-renders itself via switchProjectTab when activated
 }
 
 function projectVenues(pid){
@@ -4277,7 +4313,7 @@ async function removeVenueFromProject(e,vid){
 
   try {
   e.stopPropagation();
-  if(!confirm(t('confirm_remove_venue'))) return;
+  if(!await confirmAsync(t('confirm_remove_venue'))) return;
   const v=state.venues.find(x=>x.id===vid); if(!v) return;
   v.projectIds=v.projectIds.filter(pid=>pid!==state.currentProjectId);
   const {error} = await supa.from('pitchops_venues').update({project_ids:v.projectIds}).eq('id',vid);
@@ -4628,18 +4664,47 @@ async function logOperation(){
   const {error} = await supa.from('pitchops_operations').insert(opToDb(op));
   if(error){ showToast('Error: '+error.message); return; }
   // Upload any pending photos and patch the record
+  const logBtn = document.querySelector('#modal-log-task .btn-blue');
   if(currentPhotos.new.some(p=>!p.uploaded)){
+    if(logBtn) logBtn.textContent = '⏳ Uploading…';
     const urls = await uploadPendingPhotos(currentPhotos.new, opId, 'ops');
+    if(logBtn) logBtn.textContent = t('btn_log')||'Log task';
     if(urls.length){
       await supa.from('pitchops_operations').update({photo_urls:urls}).eq('id',opId);
       op.photos = urls;
     }
   }
   state.operations.unshift(op);
+
+  // ── Log for ALL venues (admin only, checkbox ticked) ──
+  const logAllChk = document.getElementById('log-all-venues-chk');
+  if(isAdminLog && logAllChk && logAllChk.checked){
+    const allVenues = projectVenues(state.currentProjectId).filter(v=>v.id && v.id !== resolvedVenueId);
+    if(allVenues.length){
+      const extraInserts = allVenues.map(v => {
+        const extraId = genId('op_');
+        const extraOp = {...op, id:extraId, venueId:v.id, photos:[]};
+        state.operations.unshift(extraOp);
+        return supa.from('pitchops_operations').insert(opToDb(extraOp));
+      });
+      const results = await Promise.all(extraInserts);
+      const anyError = results.find(r => r.error);
+      if(anyError) showToast('Some venues failed: '+esc(anyError.error.message));
+      else showToast(`✅ Logged for all ${allVenues.length + 1} venues`);
+    }
+    logAllChk.checked = false;
+  }
   document.getElementById('new-op-equipment').value='';
   document.getElementById('new-op-weather').value='';
   document.getElementById('new-op-notes').value='';
   document.getElementById('new-op-date').value=todayStr();
+  // Reset zone to default and hide custom zone input
+  const zoneResetEl = document.getElementById('new-op-zone');
+  if(zoneResetEl) zoneResetEl.value = zoneResetEl.options[0]?.value || 'Full pitch';
+  const zoneCustomWrap = document.getElementById('zone-custom-wrap');
+  if(zoneCustomWrap) zoneCustomWrap.style.display = 'none';
+  const zoneCustomEl = document.getElementById('new-op-zone-custom');
+  if(zoneCustomEl) zoneCustomEl.value = '';
   state.currentStaff=[]; currentPhotos.new=[];
   renderStaffTags(); renderPhotoPreviews('new');
   // Always refresh Gantt if visible
@@ -4737,7 +4802,7 @@ async function deleteOperation(){
   if(!_guardStart('deleteOperation')) return;
   try {
   const id=document.getElementById('edit-op-id').value;
-  if(!confirm(t('confirm_delete_op'))) return;
+  if(!await confirmAsync(t('confirm_delete_op'))) return;
   const {error} = await supa.from('pitchops_operations').delete().eq('id',id);
   if(error){ showToast('Error: '+error.message); return; }
   // Clean up photos from Storage before removing from state
@@ -4821,7 +4886,7 @@ async function removeOpType(i){
 
   try {
   const name=state.opTypes[i];
-  if(!confirm('Remove type "'+name+'"?')) return;
+  if(!await confirmAsync('Remove type "'+esc(name)+'"?')) return;
   const {error}=await supa.from('pitchops_op_types').delete().eq('name',name);
   if(error){ showToast('Error: '+error.message); return; }
   state.opTypes.splice(i,1); renderOpTypesList(); populateOpTypeSelects();
@@ -5106,7 +5171,7 @@ async function deleteVenue(){
   if(!_guardStart('deleteVenue')) return;
   try {
   const id=document.getElementById('edit-venue-id').value;
-  if(!confirm(t('confirm_delete_venue'))) return;
+  if(!await confirmAsync(t('confirm_delete_venue'))) return;
   const {error}=await supa.from('pitchops_operations').delete().eq('venue_id',id);
   if(error){showToast('Error: '+esc(error.message));return;}
   const {error:e2}=await supa.from('pitchops_venues').delete().eq('id',id);
@@ -5149,6 +5214,34 @@ function markModalDirty(id){
   }
 }
 function _clearDirty(){ _dirtyModalId = null; }
+
+// ── CONFIRM ACTION (replaces window.confirm for destructive actions) ──
+// Async version for use in async functions: if(!await confirmAsync('msg')) return;
+// Callback version: confirmAction('msg', () => doIt());
+function confirmAsync(msg, okLabel='Confirm', danger=true){
+  return new Promise(resolve => {
+    const modal = document.getElementById('modal-confirm');
+    const msgEl = document.getElementById('confirm-msg');
+    const okBtn = document.getElementById('confirm-ok-btn');
+    const cancelBtn = document.getElementById('confirm-cancel-btn');
+    if(!modal || !msgEl || !okBtn || !cancelBtn){ resolve(confirm(msg)); return; }
+    msgEl.textContent = msg;
+    modal.style.display = 'flex';
+    const newOk = okBtn.cloneNode(true);
+    const newCancel = cancelBtn.cloneNode(true);
+    okBtn.parentNode.replaceChild(newOk, okBtn);
+    cancelBtn.parentNode.replaceChild(newCancel, cancelBtn);
+    newOk.style.background = danger ? 'var(--red)' : 'var(--blue)';
+    newOk.textContent = okLabel;
+    const close = (result) => { modal.style.display = 'none'; resolve(result); };
+    newOk.onclick = () => close(true);
+    newCancel.onclick = () => close(false);
+    modal.onclick = (e) => { if(e.target === modal) close(false); };
+  });
+}
+function confirmAction(msg, onConfirm, okLabel='Confirm', danger=true){
+  confirmAsync(msg, okLabel, danger).then(ok => { if(ok) onConfirm(); });
+}
 
 function openModal(id){
   _clearDirty(); // fresh open = no dirty state
@@ -5845,7 +5938,11 @@ function openLogTaskModal(dateStr, timeStr, prefillType, prefillStatus, venueId)
   document.getElementById('new-op-time-from').value = timeStr||'08:00';
   document.getElementById('new-op-time-to').value = '17:00';
   document.getElementById('new-op-status').value = prefillStatus||'auto';
-  if(prefillType){ setTimeout(()=>{ document.getElementById('new-op-type').value=prefillType; },50); }
+  // Set type synchronously AFTER populateOpTypeSelects (which resets innerHTML)
+  if(prefillType){
+    const typeEl = document.getElementById('new-op-type');
+    if(typeEl) typeEl.value = prefillType;
+  }
   document.getElementById('new-op-equipment').value='';
   document.getElementById('new-op-weather').value='';
   document.getElementById('new-op-notes').value='';
@@ -5861,7 +5958,15 @@ function openLogTaskModal(dateStr, timeStr, prefillType, prefillStatus, venueId)
     const vid = venueId||state.currentVenueCalId||state.currentVenueId;
     if(vid && vselect.querySelector(`option[value="${vid}"]`)) vselect.value = vid;
     vsel.style.display = 'block';
-  } else if(vsel){ vsel.style.display = 'none'; }
+    // Show "log all venues" checkbox only when project has multiple venues
+    const allVenuesWrap = document.getElementById('log-all-venues-wrap');
+    const allVenuesChk = document.getElementById('log-all-venues-chk');
+    if(allVenuesWrap){ allVenuesWrap.style.display = venues.length > 1 ? 'block' : 'none'; }
+    if(allVenuesChk){ allVenuesChk.checked = false; }
+  } else if(vsel){ vsel.style.display = 'none';
+    const allVenuesWrap = document.getElementById('log-all-venues-wrap');
+    if(allVenuesWrap) allVenuesWrap.style.display = 'none';
+  }
   openModal('modal-log-task');
 }
 
@@ -5983,7 +6088,7 @@ async function saveMultidayEvent(){
 
 async function deleteMultidayEvent(){
   const id = document.getElementById('multiday-id').value; if(!id) return;
-  if(!confirm(t('confirm_delete_event'))) return;
+  if(!await confirmAsync(t('confirm_delete_event'))) return;
   const {error} = await supa.from('pitchops_events').delete().eq('id',id);
   if(error){ showToast('Error: '+error.message); return; }
   state_events = state_events.filter(e=>e.id!==id);
@@ -6285,7 +6390,7 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
   } catch(err){
     console.error('renderMonthCalendar error:',err);
     const g=document.getElementById(gridId);
-    if(g) g.innerHTML=`<div style="padding:2rem;color:red;font-size:12px">Error: ${err.message}</div>`;
+    if(g) g.innerHTML=`<div style="padding:2rem;color:red;font-size:12px">Error: ${esc(err.message)}</div>`;
   }
 }
 function toggleAdminMenu(){
@@ -6558,7 +6663,10 @@ async function logUsage(){
   const {error}=await supa.from('pitchops_usage').insert(usageToDb(u));
   if(error){ showToast('Error: '+error.message); return; }
   if(currentUsagePhotos.new.some(p=>!p.uploaded)){
+    const usageLogBtn = document.querySelector('#modal-log-usage .btn-blue');
+    if(usageLogBtn) usageLogBtn.textContent = '⏳ Uploading…';
     const urls = await uploadPendingPhotos(currentUsagePhotos.new, uId, 'usage');
+    if(usageLogBtn) usageLogBtn.textContent = t('btn_log_usage')||'Log usage';
     if(urls.length){
       await supa.from('pitchops_usage').update({photo_urls:urls}).eq('id',uId);
       u.photos = urls;
@@ -6651,7 +6759,7 @@ async function deleteUsage(){
   if(!_guardStart('deleteUsage')) return;
   try {
   const id=document.getElementById('edit-usage-id').value;
-  if(!confirm(t('confirm_delete_usage'))) return;
+  if(!await confirmAsync(t('confirm_delete_usage'))) return;
   const {error}=await supa.from('pitchops_usage').delete().eq('id',id);
   if(error){ showToast('Error: '+esc(error.message)); return; }
   const delU = state_usage.find(u=>u.id===id) || state_admin_usage.find(u=>u.id===id);
@@ -8138,6 +8246,19 @@ init();
         </div>
       </div>
       <button onclick="closeOnboarding()" style="width:100%;margin-top:1.5rem;padding:12px;background:linear-gradient(135deg,#0C2340,#185FA5);color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer">Got it — let's go!</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL (replaces window.confirm) -->
+<div id="modal-confirm" style="display:none;position:fixed;inset:0;background:rgba(12,35,64,.5);z-index:400;align-items:center;justify-content:center;padding:1rem">
+  <div style="background:white;border-radius:16px;max-width:360px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden">
+    <div style="padding:1.25rem 1.5rem .75rem">
+      <div id="confirm-msg" style="font-size:14px;color:var(--text);line-height:1.5"></div>
+    </div>
+    <div style="padding:.75rem 1.5rem 1.25rem;display:flex;gap:8px;justify-content:flex-end">
+      <button id="confirm-cancel-btn" style="padding:8px 20px;border:1px solid var(--border);border-radius:8px;background:white;font-size:13px;font-weight:500;cursor:pointer;color:var(--text-muted)">Cancel</button>
+      <button id="confirm-ok-btn" style="padding:8px 20px;border:none;border-radius:8px;background:var(--red);color:white;font-size:13px;font-weight:600;cursor:pointer">Confirm</button>
     </div>
   </div>
 </div>
