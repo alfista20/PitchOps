@@ -884,7 +884,19 @@ button,input,select,textarea{}
     <!-- TOP NAV (duplicate for welcome) -->
     <div style="background:#0C2340;padding:0 1.25rem;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:100">
       <span style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:white">PitchOps</span>
-      <button aria-label="Menu" onclick="toggleVenueMenu()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;font-size:18px;line-height:1">☰</button>
+      <div style="display:flex;align-items:center;gap:8px">
+        <!-- Inline language selector - always visible on welcome -->
+        <select id="lang-select-welcome" class="lang-select" onchange="setLang(this.value)"
+          style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:white;font-size:12px;font-weight:600;padding:5px 8px;cursor:pointer;outline:none;height:34px">
+          <option value="en">🌐 EN</option>
+          <option value="pl">🌐 PL</option>
+          <option value="es">🌐 ES</option>
+          <option value="fr">🌐 FR</option>
+          <option value="de">🌐 DE</option>
+          <option value="pt">🌐 PT</option>
+        </select>
+        <button aria-label="Menu" onclick="toggleVenueMenu()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;font-size:18px;line-height:1">☰</button>
+      </div>
     </div>
     <!-- CENTERED CONTENT WRAPPER -->
     <div style="max-width:480px;width:100%;margin:0 auto;display:flex;flex-direction:column;flex:1">
@@ -976,17 +988,17 @@ button,input,select,textarea{}
   <!-- HAMBURGER MENU DROPDOWN -->
   <div id="venue-menu" style="display:none;position:fixed;top:52px;right:0;width:220px;background:white;border-radius:0 0 0 16px;box-shadow:0 8px 32px rgba(0,0,0,.18);z-index:200;overflow:hidden">
     <div style="padding:.5rem 0">
-      <div style="padding:.5rem 1rem;font-size:10px;font-weight:700;color:var(--text-hint);text-transform:uppercase;letter-spacing:.5px">Language</div>
+      <div style="padding:.5rem 1rem;font-size:10px;font-weight:700;color:var(--text-hint);text-transform:uppercase;letter-spacing:.5px" data-i18n="lbl_language">Language</div>
       <div style="padding:.25rem 1rem .75rem">
         <select class="lang-select" onchange="setLang(this.value)" id="lang-select-venue" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#f8fafc;color:var(--text)"><option value="en">🌐 English</option><option value="pl">🌐 Polski</option><option value="es">🌐 Español</option><option value="fr">🌐 Français</option><option value="de">🌐 Deutsch</option><option value="pt">🌐 Português</option></select>
       </div>
       <div style="height:1px;background:var(--border)"></div>
       <button onclick="openVenueContactModal();toggleVenueMenu()" style="display:flex;align-items:center;gap:10px;width:100%;padding:.75rem 1rem;background:none;border:none;font-size:14px;color:var(--text);cursor:pointer" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='none'">
-        <span>✏️</span> My contact info
+        <span>✏️</span> <span data-i18n="menu_contact_info">My contact info</span>
       </button>
       <div style="height:1px;background:var(--border)"></div>
       <button onclick="logout()" style="display:flex;align-items:center;gap:10px;width:100%;padding:.75rem 1rem;background:none;border:none;font-size:14px;color:#dc2626;cursor:pointer" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'">
-        <span>🚪</span> Sign out
+        <span>🚪</span> <span data-i18n="btn_sign_out">Sign out</span>
       </button>
     </div>
   </div>
@@ -998,17 +1010,19 @@ button,input,select,textarea{}
     <button aria-label="Menu" onclick="toggleVenueMenu()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;font-size:18px;line-height:1">☰</button>
   </div>
 
-  <!-- HERO -->
-  <div style="background:linear-gradient(160deg,#0C2340 0%,#0f2d4e 60%,#163d66 100%);padding:1.5rem 1.25rem 1.75rem">
-    <span id="venue-badge" style="display:none"></span>
-    <h2 id="venue-hero-name" style="font-size:28px;font-weight:700;color:white;font-family:'Syne',sans-serif;margin:0 0 3px;line-height:1.1">Stadium</h2>
-    <p id="venue-hero-sub" style="font-size:13px;color:rgba(255,255,255,.5);margin:0 0 6px">City</p>
-    <div id="venue-project-tag" style="font-size:12px;color:rgba(255,255,255,.6);margin-bottom:1.25rem;font-weight:500"></div>
-    <div id="venue-contact-info" style="display:none"></div>
-    <div style="display:none">
-      <div id="stat-total"></div>
-      <div id="stat-last"></div>
-      <div id="stat-common"></div>
+  <!-- HERO — compact -->
+  <div style="background:linear-gradient(160deg,#0C2340 0%,#0f2d4e 60%,#163d66 100%);padding:1rem 1.25rem 1.1rem">
+    <div style="max-width:860px;margin:0 auto">
+      <span id="venue-badge" style="display:none"></span>
+      <h2 id="venue-hero-name" style="font-size:22px;font-weight:700;color:white;font-family:'Syne',sans-serif;margin:0 0 2px;line-height:1.2">Stadium</h2>
+      <p id="venue-hero-sub" style="font-size:12px;color:rgba(255,255,255,.5);margin:0 0 3px">City</p>
+      <div id="venue-project-tag" style="font-size:11px;color:rgba(255,255,255,.55);font-weight:500;margin:0"></div>
+      <div id="venue-contact-info" style="display:none"></div>
+      <div style="display:none">
+        <div id="stat-total"></div>
+        <div id="stat-last"></div>
+        <div id="stat-common"></div>
+      </div>
     </div>
   </div>
 
@@ -2097,6 +2111,8 @@ const i18n = {
     lbl_end_date:'End date',
     hint_90days:'Last 90 days',
     lbl_log_all_venues:'Log same task for all venues in this project',
+    lbl_language:'Language',
+    menu_contact_info:'My contact info',
   },
   pl:{
     stat_total:'Ten miesiąc',stat_last:'Ostatnia op.',stat_common:'Dominuje',
@@ -2594,6 +2610,8 @@ const i18n = {
     toast_deleted:'Usunięto',
     hint_90days:'Ostatnie 90 dni',
     lbl_log_all_venues:'Zaloguj to samo zadanie dla wszystkich boisk w projekcie',
+    lbl_language:'Język',
+    menu_contact_info:'Moje dane kontaktowe',
   },
   es:{
     stat_total:'Este mes',stat_last:'Última op.',stat_common:'Más común',
@@ -2805,6 +2823,13 @@ const i18n = {
     vtype_stadium:'Stadium',
     vtype_training:'Training site',
     hint_90days:'Últimos 90 días',
+    weather_forecast:'Pronóstico de hoy',
+    tab_log_short:'Registrar tarea',
+    tab_usage_short:'Registrar uso',
+    tab_schedule_short:'Calendario',
+    tab_stats_short:'Estadísticas',
+    lbl_language:'Idioma',
+    menu_contact_info:'Mi información de contacto',
   },
   fr:{
     stat_total:'Ce mois',stat_last:'Dernière op.',stat_common:'Plus fréquent',
@@ -3016,6 +3041,13 @@ const i18n = {
     vtype_stadium:'Stadium',
     vtype_training:'Training site',
     hint_90days:'90 derniers jours',
+    weather_forecast:"Météo du jour",
+    tab_log_short:'Enregistrer tâche',
+    tab_usage_short:"Enregistrer l'utilisation",
+    tab_schedule_short:'Planning',
+    tab_stats_short:'Statistiques',
+    lbl_language:'Langue',
+    menu_contact_info:'Mes coordonnées',
   },
   de:{
     stat_total:'Diesen Monat',stat_last:'Letzte Op.',stat_common:'Häufigste',
@@ -3227,6 +3259,13 @@ const i18n = {
     vtype_stadium:'Stadium',
     vtype_training:'Training site',
     hint_90days:'Letzte 90 Tage',
+    weather_forecast:'Heutige Prognose',
+    tab_log_short:'Aufgabe erfassen',
+    tab_usage_short:'Nutzung erfassen',
+    tab_schedule_short:'Zeitplan',
+    tab_stats_short:'Statistiken',
+    lbl_language:'Sprache',
+    menu_contact_info:'Meine Kontaktdaten',
   },
   pt:{
     stat_total:'Este mês',stat_last:'Última op.',stat_common:'Mais comum',
@@ -3438,6 +3477,13 @@ const i18n = {
     vtype_stadium:'Stadium',
     vtype_training:'Training site',
     hint_90days:'Últimos 90 dias',
+    weather_forecast:'Previsão de hoje',
+    tab_log_short:'Registar tarefa',
+    tab_usage_short:'Registar utilização',
+    tab_schedule_short:'Calendário',
+    tab_stats_short:'Estatísticas',
+    lbl_language:'Idioma',
+    menu_contact_info:'As minhas informações de contacto',
   }
 };
 function t(k){ return (i18n[state.lang]||i18n.en)[k]||k; }
@@ -3532,7 +3578,8 @@ function applyTranslations(l){
   });
 
   // ── Re-render dynamic content if visible ──
-  // Skip venue renders when welcome screen is active
+  // data-i18n elements are always updated above (querySelectorAll covers whole DOM)
+  // Only skip expensive full re-renders of venue lists when welcome screen is active
   const _welcomeActive = document.getElementById('venue-welcome')?.style.display==='flex';
   if(!_welcomeActive){
     if(typeof renderVenueUpcoming==='function') renderVenueUpcoming();
