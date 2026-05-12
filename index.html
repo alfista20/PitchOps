@@ -3762,6 +3762,7 @@ function showScreen(id){
 }
 function logout(){
   stopAdminRealtime();
+  _resetProjectTabs();
   // Clear all cached data so a subsequent session on the same device sees nothing
   state.projects=[];
   state.venues=[];
@@ -3779,7 +3780,23 @@ function logout(){
   try { state.events=[]; } catch(e){}
   showScreen('screen-login');
 }
-function backToProjects(){ state.currentProjectId=null; showScreen('screen-projects'); renderProjects(); }
+function _resetProjectTabs(){
+  ['ops','usage','calendar','stats','settings'].forEach(t=>{
+    const content = document.getElementById('ptab-'+t+'-content');
+    if(content) content.style.display = '';
+    const btn = document.getElementById('ptab-'+t);
+    if(btn) btn.classList.remove('active');
+  });
+  const opsBtn = document.getElementById('ptab-ops');
+  if(opsBtn) opsBtn.classList.add('active');
+}
+
+function backToProjects(){
+  _resetProjectTabs();
+  state.currentProjectId=null;
+  showScreen('screen-projects');
+  renderProjects();
+}
 
 // ── VIEWER LINK ──
 async function openViewerLinkModal(){
