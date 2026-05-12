@@ -33,7 +33,7 @@ h1,h2,h3,.syne{font-family:'Syne',sans-serif}
 
 /* SCREENS */
 .screen{display:none;flex-direction:column}
-.screen.active{display:flex}
+.screen.active{display:flex;flex-direction:column}
 #screen-login,#screen-admin-login{align-items:center;justify-content:center;background:linear-gradient(145deg,#0C2340 0%,#163359 60%,#185FA5 100%)}
 
 /* LOGIN */
@@ -949,7 +949,7 @@ button,input,select,textarea{}
 
       <!-- Schedule -->
       <div onclick="showVenueDashboard('schedule')" style="background:white;border:0.5px solid rgba(0,0,0,0.08);border-radius:16px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:22px;transition:transform .12s,box-shadow .12s;position:relative" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(59,109,17,.1)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
-        <div id="welcome-badge-schedule" style="display:none;position:absolute;top:10px;right:10px;background:#3B6D11;color:white;border-radius:20px;padding:2px 9px;font-size:11px;font-weight:700;line-height:1.6"></div>
+        <div id="welcome-badge-schedule" style="display:none"></div>
         <svg width="52" height="52" viewBox="0 0 40 40" fill="none">
           <rect x="5" y="8" width="30" height="26" rx="2.5" stroke="#3B6D11" stroke-width="1.5"/>
           <line x1="5" y1="15" x2="35" y2="15" stroke="#3B6D11" stroke-width="1.5"/>
@@ -969,7 +969,7 @@ button,input,select,textarea{}
 
       <!-- Stats -->
       <div onclick="showVenueDashboard('stats')" style="background:white;border:0.5px solid rgba(0,0,0,0.08);border-radius:16px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:22px;transition:transform .12s,box-shadow .12s;position:relative" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(133,79,11,.1)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
-        <div id="welcome-badge-stats" style="display:none;position:absolute;top:10px;right:10px;background:#854F0B;color:white;border-radius:20px;padding:2px 9px;font-size:11px;font-weight:700;line-height:1.6"></div>
+        <div id="welcome-badge-stats" style="display:none"></div>
         <svg width="52" height="52" viewBox="0 0 40 40" fill="none">
           <line x1="7" y1="33" x2="33" y2="33" stroke="#854F0B" stroke-width="1.5" stroke-linecap="round"/>
           <line x1="7" y1="8" x2="7" y2="33" stroke="#854F0B" stroke-width="1.5" stroke-linecap="round"/>
@@ -2113,6 +2113,8 @@ const i18n = {
     lbl_log_all_venues:'Log same task for all venues in this project',
     lbl_language:'Language',
     menu_contact_info:'My contact info',
+    badge_today:'today',
+    badge_this_week:'this week',
   },
   pl:{
     stat_total:'Ten miesiąc',stat_last:'Ostatnia op.',stat_common:'Dominuje',
@@ -2612,6 +2614,8 @@ const i18n = {
     lbl_log_all_venues:'Zaloguj to samo zadanie dla wszystkich boisk w projekcie',
     lbl_language:'Język',
     menu_contact_info:'Moje dane kontaktowe',
+    badge_today:'dziś',
+    badge_this_week:'w tym tygodniu',
   },
   es:{
     stat_total:'Este mes',stat_last:'Última op.',stat_common:'Más común',
@@ -2830,6 +2834,8 @@ const i18n = {
     tab_stats_short:'Estadísticas',
     lbl_language:'Idioma',
     menu_contact_info:'Mi información de contacto',
+    badge_today:'hoy',
+    badge_this_week:'esta semana',
   },
   fr:{
     stat_total:'Ce mois',stat_last:'Dernière op.',stat_common:'Plus fréquent',
@@ -3048,6 +3054,8 @@ const i18n = {
     tab_stats_short:'Statistiques',
     lbl_language:'Langue',
     menu_contact_info:'Mes coordonnées',
+    badge_today:"aujourd'hui",
+    badge_this_week:'cette semaine',
   },
   de:{
     stat_total:'Diesen Monat',stat_last:'Letzte Op.',stat_common:'Häufigste',
@@ -3266,6 +3274,8 @@ const i18n = {
     tab_stats_short:'Statistiken',
     lbl_language:'Sprache',
     menu_contact_info:'Meine Kontaktdaten',
+    badge_today:'heute',
+    badge_this_week:'diese Woche',
   },
   pt:{
     stat_total:'Este mês',stat_last:'Última op.',stat_common:'Mais comum',
@@ -3484,6 +3494,8 @@ const i18n = {
     tab_stats_short:'Estatísticas',
     lbl_language:'Idioma',
     menu_contact_info:'As minhas informações de contacto',
+    badge_today:'hoje',
+    badge_this_week:'esta semana',
   }
 };
 function t(k){ return (i18n[state.lang]||i18n.en)[k]||k; }
@@ -4394,40 +4406,37 @@ function updateWelcomeBadges(){
   const ops=state.operations.filter(o=>o.venueId===vid);
   const usages=(state_usage||[]).filter(u=>u.venueId===vid);
 
-  // Tasks badge: planned/inprogress for today or future (upcoming)
+  // Tasks badge: planned/inprogress for today or this week
   const todayTasks=ops.filter(o=>o.date===today&&(o.status==='planned'||o.status==='inprogress'));
   const weekTasks=ops.filter(o=>{const d=new Date(o.date);const now=new Date();const diff=(d-now)/864e5;return diff>0&&diff<=7&&(o.status==='planned'||o.status==='inprogress');});
   const tbEl=document.getElementById('welcome-badge-tasks');
   if(tbEl){
-    if(todayTasks.length>0){tbEl.textContent=todayTasks.length+' today';tbEl.style.display='block';}
-    else if(weekTasks.length>0){tbEl.textContent=weekTasks.length+' this week';tbEl.style.display='block';}
-    else{tbEl.style.display='none';}
+    if(todayTasks.length>0){
+      tbEl.textContent=todayTasks.length+' '+(t('badge_today')||'today');
+      tbEl.style.display='block';
+    } else if(weekTasks.length>0){
+      tbEl.textContent=weekTasks.length+' '+(t('badge_this_week')||'this week');
+      tbEl.style.display='block';
+    } else { tbEl.style.display='none'; }
   }
 
   // Usage badge: logged today
   const todayUsage=usages.filter(u=>u.date===today);
   const ubEl=document.getElementById('welcome-badge-usage');
   if(ubEl){
-    if(todayUsage.length>0){ubEl.textContent=todayUsage.length+' today';ubEl.style.display='block';}
-    else{ubEl.style.display='none';}
+    if(todayUsage.length>0){
+      ubEl.textContent=todayUsage.length+' '+(t('badge_today')||'today');
+      ubEl.style.display='block';
+    } else { ubEl.style.display='none'; }
   }
 
-  // Schedule badge: upcoming in next 7 days
-  const upcomingAll=ops.filter(o=>{const d=new Date(o.date);const now=new Date(today);const diff=Math.round((d-now)/864e5);return diff>=0&&diff<=7;});
+  // Schedule badge — hidden by design (removed per UX feedback)
   const sbEl=document.getElementById('welcome-badge-schedule');
-  if(sbEl){
-    if(upcomingAll.length>0){sbEl.textContent=upcomingAll.length+' upcoming';sbEl.style.display='block';}
-    else{sbEl.style.display='none';}
-  }
+  if(sbEl) sbEl.style.display='none';
 
-  // Stats badge: total tasks this month
-  const monthStart=today.slice(0,8)+'01';
-  const monthTasks=ops.filter(o=>o.date>=monthStart&&o.date<=today);
+  // Stats badge — hidden by design (removed per UX feedback)
   const stEl=document.getElementById('welcome-badge-stats');
-  if(stEl){
-    if(monthTasks.length>0){stEl.textContent=monthTasks.length+' this month';stEl.style.display='block';}
-    else{stEl.style.display='none';}
-  }
+  if(stEl) stEl.style.display='none';
 }
 
 function maybeShowOnboarding(venueId){
