@@ -410,7 +410,7 @@ button,input,select,textarea{}
     <div class="field"><label data-i18n="lbl_password">Password</label><input id="admin-pass-input" type="password" placeholder="Enter your password..."/></div>
     <div id="admin-login-error" style="display:none;font-size:12px;color:var(--red);margin-bottom:.75rem;padding:8px 12px;background:var(--red-pale);border-radius:var(--radius-sm)"></div>
     <div style="display:flex;gap:8px">
-      <button class="btn btn-ghost" onclick="showScreen('screen-login')">Back</button>
+      <button class="btn btn-ghost" onclick="showScreen('screen-login')" data-i18n="btn_back">Back</button>
       <button class="btn btn-primary" style="flex:1" onclick="adminLogin()" data-i18n="btn_sign_in">Sign in</button>
     </div>
   </div>
@@ -477,7 +477,7 @@ button,input,select,textarea{}
       <span class="brand-name" style="color:white">Pitch<span style="color:var(--blue-light)">Ops</span></span>
       <div class="breadcrumb">
         <span>/</span>
-        <button onclick="backToProjects()">Projects</button>
+        <button onclick="backToProjects()" data-i18n="btn_projects">Projects</button>
         <span>/</span>
         <span id="detail-breadcrumb" style="color:rgba(255,255,255,.85)"></span>
       </div>
@@ -513,7 +513,7 @@ button,input,select,textarea{}
     <div class="card">
       <div class="card-header">
         <span class="card-title">Venues</span>
-        <button class="btn btn-ghost btn-sm" onclick="openManageTypesModal()">⚙ Task types</button>
+        <button class="btn btn-ghost btn-sm" onclick="openManageTypesModal()" data-i18n="btn_task_types">⚙ Task types</button>
       </div>
       <div id="detail-venue-list"></div>
     </div>
@@ -584,8 +584,8 @@ button,input,select,textarea{}
 
     <!-- MODE SELECTOR -->
     <div style="display:flex;gap:8px;margin-bottom:1rem">
-      <button onclick="setStatsMode('single')" id="stats-mode-single" style="padding:8px 20px;border-radius:20px;border:2px solid var(--blue);background:var(--blue);color:white;font-size:13px;font-weight:600;cursor:pointer">📊 Single venue</button>
-      <button onclick="setStatsMode('compare')" id="stats-mode-compare" style="padding:8px 20px;border-radius:20px;border:2px solid var(--border);background:white;color:var(--text-muted);font-size:13px;font-weight:600;cursor:pointer">⚖️ Compare venues</button>
+      <button onclick="setStatsMode('single')" id="stats-mode-single" style="padding:8px 20px;border-radius:20px;border:2px solid var(--blue);background:var(--blue);color:white;font-size:13px;font-weight:600;cursor:pointer" data-i18n="btn_single_venue">📊 Single venue</button>
+      <button onclick="setStatsMode('compare')" id="stats-mode-compare" style="padding:8px 20px;border-radius:20px;border:2px solid var(--border);background:white;color:var(--text-muted);font-size:13px;font-weight:600;cursor:pointer" data-i18n="btn_compare">⚖️ Compare venues</button>
     </div>
 
     <!-- SINGLE VENUE MODE -->
@@ -617,7 +617,7 @@ button,input,select,textarea{}
             <option value="usage">Usage only</option>
           </select>
         </div>
-        <button id="stats-pdf-btn" onclick="toggleStatsPDFSelect(false)" style="margin-left:auto;padding:7px 16px;background:linear-gradient(135deg,#0C2340,#185FA5);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">⬇ Export PDF</button>
+        <button id="stats-pdf-btn" onclick="toggleStatsPDFSelect(false)" style="margin-left:auto;padding:7px 16px;background:linear-gradient(135deg,#0C2340,#185FA5);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer" data-i18n="btn_export_pdf">⬇ Export PDF</button>
       </div>
       <div style="font-size:12px;color:var(--text-muted);margin-bottom:.5rem;padding:0 2px">💡 Drag cards to rearrange · Click Export PDF to select charts</div>
       <div id="stats-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.75rem;margin-bottom:1rem"></div>
@@ -716,8 +716,8 @@ button,input,select,textarea{}
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
         <span id="compare-charts-count" style="font-size:12px;color:var(--text-hint)"></span>
         <div style="display:flex;gap:8px">
-          <button onclick="clearCompareCharts()" style="padding:5px 12px;background:#f1f5f9;border:none;border-radius:6px;font-size:12px;cursor:pointer;color:var(--text-muted)">Clear all</button>
-          <button id="compare-pdf-btn" onclick="toggleStatsPDFSelect('compare')" style="padding:7px 16px;background:linear-gradient(135deg,#0C2340,#185FA5);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">⬇ Export PDF</button>
+          <button onclick="clearCompareCharts()" style="padding:5px 12px;background:#f1f5f9;border:none;border-radius:6px;font-size:12px;cursor:pointer;color:var(--text-muted)" data-i18n="btn_clear_all">Clear all</button>
+          <button id="compare-pdf-btn" onclick="toggleStatsPDFSelect('compare')" style="padding:7px 16px;background:linear-gradient(135deg,#0C2340,#185FA5);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer" data-i18n="btn_export_pdf">⬇ Export PDF</button>
         </div>
       </div>
       <div id="compare-charts" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:1rem"></div>
@@ -734,8 +734,8 @@ button,input,select,textarea{}
         <div id="stats-pdf-checklist" style="display:flex;flex-direction:column;gap:8px"></div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-ghost" onclick="closeModal('modal-stats-pdf')">Cancel</button>
-        <button class="btn btn-primary" onclick="exportStatsPDF()" style="background:linear-gradient(135deg,#0C2340,#185FA5);border:none">⬇ Export PDF</button>
+        <button class="btn btn-ghost" onclick="closeModal('modal-stats-pdf')" data-i18n="btn_cancel">Cancel</button>
+        <button class="btn btn-primary" onclick="exportStatsPDF()" style="background:linear-gradient(135deg,#0C2340,#185FA5);border:none" data-i18n="btn_export_pdf">⬇ Export PDF</button>
       </div>
     </div>
   </div>
@@ -809,7 +809,7 @@ button,input,select,textarea{}
     </div>
     <div class="topnav-right">
       <select class="lang-select" onchange="setLang(this.value)" id="lang-select-viewer"><option value="en">EN</option><option value="pl">PL</option><option value="es">ES</option><option value="fr">FR</option><option value="de">DE</option><option value="pt">PT</option></select>
-      <button class="btn btn-ghost btn-sm" style="color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.2)" onclick="logout()">Exit</button>
+      <button class="btn btn-ghost btn-sm" style="color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.2)" onclick="logout()" data-i18n="btn_exit">Exit</button>
     </div>
   </div>
   <div id="viewer-hero" class="project-hero">
@@ -1031,7 +1031,7 @@ button,input,select,textarea{}
           onfocus="this.type='date'" onblur="if(!this.value)this.type='text'"
           onchange="renderVenueHistory()"
           style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;background:#f8fafc;outline:none;width:100%;box-sizing:border-box;color:var(--text)"/>
-          <button onclick="exportVenueHistoryCSV('tasks')" style="grid-column:1/-1;padding:10px;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;width:100%">⬇ Export CSV</button>
+          <button onclick="exportVenueHistoryCSV('tasks')" style="grid-column:1/-1;padding:10px;background:linear-gradient(135deg,#185FA5,#1d4ed8);color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;width:100%" data-i18n="btn_export_csv">⬇ Export CSV</button>
         </div>
       </div>
       <div id="venue-history-list" style="max-height:520px;overflow-y:auto"></div>
@@ -1075,7 +1075,7 @@ button,input,select,textarea{}
           onfocus="this.type='date'" onblur="if(!this.value)this.type='text'"
           onchange="renderVenueUsageHistory()"
           style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;background:#f8fafc;outline:none;width:100%;box-sizing:border-box;color:var(--text)"/>
-          <button onclick="exportVenueHistoryCSV('usage')" style="grid-column:1/-1;padding:10px;background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;width:100%">⬇ Export CSV</button>
+          <button onclick="exportVenueHistoryCSV('usage')" style="grid-column:1/-1;padding:10px;background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;width:100%" data-i18n="btn_export_csv">⬇ Export CSV</button>
         </div>
       </div>
       <div id="venue-usage-history-list" style="max-height:520px;overflow-y:auto"></div>
@@ -1111,7 +1111,7 @@ button,input,select,textarea{}
           <option value="usage">Usage only</option>
         </select>
       </div>
-      <button id="vstats-pdf-btn" onclick="toggleStatsPDFSelect(true)" style="margin-left:auto;padding:7px 16px;background:linear-gradient(135deg,#0C2340,#185FA5);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">⬇ Export PDF</button>
+      <button id="vstats-pdf-btn" onclick="toggleStatsPDFSelect(true)" style="margin-left:auto;padding:7px 16px;background:linear-gradient(135deg,#0C2340,#185FA5);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer" data-i18n="btn_export_pdf">⬇ Export PDF</button>
     </div>
 
     <!-- SUMMARY CARDS -->
@@ -1220,7 +1220,7 @@ button,input,select,textarea{}
     <div class="modal-footer">
       <button class="btn btn-danger" onclick="deleteProject()" data-i18n="btn_delete_project">Delete project</button>
       <button class="btn btn-ghost" onclick="closeModal('modal-edit-project')" data-i18n="btn_cancel">Cancel</button>
-      <button class="btn btn-primary" onclick="saveEditProject()">Save</button>
+      <button class="btn btn-primary" onclick="saveEditProject()" data-i18n="btn_save">Save</button>
     </div>
   </div>
 </div>
@@ -1277,7 +1277,7 @@ button,input,select,textarea{}
       </div>
       <div id="venue-link-result" style="display:none;margin-top:.5rem">
         <p style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:4px">Unique venue link:</p>
-        <div class="link-copy"><span id="venue-link-text" style="word-break:break-all;flex:1"></span><button class="btn btn-ghost btn-sm" onclick="copyVenueLink()">Copy</button></div>
+        <div class="link-copy"><span id="venue-link-text" style="word-break:break-all;flex:1"></span><button class="btn btn-ghost btn-sm" onclick="copyVenueLink()" data-i18n="btn_copy">Copy</button></div>
       </div>
     </div>
     <div class="modal-footer">
@@ -1340,7 +1340,7 @@ button,input,select,textarea{}
       </div>
       <div style="margin-top:.5rem">
         <p style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:4px">Venue link:</p>
-        <div class="link-copy"><span id="edit-venue-link-text" style="word-break:break-all;flex:1"></span><button class="btn btn-ghost btn-sm" onclick="copyEditVenueLink()">Copy</button></div>
+        <div class="link-copy"><span id="edit-venue-link-text" style="word-break:break-all;flex:1"></span><button class="btn btn-ghost btn-sm" onclick="copyEditVenueLink()" data-i18n="btn_copy">Copy</button></div>
       </div>
     </div>
     <div class="modal-footer">
@@ -1361,19 +1361,19 @@ button,input,select,textarea{}
       <div class="field"><label data-i18n="lbl_equipment">Equipment used</label><input id="edit-op-equipment" type="text"/></div>
       <div class="field"><label data-i18n="lbl_weather">Weather conditions</label><input id="edit-op-weather" type="text"/></div>
       <div class="field">
-        <label>Done by (staff)</label>
+        <label data-i18n="lbl_staff">Done by (staff)</label>
         <div class="staff-tags" id="edit-staff-tags"></div>
         <div class="staff-input-row" style="margin-top:8px">
           <input id="edit-staff-input" type="text" placeholder="Add staff name..."/>
-          <button class="btn btn-ghost btn-sm" onclick="addEditStaff()">Add</button>
+          <button class="btn btn-ghost btn-sm" onclick="addEditStaff()" data-i18n="btn_add">Add</button>
         </div>
       </div>
-      <div class="field"><label>Notes / observations</label><textarea id="edit-op-notes"></textarea></div>
-      <div class="field"><label>Task date (when it happens)</label><input id="edit-op-date" type="date"/></div>
+      <div class="field"><label data-i18n="lbl_notes">Notes / observations</label><textarea id="edit-op-notes"></textarea></div>
+      <div class="field"><label data-i18n="lbl_task_date_full">Task date (when it happens)</label><input id="edit-op-date" type="date"/></div>
       <div class="field">
         <label data-i18n="lbl_time_window">Time window</label>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <div><label style="font-size:10px;color:var(--text-hint)">Start</label><input id="edit-op-time-from" type="time"/></div>
+          <div><label style="font-size:10px;color:var(--text-hint)" data-i18n="lbl_start">Start</label><input id="edit-op-time-from" type="time"/></div>
           <div><label style="font-size:10px;color:var(--text-hint)">End</label><input id="edit-op-time-to" type="time"/></div>
         </div>
       </div>
@@ -1413,10 +1413,10 @@ button,input,select,textarea{}
       <div id="op-types-list" style="margin-bottom:1rem"></div>
       <div style="display:flex;gap:8px">
         <input id="new-op-type-input" type="text" placeholder="New operation type..." style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;outline:none"/>
-        <button class="btn btn-blue btn-sm" onclick="addOpType()">Add</button>
+        <button class="btn btn-blue btn-sm" onclick="addOpType()" data-i18n="btn_add">Add</button>
       </div>
     </div>
-    <div class="modal-footer"><button class="btn btn-primary" onclick="closeModal('modal-op-types')">Done</button></div>
+    <div class="modal-footer"><button class="btn btn-primary" onclick="closeModal('modal-op-types')" data-i18n="btn_done">Done</button></div>
   </div>
 </div>
 
@@ -1446,7 +1446,7 @@ button,input,select,textarea{}
         <div class="staff-tags" id="staff-tags"></div>
         <div class="staff-input-row" style="margin-top:8px">
           <input id="staff-name-input" type="text" placeholder="Add staff name..."/>
-          <button class="btn btn-ghost btn-sm" onclick="addStaff()">Add</button>
+          <button class="btn btn-ghost btn-sm" onclick="addStaff()" data-i18n="btn_add">Add</button>
         </div>
         <p style="font-size:11px;color:var(--text-hint);margin-top:4px" data-i18n="op_staff_hint">You can add multiple staff members</p>
       </div>
@@ -1455,7 +1455,7 @@ button,input,select,textarea{}
       <div class="field">
         <label data-i18n="lbl_time_window">Time window</label>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <div><label style="font-size:10px;color:var(--text-hint)">Start</label><input id="new-op-time-from" type="time" value="08:00"/></div>
+          <div><label style="font-size:10px;color:var(--text-hint)" data-i18n="lbl_start">Start</label><input id="new-op-time-from" type="time" value="08:00"/></div>
           <div><label style="font-size:10px;color:var(--text-hint)">End</label><input id="new-op-time-to" type="time" value="17:00"/></div>
         </div>
       </div>
@@ -1499,7 +1499,7 @@ button,input,select,textarea{}
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-venue-contact')" data-i18n="btn_cancel">Cancel</button>
-      <button class="btn btn-primary" onclick="saveVenueContact()">Save</button>
+      <button class="btn btn-primary" onclick="saveVenueContact()" data-i18n="btn_save">Save</button>
     </div>
   </div>
 </div>
@@ -1529,7 +1529,7 @@ button,input,select,textarea{}
       <p style="font-size:13px;color:var(--text-muted);margin-bottom:1rem">Share this link to give read-only access to this project. Anyone with the link can view all venues and operations but cannot edit anything.</p>
       <div id="viewer-link-display" class="link-copy">
         <span id="viewer-link-text" style="word-break:break-all;flex:1;font-size:12px"></span>
-        <button class="btn btn-ghost btn-sm" onclick="copyViewerLink()">Copy</button>
+        <button class="btn btn-ghost btn-sm" onclick="copyViewerLink()" data-i18n="btn_copy">Copy</button>
       </div>
       <div style="margin-top:1rem;display:flex;gap:8px">
         <button class="btn btn-danger btn-sm" onclick="revokeViewerLink()" data-i18n="btn_regenerate_link">🔄 Regenerate link</button>
@@ -1553,19 +1553,19 @@ button,input,select,textarea{}
       <div class="field">
         <label data-i18n="lbl_date_range">Date range</label>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <div><label style="font-size:10px;color:var(--text-hint)">From date</label><input id="edit-plan-from" type="date"/></div>
-          <div><label style="font-size:10px;color:var(--text-hint)">To date</label><input id="edit-plan-to" type="date"/></div>
+          <div><label style="font-size:10px;color:var(--text-hint)" data-i18n="lbl_from_date">From date</label><input id="edit-plan-from" type="date"/></div>
+          <div><label style="font-size:10px;color:var(--text-hint)" data-i18n="lbl_to_date">To date</label><input id="edit-plan-to" type="date"/></div>
         </div>
       </div>
       <div class="field">
         <label data-i18n="lbl_time_of_day">Time of day</label>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <div><label style="font-size:10px;color:var(--text-hint)">Start time</label><input id="edit-plan-time-from" type="time"/></div>
-          <div><label style="font-size:10px;color:var(--text-hint)">End time</label><input id="edit-plan-time-to" type="time"/></div>
+          <div><label style="font-size:10px;color:var(--text-hint)" data-i18n="lbl_start_time">Start time</label><input id="edit-plan-time-from" type="time"/></div>
+          <div><label style="font-size:10px;color:var(--text-hint)" data-i18n="lbl_end_time">End time</label><input id="edit-plan-time-to" type="time"/></div>
         </div>
       </div>
       <div class="field"><label data-i18n="lbl_notes_short">Notes</label><input id="edit-plan-notes" type="text"/></div>
-      <div class="field"><label>Priority</label>
+      <div class="field"><label data-i18n="lbl_priority">Priority</label>
         <select id="edit-plan-priority">
           <option value="normal">Normal</option>
           <option value="high">High</option>
@@ -1581,7 +1581,7 @@ button,input,select,textarea{}
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-danger" onclick="deletePlan()">Delete</button>
+      <button class="btn btn-danger" onclick="deletePlan()" data-i18n="btn_delete">Delete</button>
       <button class="btn btn-ghost" onclick="closeModal('modal-edit-plan')" data-i18n="btn_cancel">Cancel</button>
       <button class="btn btn-primary" onclick="saveEditPlan()" data-i18n="btn_save_changes">Save changes</button>
     </div>
@@ -1975,7 +1975,14 @@ const i18n = {
     lbl_compare_metric:'2. Compare by',
     lbl_compare_period:'3. Time period',
     lbl_compare_chart_type:'4. Chart type',
-    txt_tap_to_drill:'tap to drill in →'
+    txt_tap_to_drill:'tap to drill in →',
+    btn_exit:'Exit',
+    btn_remove:'Remove',
+    btn_edit:'Edit',
+    btn_copy_venue_link:'🔗 Copy venue link',
+    lbl_event_name:'Event name',
+    lbl_start_date:'Start date',
+    lbl_end_date:'End date',
   },
   pl:{
     stat_total:'Ten miesiąc',stat_last:'Ostatnia op.',stat_common:'Dominuje',
@@ -1987,16 +1994,16 @@ const i18n = {
     photo_hint:'JPG, PNG · max 8 zdjęć',
     tab_log:'🗒 Zadanie',tab_usage:'⏱ Użycie',tab_schedule:'📅 Harmonogram',tab_stats:'📊 Statystyki',
     btn_log_task:'+ Dodaj zadanie',btn_log_usage:'+ Dodaj użycie',
-    today:'Dziś',history_lbl:'Historia',usage_history:'Historia użycia',
+    today:'Dziś',history_lbl:'Historia',usage_history:'Historia użyć',
     no_tasks_today:'Brak zaplanowanych zadań',no_tasks_hint:'Brak zadań na dziś. Naciśnij „+ Dodaj zadanie"',
     no_usage_today:'Brak użycia na dziś',no_usage_hint:'Naciśnij „+ Dodaj użycie"',
     no_tasks_logged:'Brak zapisanych zadań.',no_usage_history:'Brak historii użycia',
     loading:'Ładowanie...',tasks_bank:'Bank zadań',
-    status_planned:'Zaplanowane',status_inprogress:'W trakcie',status_completed:'Ukończone',status_missed:'Niewykonane',
+    status_planned:'Zaplanowane',status_inprogress:'W trakcie',status_completed:'Ukończone',status_missed:'Pominięte',
     status_active:'Aktywny',status_project_planned:'Planowany',status_finished:'Zakończony',
-    lbl_today:'DZIŚ',lbl_tomorrow:'Jutro',
+    lbl_today:'DZISIAJ',lbl_tomorrow:'Jutro',
     legend_planned:'Zaplanowane',legend_inprogress:'W trakcie',legend_completed:'Ukończone',legend_missed:'Niewykonane',
-    col_tasks:'Zadania',col_usage:'Użycie',
+    col_tasks:'ZADANIA',col_usage:'UŻYCIE',
     usage_match:'Mecz',usage_training:'Trening',usage_other:'Inne',
     zone_full:'Całe boisko',zone_half_a:'Połowa A',zone_half_b:'Połowa B',
     zone_third_a:'Tercja A',zone_third_b:'Tercja B',zone_third_c:'Tercja C',
@@ -2033,26 +2040,26 @@ const i18n = {
     btn_copy:'Kopiuj',
     btn_clear:'Wyczyść',
     btn_create_project:'Utwórz projekt',
-    btn_create_venue:'Utwórz obiekt',
+    btn_create_venue:'Dodaj boisko',
     btn_save_task:'Zapisz zadanie',
     btn_save_usage:'Zapisz użycie',
     btn_update_password:'Zmień hasło',
     btn_delete_project:'Usuń projekt',
-    btn_delete_venue:'Usuń obiekt',
+    btn_delete_venue:'Usuń boisko',
     btn_back:'Wstecz',
     btn_projects:'Projekty',
-    btn_export_pdf:'⬇ Eksport PDF',
-    btn_export_csv:'CSV',
+    btn_export_pdf:'⬇ Eksportuj PDF',
+    btn_export_csv:'⬇ Eksportuj CSV',
     btn_clear_all:'Wyczyść wszystko',
     btn_new_project:'+ Nowy projekt',
-    btn_access_venue:'Otwórz pulpit obiektu',
+    btn_access_venue:'Przejdź do boiska',
     btn_move:'✂️ Przenieś',
     btn_copy_item:'📋 Kopiuj',
     btn_regenerate_link:'🔄 Regeneruj link',
     btn_add_chart:'+ Dodaj wykres',
-    btn_save_preset:'+ Zapisz bieżący',
-    btn_single_venue:'📊 Jeden obiekt',
-    btn_compare:'⚖️ Porównaj obiekty',
+    btn_save_preset:'+ Zapisz bieżące',
+    btn_single_venue:'📊 Pojedyncze boisko',
+    btn_compare:'⚖️ Porównaj boiska',
     btn_task_types:'⚙ Typy zadań',
     modal_new_project:'Nowy projekt',
     modal_edit_project:'Edytuj projekt',
@@ -2070,48 +2077,48 @@ const i18n = {
     modal_change_pass:'Zmień hasło admina',
     modal_edit_plan:'Edytuj wpis planu',
     modal_export_pdf:'Eksport PDF — wybierz wykresy',
-    lbl_venue_name:'Nazwa obiektu',
+    lbl_venue_name:'Nazwa boiska',
     lbl_venue_type:'Typ obiektu',
     lbl_city_country:'Miasto / Kraj',
     lbl_contact_person:'Osoba odpowiedzialna',
     lbl_contact_phone:'Telefon kontaktowy',
-    lbl_contact_email:'E-mail kontaktowy',
-    lbl_venue_token:'Token dostępu do obiektu',
-    lbl_proj_code:'Kod / ID projektu',
+    lbl_contact_email:'Email kontaktowy',
+    lbl_venue_token:'Token dostępu do boiska',
+    lbl_proj_code:'Kod projektu / ID',
     lbl_proj_name:'Pełna nazwa projektu',
     lbl_proj_country:'Kraj / Lokalizacja',
     lbl_proj_color:'Kolor projektu',
     lbl_proj_status:'Status',
-    lbl_venue_field:'Obiekt',
+    lbl_venue_field:'Boisko',
     lbl_date:'Data',
     lbl_date_range:'Zakres dat',
-    lbl_from_date:'Data od',
-    lbl_to_date:'Data do',
+    lbl_from_date:'Od daty',
+    lbl_to_date:'Do daty',
     lbl_time_window:'Okno czasowe',
-    lbl_time_from:'Czas od',
-    lbl_time_to:'Czas do',
+    lbl_time_from:'Od godziny',
+    lbl_time_to:'Do godziny',
     lbl_start:'Start',
     lbl_end:'Koniec',
-    lbl_start_time:'Czas start',
-    lbl_end_time:'Czas koniec',
+    lbl_start_time:'Godzina rozpoczęcia',
+    lbl_end_time:'Godzina zakończenia',
     lbl_usage_date:'Data użycia',
-    lbl_task_date_full:'Data zadania (kiedy się odbywa)',
-    lbl_type:'Typ',
+    lbl_task_date_full:'Data zadania (kiedy)',
+    lbl_type:'Typ zadania',
     lbl_usage_type:'Typ użycia',
     lbl_team:'Nazwa drużyny',
     lbl_zone:'Strefa boiska',
     lbl_zone_custom_lbl:'Własna strefa',
-    lbl_equipment:'Sprzęt',
-    lbl_weather:'Pogoda',
-    lbl_staff:'Wykonał/a',
-    lbl_staff_hint:'Możesz dodać kilka osób',
+    lbl_equipment:'Użyty sprzęt',
+    lbl_weather:'Warunki pogodowe',
+    lbl_staff:'Wykonał (personel)',
+    lbl_staff_hint:'Możesz dodać wielu pracowników',
     lbl_notes:'Notatki / obserwacje',
     lbl_notes_short:'Notatki',
     lbl_status:'Status',
     lbl_priority:'Priorytet',
     lbl_photos:'Zdjęcia (max 8)',
     lbl_time_of_day:'Pora dnia',
-    lbl_email:'E-mail',
+    lbl_email:'Email',
     lbl_password:'Hasło',
     lbl_current_pass:'Aktualne hasło',
     lbl_new_pass:'Nowe hasło',
@@ -2130,13 +2137,13 @@ const i18n = {
     th_team:'Drużyna',
     th_weather:'Pogoda',
     th_usage_type:'Typ użycia',
-    toast_task_logged:'Zadanie zapisane!',
+    toast_task_logged:'Zadanie zapisane',
     toast_task_updated:'Zadanie zaktualizowane',
     toast_task_deleted:'Zadanie usunięte',
     toast_task_not_found:'Nie znaleziono zadania',
-    toast_usage_logged:'Użycie zapisane!',
+    toast_usage_logged:'Użycie zapisane',
     toast_usage_updated:'Użycie zaktualizowane',
-    toast_usage_deleted:'Usunięto',
+    toast_usage_deleted:'Użycie usunięte',
     toast_usage_not_found:'Nie znaleziono użycia',
     toast_venue_added:'Obiekt dodany!',
     toast_venue_updated:'Obiekt zaktualizowany!',
@@ -2153,7 +2160,7 @@ const i18n = {
     toast_type_added:'Typ dodany',
     toast_type_exists:'Typ już istnieje',
     toast_type_renamed:'Zmieniono nazwę',
-    toast_csv_exported:'CSV wyeksportowany!',
+    toast_csv_exported:'CSV wyeksportowany',
     toast_select_venue:'Wybierz co najmniej jeden obiekt',
     toast_select_chart:'Wybierz co najmniej jeden wykres',
     toast_no_charts:'Brak wykresów do eksportu',
@@ -2175,49 +2182,49 @@ const i18n = {
     confirm_delete_op:'Usunąć tę operację?',
     confirm_delete_venue:'Usunąć ten obiekt i WSZYSTKIE jego operacje na stałe?',
     confirm_delete_usage:'Usunąć ten wpis użycia?',
-    lbl_auto_status:'Auto (przyszłość → Zaplanowane, dziś → W trakcie)',
-    lbl_status_hint:'Status „Ukończone" musi być ustawiony ręcznie',
+    lbl_auto_status:'Auto (przyszłość→Planowane, dziś→W trakcie)',
+    lbl_status_hint:'Ukończone musisz ustawić ręcznie',
     txt_viewer_desc:'Udostępnij ten link aby dać dostęp tylko do odczytu tego projektu.',
     txt_regen_warning:'Stary link przestanie działać',
     txt_contact_desc:'Zaktualizuj dane kontaktowe dla tego obiektu. Tylko Ty i admin możecie to widzieć.',
-    lbl_compare_venue_select:'1. Obiekty do porównania',
+    lbl_compare_venue_select:'1. Boiska do porównania',
     lbl_compare_metric:'2. Porównaj według',
     lbl_compare_period:'3. Okres czasu',
     lbl_compare_chart_type:'4. Typ wykresu',
     txt_tap_to_drill:'kliknij aby przejść →',
-    lbl_venue_indicator:'Venue',
-    btn_access_venue:'Access Venue Dashboard',
-    btn_add:'Add',
-    btn_add_chart:'+ Add chart',
-    btn_back:'Back',
-    btn_cancel:'Cancel',
-    btn_clear:'Clear',
-    btn_clear_all:'Clear all',
-    btn_compare:'⚖️ Compare venues',
-    btn_copy:'Copy',
-    btn_copy_item:'📋 Copy',
-    btn_create_project:'Create project',
-    btn_create_venue:'Create venue',
-    btn_delete:'Delete',
-    btn_delete_project:'Delete project',
-    btn_delete_venue:'Delete venue',
-    btn_done:'Done',
-    btn_export_csv:'CSV',
-    btn_export_pdf:'⬇ Export PDF',
-    btn_move:'✂️ Move',
-    btn_new_project:'+ New project',
-    btn_projects:'Projects',
-    btn_regenerate_link:'🔄 Regenerate link',
-    btn_save:'Save',
-    btn_save_changes:'Save changes',
-    btn_save_preset:'+ Save current',
-    btn_save_task:'Save task',
-    btn_save_usage:'Save usage',
-    btn_sign_in:'Sign in',
-    btn_sign_out:'Sign out',
-    btn_single_venue:'📊 Single venue',
-    btn_task_types:'⚙ Task types',
-    btn_update_password:'Update password',
+    lbl_venue_indicator:'Boisko',
+    btn_access_venue:'Przejdź do boiska',
+    btn_add:'Dodaj',
+    btn_add_chart:'+ Dodaj wykres',
+    btn_back:'Wstecz',
+    btn_cancel:'Anuluj',
+    btn_clear:'Wyczyść',
+    btn_clear_all:'Wyczyść wszystko',
+    btn_compare:'⚖️ Porównaj boiska',
+    btn_copy:'Kopiuj',
+    btn_copy_item:'📋 Kopiuj',
+    btn_create_project:'Utwórz projekt',
+    btn_create_venue:'Dodaj boisko',
+    btn_delete:'Usuń',
+    btn_delete_project:'Usuń projekt',
+    btn_delete_venue:'Usuń boisko',
+    btn_done:'Gotowe',
+    btn_export_csv:'⬇ Eksportuj CSV',
+    btn_export_pdf:'⬇ Eksportuj PDF',
+    btn_move:'✂️ Przenieś',
+    btn_new_project:'+ Nowy projekt',
+    btn_projects:'Projekty',
+    btn_regenerate_link:'🔄 Regeneruj link',
+    btn_save:'Zapisz',
+    btn_save_changes:'Zapisz zmiany',
+    btn_save_preset:'+ Zapisz bieżące',
+    btn_save_task:'Zapisz zadanie',
+    btn_save_usage:'Zapisz użycie',
+    btn_sign_in:'Zaloguj',
+    btn_sign_out:'Wyloguj',
+    btn_single_venue:'📊 Pojedyncze boisko',
+    btn_task_types:'⚙ Typy zadań',
+    btn_update_password:'Zmień hasło',
     confirm_delete_op:'Delete this operation?',
     confirm_delete_project:'Delete this project? Venues and operations will NOT be deleted.',
     confirm_delete_usage:'Delete this usage entry?',
@@ -2225,59 +2232,59 @@ const i18n = {
     confirm_regen_link:'Regenerate link? The old link will immediately stop working.',
     confirm_remove_venue:'Remove this venue from the project?',
     filter_all:'All',
-    lbl_auto_status:'Auto (future → Planned, today → In progress)',
-    lbl_city_country:'City / Country',
-    lbl_compare_chart_type:'4. Chart type',
-    lbl_compare_metric:'2. Compare by',
-    lbl_compare_period:'3. Time period',
-    lbl_compare_venue_select:'1. Venues to compare',
-    lbl_confirm_pass:'Confirm new password',
-    lbl_contact_email:'Contact email',
-    lbl_contact_person:'Responsible person',
-    lbl_contact_phone:'Contact phone',
-    lbl_current_pass:'Current password',
-    lbl_date:'Date',
-    lbl_date_range:'Date range',
+    lbl_auto_status:'Auto (przyszłość→Planowane, dziś→W trakcie)',
+    lbl_city_country:'Miasto / Kraj',
+    lbl_compare_chart_type:'4. Typ wykresu',
+    lbl_compare_metric:'2. Porównaj według',
+    lbl_compare_period:'3. Okres czasu',
+    lbl_compare_venue_select:'1. Boiska do porównania',
+    lbl_confirm_pass:'Potwierdź nowe hasło',
+    lbl_contact_email:'Email kontaktowy',
+    lbl_contact_person:'Osoba odpowiedzialna',
+    lbl_contact_phone:'Telefon kontaktowy',
+    lbl_current_pass:'Aktualne hasło',
+    lbl_date:'Data',
+    lbl_date_range:'Zakres dat',
     lbl_email:'Email',
-    lbl_end:'End',
-    lbl_end_time:'End time',
-    lbl_equipment:'Equipment used',
-    lbl_from_date:'From date',
-    lbl_new_pass:'New password',
-    lbl_notes:'Notes / observations',
-    lbl_notes_short:'Notes',
-    lbl_password:'Password',
-    lbl_photos:'Photos (max 8)',
-    lbl_priority:'Priority',
-    lbl_proj_code:'Project code / ID',
-    lbl_proj_color:'Project colour',
-    lbl_proj_country:'Country / Location',
-    lbl_proj_name:'Full project name',
+    lbl_end:'Koniec',
+    lbl_end_time:'Godzina zakończenia',
+    lbl_equipment:'Użyty sprzęt',
+    lbl_from_date:'Od daty',
+    lbl_new_pass:'Nowe hasło',
+    lbl_notes:'Notatki / obserwacje',
+    lbl_notes_short:'Notatki',
+    lbl_password:'Hasło',
+    lbl_photos:'Zdjęcia (max 8)',
+    lbl_priority:'Priorytet',
+    lbl_proj_code:'Kod projektu / ID',
+    lbl_proj_color:'Kolor projektu',
+    lbl_proj_country:'Kraj / Lokalizacja',
+    lbl_proj_name:'Pełna nazwa projektu',
     lbl_proj_status:'Status',
-    lbl_staff:'Done by (staff)',
-    lbl_staff_hint:'You can add multiple staff members',
+    lbl_staff:'Wykonał (personel)',
+    lbl_staff_hint:'Możesz dodać wielu pracowników',
     lbl_start:'Start',
-    lbl_start_time:'Start time',
+    lbl_start_time:'Godzina rozpoczęcia',
     lbl_status:'Status',
-    lbl_status_hint:'Completed must be set manually by you or admin',
-    lbl_task_date_full:'Task date (when it happens)',
-    lbl_team:'Team name',
-    lbl_time_from:'Time from',
-    lbl_time_of_day:'Time of day',
-    lbl_time_to:'Time to',
-    lbl_time_window:'Time window',
-    lbl_to_date:'To date',
-    lbl_type:'Type',
-    lbl_usage_date:'Usage date',
-    lbl_usage_type:'Usage type',
-    lbl_venue_field:'Venue',
-    lbl_venue_indicator:'Venue',
-    lbl_venue_name:'Venue name',
-    lbl_venue_token:'Venue access token',
-    lbl_venue_type:'Venue type',
-    lbl_weather:'Weather conditions',
-    lbl_zone:'Pitch area / zone',
-    lbl_zone_custom_lbl:'Custom zone',
+    lbl_status_hint:'Ukończone musisz ustawić ręcznie',
+    lbl_task_date_full:'Data zadania (kiedy)',
+    lbl_team:'Nazwa drużyny',
+    lbl_time_from:'Od godziny',
+    lbl_time_of_day:'Pora dnia',
+    lbl_time_to:'Do godziny',
+    lbl_time_window:'Okno czasowe',
+    lbl_to_date:'Do daty',
+    lbl_type:'Typ zadania',
+    lbl_usage_date:'Data użycia',
+    lbl_usage_type:'Typ użycia',
+    lbl_venue_field:'Boisko',
+    lbl_venue_indicator:'Boisko',
+    lbl_venue_name:'Nazwa boiska',
+    lbl_venue_token:'Token dostępu do boiska',
+    lbl_venue_type:'Typ obiektu',
+    lbl_weather:'Warunki pogodowe',
+    lbl_zone:'Strefa boiska',
+    lbl_zone_custom_lbl:'Własna strefa',
     modal_add_venue:'Add venue to project',
 
     modal_change_pass:'Change admin password',
@@ -2294,10 +2301,10 @@ const i18n = {
     modal_new_project:'New project',
     modal_op_types:'Manage task types',
     modal_viewer_link:'Project viewer link',
-    ptab_schedule:'📅 Schedule',
-    ptab_stats:'📊 Stats',
-    ptab_tasks:'📋 Tasks',
-    ptab_usage:'⏱ Usage',
+    ptab_schedule:'📅 Harmonogram',
+    ptab_stats:'📊 Statystyki',
+    ptab_tasks:'📋 Zadania',
+    ptab_usage:'⏱ Użycie',
     th_date:'Date',
     th_flag:'Flag',
     th_notes:'Notes',
@@ -2313,7 +2320,7 @@ const i18n = {
     toast_completed_future:'Cannot mark as completed — date is in the future.',
     toast_connection_error:'Connection error',
     toast_contact_saved:'Contact details saved!',
-    toast_csv_exported:'CSV exported!',
+    toast_csv_exported:'CSV wyeksportowany',
     toast_invalid_link:'Invalid or expired viewer link',
     toast_invalid_token:'Invalid venue token',
     toast_link_copied:'Link copied!',
@@ -2330,18 +2337,18 @@ const i18n = {
     toast_project_updated:'Project updated',
     toast_select_chart:'Select at least one chart',
     toast_select_venue:'Select at least one venue',
-    toast_task_deleted:'Task deleted',
-    toast_task_logged:'Task logged!',
+    toast_task_deleted:'Zadanie usunięte',
+    toast_task_logged:'Zadanie zapisane',
     toast_task_not_found:'Task not found',
-    toast_task_updated:'Task updated',
+    toast_task_updated:'Zadanie zaktualizowane',
     toast_token_not_found:'Token not found — please check and try again',
     toast_type_added:'Type added',
     toast_type_exists:'Type already exists',
     toast_type_renamed:'Renamed',
-    toast_usage_deleted:'Deleted',
-    toast_usage_logged:'Usage logged!',
+    toast_usage_deleted:'Użycie usunięte',
+    toast_usage_logged:'Użycie zapisane',
     toast_usage_not_found:'Usage not found',
-    toast_usage_updated:'Usage updated',
+    toast_usage_updated:'Użycie zaktualizowane',
     toast_venue_added:'Venue added!',
     toast_venue_deleted:'Venue deleted',
     toast_venue_link_copied:'Venue link copied!',
@@ -2356,45 +2363,45 @@ const i18n = {
     vtype_stadium:'Stadium',
     vtype_training:'Training site',
     all_venues_back:'← All venues',
-    btn_access_venue:'Access Venue Dashboard',
-    btn_add:'Add',
-    btn_add_chart:'+ Add chart',
-    btn_back:'Back',
-    btn_cancel:'Cancel',
-    btn_clear:'Clear',
-    btn_clear_all:'Clear all',
-    btn_compare:'⚖️ Compare venues',
-    btn_copy:'Copy',
-    btn_copy_item:'📋 Copy',
-    btn_create_project:'Create project',
-    btn_create_venue:'Create venue',
-    btn_delete:'Delete',
-    btn_delete_project:'Delete project',
-    btn_delete_venue:'Delete venue',
-    btn_done:'Done',
-    btn_export_csv:'CSV',
-    btn_export_pdf:'⬇ Export PDF',
-    btn_log_task:'+ Log task',
-    btn_move:'✂️ Move',
-    btn_new_project:'+ New project',
-    btn_projects:'Projects',
-    btn_regenerate_link:'🔄 Regenerate link',
-    btn_save:'Save',
-    btn_save_changes:'Save changes',
-    btn_save_preset:'+ Save current',
-    btn_save_task:'Save task',
-    btn_save_usage:'Save usage',
-    btn_sign_in:'Sign in',
-    btn_sign_out:'Sign out',
-    btn_single_venue:'📊 Single venue',
-    btn_task_types:'⚙ Task types',
-    btn_update_password:'Update password',
+    btn_access_venue:'Przejdź do boiska',
+    btn_add:'Dodaj',
+    btn_add_chart:'+ Dodaj wykres',
+    btn_back:'Wstecz',
+    btn_cancel:'Anuluj',
+    btn_clear:'Wyczyść',
+    btn_clear_all:'Wyczyść wszystko',
+    btn_compare:'⚖️ Porównaj boiska',
+    btn_copy:'Kopiuj',
+    btn_copy_item:'📋 Kopiuj',
+    btn_create_project:'Utwórz projekt',
+    btn_create_venue:'Dodaj boisko',
+    btn_delete:'Usuń',
+    btn_delete_project:'Usuń projekt',
+    btn_delete_venue:'Usuń boisko',
+    btn_done:'Gotowe',
+    btn_export_csv:'⬇ Eksportuj CSV',
+    btn_export_pdf:'⬇ Eksportuj PDF',
+    btn_log_task:'+ Dodaj zadanie',
+    btn_move:'✂️ Przenieś',
+    btn_new_project:'+ Nowy projekt',
+    btn_projects:'Projekty',
+    btn_regenerate_link:'🔄 Regeneruj link',
+    btn_save:'Zapisz',
+    btn_save_changes:'Zapisz zmiany',
+    btn_save_preset:'+ Zapisz bieżące',
+    btn_save_task:'Zapisz zadanie',
+    btn_save_usage:'Zapisz użycie',
+    btn_sign_in:'Zaloguj',
+    btn_sign_out:'Wyloguj',
+    btn_single_venue:'📊 Pojedyncze boisko',
+    btn_task_types:'⚙ Typy zadań',
+    btn_update_password:'Zmień hasło',
     chart_activity:'Task activity over time',
     chart_maintenance:'Maintenance (Tasks)',
     chart_ratio:'Pitch time: Tasks vs Usage',
     chart_task_by_type:'Task hours by type',
     chart_usage_types:'Usage hours by type',
-    col_tasks:'Tasks',
+    col_tasks:'ZADANIA',
     confirm_delete_op:'Delete this operation?',
     confirm_delete_project:'Delete this project? Venues and operations will NOT be deleted.',
     confirm_delete_usage:'Delete this usage entry?',
@@ -2403,67 +2410,67 @@ const i18n = {
     confirm_remove_venue:'Remove this venue from the project?',
     filter_all:'All',
     history:'Task history',
-    lbl_auto_status:'Auto (future → Planned, today → In progress)',
-    lbl_city_country:'City / Country',
-    lbl_compare_chart_type:'4. Chart type',
-    lbl_compare_metric:'2. Compare by',
-    lbl_compare_period:'3. Time period',
-    lbl_compare_venue_select:'1. Venues to compare',
-    lbl_confirm_pass:'Confirm new password',
-    lbl_contact_email:'Contact email',
-    lbl_contact_person:'Responsible person',
-    lbl_contact_phone:'Contact phone',
-    lbl_current_pass:'Current password',
-    lbl_date:'Date',
-    lbl_date_range:'Date range',
+    lbl_auto_status:'Auto (przyszłość→Planowane, dziś→W trakcie)',
+    lbl_city_country:'Miasto / Kraj',
+    lbl_compare_chart_type:'4. Typ wykresu',
+    lbl_compare_metric:'2. Porównaj według',
+    lbl_compare_period:'3. Okres czasu',
+    lbl_compare_venue_select:'1. Boiska do porównania',
+    lbl_confirm_pass:'Potwierdź nowe hasło',
+    lbl_contact_email:'Email kontaktowy',
+    lbl_contact_person:'Osoba odpowiedzialna',
+    lbl_contact_phone:'Telefon kontaktowy',
+    lbl_current_pass:'Aktualne hasło',
+    lbl_date:'Data',
+    lbl_date_range:'Zakres dat',
     lbl_email:'Email',
-    lbl_end:'End',
-    lbl_end_time:'End time',
-    lbl_equipment:'Equipment used',
-    lbl_from_date:'From date',
-    lbl_new_pass:'New password',
-    lbl_notes:'Notes / observations',
-    lbl_notes_short:'Notes',
-    lbl_password:'Password',
-    lbl_photos:'Photos (max 8)',
-    lbl_priority:'Priority',
-    lbl_proj_code:'Project code / ID',
-    lbl_proj_color:'Project colour',
-    lbl_proj_country:'Country / Location',
-    lbl_proj_name:'Full project name',
+    lbl_end:'Koniec',
+    lbl_end_time:'Godzina zakończenia',
+    lbl_equipment:'Użyty sprzęt',
+    lbl_from_date:'Od daty',
+    lbl_new_pass:'Nowe hasło',
+    lbl_notes:'Notatki / obserwacje',
+    lbl_notes_short:'Notatki',
+    lbl_password:'Hasło',
+    lbl_photos:'Zdjęcia (max 8)',
+    lbl_priority:'Priorytet',
+    lbl_proj_code:'Kod projektu / ID',
+    lbl_proj_color:'Kolor projektu',
+    lbl_proj_country:'Kraj / Lokalizacja',
+    lbl_proj_name:'Pełna nazwa projektu',
     lbl_proj_status:'Status',
-    lbl_staff:'Done by (staff)',
-    lbl_staff_hint:'You can add multiple staff members',
+    lbl_staff:'Wykonał (personel)',
+    lbl_staff_hint:'Możesz dodać wielu pracowników',
     lbl_start:'Start',
-    lbl_start_time:'Start time',
+    lbl_start_time:'Godzina rozpoczęcia',
     lbl_status:'Status',
-    lbl_status_hint:'Completed must be set manually by you or admin',
-    lbl_task_date_full:'Task date (when it happens)',
-    lbl_team:'Team name',
-    lbl_time_from:'Time from',
-    lbl_time_of_day:'Time of day',
-    lbl_time_to:'Time to',
-    lbl_time_window:'Time window',
-    lbl_to_date:'To date',
-    lbl_today:'TODAY',
-    lbl_type:'Type',
-    lbl_usage_date:'Usage date',
-    lbl_usage_type:'Usage type',
-    lbl_venue_field:'Venue',
-    lbl_venue_indicator:'Venue',
-    lbl_venue_name:'Venue name',
-    lbl_venue_token:'Venue access token',
-    lbl_venue_type:'Venue type',
+    lbl_status_hint:'Ukończone musisz ustawić ręcznie',
+    lbl_task_date_full:'Data zadania (kiedy)',
+    lbl_team:'Nazwa drużyny',
+    lbl_time_from:'Od godziny',
+    lbl_time_of_day:'Pora dnia',
+    lbl_time_to:'Do godziny',
+    lbl_time_window:'Okno czasowe',
+    lbl_to_date:'Do daty',
+    lbl_today:'DZISIAJ',
+    lbl_type:'Typ zadania',
+    lbl_usage_date:'Data użycia',
+    lbl_usage_type:'Typ użycia',
+    lbl_venue_field:'Boisko',
+    lbl_venue_indicator:'Boisko',
+    lbl_venue_name:'Nazwa boiska',
+    lbl_venue_token:'Token dostępu do boiska',
+    lbl_venue_type:'Typ obiektu',
     all_venues_back:'← All venues',
-    btn_access_venue:'Access Venue Dashboard',
-    btn_add:'Add',
-    btn_add_chart:'+ Add chart',
-    btn_back:'Back',
-    btn_cancel:'Cancel',
-    btn_clear:'Clear',
-    lbl_weather:'Weather conditions',
-    lbl_zone:'Pitch area / zone',
-    lbl_zone_custom_lbl:'Custom zone',
+    btn_access_venue:'Przejdź do boiska',
+    btn_add:'Dodaj',
+    btn_add_chart:'+ Dodaj wykres',
+    btn_back:'Wstecz',
+    btn_cancel:'Anuluj',
+    btn_clear:'Wyczyść',
+    lbl_weather:'Warunki pogodowe',
+    lbl_zone:'Strefa boiska',
+    lbl_zone_custom_lbl:'Własna strefa',
     legend_planned:'Planned',
     loading:'Loading...',
     log_op:'Log new task',
@@ -2493,17 +2500,17 @@ const i18n = {
     op_zone_custom:'Custom zone',
     period_week:'Week',
     photo_hint:'JPG, PNG · max 8 photos',
-    ptab_schedule:'📅 Schedule',
-    ptab_stats:'📊 Stats',
-    ptab_tasks:'📋 Tasks',
-    ptab_usage:'⏱ Usage',
+    ptab_schedule:'📅 Harmonogram',
+    ptab_stats:'📊 Statystyki',
+    ptab_tasks:'📋 Zadania',
+    ptab_usage:'⏱ Użycie',
     stat_total:'This month',
     stats_total_tasks:'Total tasks',
     stats_usage_hours:'Usage hours',
     stats_venues_active:'Venues active',
-    status_active:'Active',
+    status_active:'Aktywny',
     status_manual_hint:'Completed must be set manually by you or admin',
-    status_planned:'Planned',
+    status_planned:'Zaplanowane',
     tab_log:'🗒 Log task',
     tab_log_short:'Log task',
     th_date:'Date',
@@ -2521,7 +2528,7 @@ const i18n = {
     toast_completed_future:'Cannot mark as completed — date is in the future.',
     toast_connection_error:'Connection error',
     toast_contact_saved:'Contact details saved!',
-    toast_csv_exported:'CSV exported!',
+    toast_csv_exported:'CSV wyeksportowany',
     toast_invalid_link:'Invalid or expired viewer link',
     toast_invalid_token:'Invalid venue token',
     toast_link_copied:'Link copied!',
@@ -2538,18 +2545,18 @@ const i18n = {
     toast_project_updated:'Project updated',
     toast_select_chart:'Select at least one chart',
     toast_select_venue:'Select at least one venue',
-    toast_task_deleted:'Task deleted',
-    toast_task_logged:'Task logged!',
+    toast_task_deleted:'Zadanie usunięte',
+    toast_task_logged:'Zadanie zapisane',
     toast_task_not_found:'Task not found',
-    toast_task_updated:'Task updated',
+    toast_task_updated:'Zadanie zaktualizowane',
     toast_token_not_found:'Token not found — please check and try again',
     toast_type_added:'Type added',
     toast_type_exists:'Type already exists',
     toast_type_renamed:'Renamed',
-    toast_usage_deleted:'Deleted',
-    toast_usage_logged:'Usage logged!',
+    toast_usage_deleted:'Użycie usunięte',
+    toast_usage_logged:'Użycie zapisane',
     toast_usage_not_found:'Usage not found',
-    toast_usage_updated:'Usage updated',
+    toast_usage_updated:'Użycie zaktualizowane',
     toast_venue_added:'Venue added!',
     toast_venue_deleted:'Venue deleted',
     toast_venue_link_copied:'Venue link copied!',
@@ -2561,16 +2568,16 @@ const i18n = {
     txt_regen_warning:'Old link will stop working',
     txt_tap_to_drill:'tap to drill in →',
     txt_viewer_desc:'Share this link to give read-only access to this project. Anyone with the link can view all venues and operations but cannot edit anything.',
-    usage_match:'Match Day',
+    usage_match:'Mecz',
     vtype_other:'Other',
     vtype_stadium:'Stadium',
     vtype_training:'Training site',
     zone_centre:'Centre circle',
-    zone_full:'Full pitch',
+    zone_full:'Całe boisko',
     zone_goal_n:'Goal mouth (N)',
-    zone_third_a:'Third A',bl_weather:'Weather conditions',
-    lbl_zone:'Pitch area / zone',
-    lbl_zone_custom_lbl:'Custom zone',
+    zone_third_a:'Tercja A',bl_weather:'Weather conditions',
+    lbl_zone:'Strefa boiska',
+    lbl_zone_custom_lbl:'Własna strefa',
     legend_planned:'Planned',
     loading:'Loading...',
     more_suffix:'more',
@@ -2585,17 +2592,27 @@ const i18n = {
     stats_total_tasks:'Total tasks',
     stats_usage_hours:'Usage hours',
     stats_venues_active:'Venues active',
-    status_active:'Active',
+    status_active:'Aktywny',
     status_manual_hint:'Completed must be set manually by you or admin',
-    status_planned:'Planned',
+    status_planned:'Zaplanowane',
     tab_log:'🗒 Log task',
     tab_log_short:'Log task',
     today:'Today',
-    usage_match:'Match Day',
+    usage_match:'Mecz',
     zone_centre:'Centre circle',
-    zone_full:'Full pitch',
+    zone_full:'Całe boisko',
     zone_goal_n:'Goal mouth (N)',
-    zone_third_a:'Third A'
+    zone_third_a:'Tercja A',
+    btn_edit:'Edytuj',
+    btn_exit:'Wyjdź',
+    btn_remove:'Usuń',
+    btn_copy_venue_link:'🔗 Kopiuj link',
+    lbl_event_name:'Nazwa wydarzenia',
+    lbl_start_date:'Data rozpoczęcia',
+    lbl_end_date:'Data zakończenia',
+    toast_copied:'Skopiowano',
+    toast_saved:'Zapisano',
+    toast_deleted:'Usunięto',
   },
   es:{
     stat_total:'Este mes',stat_last:'Última op.',stat_common:'Más común',
@@ -3630,7 +3647,7 @@ async function enterViewerDashboard(proj){
           <div class="venue-item-city">${cityShort?esc(cityShort)+' · ':''}${vc} task${vc!==1?'s':''}</div>
           ${v.responsiblePerson||v.contactPhone?`<div class="venue-item-contact">${v.responsiblePerson?`<span>👤 ${esc(v.responsiblePerson)}</span>`:''}${v.contactPhone?`<span>📞 ${esc(v.contactPhone)}</span>`:''}</div>`:''}
           <div class="venue-item-actions">
-            <button class="btn btn-ghost btn-sm" title="Copy venue link" onclick="copyVenueViewerLink(event,'${v.token}')">🔗 Copy venue link</button>
+            <button class="btn btn-ghost btn-sm" title="Copy venue link" onclick="copyVenueViewerLink(event,'${v.token}')" data-i18n="btn_copy_venue_link">🔗 Copy venue link</button>
           </div>
         </div>
       </div>`;
@@ -3911,7 +3928,7 @@ function renderProjects(){
         <div class="project-card-footer">
           <span class="project-venues-count">${venueCount} venue${venueCount!==1?'s':''}</span>
           <div style="display:flex;align-items:center;gap:6px">
-            <button class="btn btn-ghost btn-sm" onclick="editProjectModal(event,'${p.id}')">Edit</button>
+            <button class="btn btn-ghost btn-sm" onclick="editProjectModal(event,'${p.id}')" data-i18n="btn_edit">Edit</button>
             <span class="status-badge ${statusClass}">${statusLabel}</span>
           </div>
         </div>
@@ -4436,7 +4453,7 @@ function renderVenueHistory(resetPage=true){
         <div style="flex-shrink:0;text-align:right;min-width:90px">
           <div style="font-size:12px;font-weight:500;color:var(--text)">${formatDateOnly(op.date)}</div>
           <div style="font-size:10px;color:var(--text-hint);margin-top:1px">logged ${formatDate(op.createdAt||op.date)}</div>
-          <button onclick="openEditModal('${op.id}')" style="margin-top:5px;background:#f1f5f9;border:none;border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;color:var(--text-muted)">Edit</button>
+          <button onclick="openEditModal('${op.id}')" style="margin-top:5px;background:#f1f5f9;border:none;border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;color:var(--text-muted)" data-i18n="btn_edit">Edit</button>
         </div>
       </div>
     </div>`;
@@ -4647,7 +4664,7 @@ function renderOpTypesList(){
         onblur="renameOpType(${i},this)"
         onkeydown="if(event.key==='Enter')this.blur()"
       />
-      <button class="btn btn-danger btn-sm" onclick="removeOpType(${i})">Remove</button>
+      <button class="btn btn-danger btn-sm" onclick="removeOpType(${i})" data-i18n="btn_remove">Remove</button>
     </div>`).join('');
 }
 async function renameOpType(i, input){
@@ -6092,6 +6109,15 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
     if(g) g.innerHTML=`<div style="padding:2rem;color:red;font-size:12px">Error: ${err.message}</div>`;
   }
 }
+function toggleAdminMenu(){
+  const menu=document.getElementById('admin-menu');
+  const overlay=document.getElementById('admin-menu-overlay');
+  if(!menu||!overlay) return;
+  const open=menu.style.display==='none'||!menu.style.display;
+  menu.style.display=open?'block':'none';
+  overlay.style.display=open?'block':'none';
+}
+
 function toggleVenueMenu(){
   const menu=document.getElementById('venue-menu');
   const overlay=document.getElementById('venue-menu-overlay');
@@ -6246,7 +6272,7 @@ function renderVenueUsageHistory(){
           <div style="font-size:12px;font-weight:500;color:var(--text)">${formatDateOnly(u.date)}</div>
           <div style="font-size:10px;color:var(--text-hint);margin-top:1px">${u.timeFrom}–${u.timeTo}</div>
           <div style="font-size:10px;color:var(--text-hint);margin-top:1px">logged ${formatDate(u.createdAt||u.date)}</div>
-          <button onclick="openEditUsageModal('${u.id}')" style="margin-top:5px;background:#f1f5f9;border:none;border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;color:var(--text-muted)">Edit</button>
+          <button onclick="openEditUsageModal('${u.id}')" style="margin-top:5px;background:#f1f5f9;border:none;border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;color:var(--text-muted)" data-i18n="btn_edit">Edit</button>
         </div>
       </div>
     </div>`;
@@ -7686,7 +7712,7 @@ init();
         <input id="usage-weather" type="text" placeholder="e.g. sunny, 18°C"/>
       </div>
       <div class="field">
-        <label>Notes / observations</label>
+        <label data-i18n="lbl_notes">Notes / observations</label>
         <textarea id="usage-notes" rows="2" placeholder="Any notes..." style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14px;resize:vertical;box-sizing:border-box"></textarea>
       </div>
       <div class="field">
@@ -7827,8 +7853,8 @@ init();
       <div id="vstats-pdf-checklist" style="display:flex;flex-direction:column;gap:8px"></div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-vstats-pdf')">Cancel</button>
-      <button class="btn btn-primary" onclick="doExportVenueStatsPDF()" style="background:linear-gradient(135deg,#0C2340,#185FA5);border:none">⬇ Export PDF</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-vstats-pdf')" data-i18n="btn_cancel">Cancel</button>
+      <button class="btn btn-primary" onclick="doExportVenueStatsPDF()" style="background:linear-gradient(135deg,#0C2340,#185FA5);border:none" data-i18n="btn_export_pdf">⬇ Export PDF</button>
     </div>
   </div>
 </div>
@@ -7841,17 +7867,17 @@ init();
       <button class="modal-close" onclick="closeModal('modal-multiday')">✕</button>
     </div>
     <div class="modal-body">
-      <label>Event name</label>
+      <label data-i18n="lbl_event_name">Event name</label>
       <input id="multiday-name" type="text" placeholder="e.g. Site visits Poland" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;box-sizing:border-box"/>
       <input type="hidden" id="multiday-id"/>
       <input type="hidden" id="multiday-venue-id"/>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
         <div>
-          <label>Start date</label>
+          <label data-i18n="lbl_start_date">Start date</label>
           <input id="multiday-start" type="date" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;box-sizing:border-box"/>
         </div>
         <div>
-          <label>End date</label>
+          <label data-i18n="lbl_end_date">End date</label>
           <input id="multiday-end" type="date" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;box-sizing:border-box"/>
         </div>
       </div>
@@ -7870,9 +7896,9 @@ init();
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-danger" id="multiday-delete-btn" onclick="deleteMultidayEvent()" style="display:none">Delete</button>
-      <button class="btn btn-ghost" onclick="closeModal('modal-multiday')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveMultidayEvent()">Save</button>
+      <button class="btn btn-danger" id="multiday-delete-btn" onclick="deleteMultidayEvent()" style="display:none" data-i18n="btn_delete">Delete</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-multiday')" data-i18n="btn_cancel">Cancel</button>
+      <button class="btn btn-primary" onclick="saveMultidayEvent()" data-i18n="btn_save">Save</button>
     </div>
   </div>
 </div>
