@@ -582,7 +582,7 @@ button,input,select,textarea{}
   </div>
 
   <!-- STATS TAB -->
-  <div id="ptab-stats-content" style="display:none;padding:1rem;width:100%;box-sizing:border-box">
+  <div id="ptab-stats-content" style="display:none;padding:1rem;width:100%;box-sizing:border-box;overflow-x:hidden">
 
     <!-- MODE SELECTOR -->
     <div style="display:flex;gap:8px;margin-bottom:1rem">
@@ -627,7 +627,7 @@ button,input,select,textarea{}
         <span>Click <strong>Export PDF</strong> to choose which charts to include</span>
       </div>
       <div id="stats-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.75rem;margin-bottom:1rem"></div>
-      <div id="stats-charts" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:1rem"></div>
+      <div id="stats-charts" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(400px,100%),1fr));gap:1rem"></div>
     </div>
 
     <!-- COMPARE VENUES MODE -->
@@ -730,7 +730,7 @@ button,input,select,textarea{}
           <button id="compare-pdf-btn" onclick="toggleStatsPDFSelect('compare')" style="padding:7px 16px;background:linear-gradient(135deg,#0C2340,#185FA5);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer" data-i18n="btn_export_pdf">⬇ Export PDF</button>
         </div>
       </div>
-      <div id="compare-charts" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:1rem"></div>
+      <div id="compare-charts" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(400px,100%),1fr));gap:1rem"></div>
     </div>
   </div>
 
@@ -1231,7 +1231,7 @@ button,input,select,textarea{}
   <!-- VENUE STATS TAB -->
   
   <!-- VENUE STATS TAB -->
-  <div id="vtab-stats-content" style="display:none;padding:1rem;max-width:1000px;margin:0 auto;width:100%;box-sizing:border-box">
+  <div id="vtab-stats-content" style="display:none;padding:1rem;max-width:1000px;margin:0 auto;width:100%;box-sizing:border-box;overflow-x:hidden">
 
     <!-- FILTERS -->
     <div style="background:white;border-radius:14px;box-shadow:0 2px 12px rgba(12,35,64,.08);border:1px solid rgba(0,0,0,.06);padding:1rem 1.25rem;margin-bottom:1rem;display:flex;flex-wrap:wrap;align-items:center;gap:.75rem">
@@ -1262,7 +1262,7 @@ button,input,select,textarea{}
     <div id="vstats-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;margin-bottom:1rem"></div>
 
     <!-- CHARTS -->
-    <div id="vstats-charts" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:1rem"></div>
+    <div id="vstats-charts" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(380px,100%),1fr));gap:1rem"></div>
   </div>
   <!-- SCHEDULE TAB -->
   <div id="vtab-schedule-content" style="display:none;padding:.75rem">
