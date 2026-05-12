@@ -523,7 +523,6 @@ button,input,select,textarea{}
     <button class="tab-btn" id="ptab-usage" data-i18n="ptab_usage" onclick="switchProjectTab('usage')">⏱ Usage</button>
     <button class="tab-btn" id="ptab-calendar" onclick="switchProjectTab('calendar')" data-i18n="tab_schedule">📅 Schedule</button>
     <button class="tab-btn" id="ptab-stats" data-i18n="ptab_stats" onclick="switchProjectTab('stats')">📊 Stats</button>
-    <button class="tab-btn" id="ptab-settings" onclick="switchProjectTab('settings')" style="margin-left:auto">⚙️ <span data-i18n="tab_settings">Settings</span></button>
   </div>
 
   <!-- OPS TAB -->
@@ -737,41 +736,123 @@ button,input,select,textarea{}
 
 
   <!-- SETTINGS TAB -->
-  <div id="ptab-settings-content" style="display:none;padding:1rem;max-width:900px;margin:0 auto;width:100%;box-sizing:border-box">
+  <div id="ptab-settings-content" style="display:none;width:100%;box-sizing:border-box;max-width:540px;margin:0 auto">
 
-    <!-- SECTION: Venue Bank -->
-    <div style="margin-bottom:1.5rem">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
-        <div>
-          <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif">🏟 <span data-i18n="settings_venue_bank">Venue Bank</span></div>
-          <div style="font-size:12px;color:var(--text-hint);margin-top:2px" data-i18n="settings_venue_bank_desc">All venues in this project — edit details, copy access links, manage access</div>
+    <!-- SETTINGS HOME — list of sections -->
+    <div id="settings-home" style="padding:12px 16px;display:flex;flex-direction:column;gap:6px">
+
+      <div style="font-size:11px;font-weight:600;color:var(--text-hint);text-transform:uppercase;letter-spacing:.6px;padding:6px 4px 2px" data-i18n="settings_section_project">Project management</div>
+
+      <!-- Venue Bank row -->
+      <div onclick="openSettingsSection('venues')" style="background:white;border:0.5px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background .12s" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+        <div style="width:38px;height:38px;border-radius:10px;background:#E6F1FB;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🏟</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:14px;font-weight:600;color:var(--navy)" data-i18n="settings_venue_bank">Venue Bank</div>
+          <div style="font-size:12px;color:var(--text-hint);margin-top:1px" data-i18n="settings_venue_bank_desc">Manage venues, links and access</div>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="openAddVenueModal()" style="flex-shrink:0" data-i18n="btn_add_venue">+ Add venue</button>
+        <div id="settings-venue-count" style="background:#E6F1FB;color:#185FA5;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;flex-shrink:0"></div>
+        <span style="color:var(--text-hint);font-size:18px">›</span>
       </div>
-      <div id="settings-venue-list" style="display:flex;flex-direction:column;gap:10px"></div>
-      <div id="settings-venue-load-more" style="display:none;text-align:center;margin-top:12px">
-        <button onclick="loadMoreSettingsVenues()" style="padding:8px 28px;background:white;border:1px solid var(--border);border-radius:8px;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer" data-i18n="btn_load_more">Load more</button>
+
+      <!-- Task types row -->
+      <div onclick="openSettingsSection('types')" style="background:white;border:0.5px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background .12s" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+        <div style="width:38px;height:38px;border-radius:10px;background:#EAF3DE;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📋</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:14px;font-weight:600;color:var(--navy)" data-i18n="settings_tasks_bank">Task types</div>
+          <div style="font-size:12px;color:var(--text-hint);margin-top:1px" data-i18n="settings_tasks_bank_desc">Edit available task categories</div>
+        </div>
+        <div id="settings-types-count" style="background:#EAF3DE;color:#3B6D11;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;flex-shrink:0"></div>
+        <span style="color:var(--text-hint);font-size:18px">›</span>
       </div>
-      <div id="settings-venue-empty" style="display:none;text-align:center;padding:2rem;color:var(--text-hint);font-size:13px" data-i18n="no_venues_add">No venues yet. Add the first one.</div>
+
+      <!-- Viewer link row -->
+      <div onclick="openSettingsSection('link')" style="background:white;border:0.5px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background .12s" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+        <div style="width:38px;height:38px;border-radius:10px;background:#FAEEDA;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🔗</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:14px;font-weight:600;color:var(--navy)" data-i18n="settings_viewer_link">Viewer link</div>
+          <div style="font-size:12px;color:var(--text-hint);margin-top:1px" data-i18n="settings_viewer_link_desc">Share read-only project access</div>
+        </div>
+        <span style="color:var(--text-hint);font-size:18px">›</span>
+      </div>
+
+      <div style="height:1px;background:var(--border);margin:6px 0"></div>
+      <div style="font-size:11px;font-weight:600;color:var(--text-hint);text-transform:uppercase;letter-spacing:.6px;padding:2px 4px" data-i18n="settings_section_future">Coming soon</div>
+
+      <!-- Future: Reports -->
+      <div style="background:white;border:0.5px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;opacity:.45">
+        <div style="width:38px;height:38px;border-radius:10px;background:#F1EFE8;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📊</div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:600;color:var(--navy)" data-i18n="settings_reports">Reports & exports</div>
+          <div style="font-size:12px;color:var(--text-hint);margin-top:1px" data-i18n="settings_reports_desc">Scheduled reports, custom exports</div>
+        </div>
+        <span style="color:var(--text-hint);font-size:18px">›</span>
+      </div>
+
+      <!-- Future: Staff -->
+      <div style="background:white;border:0.5px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;opacity:.45">
+        <div style="width:38px;height:38px;border-radius:10px;background:#EEEDFE;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">👥</div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:600;color:var(--navy)" data-i18n="settings_staff">Staff & roles</div>
+          <div style="font-size:12px;color:var(--text-hint);margin-top:1px" data-i18n="settings_staff_desc">Manage team members and permissions</div>
+        </div>
+        <span style="color:var(--text-hint);font-size:18px">›</span>
+      </div>
+
     </div>
 
-    <div style="height:1px;background:var(--border);margin-bottom:1.5rem"></div>
+    <!-- SECTION: Venue Bank -->
+    <div id="settings-sec-venues" style="display:none;flex-direction:column">
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 16px 8px;border-bottom:0.5px solid var(--border);background:white;position:sticky;top:0;z-index:10">
+        <button onclick="closeSettingsSection()" style="background:none;border:none;cursor:pointer;color:var(--blue);font-size:13px;font-weight:600;padding:4px 0;display:flex;align-items:center;gap:4px">‹ <span data-i18n="tab_settings">Settings</span></button>
+        <div style="flex:1;text-align:center;font-size:15px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif" data-i18n="settings_venue_bank">Venue Bank</div>
+        <button onclick="openAddVenueModal()" style="background:none;border:none;cursor:pointer;color:var(--blue);font-size:13px;font-weight:600;padding:4px 0" data-i18n="btn_add">+ Add</button>
+      </div>
+      <div style="padding:12px 16px;display:flex;flex-direction:column;gap:10px">
+        <div id="settings-venue-list" style="display:flex;flex-direction:column;gap:10px"></div>
+        <div id="settings-venue-load-more" style="display:none;text-align:center">
+          <button onclick="loadMoreSettingsVenues()" style="padding:8px 28px;background:white;border:0.5px solid var(--border);border-radius:8px;font-size:13px;color:var(--text-muted);cursor:pointer" data-i18n="btn_load_more">Load more</button>
+        </div>
+        <div id="settings-venue-empty" style="display:none;text-align:center;padding:2rem;color:var(--text-hint);font-size:13px">
+          <div style="font-size:32px;margin-bottom:8px">🏟</div>
+          <div data-i18n="no_venues_add">No venues yet.</div>
+          <button onclick="openAddVenueModal()" class="btn btn-primary btn-sm" style="margin-top:12px" data-i18n="btn_add_venue">+ Add venue</button>
+        </div>
+      </div>
+    </div>
 
-    <!-- SECTION: Tasks Bank -->
-    <div>
-      <div style="margin-bottom:.75rem">
-        <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif">📋 <span data-i18n="settings_tasks_bank">Tasks Bank</span></div>
-        <div style="font-size:12px;color:var(--text-hint);margin-top:2px" data-i18n="settings_tasks_bank_desc">Manage task types available across all venues in this project</div>
+    <!-- SECTION: Task types -->
+    <div id="settings-sec-types" style="display:none;flex-direction:column">
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 16px 8px;border-bottom:0.5px solid var(--border);background:white;position:sticky;top:0;z-index:10">
+        <button onclick="closeSettingsSection()" style="background:none;border:none;cursor:pointer;color:var(--blue);font-size:13px;font-weight:600;padding:4px 0;display:flex;align-items:center;gap:4px">‹ <span data-i18n="tab_settings">Settings</span></button>
+        <div style="flex:1;text-align:center;font-size:15px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif" data-i18n="settings_tasks_bank">Task types</div>
+        <div style="width:60px"></div>
       </div>
-      <!-- Add new type -->
-      <div style="display:flex;gap:8px;margin-bottom:1rem">
-        <input id="settings-new-type-input" type="text" placeholder="New task type..." data-i18n-placeholder="placeholder_new_type"
-          style="flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"
-          onkeydown="if(event.key==='Enter')addOpType()"/>
-        <button class="btn btn-primary btn-sm" onclick="addOpType()" style="padding:9px 20px" data-i18n="btn_add">Add</button>
+      <div style="padding:12px 16px;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;gap:8px">
+          <input id="settings-new-type-input" type="text" placeholder="New task type..."
+            style="flex:1;padding:9px 12px;border:0.5px solid var(--border);border-radius:8px;font-size:13px;outline:none"
+            onkeydown="if(event.key==='Enter')addOpType()"/>
+          <button class="btn btn-primary btn-sm" onclick="addOpType()" data-i18n="btn_add">Add</button>
+        </div>
+        <div id="settings-op-types-list" style="display:flex;flex-direction:column;gap:6px"></div>
       </div>
-      <!-- Types list -->
-      <div id="settings-op-types-list" style="display:flex;flex-direction:column;gap:6px"></div>
+    </div>
+
+    <!-- SECTION: Viewer link -->
+    <div id="settings-sec-link" style="display:none;flex-direction:column">
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 16px 8px;border-bottom:0.5px solid var(--border);background:white;position:sticky;top:0;z-index:10">
+        <button onclick="closeSettingsSection()" style="background:none;border:none;cursor:pointer;color:var(--blue);font-size:13px;font-weight:600;padding:4px 0;display:flex;align-items:center;gap:4px">‹ <span data-i18n="tab_settings">Settings</span></button>
+        <div style="flex:1;text-align:center;font-size:15px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif" data-i18n="settings_viewer_link">Viewer link</div>
+        <div style="width:60px"></div>
+      </div>
+      <div style="padding:20px 16px;display:flex;flex-direction:column;gap:12px">
+        <div style="font-size:13px;color:var(--text-muted);line-height:1.5" data-i18n="txt_viewer_desc">Share this link to give read-only access to this project.</div>
+        <div style="background:var(--surface);border:0.5px solid var(--border);border-radius:8px;padding:12px;font-size:12px;color:var(--text-muted);word-break:break-all;font-family:monospace" id="settings-viewer-link-text">—</div>
+        <div style="display:flex;gap:8px">
+          <button onclick="copyViewerLink()" class="btn btn-primary" style="flex:1" data-i18n="btn_copy_link">🔗 Copy link</button>
+          <button onclick="revokeViewerLink()" class="btn btn-ghost" style="flex:1;color:var(--red);border-color:rgba(163,45,45,.3)" data-i18n="btn_regenerate_link">↺ Regenerate</button>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -2084,9 +2165,17 @@ const i18n = {
     badge_this_week:'this week',
     tab_settings:'Settings',
     settings_venue_bank:'Venue Bank',
-    settings_venue_bank_desc:'All venues in this project — edit details, copy access links, manage access',
-    settings_tasks_bank:'Tasks Bank',
-    settings_tasks_bank_desc:'Manage task types available across all venues in this project',
+    settings_venue_bank_desc:'Manage venues, links and access',
+    settings_tasks_bank:'Task types',
+    settings_tasks_bank_desc:'Edit available task categories',
+    settings_viewer_link:'Viewer link',
+    settings_viewer_link_desc:'Share read-only project access',
+    settings_section_project:'Project management',
+    settings_section_future:'Coming soon',
+    settings_reports:'Reports & exports',
+    settings_reports_desc:'Scheduled reports, custom exports',
+    settings_staff:'Staff & roles',
+    settings_staff_desc:'Manage team members and permissions',
     btn_add_venue:'Add venue',
     btn_copy_link:'Copy link',
     btn_load_more:'Load more',
@@ -2595,9 +2684,17 @@ const i18n = {
     badge_this_week:'w tym tygodniu',
     tab_settings:'Ustawienia',
     settings_venue_bank:'Bank Obiektów',
-    settings_venue_bank_desc:'Wszystkie obiekty w projekcie — edycja, linki dostępu, zarządzanie',
-    settings_tasks_bank:'Bank Zadań',
-    settings_tasks_bank_desc:'Zarządzaj typami zadań dostępnymi we wszystkich obiektach projektu',
+    settings_venue_bank_desc:'Zarządzaj obiektami, linkami i dostępem',
+    settings_tasks_bank:'Typy zadań',
+    settings_tasks_bank_desc:'Edytuj dostępne kategorie zadań',
+    settings_viewer_link:'Link widza',
+    settings_viewer_link_desc:'Udostępnij dostęp tylko do odczytu',
+    settings_section_project:'Zarządzanie projektem',
+    settings_section_future:'Wkrótce',
+    settings_reports:'Raporty i eksport',
+    settings_reports_desc:'Raporty cykliczne, eksport niestandardowy',
+    settings_staff:'Personel i role',
+    settings_staff_desc:'Zarządzaj członkami zespołu i uprawnieniami',
     btn_add_venue:'Dodaj obiekt',
     btn_copy_link:'Kopiuj link',
     btn_load_more:'Załaduj więcej',
@@ -5642,12 +5739,46 @@ let _settingsVenuesShown = SETTINGS_VENUES_PAGE;
 function renderSettingsTab(){
   const pid = state.currentProjectId;
   if(!pid) return;
-  _settingsVenuesShown = SETTINGS_VENUES_PAGE;
-  _renderSettingsVenues(pid);
-  _renderSettingsOpTypes();
-  // Sync add-type input with existing modal input
-  const si = document.getElementById('settings-new-type-input');
-  if(si) si.value = '';
+  closeSettingsSection();
+  const venues = projectVenues(pid);
+  const vc = document.getElementById('settings-venue-count');
+  const tc = document.getElementById('settings-types-count');
+  if(vc) vc.textContent = venues.length;
+  if(tc) tc.textContent = state.opTypes.length;
+  const proj = state.projects.find(p=>p.id===pid);
+  const linkEl = document.getElementById('settings-viewer-link-text');
+  if(linkEl) linkEl.textContent = proj?.viewerToken ? window.location.href.split('?')[0]+'?view='+proj.viewerToken : '—';
+}
+
+function openSettingsSection(section){
+  document.getElementById('settings-home').style.display = 'none';
+  ['venues','types','link'].forEach(s=>{
+    const el = document.getElementById('settings-sec-'+s);
+    if(el) el.style.display = s===section ? 'flex' : 'none';
+  });
+  if(section==='venues'){ _settingsVenuesShown = SETTINGS_VENUES_PAGE; _renderSettingsVenues(state.currentProjectId); }
+  if(section==='types'){ _renderSettingsOpTypes(); const si=document.getElementById('settings-new-type-input'); if(si) si.value=''; }
+  if(section==='link'){
+    const proj = state.projects.find(p=>p.id===state.currentProjectId);
+    const linkEl = document.getElementById('settings-viewer-link-text');
+    if(linkEl) linkEl.textContent = proj?.viewerToken ? window.location.href.split('?')[0]+'?view='+proj.viewerToken : '—';
+  }
+}
+
+function closeSettingsSection(){
+  const home = document.getElementById('settings-home');
+  if(home) home.style.display = 'flex';
+  ['venues','types','link'].forEach(s=>{
+    const el = document.getElementById('settings-sec-'+s);
+    if(el) el.style.display = 'none';
+  });
+  const pid = state.currentProjectId;
+  if(pid){
+    const vc = document.getElementById('settings-venue-count');
+    const tc = document.getElementById('settings-types-count');
+    if(vc) vc.textContent = projectVenues(pid).length;
+    if(tc) tc.textContent = state.opTypes.length;
+  }
 }
 
 function _renderSettingsVenues(pid){
@@ -5656,47 +5787,36 @@ function _renderSettingsVenues(pid){
   const empty = document.getElementById('settings-venue-empty');
   const more = document.getElementById('settings-venue-load-more');
   if(!list) return;
-
   if(!venues.length){
-    list.innerHTML = '';
-    if(empty) empty.style.display = 'block';
-    if(more) more.style.display = 'none';
-    return;
+    list.innerHTML=''; if(empty) empty.style.display='block'; if(more) more.style.display='none'; return;
   }
-  if(empty) empty.style.display = 'none';
-
+  if(empty) empty.style.display='none';
   const shown = venues.slice(0, _settingsVenuesShown);
-  list.innerHTML = shown.map(v => {
-    const taskCount = state.operations.filter(o=>o.venueId===v.id).length;
-    const usageCount = state_admin_usage.filter(u=>u.venueId===v.id).length;
-    const link = window.location.href.split('?')[0]+'?token='+v.token;
-    return `<div style="background:white;border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-      <div style="flex-shrink:0">${venueTypeDot(v.venueType, v.color)}</div>
-      <div style="flex:1;min-width:160px">
-        <div style="font-size:15px;font-weight:600;color:var(--navy)">${esc(v.name)}</div>
-        <div style="font-size:12px;color:var(--text-hint);margin-top:2px">
-          ${v.city ? esc(v.city)+' · ' : ''}${taskCount} task${taskCount!==1?'s':''} · ${usageCount} usage${usageCount!==1?'s':''}
+  list.innerHTML = shown.map(v=>{
+    const taskCount=state.operations.filter(o=>o.venueId===v.id).length;
+    const usageCount=state_admin_usage.filter(u=>u.venueId===v.id).length;
+    const link=window.location.href.split('?')[0]+'?token='+v.token;
+    return `<div style="background:white;border:0.5px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;align-items:flex-start;gap:12px">
+      <div style="flex-shrink:0;padding-top:2px">${venueTypeDot(v.venueType,v.color)}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;font-weight:600;color:var(--navy)">${esc(v.name)}</div>
+        <div style="font-size:12px;color:var(--text-hint);margin-top:2px">${v.city?esc(v.city)+' · ':''}${taskCount} task${taskCount!==1?'s':''} · ${usageCount} usage${usageCount!==1?'s':''}</div>
+        ${v.responsiblePerson?`<div style="font-size:12px;color:var(--text-muted);margin-top:3px">👤 ${esc(v.responsiblePerson)}${v.contactPhone?' · 📞 '+esc(v.contactPhone):''}</div>`:''}
+        <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+          <button onclick="navigator.clipboard.writeText('${esc(link)}').then(()=>showToast(t('toast_link_copied')))"
+            style="padding:6px 12px;border:0.5px solid var(--border);border-radius:8px;background:white;font-size:12px;cursor:pointer;color:var(--text-muted);display:flex;align-items:center;gap:4px">
+            🔗 <span data-i18n="btn_copy_link">Copy link</span>
+          </button>
+          <button onclick="openEditVenueModal(event,'${v.id}')"
+            style="padding:6px 12px;border:0.5px solid var(--border);border-radius:8px;background:white;font-size:12px;cursor:pointer;color:var(--text-muted);display:flex;align-items:center;gap:4px">
+            ✏️ <span data-i18n="btn_edit">Edit</span>
+          </button>
+          <button onclick="removeVenueFromProject(event,'${v.id}')"
+            style="padding:6px 12px;border:0.5px solid rgba(163,45,45,.2);border-radius:8px;background:white;font-size:12px;cursor:pointer;color:var(--red)">✕</button>
         </div>
-        ${v.responsiblePerson ? `<div style="font-size:11px;color:var(--text-muted);margin-top:2px">👤 ${esc(v.responsiblePerson)}${v.contactPhone?' · 📞 '+esc(v.contactPhone):''}</div>` : ''}
-      </div>
-      <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap">
-        <button onclick="navigator.clipboard.writeText('${esc(link)}').then(()=>showToast(t('toast_link_copied')))"
-          style="padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:white;font-size:12px;font-weight:500;cursor:pointer;color:var(--text-muted);display:flex;align-items:center;gap:4px"
-          title="Copy access link">
-          🔗 <span data-i18n="btn_copy_link">Copy link</span>
-        </button>
-        <button onclick="openEditVenueModal(event,'${v.id}')"
-          style="padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:white;font-size:12px;font-weight:500;cursor:pointer;color:var(--text-muted);display:flex;align-items:center;gap:4px">
-          ✏️ <span data-i18n="btn_edit">Edit</span>
-        </button>
-        <button onclick="removeVenueFromProject(event,'${v.id}')"
-          style="padding:6px 12px;border:1px solid rgba(163,45,45,.15);border-radius:8px;background:white;font-size:12px;font-weight:500;cursor:pointer;color:var(--red);display:flex;align-items:center;gap:4px">
-          ✕ <span data-i18n="btn_remove">Remove</span>
-        </button>
       </div>
     </div>`;
   }).join('');
-
   if(more) more.style.display = venues.length > _settingsVenuesShown ? 'block' : 'none';
 }
 
@@ -5709,20 +5829,19 @@ function _renderSettingsOpTypes(){
   const el = document.getElementById('settings-op-types-list');
   if(!el) return;
   if(!state.opTypes.length){
-    el.innerHTML = `<div style="text-align:center;padding:1.5rem;color:var(--text-hint);font-size:13px">No task types yet</div>`;
+    el.innerHTML=`<div style="text-align:center;padding:1.5rem;color:var(--text-hint);font-size:13px">No task types yet</div>`;
     return;
   }
-  el.innerHTML = state.opTypes.map((tp, i) => `
-    <div style="display:flex;align-items:center;gap:8px;background:white;border:1px solid var(--border);border-radius:8px;padding:8px 12px">
-      <div style="width:8px;height:8px;border-radius:50%;background:${opBadge(tp).bg};flex-shrink:0"></div>
+  el.innerHTML = state.opTypes.map((tp,i)=>`
+    <div style="display:flex;align-items:center;gap:10px;background:white;border:0.5px solid var(--border);border-radius:10px;padding:10px 14px">
+      <div style="width:9px;height:9px;border-radius:50%;background:${opBadge(tp).bg};flex-shrink:0"></div>
       <input value="${esc(tp)}" data-orig="${esc(tp)}"
-        style="flex:1;font-size:13px;padding:4px 6px;border:1px solid transparent;border-radius:6px;background:transparent;outline:none;color:var(--text)"
+        style="flex:1;font-size:13px;padding:3px 6px;border:1px solid transparent;border-radius:6px;background:transparent;outline:none;color:var(--text)"
         onfocus="this.style.border='1px solid var(--blue)';this.style.background='white'"
         onblur="renameOpType(${i},this)"
         onkeydown="if(event.key==='Enter')this.blur()"/>
       <button onclick="removeOpType(${i})"
-        style="padding:4px 10px;border:none;border-radius:6px;background:#fee2e2;color:#dc2626;font-size:12px;cursor:pointer;flex-shrink:0"
-        data-i18n="btn_remove">Remove</button>
+        style="width:28px;height:28px;border:none;border-radius:6px;background:#fee2e2;color:#dc2626;font-size:14px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center">✕</button>
     </div>`).join('');
 }
 
