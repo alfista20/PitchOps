@@ -13,6 +13,7 @@
   <meta name="apple-mobile-web-app-title" content="PitchOps">
   <link rel="manifest" href="manifest.json">
 <title>PitchOps</title>
+<noscript><style>body{display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;background:#0C2340;color:white;text-align:center;padding:2rem}</style><div><h2 style="font-size:24px;margin-bottom:1rem">⚠️ JavaScript required</h2><p>PitchOps requires JavaScript to run. Please enable JavaScript in your browser settings.</p></div></noscript>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Syne:wght@500;700&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -476,10 +477,10 @@ button,input,select,textarea{}
         <span>🔗</span> Share
       </button>
       <button onclick="openAddVenueModal();toggleAdminMenu()" style="display:flex;align-items:center;gap:10px;width:100%;padding:.75rem 1rem;background:none;border:none;font-size:14px;color:var(--text);cursor:pointer" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='none'">
-        <span>➕</span> Add venue
+        <span>➕</span> <span data-i18n="btn_add_venue">Add venue</span>
       </button>
-      <button onclick="openManageTypesModal();toggleAdminMenu()" style="display:flex;align-items:center;gap:10px;width:100%;padding:.75rem 1rem;background:none;border:none;font-size:14px;color:var(--text);cursor:pointer" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='none'">
-        <span>⚙️</span> <span data-i18n="tasks_bank">Tasks bank</span>
+      <button onclick="switchProjectTab('settings');toggleAdminMenu()" style="display:flex;align-items:center;gap:10px;width:100%;padding:.75rem 1rem;background:none;border:none;font-size:14px;color:var(--text);cursor:pointer" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='none'">
+        <span>⚙️</span> <span data-i18n="tab_settings">Settings</span>
       </button>
       <div style="height:1px;background:var(--border)"></div>
       <button onclick="logout()" style="display:flex;align-items:center;gap:10px;width:100%;padding:.75rem 1rem;background:none;border:none;font-size:14px;color:#dc2626;cursor:pointer" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'">
@@ -522,18 +523,11 @@ button,input,select,textarea{}
     <button class="tab-btn" id="ptab-usage" data-i18n="ptab_usage" onclick="switchProjectTab('usage')">⏱ Usage</button>
     <button class="tab-btn" id="ptab-calendar" onclick="switchProjectTab('calendar')" data-i18n="tab_schedule">📅 Schedule</button>
     <button class="tab-btn" id="ptab-stats" data-i18n="ptab_stats" onclick="switchProjectTab('stats')">📊 Stats</button>
+    <button class="tab-btn" id="ptab-settings" onclick="switchProjectTab('settings')" style="margin-left:auto">⚙️ <span data-i18n="tab_settings">Settings</span></button>
   </div>
 
   <!-- OPS TAB -->
-  <div id="ptab-ops-content" class="project-body">
-    <!-- venues sidebar -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">Venues</span>
-        <button class="btn btn-ghost btn-sm" onclick="openManageTypesModal()" data-i18n="btn_task_types">⚙ Task types</button>
-      </div>
-      <div id="detail-venue-list"></div>
-    </div>
+  <div id="ptab-ops-content" class="project-body" style="grid-template-columns:1fr">
     <!-- ops panel -->
     <div class="card">
       <div class="filter-bar">
@@ -560,14 +554,7 @@ button,input,select,textarea{}
 
 
   <!-- USAGE TAB -->
-  <div id="ptab-usage-content" style="display:none" class="project-body">
-    <!-- venues sidebar -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">Venues</span>
-      </div>
-      <div id="detail-usage-venue-list"></div>
-    </div>
+  <div id="ptab-usage-content" style="display:none" class="project-body" style="grid-template-columns:1fr">
     <!-- usage panel -->
     <div class="card">
       <div class="filter-bar">
@@ -582,7 +569,6 @@ button,input,select,textarea{}
         <input type="date" id="filter-usage-to" onchange="renderDetailUsage(true)"/>
         <button class="btn btn-ghost btn-sm" onclick="clearUsageFilters()">Clear</button>
         <button class="btn btn-blue btn-sm" onclick="exportUsageCSV()">CSV</button>
-        
       </div>
       <div style="overflow-x:auto">
         <table class="ops-table">
@@ -749,6 +735,46 @@ button,input,select,textarea{}
     </div>
   </div>
 
+
+  <!-- SETTINGS TAB -->
+  <div id="ptab-settings-content" style="display:none;padding:1rem;max-width:900px;margin:0 auto;width:100%;box-sizing:border-box">
+
+    <!-- SECTION: Venue Bank -->
+    <div style="margin-bottom:1.5rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+        <div>
+          <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif">🏟 <span data-i18n="settings_venue_bank">Venue Bank</span></div>
+          <div style="font-size:12px;color:var(--text-hint);margin-top:2px" data-i18n="settings_venue_bank_desc">All venues in this project — edit details, copy access links, manage access</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openAddVenueModal()" style="flex-shrink:0" data-i18n="btn_add_venue">+ Add venue</button>
+      </div>
+      <div id="settings-venue-list" style="display:flex;flex-direction:column;gap:10px"></div>
+      <div id="settings-venue-load-more" style="display:none;text-align:center;margin-top:12px">
+        <button onclick="loadMoreSettingsVenues()" style="padding:8px 28px;background:white;border:1px solid var(--border);border-radius:8px;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer" data-i18n="btn_load_more">Load more</button>
+      </div>
+      <div id="settings-venue-empty" style="display:none;text-align:center;padding:2rem;color:var(--text-hint);font-size:13px" data-i18n="no_venues_add">No venues yet. Add the first one.</div>
+    </div>
+
+    <div style="height:1px;background:var(--border);margin-bottom:1.5rem"></div>
+
+    <!-- SECTION: Tasks Bank -->
+    <div>
+      <div style="margin-bottom:.75rem">
+        <div style="font-size:18px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif">📋 <span data-i18n="settings_tasks_bank">Tasks Bank</span></div>
+        <div style="font-size:12px;color:var(--text-hint);margin-top:2px" data-i18n="settings_tasks_bank_desc">Manage task types available across all venues in this project</div>
+      </div>
+      <!-- Add new type -->
+      <div style="display:flex;gap:8px;margin-bottom:1rem">
+        <input id="settings-new-type-input" type="text" placeholder="New task type..." data-i18n-placeholder="placeholder_new_type"
+          style="flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"
+          onkeydown="if(event.key==='Enter')addOpType()"/>
+        <button class="btn btn-primary btn-sm" onclick="addOpType()" style="padding:9px 20px" data-i18n="btn_add">Add</button>
+      </div>
+      <!-- Types list -->
+      <div id="settings-op-types-list" style="display:flex;flex-direction:column;gap:6px"></div>
+    </div>
+
+  </div>
 
   <!-- CALENDAR TAB -->
   <div id="ptab-calendar-content" style="display:none;padding:.75rem 1rem;width:100%;box-sizing:border-box;align-self:stretch">
@@ -1590,50 +1616,6 @@ button,input,select,textarea{}
 
 
 <!-- EDIT PLAN MODAL -->
-<div class="modal-overlay" id="modal-edit-plan">
-  <div class="modal">
-    <div class="modal-header"><span class="modal-title" data-i18n="modal_edit_plan">Edit plan entry</span><button class="modal-close" onclick="closeModal('modal-edit-plan')">✕</button></div>
-    <div class="modal-body">
-      <input type="hidden" id="edit-plan-id"/>
-      <div class="field"><label data-i18n="lbl_type">Task type</label><select id="edit-plan-op-type"></select></div>
-      <div class="field">
-        <label data-i18n="lbl_date_range">Date range</label>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <div><label style="font-size:10px;color:var(--text-hint)" data-i18n="lbl_from_date">From date</label><input id="edit-plan-from" type="date"/></div>
-          <div><label style="font-size:10px;color:var(--text-hint)" data-i18n="lbl_to_date">To date</label><input id="edit-plan-to" type="date"/></div>
-        </div>
-      </div>
-      <div class="field">
-        <label data-i18n="lbl_time_of_day">Time of day</label>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <div><label style="font-size:10px;color:var(--text-hint)" data-i18n="lbl_start_time">Start time</label><input id="edit-plan-time-from" type="time"/></div>
-          <div><label style="font-size:10px;color:var(--text-hint)" data-i18n="lbl_end_time">End time</label><input id="edit-plan-time-to" type="time"/></div>
-        </div>
-      </div>
-      <div class="field"><label data-i18n="lbl_notes_short">Notes</label><input id="edit-plan-notes" type="text"/></div>
-      <div class="field"><label data-i18n="lbl_priority">Priority</label>
-        <select id="edit-plan-priority">
-          <option value="normal">Normal</option>
-          <option value="high">High</option>
-          <option value="critical">Critical</option>
-        </select>
-      </div>
-      <div class="field"><label data-i18n="lbl_status">Status</label>
-        <select id="edit-plan-status">
-          <option value="planned">Planned</option>
-          <option value="inprogress">In progress</option>
-          <option value="completed">Completed</option>
-        </select>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-danger" onclick="deletePlan()" data-i18n="btn_delete">Delete</button>
-      <button class="btn btn-ghost" onclick="closeModal('modal-edit-plan')" data-i18n="btn_cancel">Cancel</button>
-      <button class="btn btn-primary" onclick="saveEditPlan()" data-i18n="btn_save_changes">Save changes</button>
-    </div>
-  </div>
-</div>
-
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
   <button class="lightbox-close" aria-label="Close" onclick="closeLightboxBtn()">✕</button>
@@ -1648,7 +1630,7 @@ button,input,select,textarea{}
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.js"></script>
 <script>
 // ════════════════════════════════════════
 // SUPABASE CONFIG
@@ -2100,6 +2082,16 @@ const i18n = {
     menu_contact_info:'My contact info',
     badge_today:'today',
     badge_this_week:'this week',
+    tab_settings:'Settings',
+    settings_venue_bank:'Venue Bank',
+    settings_venue_bank_desc:'All venues in this project — edit details, copy access links, manage access',
+    settings_tasks_bank:'Tasks Bank',
+    settings_tasks_bank_desc:'Manage task types available across all venues in this project',
+    btn_add_venue:'Add venue',
+    btn_copy_link:'Copy link',
+    btn_load_more:'Load more',
+    toast_file_too_large:'File too large (max 30MB)',
+    toast_photos_limit:'Only {n} more photo(s) added',
   },
   pl:{
     stat_total:'Ten miesiąc',stat_last:'Ostatnia op.',stat_common:'Dominuje',
@@ -2601,6 +2593,16 @@ const i18n = {
     menu_contact_info:'Moje dane kontaktowe',
     badge_today:'dziś',
     badge_this_week:'w tym tygodniu',
+    tab_settings:'Ustawienia',
+    settings_venue_bank:'Bank Obiektów',
+    settings_venue_bank_desc:'Wszystkie obiekty w projekcie — edycja, linki dostępu, zarządzanie',
+    settings_tasks_bank:'Bank Zadań',
+    settings_tasks_bank_desc:'Zarządzaj typami zadań dostępnymi we wszystkich obiektach projektu',
+    btn_add_venue:'Dodaj obiekt',
+    btn_copy_link:'Kopiuj link',
+    btn_load_more:'Załaduj więcej',
+    toast_file_too_large:'Plik za duży (maks. 30 MB)',
+    toast_photos_limit:'Dodano tylko {n} zdjęć',
   },
   es:{
     stat_total:'Este mes',stat_last:'Última op.',stat_common:'Más común',
@@ -2821,6 +2823,16 @@ const i18n = {
     menu_contact_info:'Mi información de contacto',
     badge_today:'hoy',
     badge_this_week:'esta semana',
+    tab_settings:'Configuración',
+    settings_venue_bank:'Banco de Estadios',
+    settings_venue_bank_desc:'Todos los estadios del proyecto — editar, copiar enlaces de acceso',
+    settings_tasks_bank:'Banco de Tareas',
+    settings_tasks_bank_desc:'Gestiona los tipos de tareas disponibles en todos los estadios',
+    btn_add_venue:'Añadir estadio',
+    btn_copy_link:'Copiar enlace',
+    btn_load_more:'Cargar más',
+    toast_file_too_large:'Archivo demasiado grande (máx. 30 MB)',
+    toast_photos_limit:'Solo se añadieron {n} fotos',
   },
   fr:{
     stat_total:'Ce mois',stat_last:'Dernière op.',stat_common:'Plus fréquent',
@@ -3041,6 +3053,16 @@ const i18n = {
     menu_contact_info:'Mes coordonnées',
     badge_today:"aujourd'hui",
     badge_this_week:'cette semaine',
+    tab_settings:'Paramètres',
+    settings_venue_bank:'Banque de Stades',
+    settings_venue_bank_desc:'Tous les stades du projet — modifier, copier les liens d\'accès',
+    settings_tasks_bank:'Banque de Tâches',
+    settings_tasks_bank_desc:'Gérer les types de tâches disponibles dans tous les stades',
+    btn_add_venue:'Ajouter un stade',
+    btn_copy_link:'Copier le lien',
+    btn_load_more:'Charger plus',
+    toast_file_too_large:'Fichier trop volumineux (max 30 Mo)',
+    toast_photos_limit:'Seulement {n} photo(s) ajoutée(s)',
   },
   de:{
     stat_total:'Diesen Monat',stat_last:'Letzte Op.',stat_common:'Häufigste',
@@ -3261,6 +3283,16 @@ const i18n = {
     menu_contact_info:'Meine Kontaktdaten',
     badge_today:'heute',
     badge_this_week:'diese Woche',
+    tab_settings:'Einstellungen',
+    settings_venue_bank:'Stadion-Bank',
+    settings_venue_bank_desc:'Alle Stadien im Projekt — bearbeiten, Zugriffslinks kopieren',
+    settings_tasks_bank:'Aufgaben-Bank',
+    settings_tasks_bank_desc:'Aufgabentypen für alle Stadien verwalten',
+    btn_add_venue:'Stadion hinzufügen',
+    btn_copy_link:'Link kopieren',
+    btn_load_more:'Mehr laden',
+    toast_file_too_large:'Datei zu groß (max. 30 MB)',
+    toast_photos_limit:'Nur {n} Foto(s) hinzugefügt',
   },
   pt:{
     stat_total:'Este mês',stat_last:'Última op.',stat_common:'Mais comum',
@@ -3481,6 +3513,16 @@ const i18n = {
     menu_contact_info:'As minhas informações de contacto',
     badge_today:'hoje',
     badge_this_week:'esta semana',
+    tab_settings:'Definições',
+    settings_venue_bank:'Banco de Estádios',
+    settings_venue_bank_desc:'Todos os estádios do projeto — editar, copiar links de acesso',
+    settings_tasks_bank:'Banco de Tarefas',
+    settings_tasks_bank_desc:'Gerir os tipos de tarefas disponíveis em todos os estádios',
+    btn_add_venue:'Adicionar estádio',
+    btn_copy_link:'Copiar link',
+    btn_load_more:'Carregar mais',
+    toast_file_too_large:'Ficheiro demasiado grande (máx. 30 MB)',
+    toast_photos_limit:'Apenas {n} foto(s) adicionada(s)',
   }
 };
 function t(k){ return (i18n[state.lang]||i18n.en)[k]||k; }
@@ -3501,6 +3543,25 @@ function applyTranslations(l){
   // Static data-i18n elements
   document.querySelectorAll('[data-i18n]').forEach(el=>{ const v=T[el.dataset.i18n]; if(v) el.textContent=v; });
   document.querySelectorAll('.lang-select,#lang-select-login').forEach(s=>s.value=l);
+
+  // ── Update "All ..." first options in filter dropdowns ──
+  const allVenuesLabel = T.all_venues||'All venues';
+  const allTypesLabel  = T.all_types||'All types';
+  const allStatusLabel = T.all_status||'All status';
+  [
+    ['filter-venue', allVenuesLabel],
+    ['filter-usage-venue', allVenuesLabel],
+    ['filter-usage-type', allTypesLabel],
+    ['vw-filter-venue', allVenuesLabel],
+    ['vw-filter-type', allTypesLabel],
+    ['stats-venue-filter', allVenuesLabel],
+  ].forEach(([id, label]) => {
+    const sel = document.getElementById(id);
+    if(sel?.options[0] && sel.options[0].value === '') sel.options[0].textContent = label;
+  });
+  // Status filter (venue history)
+  const statusSel = document.getElementById('venue-hist-status');
+  if(statusSel?.options[0] && statusSel.options[0].value === '') statusSel.options[0].textContent = allStatusLabel;
 
   // ── Zone select options (Log Task modal) ──
   const zoneOpts=[
@@ -3624,15 +3685,16 @@ function logout(){
 function backToProjects(){ state.currentProjectId=null; showScreen('screen-projects'); renderProjects(); }
 
 // ── VIEWER LINK ──
-function openViewerLinkModal(){
+async function openViewerLinkModal(){
   const pid=state.currentProjectId; if(!pid) return;
   const proj=state.projects.find(p=>p.id===pid); if(!proj) return;
   if(!proj.viewerToken) proj.viewerToken=genToken();
   const link=window.location.href.split('?')[0]+'?view='+proj.viewerToken;
   document.getElementById('viewer-link-text').textContent=link;
   openModal('modal-viewer-link');
-  // persist token if new
-  supa.from('pitchops_projects').update({viewer_token:proj.viewerToken}).eq('id',pid);
+  // persist token — await so link is saved before user copies it
+  const {error} = await supa.from('pitchops_projects').update({viewer_token:proj.viewerToken}).eq('id',pid);
+  if(error) showToast('⚠️ Could not save viewer link: '+esc(error.message));
 }
 
 function copyViewerLink(){
@@ -3929,6 +3991,8 @@ async function adminLogin(){
 }
 
 async function changePassword(){
+  if(!_guardStart('changePassword')) return;
+  try {
   const cur=document.getElementById('cp-current').value;
   const nw=document.getElementById('cp-new').value;
   const cf=document.getElementById('cp-confirm').value;
@@ -3946,6 +4010,8 @@ async function changePassword(){
   document.getElementById('cp-new').value='';
   document.getElementById('cp-confirm').value='';
   showToast(t('toast_pass_updated'));
+  } catch(err){ showToast('Error: '+esc(err.message)); }
+  finally { _guardEnd('changePassword'); }
 }
 
 async function venueTokenLogin(){
@@ -4145,15 +4211,16 @@ function renderProjectDetail(pid){
 
   updateDetailStats(pid);
 
-  // venue list
+  // venue list (rendered in Settings tab; kept here for filter dropdowns)
   const venues = projectVenues(pid);
   const vlist = document.getElementById('detail-venue-list');
-  if(!venues.length){ vlist.innerHTML=`<div class="empty-state"><div class="ico">🏟</div><div>${t('no_venues_add')}</div></div>`; }
-  else {
-    vlist.innerHTML=venues.map(v=>{
-      const vc=state.operations.filter(o=>o.venueId===v.id).length;
-      const cityShort=(v.city||'').split(',')[0].trim();
-      return `<div class="venue-item" onclick="focusDetailVenue('${v.id}')">
+  if(vlist){
+    if(!venues.length){ vlist.innerHTML=`<div class="empty-state"><div class="ico">🏟</div><div>${t('no_venues_add')}</div></div>`; }
+    else {
+      vlist.innerHTML=venues.map(v=>{
+        const vc=state.operations.filter(o=>o.venueId===v.id).length;
+        const cityShort=(v.city||'').split(',')[0].trim();
+        return `<div class="venue-item" onclick="focusDetailVenue('${v.id}')">
         <div class="venue-dot">${venueTypeDot(v.venueType, v.color)}</div>
         <div style="flex:1;min-width:0">
           <div class="venue-item-name">${esc(v.name)}</div>
@@ -4169,7 +4236,8 @@ function renderProjectDetail(pid){
           </div>
         </div>
       </div>`;
-    }).join('');
+      }).join('');
+    }
   }
 
   // populate filter dropdowns
@@ -4178,7 +4246,7 @@ function renderProjectDetail(pid){
   populateOpTypeSelects();
 
   // Lazy tab rendering: only render the currently active tab's content
-  const activeTab = ['ops','usage','calendar','stats'].find(tab=>{
+  const activeTab = ['ops','usage','calendar','stats','settings'].find(tab=>{
     const el = document.getElementById('ptab-'+tab+'-content');
     return el && el.style.display !== 'none';
   }) || 'ops';
@@ -4190,6 +4258,7 @@ function renderProjectDetail(pid){
     renderDetailUsage();
   }
   else if(activeTab === 'calendar') _refreshCalendars();
+  else if(activeTab === 'settings') _renderSettingsVenues(pid);
   // stats tab re-renders itself via switchProjectTab when activated
 }
 
@@ -4217,7 +4286,6 @@ function focusDetailVenue(vid){
   document.getElementById('filter-venue').value=vid;
   renderDetailOps();
   document.querySelectorAll('#detail-venue-list .venue-item').forEach(el=>el.classList.remove('selected'));
-  event.currentTarget.classList.add('selected');
 }
 
 let _detailOpsPage = 0;
@@ -4285,7 +4353,7 @@ function renderDetailOps(resetPage=true){
     tr.innerHTML = `<td colspan="8" style="text-align:center;padding:12px">
       <button onclick="_detailOpsPage++;renderDetailOps(false)"
         style="padding:8px 24px;background:var(--navy);color:white;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600">
-        Load more (${total - pageEnd} remaining)
+        ${t('btn_load_more')||'Load more'} (${total - pageEnd})
       </button></td>`;
     tbody.appendChild(tr);
   }
@@ -4297,7 +4365,6 @@ function clearDetailFilters(){
   document.getElementById('filter-type').value='';
   document.getElementById('filter-from').value='';
   document.getElementById('filter-to').value='';
-  document.querySelectorAll('#detail-venue-list .venue-item').forEach(el=>el.classList.remove('selected'));
   renderDetailOps();
 }
 
@@ -4657,7 +4724,7 @@ function renderVenueHistory(resetPage=true){
     btn.style.cssText = 'text-align:center;padding:12px';
     btn.innerHTML = `<button onclick="_venueHistPage++;renderVenueHistory(false)"
       style="padding:8px 24px;background:var(--navy);color:white;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600">
-      Load more (${total - pageEnd} remaining)</button>`;
+      ${t('btn_load_more')||'Load more'} (${total - pageEnd})</button>`;
     container.appendChild(btn);
   }
 }
@@ -4879,7 +4946,9 @@ function populateOpTypeSelects(){
 }
 function openManageTypesModal(){ renderOpTypesList(); openModal('modal-op-types'); }
 function renderOpTypesList(){
-  document.getElementById('op-types-list').innerHTML=state.opTypes.map((tp,i)=>`
+  // Modal list
+  const modal = document.getElementById('op-types-list');
+  if(modal) modal.innerHTML=state.opTypes.map((tp,i)=>`
     <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
       <input value="${esc(tp)}" data-orig="${esc(tp)}"
         style="flex:1;font-size:13px;padding:5px 8px;border:1px solid transparent;border-radius:6px;background:transparent;outline:none"
@@ -4889,6 +4958,8 @@ function renderOpTypesList(){
       />
       <button class="btn btn-danger btn-sm" onclick="removeOpType(${i})" data-i18n="btn_remove">Remove</button>
     </div>`).join('');
+  // Settings panel list (if visible)
+  _renderSettingsOpTypes();
 }
 async function renameOpType(i, input){
 
@@ -4909,17 +4980,22 @@ async function renameOpType(i, input){
   } catch(err){ showToast('Error: '+err.message); console.error('renameOpType:', err); }
 }
 async function addOpType(){
-
+  if(!_guardStart('addOpType')) return;
   try {
-  const val=document.getElementById('new-op-type-input').value.trim();
+  // Support both the modal input and the settings tab input
+  const modalInput = document.getElementById('new-op-type-input');
+  const settingsInput = document.getElementById('settings-new-type-input');
+  const val = (settingsInput?.value.trim() || modalInput?.value.trim()) || '';
   if(!val||state.opTypes.includes(val)){ showToast(val?t('toast_type_exists'):t('toast_type_add_hint')||'Enter a type name'); return; }
   const {error} = await supa.from('pitchops_op_types').insert({name:val});
   if(error){ showToast(error.message); return; }
   state.opTypes.push(val);
-  document.getElementById('new-op-type-input').value='';
+  if(modalInput) modalInput.value='';
+  if(settingsInput) settingsInput.value='';
   renderOpTypesList(); populateOpTypeSelects(); showToast(t('toast_type_added'));
 
-  } catch(err){ showToast('Error: '+err.message); console.error('addOpType:', err); }
+  } catch(err){ showToast('Error: '+esc(err.message)); console.error('addOpType:', err); }
+  finally { _guardEnd('addOpType'); }
 }
 async function removeOpType(i){
 
@@ -5057,13 +5133,13 @@ function handlePhotoSelect(input, ctx) {
   const MAX_FILE_BYTES = 30 * 1024 * 1024; // 30MB per file
   let added = 0;
   files.slice(0, allowed).forEach(file => {
-    if(file.size > MAX_FILE_BYTES){ showToast('File too large (max 30MB): '+file.name); return; }
+    if(file.size > MAX_FILE_BYTES){ showToast((t('toast_file_too_large')||'File too large (max 30MB)')+': '+file.name); return; }
     const url = URL.createObjectURL(file);
     currentPhotos[ctx].push({ url, file, uploaded: false });
     added++;
     renderPhotoPreviews(ctx);
   });
-  if(files.length > allowed && added < files.length) showToast('Only ' + allowed + ' more photo(s) added');
+  if(files.length > allowed && added < files.length) showToast((t('toast_photos_limit')||'Only '+allowed+' more photo(s) added').replace('{n}', allowed));
   input.value = '';
 }
 
@@ -5509,11 +5585,11 @@ function switchProjectTab(tab){
     Object.values(compareChartInstances).forEach(c=>{try{c.destroy();}catch(e){}});
     compareChartInstances={};
   }
-  ['ops','usage','calendar','stats'].forEach(t=>{
+  ['ops','usage','calendar','stats','settings'].forEach(t=>{
     const btn=document.getElementById('ptab-'+t);
     const content=document.getElementById('ptab-'+t+'-content');
     if(btn) btn.classList.toggle('active', t===tab);
-    if(content) content.style.display = t===tab ? (t==='calendar'||t==='stats'?'block':'') : 'none';
+    if(content) content.style.display = t===tab ? (t==='calendar'||t==='stats'||t==='settings'?'block':'') : 'none';
   });
   if(tab==='calendar'){
     document.getElementById('gantt-view').style.display='block';
@@ -5535,7 +5611,6 @@ function switchProjectTab(tab){
     const pid=state.currentProjectId;
     if(pid){
       const venues=projectVenues(pid);
-      // Populate venue filter for single mode
       const fv=document.getElementById('stats-venue-filter');
       if(fv) fv.innerHTML='<option value="">All venues</option>'+venues.map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('');
       refreshProjectUsage(pid, true).then(()=>{
@@ -5553,6 +5628,102 @@ function switchProjectTab(tab){
       refreshProjectUsage(pid, true);
     }
   }
+  if(tab==='settings'){
+    renderSettingsTab();
+  }
+}
+
+// ════════════════════════════════════════
+// SETTINGS TAB
+// ════════════════════════════════════════
+const SETTINGS_VENUES_PAGE = 20;
+let _settingsVenuesShown = SETTINGS_VENUES_PAGE;
+
+function renderSettingsTab(){
+  const pid = state.currentProjectId;
+  if(!pid) return;
+  _settingsVenuesShown = SETTINGS_VENUES_PAGE;
+  _renderSettingsVenues(pid);
+  _renderSettingsOpTypes();
+  // Sync add-type input with existing modal input
+  const si = document.getElementById('settings-new-type-input');
+  if(si) si.value = '';
+}
+
+function _renderSettingsVenues(pid){
+  const venues = projectVenues(pid||state.currentProjectId);
+  const list = document.getElementById('settings-venue-list');
+  const empty = document.getElementById('settings-venue-empty');
+  const more = document.getElementById('settings-venue-load-more');
+  if(!list) return;
+
+  if(!venues.length){
+    list.innerHTML = '';
+    if(empty) empty.style.display = 'block';
+    if(more) more.style.display = 'none';
+    return;
+  }
+  if(empty) empty.style.display = 'none';
+
+  const shown = venues.slice(0, _settingsVenuesShown);
+  list.innerHTML = shown.map(v => {
+    const taskCount = state.operations.filter(o=>o.venueId===v.id).length;
+    const usageCount = state_admin_usage.filter(u=>u.venueId===v.id).length;
+    const link = window.location.href.split('?')[0]+'?token='+v.token;
+    return `<div style="background:white;border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <div style="flex-shrink:0">${venueTypeDot(v.venueType, v.color)}</div>
+      <div style="flex:1;min-width:160px">
+        <div style="font-size:15px;font-weight:600;color:var(--navy)">${esc(v.name)}</div>
+        <div style="font-size:12px;color:var(--text-hint);margin-top:2px">
+          ${v.city ? esc(v.city)+' · ' : ''}${taskCount} task${taskCount!==1?'s':''} · ${usageCount} usage${usageCount!==1?'s':''}
+        </div>
+        ${v.responsiblePerson ? `<div style="font-size:11px;color:var(--text-muted);margin-top:2px">👤 ${esc(v.responsiblePerson)}${v.contactPhone?' · 📞 '+esc(v.contactPhone):''}</div>` : ''}
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap">
+        <button onclick="navigator.clipboard.writeText('${esc(link)}').then(()=>showToast(t('toast_link_copied')))"
+          style="padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:white;font-size:12px;font-weight:500;cursor:pointer;color:var(--text-muted);display:flex;align-items:center;gap:4px"
+          title="Copy access link">
+          🔗 <span data-i18n="btn_copy_link">Copy link</span>
+        </button>
+        <button onclick="openEditVenueModal(event,'${v.id}')"
+          style="padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:white;font-size:12px;font-weight:500;cursor:pointer;color:var(--text-muted);display:flex;align-items:center;gap:4px">
+          ✏️ <span data-i18n="btn_edit">Edit</span>
+        </button>
+        <button onclick="removeVenueFromProject(event,'${v.id}')"
+          style="padding:6px 12px;border:1px solid rgba(163,45,45,.15);border-radius:8px;background:white;font-size:12px;font-weight:500;cursor:pointer;color:var(--red);display:flex;align-items:center;gap:4px">
+          ✕ <span data-i18n="btn_remove">Remove</span>
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+
+  if(more) more.style.display = venues.length > _settingsVenuesShown ? 'block' : 'none';
+}
+
+function loadMoreSettingsVenues(){
+  _settingsVenuesShown += SETTINGS_VENUES_PAGE;
+  _renderSettingsVenues(state.currentProjectId);
+}
+
+function _renderSettingsOpTypes(){
+  const el = document.getElementById('settings-op-types-list');
+  if(!el) return;
+  if(!state.opTypes.length){
+    el.innerHTML = `<div style="text-align:center;padding:1.5rem;color:var(--text-hint);font-size:13px">No task types yet</div>`;
+    return;
+  }
+  el.innerHTML = state.opTypes.map((tp, i) => `
+    <div style="display:flex;align-items:center;gap:8px;background:white;border:1px solid var(--border);border-radius:8px;padding:8px 12px">
+      <div style="width:8px;height:8px;border-radius:50%;background:${opBadge(tp).bg};flex-shrink:0"></div>
+      <input value="${esc(tp)}" data-orig="${esc(tp)}"
+        style="flex:1;font-size:13px;padding:4px 6px;border:1px solid transparent;border-radius:6px;background:transparent;outline:none;color:var(--text)"
+        onfocus="this.style.border='1px solid var(--blue)';this.style.background='white'"
+        onblur="renameOpType(${i},this)"
+        onkeydown="if(event.key==='Enter')this.blur()"/>
+      <button onclick="removeOpType(${i})"
+        style="padding:4px 10px;border:none;border-radius:6px;background:#fee2e2;color:#dc2626;font-size:12px;cursor:pointer;flex-shrink:0"
+        data-i18n="btn_remove">Remove</button>
+    </div>`).join('');
 }
 
 // ── GANTT ──
@@ -6091,7 +6262,7 @@ function openMultidayEditModal(id){
 }
 
 async function saveMultidayEvent(){
-
+  if(!_guardStart('saveMultidayEvent')) return;
   try {
   const id = document.getElementById('multiday-id').value;
   const name = document.getElementById('multiday-name').value.trim();
@@ -6120,20 +6291,25 @@ async function saveMultidayEvent(){
     if(error){ showToast('Error: '+error.message); return; }
     state_events.unshift({id:newId, venueId, name, dateStart, dateEnd, colorBg, colorFg});
   }
-  closeModal('modal-multiday');
+  closeModal('modal-multiday', null, true);
   _refreshCalendars();
 
-  } catch(err){ showToast('Error: '+err.message); console.error('saveMultidayEvent:', err); }
+  } catch(err){ showToast('Error: '+esc(err.message)); console.error('saveMultidayEvent:', err); }
+  finally { _guardEnd('saveMultidayEvent'); }
 }
 
 async function deleteMultidayEvent(){
+  if(!_guardStart('deleteMultidayEvent')) return;
+  try {
   const id = document.getElementById('multiday-id').value; if(!id) return;
   if(!await confirmAsync(t('confirm_delete_event'))) return;
   const {error} = await supa.from('pitchops_events').delete().eq('id',id);
-  if(error){ showToast('Error: '+error.message); return; }
+  if(error){ showToast('Error: '+esc(error.message)); return; }
   state_events = state_events.filter(e=>e.id!==id);
-  closeModal('modal-multiday');
+  closeModal('modal-multiday', null, true);
   _refreshCalendars();
+  } catch(err){ showToast('Error: '+esc(err.message)); }
+  finally { _guardEnd('deleteMultidayEvent'); }
 }
 
 function _refreshCalendars(){
@@ -6666,7 +6842,7 @@ function handleUsagePhotos(input, mode='new'){
   if(allowed<=0){ showToast(t('toast_max_photos')); input.value=''; return; }
   const MAX_FILE_BYTES = 30 * 1024 * 1024;
   files.slice(0, allowed).forEach(file=>{
-    if(file.size > MAX_FILE_BYTES){ showToast('File too large (max 30MB): '+file.name); return; }
+    if(file.size > MAX_FILE_BYTES){ showToast((t('toast_file_too_large')||'File too large (max 30MB)')+': '+file.name); return; }
     currentUsagePhotos[mode].push({ url: URL.createObjectURL(file), file, uploaded: false });
   });
   renderUsagePhotoPreviews(mode); input.value='';
@@ -6894,9 +7070,9 @@ function renderDetailUsage(){
 }
 
 function renderDetailUsageVenueList(pid){
-  const venues=projectVenues(pid);
   const vlist=document.getElementById('detail-usage-venue-list');
-  if(!vlist) return;
+  if(!vlist) return; // element removed — venues now in Settings tab
+  const venues=projectVenues(pid);
   vlist.innerHTML=venues.map(v=>{
     const vc=state_admin_usage.filter(u=>u.venueId===v.id).length;
     return `<div class="venue-item" onclick="focusUsageVenue('${v.id}')">
@@ -6912,15 +7088,12 @@ function renderDetailUsageVenueList(pid){
 function focusUsageVenue(vid){
   const fv=document.getElementById('filter-usage-venue');
   if(fv){ fv.value=vid; renderDetailUsage(); }
-  document.querySelectorAll('#detail-usage-venue-list .venue-item').forEach(el=>el.classList.remove('selected'));
-  event.currentTarget?.classList.add('selected');
 }
 
 function clearUsageFilters(){
   ['filter-usage-venue','filter-usage-type','filter-usage-from','filter-usage-to'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
   });
-  document.querySelectorAll('#detail-usage-venue-list .venue-item').forEach(el=>el.classList.remove('selected'));
   renderDetailUsage();
 }
 
