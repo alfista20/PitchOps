@@ -1922,7 +1922,7 @@ function _guardStart(key){
   if(_savingGuard[key]) return false;
   // Block saves when offline
   if(!navigator.onLine){
-    showToast('⚡ You are offline — please reconnect and try again');
+    showToast(t('toast_offline_guard')||'⚡ You are offline — please reconnect and try again');
     return false;
   }
   _savingGuard[key]=true;
@@ -2231,6 +2231,9 @@ const i18n = {
     lbl_view_only:' — View only',
     toast_invalid_file_type:'Only image files are allowed (JPG, PNG, WEBP)',
     toast_proj_code_exists:'A project with this code already exists.',
+    toast_copy_link_fail:'⚠️ Could not copy link',
+    toast_offline_guard:'⚡ You are offline — please reconnect and try again',
+    toast_offline_banner:'',
   },
   pl:{
     stat_total:'Ten miesiąc',stat_last:'Ostatnia op.',stat_common:'Dominuje',
@@ -2520,6 +2523,9 @@ const i18n = {
     lbl_view_only:' — Solo lectura',
     toast_invalid_file_type:'Solo se permiten archivos de imagen (JPG, PNG, WEBP)',
     toast_proj_code_exists:'Ya existe un proyecto con este código.',
+    toast_copy_link_fail:'⚠️ No se pudo copiar el enlace',
+    toast_offline_guard:'⚡ Sin conexión — reconéctate e inténtalo de nuevo',
+    toast_offline_banner:'📡 Sin conexión — viendo datos en caché',
   },
   es:{
     stat_total:'Este mes',stat_last:'Última op.',stat_common:'Más común',
@@ -2812,6 +2818,9 @@ const i18n = {
     lbl_view_only:' — Lecture seule',
     toast_invalid_file_type:'Seuls les fichiers image sont autorisés (JPG, PNG, WEBP)',
     toast_proj_code_exists:'Un projet avec ce code existe déjà.',
+    toast_copy_link_fail:'⚠️ Impossible de copier le lien',
+    toast_offline_guard:'⚡ Hors ligne — veuillez vous reconnecter',
+    toast_offline_banner:'📡 Hors ligne — affichage des données en cache',
   },
   fr:{
     stat_total:'Ce mois',stat_last:'Dernière op.',stat_common:'Plus fréquent',
@@ -3104,6 +3113,9 @@ const i18n = {
     lbl_view_only:' — Nur Ansicht',
     toast_invalid_file_type:'Nur Bilddateien sind erlaubt (JPG, PNG, WEBP)',
     toast_proj_code_exists:'Ein Projekt mit diesem Code existiert bereits.',
+    toast_copy_link_fail:'⚠️ Link konnte nicht kopiert werden',
+    toast_offline_guard:'⚡ Offline — bitte neu verbinden und erneut versuchen',
+    toast_offline_banner:'📡 Offline — zwischengespeicherte Daten werden angezeigt',
   },
   de:{
     stat_total:'Diesen Monat',stat_last:'Letzte Op.',stat_common:'Häufigste',
@@ -3396,6 +3408,9 @@ const i18n = {
     lbl_view_only:' — Nur Ansicht',
     toast_invalid_file_type:'Nur Bilddateien sind erlaubt (JPG, PNG, WEBP)',
     toast_proj_code_exists:'Ein Projekt mit diesem Code existiert bereits.',
+    toast_copy_link_fail:'⚠️ Link konnte nicht kopiert werden',
+    toast_offline_banner:'📡 Offline — zwischengespeicherte Daten werden angezeigt',
+    toast_offline_guard:'⚡ Offline — bitte neu verbinden und erneut versuchen',
   },
   pt:{
     stat_total:'Este mês',stat_last:'Última op.',stat_common:'Mais comum',
@@ -3688,6 +3703,9 @@ const i18n = {
     lbl_view_only:' — Apenas leitura',
     toast_invalid_file_type:'Apenas ficheiros de imagem são permitidos (JPG, PNG, WEBP)',
     toast_proj_code_exists:'Já existe um projeto com este código.',
+    toast_copy_link_fail:'⚠️ Não foi possível copiar o link',
+    toast_offline_guard:'⚡ Offline — por favor reconecte e tente novamente',
+    toast_offline_banner:'📡 Offline — a ver dados em cache',
   }
 };
 function t(k){ return (i18n[state.lang]||i18n.en)[k]||k; }
@@ -3900,7 +3918,7 @@ async function openViewerLinkModal(){
 }
 
 function copyViewerLink(){
-  navigator.clipboard.writeText(document.getElementById('viewer-link-text').textContent).then(()=>showToast(t('toast_viewer_link_copied'))).catch(()=>showToast('⚠️ Could not copy link'));
+  navigator.clipboard.writeText(document.getElementById('viewer-link-text').textContent).then(()=>showToast(t('toast_viewer_link_copied'))).catch(()=>showToast(t('toast_copy_link_fail')||'⚠️ Could not copy link'));
 }
 
 async function revokeViewerLink(){
@@ -3975,6 +3993,7 @@ async function enterViewerDashboard(proj){
   renderViewerOps();
   showScreen('screen-viewer');
   window.scrollTo(0, 0);
+}
 
 function focusViewerVenue(e, vid){
   document.getElementById('vw-filter-venue').value=vid;
@@ -3986,7 +4005,7 @@ function focusViewerVenue(e, vid){
 function copyVenueViewerLink(e,token){
   e.stopPropagation();
   const link=window.location.href.split('?')[0]+'?token='+token;
-  navigator.clipboard.writeText(link).then(()=>showToast(t('toast_venue_link_copied'))).catch(()=>showToast('⚠️ Could not copy link'));
+  navigator.clipboard.writeText(link).then(()=>showToast(t('toast_venue_link_copied'))).catch(()=>showToast(t('toast_copy_link_fail')||'⚠️ Could not copy link'));
 }
 
 let _viewerOpsPage = 0;
@@ -4376,9 +4395,11 @@ async function saveEditProject(){
   try {
   const id=document.getElementById('edit-proj-id').value;
   const idx=state.projects.findIndex(p=>p.id===id); if(idx===-1) return;
+  const code=document.getElementById('edit-proj-code').value.trim();
+  const name=document.getElementById('edit-proj-name').value.trim();
+  if(!code||!name){ showToast(t('toast_proj_required')||'Please enter a project code and name.'); return; }
   state.projects[idx]={...state.projects[idx],
-    code:document.getElementById('edit-proj-code').value.trim(),
-    name:document.getElementById('edit-proj-name').value.trim(),
+    code, name,
     country:document.getElementById('edit-proj-country').value.trim(),
     status:document.getElementById('edit-proj-status').value,
     color:state.editProjColor,
@@ -4648,10 +4669,10 @@ async function createVenue(){
 
 function copyVenueLinkById(e,token){
   e.stopPropagation();
-  navigator.clipboard.writeText(window.location.href.split('?')[0]+'?token='+token).then(()=>showToast(t('toast_link_copied'))).catch(()=>showToast('⚠️ Could not copy link'));
+  navigator.clipboard.writeText(window.location.href.split('?')[0]+'?token='+token).then(()=>showToast(t('toast_link_copied'))).catch(()=>showToast(t('toast_copy_link_fail')||'⚠️ Could not copy link'));
 }
 function copyVenueLink(){
-  navigator.clipboard.writeText(document.getElementById('venue-link-text').textContent).then(()=>showToast(t('toast_link_copied'))).catch(()=>showToast('⚠️ Could not copy link'));
+  navigator.clipboard.writeText(document.getElementById('venue-link-text').textContent).then(()=>showToast(t('toast_link_copied'))).catch(()=>showToast(t('toast_copy_link_fail')||'⚠️ Could not copy link'));
 }
 
 async function removeVenueFromProject(e,vid){
@@ -5485,7 +5506,7 @@ function openEditVenueModal(e, vid){
 }
 
 function copyEditVenueLink(){
-  navigator.clipboard.writeText(document.getElementById('edit-venue-link-text').textContent).then(()=>showToast(t('toast_link_copied'))).catch(()=>showToast('⚠️ Could not copy link'));
+  navigator.clipboard.writeText(document.getElementById('edit-venue-link-text').textContent).then(()=>showToast(t('toast_link_copied'))).catch(()=>showToast(t('toast_copy_link_fail')||'⚠️ Could not copy link'));
 }
 
 async function saveEditVenue(){
@@ -5493,13 +5514,15 @@ async function saveEditVenue(){
   try {
   const id=document.getElementById('edit-venue-id').value;
   const idx=state.venues.findIndex(v=>v.id===id); if(idx===-1) return;
+  const name=document.getElementById('edit-venue-name').value.trim();
+  if(!name){ showToast(t('lbl_venue_name')+' '+t('lbl_required')); return; }
   const vtype=state.selectedEditVenueType;
   const color=vtype==='Training Site'?'#3B6D11':vtype==='Other'?'#854F0B':'#185FA5';
   const person=document.getElementById('edit-venue-person').value.trim();
   const phone=document.getElementById('edit-venue-phone').value.trim();
   const email=document.getElementById('edit-venue-email').value.trim();
   state.venues[idx]={...state.venues[idx],
-    name:document.getElementById('edit-venue-name').value.trim(),
+    name,
     city:document.getElementById('edit-venue-city').value.trim(),
     venueType:vtype, color,
     responsiblePerson:person, contactPhone:phone, contactEmail:email
@@ -5952,7 +5975,7 @@ function _renderSettingsVenues(pid){
         <div style="font-size:12px;color:var(--text-hint);margin-top:2px">${v.city?esc(v.city)+' · ':''}${taskCount} task${taskCount!==1?'s':''} · ${usageCount} usage${usageCount!==1?'s':''}</div>
         ${v.responsiblePerson?`<div style="font-size:12px;color:var(--text-muted);margin-top:3px">👤 ${esc(v.responsiblePerson)}${v.contactPhone?' · 📞 '+esc(v.contactPhone):''}</div>`:''}
         <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
-          <button onclick="navigator.clipboard.writeText('${esc(link)}').then(()=>showToast(t('toast_link_copied'))).catch(()=>showToast('⚠️ Could not copy link'))"
+          <button onclick="navigator.clipboard.writeText('${esc(link)}').then(()=>showToast(t('toast_link_copied'))).catch(()=>showToast(t('toast_copy_link_fail')||'⚠️ Could not copy link'))"
             style="padding:6px 12px;border:0.5px solid var(--border);border-radius:8px;background:white;font-size:12px;cursor:pointer;color:var(--text-muted);display:flex;align-items:center;gap:4px">
             🔗 <span data-i18n="btn_copy_link">Copy link</span>
           </button>
@@ -8838,8 +8861,8 @@ init();
   </div>
 </div>
 
-  <div id="offline-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#0C2340;color:white;text-align:center;padding:10px;font-size:13px;z-index:9999;font-weight:500">
-    📡 You are offline — viewing cached data
+  <div id="offline-banner" data-i18n="toast_offline_banner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#0C2340;color:white;text-align:center;padding:10px;font-size:13px;z-index:9999;font-weight:500">
+    
   </div>
   <script>
     if ('serviceWorker' in navigator) {
