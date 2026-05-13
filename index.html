@@ -503,6 +503,7 @@ button,input,select,textarea{}
       <button aria-label="Menu" onclick="toggleAdminMenu()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;font-size:18px;line-height:1">☰</button>
     </div>
   </div>
+  <div id="project-sticky-header" style="position:sticky;top:52px;z-index:90;background:var(--navy)">
   <div id="project-hero" class="project-hero">
     <div class="project-hero-left">
       <div id="detail-project-tag" class="venue-hero-project"></div>
@@ -523,6 +524,7 @@ button,input,select,textarea{}
     <button class="tab-btn" id="ptab-calendar" onclick="switchProjectTab('calendar')" data-i18n="tab_schedule">📅 Schedule</button>
     <button class="tab-btn" id="ptab-stats" data-i18n="ptab_stats" onclick="switchProjectTab('stats')">📊 Stats</button>
   </div>
+  </div><!-- /project-sticky-header -->
 
   <!-- OPS TAB -->
   <div id="ptab-ops-content" class="project-body" style="display:none;grid-template-columns:1fr">
