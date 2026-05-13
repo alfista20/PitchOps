@@ -4784,13 +4784,27 @@ async function loadWelcomeWeather(city){
     // Step 1: Geocode the city using Open-Meteo geocoding API
     const cityName=city.split('/')[0].split(',')[0].trim(); // handle "Bielsko-Biała" or "Bielsko-Biała / Poland"
 
+    // Strip Polish diacritics that don't decompose via NFD (e.g. ł→l, ą→a)
+    function stripDiacritics(s){
+      return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+        .replace(/ł/g,'l').replace(/Ł/g,'L')
+        .replace(/ą/g,'a').replace(/Ą/g,'A')
+        .replace(/ę/g,'e').replace(/Ę/g,'E')
+        .replace(/ó/g,'o').replace(/Ó/g,'O')
+        .replace(/ś/g,'s').replace(/Ś/g,'S')
+        .replace(/ź/g,'z').replace(/Ź/g,'Z')
+        .replace(/ż/g,'z').replace(/Ż/g,'Z')
+        .replace(/ć/g,'c').replace(/Ć/g,'C')
+        .replace(/ń/g,'n').replace(/Ń/g,'N');
+    }
     // Try multiple variants to handle diacritics and hyphenated names (e.g. "Bielsko-Biała")
     const geoVariants=[
       cityName,
-      cityName.replace(/-/g,' '),          // "Bielsko Biała"
-      cityName.split('-')[0].trim(),        // "Bielsko"
-      cityName.normalize('NFD').replace(/[\u0300-\u036f]/g,''), // strip diacritics
-      cityName.replace(/-/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g,'') // both
+      stripDiacritics(cityName),
+      cityName.replace(/-/g,' '),
+      stripDiacritics(cityName.replace(/-/g,' ')),
+      cityName.split('-')[0].trim(),
+      stripDiacritics(cityName.split('-')[0].trim())
     ].filter((v,i,a)=>v&&a.indexOf(v)===i); // deduplicate
 
     let geoData=null;
