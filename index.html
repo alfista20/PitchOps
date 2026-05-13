@@ -5829,15 +5829,20 @@ async function init(){
     // check ?token= — venue manager flow
     const tok=params.get('token');
     if(tok){
+      console.log('[PitchOps] token found:', tok);
       showLoading(true);
-      const {data:venues} = await supa.from('pitchops_venues').select('*').eq('token',tok);
+      const {data:venues, error:venErr} = await supa.from('pitchops_venues').select('*').eq('token',tok);
       showLoading(false);
+      console.log('[PitchOps] venues result:', venues?.length, 'error:', venErr);
       if(venues&&venues.length){
         const venue=dbToVenue(venues[0]);
+        console.log('[PitchOps] entering venue dashboard:', venue.name);
         state.venues=[venue];
         await enterVenueDashboard(venue);
+        console.log('[PitchOps] enterVenueDashboard done');
         return;
       }
+      console.log('[PitchOps] token not found in DB');
       showToast(t('toast_invalid_token'));
     }
   } catch(err){
