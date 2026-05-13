@@ -4808,14 +4808,19 @@ async function loadWelcomeWeather(city){
     ].filter((v,i,a)=>v&&a.indexOf(v)===i); // deduplicate
 
     let geoData=null;
+    console.log('[Weather] city input:',city,'→ cityName:',cityName,'variants:',geoVariants);
     for(const variant of geoVariants){
-      const r=await fetch('https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(variant)+'&count=1&language=en&format=json');
-      const d=await r.json();
-      if(d.results&&d.results.length){geoData=d;break;}
+      try{
+        const r=await fetch('https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(variant)+'&count=1&language=en&format=json');
+        const d=await r.json();
+        console.log('[Weather] variant "'+variant+'" →',d.results?d.results[0]?.name+', '+d.results[0]?.country:'no results');
+        if(d.results&&d.results.length){geoData=d;break;}
+      }catch(variantErr){console.warn('[Weather] variant "'+variant+'" fetch error:',variantErr);}
     }
 
     // City not found → hide silently
     if(!geoData||!geoData.results||!geoData.results.length){
+      console.warn('[Weather] all variants failed for city:',city);
       if(section) section.style.display='none';
       return;
     }
