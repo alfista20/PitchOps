@@ -891,7 +891,7 @@ button,input,select,textarea{}
           <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:2px;background:var(--green);display:inline-block"></span><span data-i18n="legend_completed">Completed</span></span>
           <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:2px;background:var(--red);display:inline-block"></span><span data-i18n="legend_missed">Missed</span></span>
         </div>
-        <div id="gantt-grid" style="overflow-x:auto;width:100%"></div>
+        <div id="gantt-grid" style="width:100%"></div>
       </div>
     </div>
     <div id="venue-cal-view" style="display:none">
@@ -6250,19 +6250,50 @@ function renderGantt(){
   const legendBar2=document.getElementById('gantt-legend-bar');
   if(navBar2&&legendBar2) legendBar2.style.top=(52+navBar2.offsetHeight)+'px';
 
-  grid.innerHTML=`<div style="overflow-x:auto;width:100%"><table style="border-collapse:collapse;width:100%;min-width:700px">
-    <thead>
-      <tr>${headerCols}</tr>
-      <tr>${subHeaderCols}</tr>
-    </thead>
-    <tbody>${rows}</tbody>
-  </table></div>`;
+  // Sticky thead: rendered as a SEPARATE sticky div above the scrollable table
+  // This bypasses the overflow-x:auto limitation that kills position:sticky in tables
+  const colWidths='150px'+' 1fr'.repeat(14); // VENUE(2) + 7days x 2cols
+  grid.innerHTML=`
+    <div id="gantt-sticky-head" style="position:sticky;top:134px;z-index:8;background:white;overflow:hidden">
+      <table style="border-collapse:collapse;width:100%;table-layout:fixed;min-width:700px" id="gantt-head-table">
+        <thead>
+          <tr>${headerCols}</tr>
+          <tr>${subHeaderCols}</tr>
+        </thead>
+      </table>
+    </div>
+    <div id="gantt-scroll-body" style="overflow-x:auto;width:100%">
+      <table style="border-collapse:collapse;width:100%;min-width:700px" id="gantt-body-table">
+        <thead style="visibility:hidden;height:0">
+          <tr>${headerCols}</tr>
+          <tr>${subHeaderCols}</tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
 
-  // Inject sticky onto th elements after innerHTML is set — safe, no layout thrash
-  const allThs=grid.querySelectorAll('thead tr:first-child th');
-  const allThs2=grid.querySelectorAll('thead tr:last-child th');
-  allThs.forEach(th=>{th.style.position='sticky';th.style.top='134px';th.style.zIndex='8';});
-  allThs2.forEach(th=>{th.style.position='sticky';th.style.top='172px';th.style.zIndex='8';});
+  // Sync scroll: when body scrolls horizontally, mirror to sticky head
+  const scrollBody=document.getElementById('gantt-scroll-body');
+  const stickyHead=document.getElementById('gantt-sticky-head');
+  if(scrollBody&&stickyHead){
+    scrollBody.addEventListener('scroll',()=>{ stickyHead.scrollLeft=scrollBody.scrollLeft; });
+  }
+
+  // Sync column widths: measure body table cols and apply to head table
+  requestAnimationFrame(()=>{
+    const bodyTable=document.getElementById('gantt-body-table');
+    const headTable=document.getElementById('gantt-head-table');
+    if(!bodyTable||!headTable) return;
+    const bodyCells=bodyTable.querySelector('tbody tr')?.cells;
+    const headCells=headTable.querySelector('thead tr')?.cells;
+    if(bodyCells&&headCells){
+      Array.from(bodyCells).forEach((td,i)=>{
+        if(headCells[i]) headCells[i].style.width=td.offsetWidth+'px';
+      });
+    }
+    // Make sticky head same width as body table
+    headTable.style.width=bodyTable.offsetWidth+'px';
+  });
 }
 
 
