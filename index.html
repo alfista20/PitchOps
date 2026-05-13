@@ -1007,8 +1007,8 @@ button,input,select,textarea{}
       <!-- Weather -->
       <div id="welcome-weather-section" style="border-top:0.5px solid #1a3555;padding-top:14px">
         <div style="font-size:10px;font-weight:500;color:#4a7a9a;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px" data-i18n="weather_forecast">Today's forecast</div>
-        <div id="welcome-weather" style="display:flex;align-items:center;gap:4px;overflow-x:auto;padding-bottom:2px">
-          <div style="font-size:11px;color:#4a7a9a;font-style:italic">Loading weather...</div>
+        <div id="welcome-weather" style="display:grid;grid-template-columns:repeat(7,1fr);width:100%;overflow-x:auto;scrollbar-width:none">
+          <div style="font-size:11px;color:#4a7a9a;font-style:italic;grid-column:1/-1">Loading weather...</div>
         </div>
       </div>
     </div>
@@ -4836,11 +4836,13 @@ async function loadWelcomeWeather(city){
 
     const now=new Date();
     const currentHour=now.getHours();
+    // All hours from now for next 24h, every hour
     let hours=wxData.hourly.time.map((tp,i)=>({
+      dt:new Date(tp),
       hour:new Date(tp).getHours(),
       temp:Math.round(wxData.hourly.temperature_2m[i]),
       code:wxData.hourly.weathercode[i]
-    })).filter(h=>h.hour>=currentHour).filter((_,i)=>i%2===0).slice(0,6);
+    })).filter(h=>h.dt>=now).slice(0,24);
 
     if(!hours.length){
       if(section) section.style.display='none';
@@ -4848,11 +4850,18 @@ async function loadWelcomeWeather(city){
     }
 
     if(section) section.style.display='block';
+    // Grid: 7 columns visible, scroll for rest; each cell equal width
+    const total=hours.length;
+    el.style.display='grid';
+    el.style.gridTemplateColumns='repeat('+total+',calc(100%/7))';
+    el.style.overflowX='auto';
+    el.style.scrollbarWidth='none';
+    el.style.webkitOverflowScrolling='touch';
     el.innerHTML=hours.map((h,i)=>
-      `<div style="display:flex;flex-direction:column;align-items:center;gap:5px;min-width:42px">
-        <div style="font-size:11px;color:#7a9ab8">${i===0?'Now':h.hour+':00'}</div>
-        ${weatherIcon(h.code)}
-        <div style="font-size:13px;font-weight:500;color:#fff">${h.temp}°</div>
+      `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:4px 0">
+        <div style="font-size:11px;color:#7a9ab8;white-space:nowrap">${i===0?'Now':h.hour+':00'}</div>
+        ${weatherIcon(h.code,30)}
+        <div style="font-size:13px;font-weight:600;color:#fff">${h.temp}°</div>
       </div>`
     ).join('');
 
@@ -4862,23 +4871,24 @@ async function loadWelcomeWeather(city){
   }
 }
 
-function weatherIcon(code){
-  // WMO weather codes → SVG icon
-  const s='stroke-linecap="round" stroke-width="1.5"';
+function weatherIcon(code,sz){
+  // WMO weather codes → SVG icon; sz = pixel size (default 28)
+  const d=sz||28;
+  const s='stroke-linecap="round" stroke-width="1.6"';
   if(code===0) // clear
-    return `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" ${s}><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.93" y1="4.93" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.07" y2="19.07"/><line x1="4.93" y1="19.07" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.07" y2="4.93"/></svg>`;
+    return `<svg width="${d}" height="${d}" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" ${s}><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.93" y1="4.93" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.07" y2="19.07"/><line x1="4.93" y1="19.07" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.07" y2="4.93"/></svg>`;
   if(code<=2) // partly cloudy
-    return `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" ${s}><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>`;
+    return `<svg width="${d}" height="${d}" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" ${s}><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>`;
   if(code<=49) // foggy/cloudy
-    return `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" ${s}><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>`;
+    return `<svg width="${d}" height="${d}" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" ${s}><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>`;
   if(code<=69) // rain/drizzle
-    return `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" ${s}><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/><line x1="8" y1="19" x2="8" y2="21" stroke="#60A5FA"/><line x1="12" y1="19" x2="12" y2="21" stroke="#60A5FA"/><line x1="16" y1="19" x2="16" y2="21" stroke="#60A5FA"/></svg>`;
+    return `<svg width="${d}" height="${d}" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" ${s}><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/><line x1="8" y1="19" x2="8" y2="21" stroke="#60A5FA"/><line x1="12" y1="19" x2="12" y2="21" stroke="#60A5FA"/><line x1="16" y1="19" x2="16" y2="21" stroke="#60A5FA"/></svg>`;
   if(code<=79) // snow
-    return `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" ${s}><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/><line x1="8" y1="19" x2="8" y2="21" stroke="#BAE6FD"/><line x1="12" y1="19" x2="12" y2="21" stroke="#BAE6FD"/><line x1="16" y1="19" x2="16" y2="21" stroke="#BAE6FD"/></svg>`;
+    return `<svg width="${d}" height="${d}" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" ${s}><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/><line x1="8" y1="19" x2="8" y2="21" stroke="#BAE6FD"/><line x1="12" y1="19" x2="12" y2="21" stroke="#BAE6FD"/><line x1="16" y1="19" x2="16" y2="21" stroke="#BAE6FD"/></svg>`;
   if(code<=99) // thunderstorm
-    return `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" ${s}><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/><polyline points="13,12 10,17 14,17 11,22" stroke="#FCD34D" stroke-width="1.5"/></svg>`;
+    return `<svg width="${d}" height="${d}" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" ${s}><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/><polyline points="13,12 10,17 14,17 11,22" stroke="#FCD34D" stroke-width="1.5"/></svg>`;
   // night
-  return `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7a9ab8" ${s}><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+  return `<svg width="${d}" height="${d}" viewBox="0 0 24 24" fill="none" stroke="#7a9ab8" ${s}><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
 }
 
 async function enterVenueDashboard(venue){
