@@ -4694,15 +4694,19 @@ async function removeVenueFromProject(e,vid){
 // ════════════════════════════════════════
 // ── VENUE WELCOME SCREEN ──
 function showVenueWelcome(){
-  document.getElementById('venue-welcome').style.display='flex';
+  const vw = document.getElementById('venue-welcome');
+  const sv = document.getElementById('screen-venue');
+  vw.style.display='flex';
+  console.log('[PitchOps] showVenueWelcome: vw display='+vw.style.display+' sv active='+sv.classList.contains('active'));
   // Hide all direct children except venue-welcome, venue-menu, venue-menu-overlay
-  Array.from(document.getElementById('screen-venue').children).forEach(el=>{
+  Array.from(sv.children).forEach(el=>{
     if(!['venue-welcome','venue-menu','venue-menu-overlay'].includes(el.id))
       el.style.display='none';
   });
   const venue=state.venues.find(v=>v.id===state.currentVenueId);
   loadWelcomeWeather(venue?venue.city:'');
   updateWelcomeBadges();
+  console.log('[PitchOps] showVenueWelcome done: vw display='+vw.style.display);
 }
 
 function updateWelcomeBadges(){
