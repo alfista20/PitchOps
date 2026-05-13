@@ -6245,34 +6245,24 @@ function renderGantt(){
     rows=`<tr><td colspan="${2+days.length*2}" style="padding:2rem;text-align:center;color:#96a6bb;font-size:13px">${t('no_venues')||'No venues in this project.'}</td></tr>`;
   }
 
+  // Update legend bar top
+  const navBar2=document.getElementById('gantt-nav-bar');
+  const legendBar2=document.getElementById('gantt-legend-bar');
+  if(navBar2&&legendBar2) legendBar2.style.top=(52+navBar2.offsetHeight)+'px';
+
   grid.innerHTML=`<div style="overflow-x:auto;width:100%"><table style="border-collapse:collapse;width:100%;min-width:700px">
-    <thead id="gantt-thead">
+    <thead>
       <tr>${headerCols}</tr>
       <tr>${subHeaderCols}</tr>
     </thead>
     <tbody>${rows}</tbody>
   </table></div>`;
 
-  // Apply sticky to thead AFTER render so offsetHeight values are correct
-  requestAnimationFrame(()=>{
-    const navBar=document.getElementById('gantt-nav-bar');
-    const legendBar=document.getElementById('gantt-legend-bar');
-    const navH=navBar?navBar.offsetHeight:50;
-    const legendH=legendBar?legendBar.offsetHeight:32;
-    const theadTop=52+navH+legendH;
-    if(legendBar) legendBar.style.top=(52+navH)+'px';
-    const thead=grid.querySelector('#gantt-thead');
-    if(thead){
-      const row1=thead.rows[0], row2=thead.rows[1];
-      const row1H=row1?row1.offsetHeight:38;
-      if(row1) Array.from(row1.cells).forEach(th=>{
-        th.style.position='sticky'; th.style.top=theadTop+'px'; th.style.zIndex='8';
-      });
-      if(row2) Array.from(row2.cells).forEach(th=>{
-        th.style.position='sticky'; th.style.top=(theadTop+row1H)+'px'; th.style.zIndex='8';
-      });
-    }
-  });
+  // Inject sticky onto th elements after innerHTML is set — safe, no layout thrash
+  const allThs=grid.querySelectorAll('thead tr:first-child th');
+  const allThs2=grid.querySelectorAll('thead tr:last-child th');
+  allThs.forEach(th=>{th.style.position='sticky';th.style.top='134px';th.style.zIndex='8';});
+  allThs2.forEach(th=>{th.style.position='sticky';th.style.top='172px';th.style.zIndex='8';});
 }
 
 
