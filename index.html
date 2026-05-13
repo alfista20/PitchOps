@@ -4783,11 +4783,25 @@ async function loadWelcomeWeather(city){
   try {
     // Step 1: Geocode the city using Open-Meteo geocoding API
     const cityName=city.split('/')[0].split(',')[0].trim(); // handle "Bielsko-Biała" or "Bielsko-Biała / Poland"
-    const geoRes=await fetch('https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(cityName)+'&count=1&language=en&format=json');
-    const geoData=await geoRes.json();
+
+    // Try multiple variants to handle diacritics and hyphenated names (e.g. "Bielsko-Biała")
+    const geoVariants=[
+      cityName,
+      cityName.replace(/-/g,' '),          // "Bielsko Biała"
+      cityName.split('-')[0].trim(),        // "Bielsko"
+      cityName.normalize('NFD').replace(/[\u0300-\u036f]/g,''), // strip diacritics
+      cityName.replace(/-/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g,'') // both
+    ].filter((v,i,a)=>v&&a.indexOf(v)===i); // deduplicate
+
+    let geoData=null;
+    for(const variant of geoVariants){
+      const r=await fetch('https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(variant)+'&count=1&language=en&format=json');
+      const d=await r.json();
+      if(d.results&&d.results.length){geoData=d;break;}
+    }
 
     // City not found → hide silently
-    if(!geoData.results||!geoData.results.length){
+    if(!geoData||!geoData.results||!geoData.results.length){
       if(section) section.style.display='none';
       return;
     }
@@ -4803,11 +4817,11 @@ async function loadWelcomeWeather(city){
 
     const now=new Date();
     const currentHour=now.getHours();
-    const hours=wxData.hourly.time.map((tp,i)=>({
+    let hours=wxData.hourly.time.map((tp,i)=>({
       hour:new Date(tp).getHours(),
       temp:Math.round(wxData.hourly.temperature_2m[i]),
       code:wxData.hourly.weathercode[i]
-    })).filter(h=>h.hour>=currentHour&&h.hour<=22).filter((_,i)=>i%2===0).slice(0,6);
+    })).filter(h=>h.hour>=currentHour).filter((_,i)=>i%2===0).slice(0,6);
 
     if(!hours.length){
       if(section) section.style.display='none';
