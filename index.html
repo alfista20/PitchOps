@@ -4762,7 +4762,7 @@ function showVenueDashboard(tab){
   // Use explicit display values — never '' which removes inline style and may show content unexpectedly
   Array.from(document.getElementById('screen-venue').children).forEach(el=>{
     if(!['venue-welcome','venue-menu','venue-menu-overlay'].includes(el.id))
-      el.style.display=(el.id==='venue-topnav')?'flex':'block';
+      el.style.display=(el.id==='venue-topnav'||el.id==='vtab-bar')?'flex':'block';
   });
   switchVenueTab(tab||'log');
 }
