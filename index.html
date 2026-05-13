@@ -4706,7 +4706,10 @@ function showVenueWelcome(){
   const venue=state.venues.find(v=>v.id===state.currentVenueId);
   loadWelcomeWeather(venue?venue.city:'');
   updateWelcomeBadges();
-  console.log('[PitchOps] showVenueWelcome done: vw display='+vw.style.display);
+  // Diagnostic: check rendered dimensions after a tick
+  setTimeout(()=>{
+    console.log('[PitchOps] DIMENSIONS: sv.offsetHeight='+sv.offsetHeight+' vw.offsetHeight='+vw.offsetHeight+' body.offsetHeight='+document.body.offsetHeight+' vw.getBCR='+JSON.stringify(vw.getBoundingClientRect()));
+  }, 100);
 }
 
 function updateWelcomeBadges(){
