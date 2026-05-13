@@ -4830,19 +4830,21 @@ async function loadWelcomeWeather(city){
     // Step 2: Fetch hourly forecast
     const wxRes=await fetch(
       'https://api.open-meteo.com/v1/forecast?latitude='+latitude+'&longitude='+longitude+
-      '&hourly=temperature_2m,weathercode&timezone='+encodeURIComponent(timezone||'auto')+'&forecast_days=1'
+      '&hourly=temperature_2m,weathercode&timezone='+encodeURIComponent(timezone||'auto')+'&forecast_days=2'
     );
     const wxData=await wxRes.json();
 
     const now=new Date();
     const currentHour=now.getHours();
     // All hours from now for next 24h, every hour
+    const todayDate=new Date().toDateString();
     let hours=wxData.hourly.time.map((tp,i)=>({
       dt:new Date(tp),
       hour:new Date(tp).getHours(),
+      isToday:new Date(tp).toDateString()===todayDate,
       temp:Math.round(wxData.hourly.temperature_2m[i]),
       code:wxData.hourly.weathercode[i]
-    })).filter(h=>h.dt>=now).slice(0,24);
+    })).filter(h=>h.dt>=now).slice(0,48);
 
     if(!hours.length){
       if(section) section.style.display='none';
@@ -4857,13 +4859,17 @@ async function loadWelcomeWeather(city){
     el.style.overflowX='auto';
     el.style.scrollbarWidth='none';
     el.style.webkitOverflowScrolling='touch';
-    el.innerHTML=hours.map((h,i)=>
-      `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:4px 0">
-        <div style="font-size:11px;color:#7a9ab8;white-space:nowrap">${i===0?'Now':h.hour+':00'}</div>
+    // Add day label on first hour of tomorrow
+    el.innerHTML=hours.map((h,i)=>{
+      const prevIsToday=i>0?hours[i-1].isToday:true;
+      const dayBreak=!h.isToday&&prevIsToday;
+      const label=i===0?'Now':h.hour+':00';
+      return `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:4px 0;${dayBreak?'border-left:1px solid rgba(255,255,255,.15);':''}">
+        <div style="font-size:11px;color:${dayBreak?'#7ab8e0':'#7a9ab8'};white-space:nowrap;font-weight:${dayBreak?'600':'400'}">${dayBreak?'Tmrw':label}</div>
         ${weatherIcon(h.code,30)}
         <div style="font-size:13px;font-weight:600;color:#fff">${h.temp}°</div>
-      </div>`
-    ).join('');
+      </div>`;
+    }).join('');
 
   } catch(e){
     // Any error → hide silently
