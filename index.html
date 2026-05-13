@@ -4891,6 +4891,7 @@ async function enterVenueDashboard(venue){
   maybeShowOnboarding(venue.id);
   } catch(err) {
     console.error('[ENTER] CRASHED:', err);
+    showToast('Error: '+esc(err.message));
     // Force show welcome even if crash
     document.getElementById('venue-welcome').style.display='flex';
   }
@@ -5580,7 +5581,7 @@ function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.get
 function genId(prefix){ return prefix+Date.now()+'_'+Math.random().toString(36).slice(2,6); }
 
 // Returns browser locale string for current app language
-function appLocale(){ return ({'en':appLocale(),'pl':'pl-PL','es':'es-ES','fr':'fr-FR','de':'de-DE','pt':'pt-PT'})[state.lang]||appLocale(); }
+function appLocale(){ return ({'en':'en-GB','pl':'pl-PL','es':'es-ES','fr':'fr-FR','de':'de-DE','pt':'pt-PT'})[state.lang]||'en-GB'; }
 function formatDate(dt){ if(!dt) return '—'; const d=new Date(dt); return d.toLocaleDateString(appLocale(),{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString(appLocale(),{hour:'2-digit',minute:'2-digit'}); }
 function formatDateOnly(dt){
   if(!dt) return '—';
@@ -7241,7 +7242,7 @@ function openEditUsageModal(id){
   currentUsagePhotos.edit = (u.photos||[]).map(url=>({url,file:null,uploaded:true}));
   renderUsagePhotoPreviews('edit');
   openModal('modal-edit-usage');
-  } catch(err){ console.error('openEditUsageModal error:',err); }
+  } catch(err){ showToast('Error: '+esc(err.message)); console.error('openEditUsageModal error:',err); }
 }
 
 async function saveEditUsage(){
