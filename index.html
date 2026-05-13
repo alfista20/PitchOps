@@ -5067,33 +5067,39 @@ async function logOperation(){
     photos:[],
     createdAt:new Date().toISOString()
   };
-  // Insert first (get ID into DB), then upload photos and update
+  // Add to local state BEFORE insert so realtime echo is ignored (duplicate guard in realtime handler)
+  state.operations.unshift(op);
   const {error} = await supa.from('pitchops_operations').insert(opToDb(op));
-  if(error){ showToast('Error: '+esc(error.message)); return; }
+  if(error){ state.operations.shift(); showToast('Error: '+esc(error.message)); return; }
   // Upload any pending photos and patch the record
   const logBtn = document.querySelector('#modal-log-task .btn-blue');
+  let photoUrls = [];
   if(currentPhotos.new.some(p=>!p.uploaded)){
     if(logBtn) logBtn.textContent = '⏳ Uploading…';
-    const urls = await uploadPendingPhotos(currentPhotos.new, opId, 'ops');
+    photoUrls = await uploadPendingPhotos(currentPhotos.new, opId, 'ops');
     if(logBtn) logBtn.textContent = t('btn_log')||'Log task';
-    if(urls.length){
-      await supa.from('pitchops_operations').update({photo_urls:urls}).eq('id',opId);
-      op.photos = urls;
+    if(photoUrls.length){
+      await supa.from('pitchops_operations').update({photo_urls:photoUrls}).eq('id',opId);
+      op.photos = photoUrls;
+      // Patch in state too (unshift already added op, update photos in place)
+      const stIdx = state.operations.findIndex(o=>o.id===opId);
+      if(stIdx!==-1) state.operations[stIdx].photos = photoUrls;
     }
   }
-  state.operations.unshift(op);
 
   // ── Log for ALL venues (admin only, checkbox ticked) ──
   const logAllChk = document.getElementById('log-all-venues-chk');
   if(isAdminLog && logAllChk && logAllChk.checked){
     const allVenues = projectVenues(state.currentProjectId).filter(v=>v.id && v.id !== resolvedVenueId);
     if(allVenues.length){
-      const extraInserts = allVenues.map(v => {
+      // Bug fix: copy photos from main op (URLs already uploaded, reuse same files)
+      const extraOpsData = allVenues.map(v => {
         const extraId = genId('op_');
-        const extraOp = {...op, id:extraId, venueId:v.id, photos:[]};
-        state.operations.unshift(extraOp);
-        return supa.from('pitchops_operations').insert(opToDb(extraOp));
+        const extraOp = {...op, id:extraId, venueId:v.id, photos:[...photoUrls]};
+        state.operations.unshift(extraOp); // add to state before insert to block realtime echo
+        return extraOp;
       });
+      const extraInserts = extraOpsData.map(extraOp => supa.from('pitchops_operations').insert(opToDb(extraOp)));
       const results = await Promise.all(extraInserts);
       const anyError = results.find(r => r.error);
       if(anyError) showToast('Some venues failed: '+esc(anyError.error.message));
