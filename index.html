@@ -503,7 +503,6 @@ button,input,select,textarea{}
       <button aria-label="Menu" onclick="toggleAdminMenu()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;font-size:18px;line-height:1">☰</button>
     </div>
   </div>
-  <div id="project-sticky-header" style="position:sticky;top:52px;z-index:90;background:var(--navy)">
   <div id="project-hero" class="project-hero">
     <div class="project-hero-left">
       <div id="detail-project-tag" class="venue-hero-project"></div>
@@ -524,7 +523,7 @@ button,input,select,textarea{}
     <button class="tab-btn" id="ptab-calendar" onclick="switchProjectTab('calendar')" data-i18n="tab_schedule">📅 Schedule</button>
     <button class="tab-btn" id="ptab-stats" data-i18n="ptab_stats" onclick="switchProjectTab('stats')">📊 Stats</button>
   </div>
-  </div><!-- /project-sticky-header -->
+
 
   <!-- OPS TAB -->
   <div id="ptab-ops-content" class="project-body" style="display:none;grid-template-columns:1fr">
@@ -868,7 +867,7 @@ button,input,select,textarea{}
   <div id="ptab-calendar-content" style="display:none;padding:.75rem 1rem;width:100%;box-sizing:border-box;align-self:stretch">
     <div id="gantt-view">
       <div style="background:white;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden">
-        <div style="padding:.6rem .75rem;border-bottom:1px solid var(--border);background:#fafbfc;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
+        <div id="gantt-nav-bar" style="padding:.6rem .75rem;border-bottom:1px solid var(--border);background:#fafbfc;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;position:sticky;top:52px;z-index:20">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
             <div style="display:flex;align-items:center;background:white;border:1px solid var(--border);border-radius:var(--radius-sm);padding:2px 8px;gap:6px">
               <button aria-label="Previous week" onclick="ganttNav(-1)" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--text-muted);padding:0 2px">←</button>
@@ -886,7 +885,7 @@ button,input,select,textarea{}
           </div>
           
         </div>
-        <div style="display:flex;gap:8px;padding:.35rem .75rem;border-bottom:1px solid var(--border);flex-wrap:wrap">
+        <div id="gantt-legend-bar" style="display:flex;gap:8px;padding:.35rem .75rem;border-bottom:1px solid var(--border);flex-wrap:wrap;position:sticky;z-index:19;background:white">
           <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:2px;background:var(--amber);display:inline-block"></span><span data-i18n="legend_planned">Planned</span></span>
           <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:2px;background:var(--blue);display:inline-block"></span><span data-i18n="legend_inprogress">In progress</span></span>
           <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:2px;background:var(--green);display:inline-block"></span><span data-i18n="legend_completed">Completed</span></span>
@@ -6247,12 +6246,30 @@ function renderGantt(){
   }
 
   grid.innerHTML=`<div style="overflow-x:auto;width:100%"><table style="border-collapse:collapse;width:100%;min-width:700px">
-    <thead>
+    <thead id="gantt-thead">
       <tr>${headerCols}</tr>
       <tr>${subHeaderCols}</tr>
     </thead>
     <tbody>${rows}</tbody>
   </table></div>`;
+
+  // Sticky thead: offset = topnav(52) + gantt-nav-bar + gantt-legend-bar
+  const navBar=document.getElementById('gantt-nav-bar');
+  const legendBar=document.getElementById('gantt-legend-bar');
+  const navH=navBar?navBar.offsetHeight:0;
+  const legendH=legendBar?legendBar.offsetHeight:0;
+  if(legendBar) legendBar.style.top=(52+navH)+'px';
+  const theadTop=52+navH+legendH;
+  const thead=grid.querySelector('#gantt-thead');
+  if(thead){
+    const row1=thead.rows[0], row2=thead.rows[1];
+    if(row1) Array.from(row1.cells).forEach(th=>{
+      th.style.position='sticky'; th.style.top=theadTop+'px'; th.style.zIndex='10';
+    });
+    if(row2) Array.from(row2.cells).forEach(th=>{
+      th.style.position='sticky'; th.style.top=(theadTop+(row1?row1.offsetHeight:0))+'px'; th.style.zIndex='10';
+    });
+  }
 }
 
 
