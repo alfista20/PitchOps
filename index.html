@@ -4871,15 +4871,7 @@ async function enterVenueDashboard(venue){
   renderStaffTags(); renderPhotoPreviews('new');
   showScreen('screen-venue');
   window.scrollTo(0, 0);
-  // Load data then render
-  await Promise.all([refreshVenueOps(venue.id, true), refreshVenueUsage(venue.id, true)]);
-  populateOpTypeSelects();
-  renderVenueContactInfo();
-  // Reset events loaded flag for fresh load
-  if(!window._eventsLoaded) window._eventsLoaded = {};
-  window._eventsLoaded[venue.id] = false;
-  loadVenueEvents(venue.id).catch(()=>{});
-  // Show welcome screen first, not directly the log tab
+  // Show welcome immediately — before data loads
   showVenueWelcome();
   // Set welcome screen venue name and project — reuse proj already fetched above
   const wname=document.getElementById('welcome-venue-name');
@@ -4887,14 +4879,21 @@ async function enterVenueDashboard(venue){
   if(wname) wname.textContent=venue.name;
   if(wtag) wtag.textContent=proj?proj.name:'';
   applyTranslations(state.lang);
-  // Show onboarding for first-time venue users
+  // Load data in background
+  await Promise.all([refreshVenueOps(venue.id, true), refreshVenueUsage(venue.id, true)]);
+  populateOpTypeSelects();
+  renderVenueContactInfo();
+  updateWelcomeBadges();
+  // Reset events loaded flag for fresh load
+  if(!window._eventsLoaded) window._eventsLoaded = {};
+  window._eventsLoaded[venue.id] = false;
+  loadVenueEvents(venue.id).catch(()=>{});
   maybeShowOnboarding(venue.id);
   } catch(err) {
     console.error('[ENTER] CRASHED:', err);
     showToast('Error: '+esc(err.message));
     showScreen('screen-venue');
-    // Force show welcome even if crash
-    document.getElementById('venue-welcome').style.display='flex';
+    showVenueWelcome();
   }
 }
 
@@ -8873,21 +8872,6 @@ init();
     
   </div>
   <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function() {
-        // Inline minimal SW — no external file needed for single-file deployment
-        const swCode = `
-self.addEventListener('install', e => self.skipWaiting());
-self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
-self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => new Response('', {status: 503}))));
-`;
-        const blob = new Blob([swCode], {type: 'application/javascript'});
-        const swUrl = URL.createObjectURL(blob);
-        navigator.serviceWorker.register(swUrl)
-          .then(function(reg){ URL.revokeObjectURL(swUrl); })
-          .catch(function(err){ console.warn('[PitchOps] SW registration failed:', err); });
-      });
-    }
     function updateOnlineStatus() {
       var banner = document.getElementById('offline-banner');
       if (banner) banner.style.display = navigator.onLine ? 'none' : 'block';
