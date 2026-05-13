@@ -974,6 +974,7 @@ button,input,select,textarea{}
     </div>
   </div>
 </div>
+</div>
 
 <!-- ══ VENUE DASHBOARD ══ -->
 <div id="screen-venue" class="screen">
@@ -4694,22 +4695,15 @@ async function removeVenueFromProject(e,vid){
 // ════════════════════════════════════════
 // ── VENUE WELCOME SCREEN ──
 function showVenueWelcome(){
-  const vw = document.getElementById('venue-welcome');
-  const sv = document.getElementById('screen-venue');
-  vw.style.display='flex';
-  console.log('[PitchOps] showVenueWelcome: vw display='+vw.style.display+' sv active='+sv.classList.contains('active'));
+  document.getElementById('venue-welcome').style.display='flex';
   // Hide all direct children except venue-welcome, venue-menu, venue-menu-overlay
-  Array.from(sv.children).forEach(el=>{
+  Array.from(document.getElementById('screen-venue').children).forEach(el=>{
     if(!['venue-welcome','venue-menu','venue-menu-overlay'].includes(el.id))
       el.style.display='none';
   });
   const venue=state.venues.find(v=>v.id===state.currentVenueId);
   loadWelcomeWeather(venue?venue.city:'');
   updateWelcomeBadges();
-  // Diagnostic: check rendered dimensions after a tick
-  setTimeout(()=>{
-    console.log('[PitchOps] DIMENSIONS: sv.offsetHeight='+sv.offsetHeight+' vw.offsetHeight='+vw.offsetHeight+' body.offsetHeight='+document.body.offsetHeight+' vw.getBCR='+JSON.stringify(vw.getBoundingClientRect()));
-  }, 100);
 }
 
 function updateWelcomeBadges(){
