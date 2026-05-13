@@ -4892,6 +4892,7 @@ async function enterVenueDashboard(venue){
   } catch(err) {
     console.error('[ENTER] CRASHED:', err);
     showToast('Error: '+esc(err.message));
+    showScreen('screen-venue');
     // Force show welcome even if crash
     document.getElementById('venue-welcome').style.display='flex';
   }
@@ -5809,35 +5810,41 @@ async function init(){
 
   setLang(state.lang);
 
-  const params=new URLSearchParams(window.location.search);
+  try {
+    const params=new URLSearchParams(window.location.search);
 
-  // check ?view= — project viewer flow
-  const viewTok=params.get('view');
-  if(viewTok){
-    showLoading(true);
-    const {data:projs}=await supa.from('pitchops_projects').select('*').eq('viewer_token',viewTok);
-    showLoading(false);
-    if(projs&&projs.length){
-      const proj=dbToProject(projs[0]);
-      await enterViewerDashboard(proj);
-      return;
+    // check ?view= — project viewer flow
+    const viewTok=params.get('view');
+    if(viewTok){
+      showLoading(true);
+      const {data:projs}=await supa.from('pitchops_projects').select('*').eq('viewer_token',viewTok);
+      showLoading(false);
+      if(projs&&projs.length){
+        const proj=dbToProject(projs[0]);
+        await enterViewerDashboard(proj);
+        return;
+      }
+      showToast(t('toast_invalid_link'));
     }
-    showToast(t('toast_invalid_link'));
-  }
 
-  // check ?token= — venue manager flow
-  const tok=params.get('token');
-  if(tok){
-    showLoading(true);
-    const {data:venues} = await supa.from('pitchops_venues').select('*').eq('token',tok);
-    showLoading(false);
-    if(venues&&venues.length){
-      const venue=dbToVenue(venues[0]);
-      state.venues=[venue];
-      await enterVenueDashboard(venue);
-      return;
+    // check ?token= — venue manager flow
+    const tok=params.get('token');
+    if(tok){
+      showLoading(true);
+      const {data:venues} = await supa.from('pitchops_venues').select('*').eq('token',tok);
+      showLoading(false);
+      if(venues&&venues.length){
+        const venue=dbToVenue(venues[0]);
+        state.venues=[venue];
+        await enterVenueDashboard(venue);
+        return;
+      }
+      showToast(t('toast_invalid_token'));
     }
-    showToast(t('toast_invalid_token'));
+  } catch(err){
+    showLoading(false);
+    console.error('[init] error:', err);
+    showToast('Error: '+esc(err.message));
   }
   showScreen('screen-login');
 }
