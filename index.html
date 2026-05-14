@@ -1732,7 +1732,7 @@ let state = {
   projects: [],
   venues: [],
   operations: [],
-  opTypes: ['Mowing','Aeration','Scarifying','Top dressing','Seeding','Fertilizing','Irrigation check','Line marking','Pest/disease treatment'],
+  opTypes: [], // array of {id, name, name_en, name_pl, name_es, name_fr, name_de, name_pt}
   currentVenueId: null,
   currentProjectId: null,
   currentViewerProjectId: null,
@@ -1794,7 +1794,7 @@ async function loadAll() {
     state.venues = (ven.data||[]).map(dbToVenue);
     state.operations = (ops.data||[]).map(dbToOp);
     state_admin_usage = (usage.data||[]).map(dbToUsage);
-    state.opTypes = (types.data||[]).map(tp=>tp.name);
+    state.opTypes = (types.data||[]);
     showLoading(false);
     return true; // success
   } catch(e) {
@@ -1836,7 +1836,7 @@ async function refreshProjectOps(projectId, silent=false){
     // Merge: keep ops from other venues, replace ops for this project's venues
     state.operations = state.operations.filter(o=>!vids.includes(o.venueId))
       .concat((ops.data||[]).map(dbToOp));
-    state.opTypes = (types.data||[]).map(tp=>tp.name);
+    state.opTypes = (types.data||[]);
   } catch(e) { showToast('Error loading data: '+esc(e.message)); }
   if(!silent) showLoading(false);
 
@@ -1857,7 +1857,7 @@ async function refreshVenueOps(venueId, silent=false){
       supa.from('pitchops_op_types').select('*').order('name'),
     ]);
     state.operations = state.operations.filter(o=>o.venueId!==venueId).concat((ops.data||[]).map(dbToOp));
-    state.opTypes = (types.data||[]).map(tp=>tp.name);
+    state.opTypes = (types.data||[]);
   } catch(e) {
     if(!silent) showToast('⚠️ Could not load data — check your connection');
   }
@@ -3849,6 +3849,10 @@ function setLang(l){
   state.lang=l; try{localStorage.setItem('pitchops_lang',l);}catch(e){}
   document.documentElement.lang=l;
   applyTranslations(l);
+  // Refresh op type dropdowns and lists with new language
+  populateOpTypeSelects();
+  if(typeof renderOpTypesList==='function') renderOpTypesList();
+  if(typeof _renderSettingsOpTypes==='function') _renderSettingsOpTypes();
 }
 
 // ════════════════════════════════════════
@@ -3969,7 +3973,7 @@ async function enterViewerDashboard(proj){
     state.operations = (ops_res.data||[]).map(dbToOp);
   } else { state.operations=[]; }
   const types_res = await supa.from('pitchops_op_types').select('*').order('name');
-  state.opTypes = (types_res.data||[]).map(tp=>tp.name);
+  state.opTypes = (types_res.data||[]);
   showLoading(false);
 
   const venues=projectVenues(proj.id);
@@ -3999,7 +4003,7 @@ async function enterViewerDashboard(proj){
 
   // populate viewer filters
   document.getElementById('vw-filter-venue').innerHTML=`<option value="">${t('all_venues')}</option>`+venues.map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('');
-  document.getElementById('vw-filter-type').innerHTML=`<option value="">${t('all_types')||'All types'}</option>`+state.opTypes.map(tp=>`<option value="${esc(tp)}">${esc(tp)}</option>`).join('');
+  document.getElementById('vw-filter-type').innerHTML=`<option value="">${t('all_types')||'All types'}</option>`+state.opTypes.map(tp=>`<option value="${esc(opTypeKey(tp))}">  ${esc(opTypeName(tp))}</option>`).join('');
   renderViewerOps();
   showScreen('screen-viewer');
   window.scrollTo(0, 0);
@@ -4049,7 +4053,7 @@ function renderViewerOps(resetPage=true){
     return `<tr>
       <td style="white-space:nowrap;font-size:12px">${formatDateOnly(op.date)}</td>
       <td><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:${venue?.color||'#888'}"></span>${esc(venue?.name||'')}</span></td>
-      <td><span class="badge" style="background:${badge.bg};color:${badge.fg}">${esc(op.type)}</span></td>
+      <td><span class="badge" style="background:${badge.bg};color:${badge.fg}">${esc(opTypeDisplay(op.type))}</span></td>
       <td style="font-size:12px">${esc(op.zone||'—')}</td>
       <td style="font-size:12px">${esc(staffStr)}</td>
       <td style="font-size:12px;max-width:200px;white-space:pre-wrap;word-break:break-word">${esc(op.notes||'')}</td>
@@ -4596,7 +4600,7 @@ function renderDetailOps(resetPage=true){
     return `<tr>
       <td style="white-space:nowrap;font-size:12px">${formatDateOnly(op.date)}</td>
       <td><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:${venue?.color||'#888'}"></span>${esc(venue?.name||'Unknown')}</span></td>
-      <td><span class="badge" style="background:${badge.bg};color:${badge.fg}">${esc(op.type)}</span></td>
+      <td><span class="badge" style="background:${badge.bg};color:${badge.fg}">${esc(opTypeDisplay(op.type))}</span></td>
       <td style="font-size:12px">${esc(op.zone||'—')}</td>
       <td style="font-size:12px">${esc(staffStr)}</td>
       <td style="font-size:12px;max-width:220px">
@@ -4964,7 +4968,7 @@ function renderVenueStats(){
   document.getElementById('stat-total').textContent=thisMonth.length;
   if(ops.length){ const now=new Date(); const diff=Math.floor((now-new Date(ops[0].date+'T12:00:00'))/86400000); document.getElementById('stat-last').textContent=diff===0?t('today'):diff+'d'; }
   else document.getElementById('stat-last').textContent='—';
-  if(ops.length){ const freq={}; ops.forEach(o=>freq[o.type]=(freq[o.type]||0)+1); const top=Object.entries(freq).sort((a,b)=>b[1]-a[1])[0]; document.getElementById('stat-common').textContent=top?top[0].slice(0,7):'—'; }
+  if(ops.length){ const freq={}; ops.forEach(o=>freq[o.type]=(freq[o.type]||0)+1); const top=Object.entries(freq).sort((a,b)=>b[1]-a[1])[0]; document.getElementById('stat-common').textContent=top?opTypeDisplay(top[0]).slice(0,7):'—'; }
   else document.getElementById('stat-common').textContent='—';
 }
 
@@ -5009,7 +5013,7 @@ function renderVenueHistory(resetPage=true){
       <div style="flex:1;padding:10px 12px;display:flex;align-items:flex-start;gap:10px">
         <div style="width:36px;height:36px;border-radius:8px;background:${badge.bg};color:${badge.fg};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">${badge.abbr}</div>
         <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:600;color:var(--navy)">${esc(op.type)}</div>
+          <div style="font-size:13px;font-weight:600;color:var(--navy)">${esc(opTypeDisplay(op.type))}</div>
           ${meta?`<div style="font-size:11px;color:var(--text-muted);margin-top:2px">${esc(meta)}</div>`:''}
           ${op.notes?`<div style="font-size:11px;color:var(--text-hint);font-style:italic;margin-top:2px">${esc(op.notes)}</div>`:''}
           ${op.photos&&op.photos.length?`<div class="admin-photo-strip" style="margin-top:6px">${op.photos.map((p,i)=>`<img src="${p}" loading="lazy" alt="Photo ${i+1}" onclick="openLightboxFromOp('${op.id}',${i})" style="border-radius:6px">`).join('')}</div>`:''}
@@ -5249,74 +5253,112 @@ async function deleteOperation(){
 function populateOpTypeSelects(){
   ['new-op-type','edit-op-type','edit-plan-op-type'].forEach(id=>{
     const s=document.getElementById(id); if(!s) return;
-    s.innerHTML=state.opTypes.map(tp=>`<option value="${esc(tp)}">${esc(tp)}</option>`).join('');
+    s.innerHTML=state.opTypes.map(tp=>`<option value="${esc(opTypeKey(tp))}">${esc(opTypeName(tp))}</option>`).join('');
   });
   const ft=document.getElementById('filter-type');
-  if(ft) ft.innerHTML=`<option value="">${t('all_types')||'All types'}</option>`+state.opTypes.map(tp=>`<option value="${esc(tp)}">${esc(tp)}</option>`).join('');
+  if(ft) ft.innerHTML=`<option value="">${t('all_types')||'All types'}</option>`+state.opTypes.map(tp=>`<option value="${esc(opTypeKey(tp))}">${esc(opTypeName(tp))}</option>`).join('');
 }
 function openManageTypesModal(){ renderOpTypesList(); openModal('modal-op-types'); }
 function renderOpTypesList(){
   // Modal list
   const modal = document.getElementById('op-types-list');
   if(modal) modal.innerHTML=state.opTypes.map((tp,i)=>`
-    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
-      <input value="${esc(tp)}" data-orig="${esc(tp)}"
-        style="flex:1;font-size:13px;padding:5px 8px;border:1px solid transparent;border-radius:6px;background:transparent;outline:none"
-        onfocus="this.style.border='1px solid var(--blue)';this.style.background='white'"
-        onblur="renameOpType(${i},this)"
-        onkeydown="if(event.key==='Enter')this.blur()"
-      />
-      <button class="btn btn-danger btn-sm" onclick="removeOpType(${i})" data-i18n="btn_remove">Remove</button>
+    <div style="padding:8px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <span style="font-size:11px;font-weight:600;color:var(--text-muted);width:28px">PL</span>
+        <input value="${esc(tp.name_pl||tp.name||'')}" data-id="${tp.id}" data-lang="name_pl"
+          style="flex:1;font-size:13px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:white;outline:none"
+          onblur="renameOpTypeLang(${i},this)" onkeydown="if(event.key==='Enter')this.blur()"/>
+        <button class="btn btn-danger btn-sm" onclick="removeOpType(${i})" data-i18n="btn_remove">Remove</button>
+      </div>
+      ${['en','es','fr','de','pt'].map(lang=>`
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
+          <span style="font-size:11px;font-weight:600;color:var(--text-muted);width:28px;text-transform:uppercase">${lang}</span>
+          <input value="${esc(tp['name_'+lang]||'')}" data-id="${tp.id}" data-lang="name_${lang}"
+            style="flex:1;font-size:12px;padding:3px 8px;border:1px solid var(--border);border-radius:6px;background:#fafbfc;outline:none;color:var(--text-muted)"
+            onblur="renameOpTypeLang(${i},this)" onkeydown="if(event.key==='Enter')this.blur()"/>
+        </div>`).join('')}
     </div>`).join('');
   // Settings panel list (if visible)
   _renderSettingsOpTypes();
 }
-async function renameOpType(i, input){
+async function renameOpTypeLang(i, input){
   if(!_guardStart('renameOpType')) return;
   try {
   input.style.border='1px solid transparent';
   input.style.background='transparent';
-  const oldName=input.dataset.orig;
-  const newName=input.value.trim();
-  if(!newName||newName===oldName){ input.value=oldName; return; }
-  if(state.opTypes.includes(newName)){ showToast(t('toast_type_exists')); input.value=oldName; return; }
-  const {error}=await supa.from('pitchops_op_types').update({name:newName}).eq('name',oldName);
-  if(error){ showToast(error.message); input.value=oldName; return; }
-  // Cascade: update existing operations with old type name in DB and local state
-  const {error:opErr}=await supa.from('pitchops_operations').update({type:newName}).eq('type',oldName);
-  if(opErr) console.warn('renameOpType: could not update operations:', opErr.message);
-  state.operations.forEach(o=>{ if(o.type===oldName) o.type=newName; });
-  state.opTypes[i]=newName;
-  input.dataset.orig=newName;
+  const id=parseInt(input.dataset.id);
+  const lang=input.dataset.lang; // e.g. 'name_pl'
+  const newVal=input.value.trim();
+  const tp=state.opTypes[i];
+  if(!tp||!newVal||newVal===(tp[lang]||'')) return;
+  const {error}=await supa.from('pitchops_op_types').update({[lang]:newVal}).eq('id',id);
+  if(error){ showToast(error.message); input.value=tp[lang]||''; return; }
+  tp[lang]=newVal;
+  // If editing name_en, cascade update operations type field
+  if(lang==='name_en'){
+    const oldEn=tp.name_en;
+    await supa.from('pitchops_operations').update({type:newVal}).eq('type',oldEn);
+    state.operations.forEach(o=>{ if(o.type===oldEn) o.type=newVal; });
+  }
   populateOpTypeSelects();
   showToast(t('toast_type_renamed'));
-  } catch(err){ showToast('Error: '+esc(err.message)); console.error('renameOpType:', err); }
+  } catch(err){ showToast('Error: '+esc(err.message)); console.error('renameOpTypeLang:', err); }
   finally { _guardEnd('renameOpType'); }
 }
 async function addOpType(){
   if(!_guardStart('addOpType')) return;
   try {
-  // Support both the modal input and the settings tab input
   const modalInput = document.getElementById('new-op-type-input');
   const settingsInput = document.getElementById('settings-new-type-input');
   const val = (settingsInput?.value.trim() || modalInput?.value.trim()) || '';
-  if(!val||state.opTypes.includes(val)){ showToast(val?t('toast_type_exists'):t('toast_type_add_hint')||'Enter a type name'); return; }
-  const {error} = await supa.from('pitchops_op_types').insert({name:val});
+  if(!val){ showToast(t('toast_type_add_hint')||'Enter a type name'); return; }
+  const srcLang = state.lang||'en';
+  // Check duplicate in current language
+  if(state.opTypes.some(tp=>opTypeName(tp).toLowerCase()===val.toLowerCase())){
+    showToast(t('toast_type_exists')); return;
+  }
+  // Auto-translate via Claude API
+  showToast('⏳ Translating...');
+  let translations = {name_pl:'',name_en:'',name_es:'',name_fr:'',name_de:'',name_pt:''};
+  translations['name_'+srcLang] = val;
+  try {
+    const langs = {en:'English',pl:'Polish',es:'Spanish',fr:'French',de:'German',pt:'Portuguese'};
+    const targets = Object.keys(langs).filter(l=>l!==srcLang);
+    const prompt = `You are a professional groundsman/groundkeeper terminology expert. Translate the following turf maintenance task type from ${langs[srcLang]} into these languages. Return ONLY a JSON object with keys: ${targets.map(l=>'name_'+l).join(', ')}. No markdown, no explanation.
+
+Task: "${val}"`;
+    const resp = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,messages:[{role:'user',content:prompt}]})
+    });
+    const data = await resp.json();
+    const text = (data.content||[]).find(c=>c.type==='text')?.text||'{}';
+    const clean = text.replace(/```json|```/g,'').trim();
+    const parsed = JSON.parse(clean);
+    Object.assign(translations, parsed);
+  } catch(e){ console.warn('Auto-translate failed:',e); }
+  // name_en is canonical storage key for operations
+  const nameEn = translations.name_en||val;
+  const {data:inserted, error} = await supa.from('pitchops_op_types').insert({
+    name:nameEn, ...translations
+  }).select().single();
   if(error){ showToast(error.message); return; }
-  state.opTypes.push(val);
+  state.opTypes.push(inserted);
   if(modalInput) modalInput.value='';
   if(settingsInput) settingsInput.value='';
   renderOpTypesList(); populateOpTypeSelects(); showToast(t('toast_type_added'));
-
   } catch(err){ showToast('Error: '+esc(err.message)); console.error('addOpType:', err); }
   finally { _guardEnd('addOpType'); }
 }
 async function removeOpType(i){
   if(!_guardStart('removeOpType')) return;
   try {
-  const name=state.opTypes[i];
-  if(!await confirmAsync((t('confirm_delete_type')||'Remove type "{name}"?').replace('{name}',name))) return;
-  const {error}=await supa.from('pitchops_op_types').delete().eq('name',name);
+  const tp=state.opTypes[i];
+  const displayName=opTypeName(tp);
+  if(!await confirmAsync((t('confirm_delete_type')||'Remove type "{name}"?').replace('{name}',displayName))) return;
+  const {error}=await supa.from('pitchops_op_types').delete().eq('id',tp.id);
   if(error){ showToast('Error: '+esc(error.message)); return; }
   state.opTypes.splice(i,1); renderOpTypesList(); populateOpTypeSelects();
   showToast(t('toast_type_removed')||'Type removed');
@@ -5846,6 +5888,29 @@ const OP_COLORS=[
   {key:'Irrigation check',bg:'#E6F1FB',fg:'#185FA5',abbr:'IRR'},{key:'Line marking',bg:'#FCEBEB',fg:'#A32D2D',abbr:'LMK'},
   {key:'Pest/disease treatment',bg:'#FAECE7',fg:'#993C1D',abbr:'PST'},
 ];
+// Translate a stored type key (name_en string from operations) to display name
+function opTypeDisplay(nameEn){
+  if(!nameEn) return '';
+  const tp = state.opTypes.find(t=>t.name_en===nameEn||t.name===nameEn);
+  if(tp) return opTypeName(tp);
+  return nameEn; // fallback if not found
+}
+
+// Returns display name of op type in current language
+function opTypeName(tp){
+  if(!tp) return '';
+  if(typeof tp==='string') return tp; // legacy fallback
+  const lang=state.lang||'en';
+  return tp['name_'+lang]||tp.name_en||tp.name||'';
+}
+
+// Returns the canonical storage name (English) for a type object or string
+function opTypeKey(tp){
+  if(!tp) return '';
+  if(typeof tp==='string') return tp;
+  return tp.name_en||tp.name||'';
+}
+
 function opBadge(type){const f=OP_COLORS.find(c=>c.key===type);if(f)return f;const b=OP_COLORS[(type.charCodeAt(0)+(type.charCodeAt(1)||0))%OP_COLORS.length];return{bg:b.bg,fg:b.fg,abbr:type.slice(0,3).toUpperCase()};}
 
 // ════════════════════════════════════════
@@ -6076,15 +6141,26 @@ function _renderSettingsOpTypes(){
     return;
   }
   el.innerHTML = state.opTypes.map((tp,i)=>`
-    <div style="display:flex;align-items:center;gap:10px;background:white;border:0.5px solid var(--border);border-radius:10px;padding:10px 14px">
-      <div style="width:9px;height:9px;border-radius:50%;background:${opBadge(tp).bg};flex-shrink:0"></div>
-      <input value="${esc(tp)}" data-orig="${esc(tp)}"
-        style="flex:1;font-size:13px;padding:3px 6px;border:1px solid transparent;border-radius:6px;background:transparent;outline:none;color:var(--text)"
-        onfocus="this.style.border='1px solid var(--blue)';this.style.background='white'"
-        onblur="renameOpType(${i},this)"
-        onkeydown="if(event.key==='Enter')this.blur()"/>
-      <button onclick="removeOpType(${i})"
-        style="width:28px;height:28px;border:none;border-radius:6px;background:#fee2e2;color:#dc2626;font-size:14px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center">✕</button>
+    <div style="background:white;border:0.5px solid var(--border);border-radius:10px;padding:10px 14px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+        <div style="width:9px;height:9px;border-radius:50%;background:${opBadge(opTypeName(tp)).bg};flex-shrink:0"></div>
+        <span style="font-size:11px;font-weight:700;color:var(--text-muted)">PL</span>
+        <input value="${esc(tp.name_pl||tp.name||'')}" data-id="${tp.id}" data-lang="name_pl"
+          style="flex:1;font-size:13px;padding:3px 6px;border:1px solid transparent;border-radius:6px;background:transparent;outline:none;color:var(--text)"
+          onfocus="this.style.border='1px solid var(--blue)';this.style.background='white'"
+          onblur="renameOpTypeLang(${i},this)" onkeydown="if(event.key==='Enter')this.blur()"/>
+        <button onclick="removeOpType(${i})"
+          style="width:28px;height:28px;border:none;border-radius:6px;background:#fee2e2;color:#dc2626;font-size:14px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center">✕</button>
+      </div>
+      ${['en','es','fr','de','pt'].map(lang=>`
+        <div style="display:flex;align-items:center;gap:10px;margin-top:2px">
+          <div style="width:9px;height:9px;flex-shrink:0"></div>
+          <span style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;min-width:20px">${lang}</span>
+          <input value="${esc(tp['name_'+lang]||'')}" data-id="${tp.id}" data-lang="name_${lang}"
+            style="flex:1;font-size:12px;padding:2px 6px;border:1px solid transparent;border-radius:6px;background:transparent;outline:none;color:var(--text-muted)"
+            onfocus="this.style.border='1px solid var(--blue)';this.style.background='white'"
+            onblur="renameOpTypeLang(${i},this)" onkeydown="if(event.key==='Enter')this.blur()"/>
+        </div>`).join('')}
     </div>`).join('');
 }
 
@@ -6114,7 +6190,7 @@ function dStrOf(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2
 function _buildOpChip(o, dStr, vid, chipStyle, cls='gantt-chip'){
   const cs=chipStyle[o.status]||chipStyle.planned;
   const tl=o.timeFrom&&o.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${o.timeFrom}–${o.timeTo}</span>`:'';
-  return `<div draggable="true" class="${cls}" ondragstart="onDragStart(event,'op','${o.id}','${dStr}','${vid}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditModal('${o.id}')" style="${cs}">${esc(o.type)}${tl}</div>`;
+  return `<div draggable="true" class="${cls}" ondragstart="onDragStart(event,'op','${o.id}','${dStr}','${vid}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditModal('${o.id}')" style="${cs}">${esc(opTypeDisplay(o.type))}${tl}</div>`;
 }
 function _buildUsageChip(u, dStr, vid, usageChipStyle, cls='gantt-chip'){
   const cs=usageChipStyle[u.status]||usageChipStyle.planned;
@@ -6312,7 +6388,7 @@ function renderVenueUpcoming(){
       <div style="width:4px;background:${sc.bar};flex-shrink:0"></div>
 <div style="flex:1;padding:10px 12px;background:${isToday?sc.bg:'white'}">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-          <div style="font-size:14px;font-weight:600;color:var(--navy)">${esc(op.type)}</div>
+          <div style="font-size:14px;font-weight:600;color:var(--navy)">${esc(opTypeDisplay(op.type))}</div>
           <span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:${sc.bg};color:${sc.color};flex-shrink:0">${sc.icon} ${sc.label}</span>
         </div>
         <div style="display:flex;align-items:center;gap:10px;margin-top:4px;flex-wrap:wrap">
@@ -6907,7 +6983,7 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
                       .map(o=>isPast&&o.status==='planned'?{...o,status:'missed'}:o);
       const dUse = usage.filter(u=>(u.date||'').slice(0,10)===dStr);
       const items = [
-        ...dOps.map(o=>({action:'edit-op',id:o.id,label:o.type,st:CS[o.status]||CS.planned})),
+        ...dOps.map(o=>({action:'edit-op',id:o.id,label:opTypeDisplay(o.type),st:CS[o.status]||CS.planned})),
         ...dUse.map(u=>({action:'edit-usage',id:u.id,label:u.usageType||'Usage',st:UB})),
       ];
       // Dynamic chip limit: how many chips fit in remaining space after bars
@@ -8437,7 +8513,7 @@ function updateCompareMetricDetail(){
   if(metric==='task-hours-type'){
     if(detail){ detail.style.display='block';
       const sel=document.getElementById('compare-task-type');
-      if(sel) sel.innerHTML=state.opTypes.map(tp=>`<option value="${esc(tp)}">${esc(tp)}</option>`).join('');
+      if(sel) sel.innerHTML=state.opTypes.map(tp=>`<option value="${esc(opTypeKey(tp))}">${esc(opTypeName(tp))}</option>`).join('');
     }
     if(usageWrap) usageWrap.style.display='none';
   } else if(metric==='usage-hours-type'){
