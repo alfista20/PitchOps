@@ -1163,7 +1163,7 @@ button,input,select,textarea{}
           </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%">
-          <input type="text" id="venue-hist-search" placeholder="🔍 Search..." inputmode="search" oninput="_dRenderVenueHistory()" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;outline:none;background:#f8fafc;width:100%;box-sizing:border-box"/>
+          <input type="text" id="venue-hist-search" placeholder="🔍 Search..."  inputmode="search" oninput="_dRenderVenueHistory()" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;outline:none;background:#f8fafc;width:100%;box-sizing:border-box"/>
           <select id="venue-hist-status" onchange="renderVenueHistory(true)" style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;background:#f8fafc;outline:none;width:100%;box-sizing:border-box">
             <option value="">All status</option>
             <option value="completed">Completed</option>
@@ -1171,11 +1171,11 @@ button,input,select,textarea{}
             <option value="inprogress">In progress</option>
             <option value="planned">Planned</option>
           </select>
-          <input type="text" id="venue-hist-from" placeholder="From date"
+          <input type="text" id="venue-hist-from" placeholder="From date" data-i18n-placeholder="lbl_from_date"
           onfocus="this.type='date'" onblur="if(!this.value)this.type='text'"
           onchange="renderVenueHistory(true)"
           style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;background:#f8fafc;outline:none;width:100%;box-sizing:border-box;color:var(--text)"/>
-          <input type="text" id="venue-hist-to" placeholder="To date"
+          <input type="text" id="venue-hist-to" placeholder="To date" data-i18n-placeholder="lbl_to_date"
           onfocus="this.type='date'" onblur="if(!this.value)this.type='text'"
           onchange="renderVenueHistory(true)"
           style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;background:#f8fafc;outline:none;width:100%;box-sizing:border-box;color:var(--text)"/>
@@ -1218,11 +1218,11 @@ button,input,select,textarea{}
             <option value="Training Session">Training Session</option>
             <option value="Other">Other</option>
           </select>
-          <input type="text" id="venue-usage-from" placeholder="From date"
+          <input type="text" id="venue-usage-from" placeholder="From date" data-i18n-placeholder="lbl_from_date"
           onfocus="this.type='date'" onblur="if(!this.value)this.type='text'"
           onchange="renderVenueUsageHistory(true)"
           style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;background:#f8fafc;outline:none;width:100%;box-sizing:border-box;color:var(--text)"/>
-          <input type="text" id="venue-usage-to" placeholder="To date"
+          <input type="text" id="venue-usage-to" placeholder="To date" data-i18n-placeholder="lbl_to_date"
           onfocus="this.type='date'" onblur="if(!this.value)this.type='text'"
           onchange="renderVenueUsageHistory(true)"
           style="padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:13px;background:#f8fafc;outline:none;width:100%;box-sizing:border-box;color:var(--text)"/>
@@ -3744,9 +3744,18 @@ function applyTranslations(l){
     const sel = document.getElementById(id);
     if(sel?.options[0] && sel.options[0].value === '') sel.options[0].textContent = label;
   });
-  // Status filter (venue history)
+  // Status filter (venue history) — translate all options
   const statusSel = document.getElementById('venue-hist-status');
-  if(statusSel?.options[0] && statusSel.options[0].value === '') statusSel.options[0].textContent = allStatusLabel;
+  if(statusSel){
+    const statusMap = {
+      '': allStatusLabel,
+      'completed': T.status_completed||'Completed',
+      'missed':    T.status_missed||'Missed',
+      'inprogress':T.status_inprogress||'In progress',
+      'planned':   T.status_planned||'Planned'
+    };
+    Array.from(statusSel.options).forEach(o=>{ if(statusMap[o.value]!==undefined) o.textContent=statusMap[o.value]; });
+  }
 
   // ── Zone select options (Log Task modal) ──
   const zoneOpts=[
