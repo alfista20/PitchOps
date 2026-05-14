@@ -5373,6 +5373,19 @@ async function renameOpTypeLang(i, input){
   } catch(err){ showToast('Error: '+esc(err.message)); console.error('renameOpTypeLang:', err); }
   finally { _guardEnd('renameOpType'); }
 }
+
+async function _autoTranslate(text, srcLang, domain){
+  // Attempt via Supabase Edge Function; falls back silently
+  try{
+    const r=await fetch('https://dqlcgqfkyvzneakgcyxq.supabase.co/functions/v1/translate',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer sb_publishable_8_HjwuO-JgyzcpahkWXepg_Z-v3UUYm'},
+      body:JSON.stringify({text,srcLang,domain})
+    });
+    if(r.ok) return await r.json();
+  }catch(e){console.warn('_autoTranslate failed:',e);}
+  return {};
+}
 async function addOpType(){
   if(!_guardStart('addOpType')) return;
   try {
@@ -5389,23 +5402,7 @@ async function addOpType(){
   showToast('⏳ Translating...');
   let translations = {name_pl:'',name_en:'',name_es:'',name_fr:'',name_de:'',name_pt:''};
   translations['name_'+srcLang] = val;
-  try {
-    const langs = {en:'English',pl:'Polish',es:'Spanish',fr:'French',de:'German',pt:'Portuguese'};
-    const targets = Object.keys(langs).filter(l=>l!==srcLang);
-    const prompt = `You are a professional groundsman/groundkeeper terminology expert. Translate the following turf maintenance task type from ${langs[srcLang]} into these languages. Return ONLY a JSON object with keys: ${targets.map(l=>'name_'+l).join(', ')}. No markdown, no explanation.
-
-Task: "${val}"`;
-    const resp = await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,messages:[{role:'user',content:prompt}]})
-    });
-    const data = await resp.json();
-    const text = (data.content||[]).find(c=>c.type==='text')?.text||'{}';
-    const clean = text.replace(/```json|```/g,'').trim();
-    const parsed = JSON.parse(clean);
-    Object.assign(translations, parsed);
-  } catch(e){ console.warn('Auto-translate failed:',e); }
+  Object.assign(translations, await _autoTranslate(val,srcLang,'groundsman task type'));
   // name_en is canonical storage key for operations
   const nameEn = translations.name_en||val;
   const {data:inserted, error} = await supa.from('pitchops_op_types').insert({
@@ -6403,17 +6400,7 @@ async function addUsageType(){
     showToast('⏳ Translating...');
     let translations={name_pl:'',name_en:'',name_es:'',name_fr:'',name_de:'',name_pt:''};
     translations['name_'+srcLang]=val;
-    try{
-      const langs={en:'English',pl:'Polish',es:'Spanish',fr:'French',de:'German',pt:'Portuguese'};
-      const targets=Object.keys(langs).filter(l=>l!==srcLang);
-      const prompt=`You are a sports venue management expert. Translate this pitch usage type from ${langs[srcLang]} into these languages. Return ONLY a JSON object with keys: ${targets.map(l=>'name_'+l).join(', ')}. No markdown.
-
-Usage type: "${val}"`;
-      const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:200,messages:[{role:'user',content:prompt}]})});
-      const data=await resp.json();
-      const text=(data.content||[]).find(c=>c.type==='text')?.text||'{}';
-      Object.assign(translations,JSON.parse(text.replace(/```json|```/g,'').trim()));
-    }catch(e){console.warn('Auto-translate failed:',e);}
+    Object.assign(translations,await _autoTranslate(val,srcLang,'sports venue usage type'));
     const nameEn=translations.name_en||val;
     const {data:inserted,error}=await supa.from('pitchops_usage_types').insert({...translations}).select().single();
     if(error){showToast(error.message);return;}
@@ -6449,13 +6436,7 @@ async function _retranslateUsageType(i){
   if(!enName) return;
   showToast('⏳ Re-translating...');
   try{
-    const prompt=`You are a sports venue management expert. Translate this pitch usage type from English into Polish, Spanish, French, German, Portuguese. Return ONLY a JSON object with keys: name_pl, name_es, name_fr, name_de, name_pt. No markdown.
-
-Usage type: "${enName}"`;
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:200,messages:[{role:'user',content:prompt}]})});
-    const data=await resp.json();
-    const text=(data.content||[]).find(c=>c.type==='text')?.text||'{}';
-    const parsed=JSON.parse(text.replace(/```json|```/g,'').trim());
+    const parsed=await _autoTranslate(enName,'en','sports venue usage type');
     const {error}=await supa.from('pitchops_usage_types').update(parsed).eq('id',tp.id);
     if(error){showToast(error.message);return;}
     Object.assign(tp,parsed);
@@ -6474,10 +6455,7 @@ async function _retranslateOpType(i){
     const prompt=`You are a professional groundsman/groundkeeper terminology expert. Translate this turf maintenance task from English into the following languages. Return ONLY a JSON object with keys: name_pl, name_es, name_fr, name_de, name_pt. No markdown.
 
 Task: "${enName}"`;
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,messages:[{role:'user',content:prompt}]})});
-    const data=await resp.json();
-    const text=(data.content||[]).find(c=>c.type==='text')?.text||'{}';
-    const parsed=JSON.parse(text.replace(/```json|```/g,'').trim());
+    const parsed=await _autoTranslate(enName,'en','groundsman task type');
     const {error}=await supa.from('pitchops_op_types').update(parsed).eq('id',tp.id);
     if(error){showToast(error.message);return;}
     Object.assign(tp,parsed);
