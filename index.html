@@ -6279,20 +6279,37 @@ function renderGantt(){
     scrollBody.addEventListener('scroll',()=>{ stickyHead.scrollLeft=scrollBody.scrollLeft; });
   }
 
-  // Sync column widths: measure body table cols and apply to head table
+  // Sync column widths after layout is complete
   requestAnimationFrame(()=>{
     const bodyTable=document.getElementById('gantt-body-table');
     const headTable=document.getElementById('gantt-head-table');
+    const stickyHead=document.getElementById('gantt-sticky-head');
     if(!bodyTable||!headTable) return;
-    const bodyCells=bodyTable.querySelector('tbody tr')?.cells;
-    const headCells=headTable.querySelector('thead tr')?.cells;
-    if(bodyCells&&headCells){
-      Array.from(bodyCells).forEach((td,i)=>{
-        if(headCells[i]) headCells[i].style.width=td.offsetWidth+'px';
+    // Get widths from each col in first tbody row
+    const bodyRow=bodyTable.querySelector('tbody tr');
+    if(!bodyRow) return;
+    const bodyCells=Array.from(bodyRow.cells);
+    // Apply to BOTH header rows
+    [0,1].forEach(rowIdx=>{
+      const headRow=headTable.querySelectorAll('thead tr')[rowIdx];
+      if(!headRow) return;
+      const headCells=Array.from(headRow.cells);
+      let bodyIdx=0;
+      headCells.forEach(th=>{
+        const span=parseInt(th.colSpan)||1;
+        // sum widths of spanned body cells
+        let w=0;
+        for(let s=0;s<span;s++) w+=(bodyCells[bodyIdx+s]?.offsetWidth||0);
+        th.style.width=w+'px';
+        th.style.minWidth=w+'px';
+        th.style.maxWidth=w+'px';
+        bodyIdx+=span;
       });
-    }
-    // Make sticky head same width as body table
-    headTable.style.width=bodyTable.offsetWidth+'px';
+    });
+    const totalW=bodyTable.offsetWidth;
+    headTable.style.width=totalW+'px';
+    headTable.style.minWidth=totalW+'px';
+    if(stickyHead) stickyHead.style.width=(document.getElementById('gantt-scroll-body')?.offsetWidth||totalW)+'px';
   });
 }
 
