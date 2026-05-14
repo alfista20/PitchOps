@@ -559,8 +559,7 @@ button,input,select,textarea{}
         <select id="filter-usage-venue" onchange="renderDetailUsage(true)"><option value="">All venues</option></select>
         <select id="filter-usage-type" onchange="renderDetailUsage(true)">
           <option value="">All types</option>
-          <option value="Match Day">Match Day</option>
-          <option value="Training Session">Training Session</option>
+          <!-- usage types loaded dynamically -->
           <option value="Other">Other</option>
         </select>
         <input type="date" id="filter-usage-from" onchange="renderDetailUsage(true)"/>
@@ -684,8 +683,7 @@ button,input,select,textarea{}
             <div id="compare-usage-type-wrap" style="display:none;margin-top:6px">
               <select id="compare-usage-type" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px">
                 <option value="all">All types</option>
-                <option value="Match Day">Match Day</option>
-                <option value="Training Session">Training Session</option>
+                <!-- usage types loaded dynamically -->
                 <option value="Other">Other</option>
               </select>
             </div>
@@ -771,6 +769,16 @@ button,input,select,textarea{}
         <span style="color:var(--text-hint);font-size:18px">›</span>
       </div>
 
+      <div onclick="openSettingsSection('usage-types')" style="background:white;border:0.5px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background .12s" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+        <div style="width:38px;height:38px;border-radius:10px;background:#E1F5EE;display:flex;align-items:center;justify-content:justify-content:center;font-size:18px;flex-shrink:0">⚽</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:14px;font-weight:600;color:var(--navy)" data-i18n="settings_usage_bank">Usage types</div>
+          <div style="font-size:12px;color:var(--text-hint);margin-top:1px" data-i18n="settings_usage_bank_desc">Edit available usage categories</div>
+        </div>
+        <div id="settings-usage-types-count" style="background:#E1F5EE;color:#0F6E56;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;flex-shrink:0"></div>
+        <span style="color:var(--text-hint);font-size:18px">›</span>
+      </div>
+
       <!-- Viewer link row -->
       <div onclick="openSettingsSection('link')" style="background:white;border:0.5px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background .12s" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
         <div style="width:38px;height:38px;border-radius:10px;background:#FAEEDA;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🔗</div>
@@ -840,7 +848,47 @@ button,input,select,textarea{}
             onkeydown="if(event.key==='Enter')addOpType()"/>
           <button class="btn btn-primary btn-sm" onclick="addOpType()" data-i18n="btn_add">Add</button>
         </div>
-        <div id="settings-op-types-list" style="display:flex;flex-direction:column;gap:6px"></div>
+        <div style="position:relative;margin-bottom:4px">
+          <input id="settings-type-search" type="text" placeholder="Search..." autocomplete="off"
+            oninput="_renderSettingsOpTypes()"
+            style="width:100%;box-sizing:border-box;padding:8px 10px 8px 32px;border:0.5px solid var(--border);border-radius:8px;font-size:13px;outline:none;background:#f8fafc"/>
+          <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--text-muted)">🔍</span>
+        </div>
+        <div id="settings-op-types-header" style="display:grid;grid-template-columns:1fr 1fr auto;padding:5px 12px;background:#f0f2f5;border:0.5px solid var(--border);border-radius:10px 10px 0 0;border-bottom:none">
+          <span style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">English</span>
+          <span id="settings-types-col2-label" style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;padding-left:8px">Polish</span>
+          <span style="width:64px"></span>
+        </div>
+        <div id="settings-op-types-list" style="display:flex;flex-direction:column;gap:0;border:0.5px solid var(--border);border-top:none;border-radius:0 0 10px 10px;overflow:hidden;background:white"></div>
+      </div>
+    </div>
+
+    <!-- SECTION: Usage types -->
+    <div id="settings-sec-usage-types" style="display:none;flex-direction:column">
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 16px 8px;border-bottom:0.5px solid var(--border);background:white;position:sticky;top:0;z-index:10">
+        <button onclick="closeSettingsSection()" style="background:none;border:none;cursor:pointer;color:var(--blue);font-size:13px;font-weight:600;padding:4px 0;display:flex;align-items:center;gap:4px">‹ <span data-i18n="tab_settings">Settings</span></button>
+        <div style="flex:1;text-align:center;font-size:15px;font-weight:700;color:var(--navy);font-family:'Syne',sans-serif" data-i18n="settings_usage_bank">Usage types</div>
+        <div style="width:60px"></div>
+      </div>
+      <div style="padding:12px 16px;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;gap:8px">
+          <input id="settings-new-usage-type-input" type="text" placeholder="New usage type..."
+            style="flex:1;padding:9px 12px;border:0.5px solid var(--border);border-radius:8px;font-size:13px;outline:none"
+            onkeydown="if(event.key==='Enter')addUsageType()"/>
+          <button class="btn btn-primary btn-sm" onclick="addUsageType()" data-i18n="btn_add">Add</button>
+        </div>
+        <div style="position:relative;margin-bottom:4px">
+          <input id="settings-usage-type-search" type="text" placeholder="Search..." autocomplete="off"
+            oninput="_renderSettingsUsageTypes()"
+            style="width:100%;box-sizing:border-box;padding:8px 10px 8px 32px;border:0.5px solid var(--border);border-radius:8px;font-size:13px;outline:none;background:#f8fafc"/>
+          <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--text-muted)">🔍</span>
+        </div>
+        <div id="settings-usage-types-header" style="display:grid;grid-template-columns:1fr 1fr auto;padding:5px 12px;background:#f0f2f5;border:0.5px solid var(--border);border-radius:10px 10px 0 0;border-bottom:none">
+          <span style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">English</span>
+          <span id="settings-usage-types-col2-label" style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;padding-left:8px">Polish</span>
+          <span style="width:64px"></span>
+        </div>
+        <div id="settings-usage-types-list" style="display:flex;flex-direction:column;gap:0;border:0.5px solid var(--border);border-top:none;border-radius:0 0 10px 10px;overflow:hidden;background:white"></div>
       </div>
     </div>
 
@@ -1733,6 +1781,7 @@ let state = {
   venues: [],
   operations: [],
   opTypes: [], // array of {id, name, name_en, name_pl, name_es, name_fr, name_de, name_pt}
+  usageTypes: [], // array of {id, name, name_en, name_pl, name_es, name_fr, name_de, name_pt}
   currentVenueId: null,
   currentProjectId: null,
   currentViewerProjectId: null,
@@ -1783,18 +1832,20 @@ async function loadAll() {
   showLoading(true);
   const cutoff = ninetyDaysAgoStr();
   try {
-    const [proj, ven, ops, usage, types] = await Promise.all([
+    const [proj, ven, ops, usage, types, utypes] = await Promise.all([
       supa.from('pitchops_projects').select('*').order('created_at'),
       supa.from('pitchops_venues').select('*').order('created_at'),
       supa.from('pitchops_operations').select('*').gte('operation_date', cutoff).order('operation_date',{ascending:false}).limit(2000),
       supa.from('pitchops_usage').select('*').gte('usage_date', cutoff).order('usage_date',{ascending:false}).limit(2000),
       supa.from('pitchops_op_types').select('*').order('name'),
+      supa.from('pitchops_usage_types').select('*').order('name'),
     ]);
     state.projects = (proj.data||[]).map(dbToProject);
     state.venues = (ven.data||[]).map(dbToVenue);
     state.operations = (ops.data||[]).map(dbToOp);
     state_admin_usage = (usage.data||[]).map(dbToUsage);
     state.opTypes = (types.data||[]);
+    state.usageTypes = (utypes.data||[]);
     showLoading(false);
     return true; // success
   } catch(e) {
@@ -1829,14 +1880,16 @@ async function refreshProjectOps(projectId, silent=false){
   if(!vids.length) return;
   if(!silent) showLoading(true);
   try {
-    const [ops, types] = await Promise.all([
+    const [ops, types, utypes] = await Promise.all([
       supa.from('pitchops_operations').select('*').in('venue_id', vids).gte('operation_date',ninetyDaysAgoStr()).order('operation_date',{ascending:false}).limit(2000),
       supa.from('pitchops_op_types').select('*').order('name'),
+      supa.from('pitchops_usage_types').select('*').order('name'),
     ]);
     // Merge: keep ops from other venues, replace ops for this project's venues
     state.operations = state.operations.filter(o=>!vids.includes(o.venueId))
       .concat((ops.data||[]).map(dbToOp));
     state.opTypes = (types.data||[]);
+    state.usageTypes = (utypes.data||[]);
   } catch(e) { showToast('Error loading data: '+esc(e.message)); }
   if(!silent) showLoading(false);
 
@@ -1852,12 +1905,14 @@ async function refreshProjectOps(projectId, silent=false){
 async function refreshVenueOps(venueId, silent=false){
   if(!silent) showLoading(true);
   try {
-    const [ops, types] = await Promise.all([
+    const [ops, types, utypes] = await Promise.all([
       supa.from('pitchops_operations').select('*').eq('venue_id', venueId).gte('operation_date',ninetyDaysAgoStr()).order('operation_date', {ascending:false}).limit(2000),
       supa.from('pitchops_op_types').select('*').order('name'),
+      supa.from('pitchops_usage_types').select('*').order('name'),
     ]);
     state.operations = state.operations.filter(o=>o.venueId!==venueId).concat((ops.data||[]).map(dbToOp));
     state.opTypes = (types.data||[]);
+    state.usageTypes = (utypes.data||[]);
   } catch(e) {
     if(!silent) showToast('⚠️ Could not load data — check your connection');
   }
@@ -3851,8 +3906,11 @@ function setLang(l){
   applyTranslations(l);
   // Refresh op type dropdowns and lists with new language
   populateOpTypeSelects();
+  populateUsageTypeSelects();
   if(typeof renderOpTypesList==='function') renderOpTypesList();
   if(typeof _renderSettingsOpTypes==='function') _renderSettingsOpTypes();
+  if(typeof _renderSettingsUsageTypes==='function') _renderSettingsUsageTypes();
+  if(typeof populateUsageTypeSelects==='function') populateUsageTypeSelects();
 }
 
 // ════════════════════════════════════════
@@ -3972,8 +4030,12 @@ async function enterViewerDashboard(proj){
     const ops_res = await supa.from('pitchops_operations').select('*').in('venue_id',vids).gte('operation_date',ninetyDaysAgoStr()).order('operation_date',{ascending:false}).limit(2000);
     state.operations = (ops_res.data||[]).map(dbToOp);
   } else { state.operations=[]; }
-  const types_res = await supa.from('pitchops_op_types').select('*').order('name');
+  const [types_res, utypes_res] = await Promise.all([
+    supa.from('pitchops_op_types').select('*').order('name'),
+    supa.from('pitchops_usage_types').select('*').order('name'),
+  ]);
   state.opTypes = (types_res.data||[]);
+  state.usageTypes = (utypes_res.data||[]);
   showLoading(false);
 
   const venues=projectVenues(proj.id);
@@ -4247,6 +4309,7 @@ async function adminLogin(){
   if(!ok) return;
   document.getElementById('load-error-banner')?.remove();
   populateOpTypeSelects();
+  populateUsageTypeSelects();
   showScreen('screen-projects');
   window.scrollTo(0, 0);
   renderProjects();
@@ -4514,6 +4577,7 @@ function renderProjectDetail(pid){
   const fv=document.getElementById('filter-venue');
   fv.innerHTML=`<option value="">${t('all_venues')}</option>`+venues.map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('');
   populateOpTypeSelects();
+  populateUsageTypeSelects();
 
   // Lazy tab rendering: only render the currently active tab's content
   const activeTab = ['ops','usage','calendar','stats','settings'].find(tab=>{
@@ -4944,6 +5008,7 @@ async function enterVenueDashboard(venue){
   // Load data in background
   await Promise.all([refreshVenueOps(venue.id, true), refreshVenueUsage(venue.id, true)]);
   populateOpTypeSelects();
+  populateUsageTypeSelects();
   renderVenueContactInfo();
   updateWelcomeBadges();
   // Reset events loaded flag for fresh load
@@ -5149,6 +5214,7 @@ async function logOperation(){
 function openEditModal(opId){
   const op=state.operations.find(o=>o.id===opId); if(!op) return;
   populateOpTypeSelects();
+  populateUsageTypeSelects();
   document.getElementById('edit-op-id').value=opId;
   document.getElementById('edit-op-type').value=op.type;
   document.getElementById('edit-op-zone').value=op.zone||'';
@@ -5251,9 +5317,18 @@ async function deleteOperation(){
 // OP TYPES
 // ════════════════════════════════════════
 function populateOpTypeSelects(){
-  ['new-op-type','edit-op-type','edit-plan-op-type'].forEach(id=>{
-    const s=document.getElementById(id); if(!s) return;
-    s.innerHTML=state.opTypes.map(tp=>`<option value="${esc(opTypeKey(tp))}">${esc(opTypeName(tp))}</option>`).join('');
+  // Build frequency map from all operations globally (by name_en key)
+  const freq={};
+  (state.operations||[]).forEach(o=>{ if(o.type) freq[o.type]=(freq[o.type]||0)+1; });
+  // Sorted by frequency desc for log task select
+  const sorted=[...state.opTypes].sort((a,b)=>(freq[opTypeKey(b)]||0)-(freq[opTypeKey(a)]||0));
+
+  const s=document.getElementById('new-op-type');
+  if(s) s.innerHTML=sorted.map(tp=>`<option value="${esc(opTypeKey(tp))}">${esc(opTypeName(tp))}</option>`).join('');
+
+  ['edit-op-type','edit-plan-op-type'].forEach(id=>{
+    const el=document.getElementById(id); if(!el) return;
+    el.innerHTML=state.opTypes.map(tp=>`<option value="${esc(opTypeKey(tp))}">${esc(opTypeName(tp))}</option>`).join('');
   });
   const ft=document.getElementById('filter-type');
   if(ft) ft.innerHTML=`<option value="">${t('all_types')||'All types'}</option>`+state.opTypes.map(tp=>`<option value="${esc(opTypeKey(tp))}">${esc(opTypeName(tp))}</option>`).join('');
@@ -5302,6 +5377,7 @@ async function renameOpTypeLang(i, input){
     state.operations.forEach(o=>{ if(o.type===oldEn) o.type=newVal; });
   }
   populateOpTypeSelects();
+  populateUsageTypeSelects();
   showToast(t('toast_type_renamed'));
   } catch(err){ showToast('Error: '+esc(err.message)); console.error('renameOpTypeLang:', err); }
   finally { _guardEnd('renameOpType'); }
@@ -5888,6 +5964,42 @@ const OP_COLORS=[
   {key:'Irrigation check',bg:'#E6F1FB',fg:'#185FA5',abbr:'IRR'},{key:'Line marking',bg:'#FCEBEB',fg:'#A32D2D',abbr:'LMK'},
   {key:'Pest/disease treatment',bg:'#FAECE7',fg:'#993C1D',abbr:'PST'},
 ];
+// ── USAGE TYPES helpers (mirror of opType* functions) ──
+function usageTypeName(tp){
+  if(!tp) return '';
+  if(typeof tp==='string') return tp;
+  const lang=state.lang||'en';
+  return tp['name_'+lang]||tp.name_en||tp.name||'';
+}
+function usageTypeKey(tp){
+  if(!tp) return '';
+  if(typeof tp==='string') return tp;
+  return tp.name_en||tp.name||'';
+}
+function usageTypeDisplay(nameEn){
+  if(!nameEn) return '';
+  const tp=state.usageTypes.find(t=>t.name_en===nameEn||t.name===nameEn);
+  if(tp) return usageTypeName(tp);
+  return nameEn;
+}
+function populateUsageTypeSelects(){
+  const freq={};
+  (state_admin_usage||[]).concat(state_usage||[]).forEach(u=>{ if(u.type) freq[u.type]=(freq[u.type]||0)+1; });
+  const sorted=[...state.usageTypes].sort((a,b)=>(freq[usageTypeKey(b)]||0)-(freq[usageTypeKey(a)]||0));
+  ['new-usage-type','edit-usage-type'].forEach(id=>{
+    const el=document.getElementById(id); if(!el) return;
+    el.innerHTML=sorted.map(tp=>`<option value="${esc(usageTypeKey(tp))}">${esc(usageTypeName(tp))}</option>`).join('');
+  });
+  // Filter selects
+  ['admin-usage-filter-type','venue-usage-filter-type'].forEach(id=>{
+    const el=document.getElementById(id); if(!el) return;
+    const cur=el.value;
+    el.innerHTML=`<option value="">${t('all_types')||'All types'}</option>`+
+      state.usageTypes.map(tp=>`<option value="${esc(usageTypeKey(tp))}">${esc(usageTypeName(tp))}</option>`).join('');
+    el.value=cur;
+  });
+}
+
 // Translate a stored type key (name_en string from operations) to display name
 function opTypeDisplay(nameEn){
   if(!nameEn) return '';
@@ -6053,6 +6165,8 @@ function renderSettingsTab(){
   const tc = document.getElementById('settings-types-count');
   if(vc) vc.textContent = venues.length;
   if(tc) tc.textContent = state.opTypes.length;
+  const utc = document.getElementById('settings-usage-types-count');
+  if(utc) utc.textContent = state.usageTypes.length;
   const proj = state.projects.find(p=>p.id===pid);
   const linkEl = document.getElementById('settings-viewer-link-text');
   if(linkEl) linkEl.textContent = proj?.viewerToken ? window.location.href.split('?')[0]+'?view='+proj.viewerToken : '—';
@@ -6060,12 +6174,13 @@ function renderSettingsTab(){
 
 function openSettingsSection(section){
   document.getElementById('settings-home').style.display = 'none';
-  ['venues','types','link'].forEach(s=>{
+  ['venues','types','usage-types','link'].forEach(s=>{
     const el = document.getElementById('settings-sec-'+s);
     if(el) el.style.display = s===section ? 'flex' : 'none';
   });
   if(section==='venues'){ _settingsVenuesShown = SETTINGS_VENUES_PAGE; _renderSettingsVenues(state.currentProjectId); }
   if(section==='types'){ _renderSettingsOpTypes(); const si=document.getElementById('settings-new-type-input'); if(si) si.value=''; }
+  if(section==='usage-types'){ _renderSettingsUsageTypes(); const si=document.getElementById('settings-new-usage-type-input'); if(si) si.value=''; }
   if(section==='link'){
     const proj = state.projects.find(p=>p.id===state.currentProjectId);
     const linkEl = document.getElementById('settings-viewer-link-text');
@@ -6076,7 +6191,7 @@ function openSettingsSection(section){
 function closeSettingsSection(){
   const home = document.getElementById('settings-home');
   if(home) home.style.display = 'flex';
-  ['venues','types','link'].forEach(s=>{
+  ['venues','types','usage-types','link'].forEach(s=>{
     const el = document.getElementById('settings-sec-'+s);
     if(el) el.style.display = 'none';
   });
@@ -6136,32 +6251,248 @@ function loadMoreSettingsVenues(){
 function _renderSettingsOpTypes(){
   const el = document.getElementById('settings-op-types-list');
   if(!el) return;
-  if(!state.opTypes.length){
-    el.innerHTML=`<div style="text-align:center;padding:1.5rem;color:var(--text-hint);font-size:13px">No task types yet</div>`;
+  const q=(document.getElementById('settings-type-search')?.value||'').toLowerCase();
+  const filtered=state.opTypes.map((tp,i)=>({tp,i})).filter(({tp})=>{
+    if(!q) return true;
+    return ['name_en','name_pl','name_es','name_fr','name_de','name_pt','name'].some(k=>(tp[k]||'').toLowerCase().includes(q));
+  });
+  if(!filtered.length){
+    el.innerHTML=`<div style="text-align:center;padding:1.5rem;color:var(--text-muted);font-size:13px">${q?'No results':'No task types yet'}</div>`;
     return;
   }
-  el.innerHTML = state.opTypes.map((tp,i)=>`
-    <div style="background:white;border:0.5px solid var(--border);border-radius:10px;padding:10px 14px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
-        <div style="width:9px;height:9px;border-radius:50%;background:${opBadge(opTypeName(tp)).bg};flex-shrink:0"></div>
-        <span style="font-size:11px;font-weight:700;color:var(--text-muted)">PL</span>
-        <input value="${esc(tp.name_pl||tp.name||'')}" data-id="${tp.id}" data-lang="name_pl"
-          style="flex:1;font-size:13px;padding:3px 6px;border:1px solid transparent;border-radius:6px;background:transparent;outline:none;color:var(--text)"
-          onfocus="this.style.border='1px solid var(--blue)';this.style.background='white'"
-          onblur="renameOpTypeLang(${i},this)" onkeydown="if(event.key==='Enter')this.blur()"/>
-        <button onclick="removeOpType(${i})"
-          style="width:28px;height:28px;border:none;border-radius:6px;background:#fee2e2;color:#dc2626;font-size:14px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center">✕</button>
+  const activeLang=state.lang||'en';
+  const previewLang=activeLang==='en'?'pl':activeLang; // second col: active lang (or PL if EN)
+  const col2Label=document.getElementById('settings-types-col2-label');
+  if(col2Label) col2Label.textContent=previewLang.toUpperCase();
+  const LANGS=['en','pl','es','fr','de','pt'];
+  const LANG_LABELS={en:'EN',pl:'PL',es:'ES',fr:'FR',de:'DE',pt:'PT'};
+  el.innerHTML=filtered.map(({tp,i},fi)=>{
+    const enVal=tp.name_en||tp.name||'';
+    const previewVal=tp['name_'+previewLang]||'';
+    const expanded=el._expanded===tp.id;
+    const isLast=fi===filtered.length-1;
+    return `<div data-type-id="${tp.id}">
+      <div style="display:grid;grid-template-columns:1fr 1fr auto;align-items:center;gap:0;padding:10px 12px;${!isLast||expanded?'border-bottom:0.5px solid var(--border);':''}cursor:default">
+        <div style="display:flex;align-items:center;gap:8px;min-width:0">
+          <div style="width:8px;height:8px;border-radius:50%;background:${opBadge(enVal).bg};flex-shrink:0"></div>
+          <span style="font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(enVal)}</span>
+        </div>
+        <span style="font-size:13px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 8px">${esc(previewVal)}</span>
+        <div style="display:flex;gap:4px;align-items:center;flex-shrink:0">
+          <button onclick="_toggleOpTypeExpand(${tp.id})"
+            style="width:28px;height:28px;border:0.5px solid var(--border);border-radius:6px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text-muted)">
+            ${expanded?'▲':'▼'}
+          </button>
+          <button onclick="removeOpType(${i})"
+            style="width:28px;height:28px;border:none;border-radius:6px;background:#fee2e2;color:#dc2626;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+        </div>
       </div>
-      ${['en','es','fr','de','pt'].map(lang=>`
-        <div style="display:flex;align-items:center;gap:10px;margin-top:2px">
-          <div style="width:9px;height:9px;flex-shrink:0"></div>
-          <span style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;min-width:20px">${lang}</span>
-          <input value="${esc(tp['name_'+lang]||'')}" data-id="${tp.id}" data-lang="name_${lang}"
-            style="flex:1;font-size:12px;padding:2px 6px;border:1px solid transparent;border-radius:6px;background:transparent;outline:none;color:var(--text-muted)"
-            onfocus="this.style.border='1px solid var(--blue)';this.style.background='white'"
-            onblur="renameOpTypeLang(${i},this)" onkeydown="if(event.key==='Enter')this.blur()"/>
-        </div>`).join('')}
-    </div>`).join('');
+      ${expanded?`
+      <div style="padding:10px 12px 14px;background:#fafbfc;border-bottom:0.5px solid var(--border)">
+        <div style="display:grid;grid-template-columns:32px 1fr;gap:5px 10px;align-items:center;margin-bottom:10px">
+          ${LANGS.map(lang=>`
+            <span style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase">${LANG_LABELS[lang]}</span>
+            <input value="${esc(tp['name_'+lang]||'')}" data-id="${tp.id}" data-lang="name_${lang}"
+              style="font-size:13px;padding:5px 8px;border:0.5px solid var(--border);border-radius:6px;background:white;outline:none;color:var(--text)"
+              onblur="renameOpTypeLang(${i},this)" onkeydown="if(event.key==='Enter')this.blur()"/>
+          `).join('')}
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:6px">
+          <button onclick="_retranslateOpType(${i})"
+            style="font-size:12px;padding:5px 12px;border:0.5px solid var(--border);border-radius:6px;background:white;cursor:pointer;color:var(--text-muted);display:flex;align-items:center;gap:5px">
+            ↻ Re-translate with AI
+          </button>
+        </div>
+      </div>`:``}
+    </div>`;
+  }).join('');
+}
+
+function _toggleOpTypeExpand(id){
+  const el=document.getElementById('settings-op-types-list');
+  if(!el) return;
+  el._expanded=(el._expanded===id)?null:id;
+  _renderSettingsOpTypes();
+}
+
+// ── USAGE TYPES MANAGEMENT ──
+function _renderSettingsUsageTypes(){
+  const el=document.getElementById('settings-usage-types-list');
+  if(!el) return;
+  const q=(document.getElementById('settings-usage-type-search')?.value||'').toLowerCase();
+  const filtered=state.usageTypes.map((tp,i)=>({tp,i})).filter(({tp})=>{
+    if(!q) return true;
+    return ['name_en','name_pl','name_es','name_fr','name_de','name_pt','name'].some(k=>(tp[k]||'').toLowerCase().includes(q));
+  });
+  const activeLang=state.lang||'en';
+  const previewLang=activeLang==='en'?'pl':activeLang;
+  const col2Label=document.getElementById('settings-usage-types-col2-label');
+  if(col2Label) col2Label.textContent=previewLang.toUpperCase();
+  const LANGS=['en','pl','es','fr','de','pt'];
+  const LANG_LABELS={en:'EN',pl:'PL',es:'ES',fr:'FR',de:'DE',pt:'PT'};
+  if(!filtered.length){
+    el.innerHTML=`<div style="text-align:center;padding:1.5rem;color:var(--text-muted);font-size:13px">${q?'No results':'No usage types yet'}</div>`;
+    return;
+  }
+  el.innerHTML=filtered.map(({tp,i},fi)=>{
+    const enVal=tp.name_en||tp.name||'';
+    const previewVal=tp['name_'+previewLang]||'';
+    const expanded=el._expanded===tp.id;
+    const isLast=fi===filtered.length-1;
+    return `<div data-utype-id="${tp.id}">
+      <div style="display:grid;grid-template-columns:1fr 1fr auto;align-items:center;gap:0;padding:10px 12px;${!isLast||expanded?'border-bottom:0.5px solid var(--border);':''}">
+        <div style="display:flex;align-items:center;gap:8px;min-width:0">
+          <span style="font-size:16px">⚽</span>
+          <span style="font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(enVal)}</span>
+        </div>
+        <span style="font-size:13px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 8px">${esc(previewVal)}</span>
+        <div style="display:flex;gap:4px;align-items:center;flex-shrink:0">
+          <button onclick="_toggleUsageTypeExpand(${tp.id})"
+            style="width:28px;height:28px;border:0.5px solid var(--border);border-radius:6px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text-muted)">
+            ${expanded?'▲':'▼'}
+          </button>
+          <button onclick="removeUsageType(${i})"
+            style="width:28px;height:28px;border:none;border-radius:6px;background:#fee2e2;color:#dc2626;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+        </div>
+      </div>
+      ${expanded?`
+      <div style="padding:10px 12px 14px;background:#fafbfc;border-bottom:0.5px solid var(--border)">
+        <div style="display:grid;grid-template-columns:32px 1fr;gap:5px 10px;align-items:center;margin-bottom:10px">
+          ${LANGS.map(lang=>`
+            <span style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase">${LANG_LABELS[lang]}</span>
+            <input value="${esc(tp['name_'+lang]||'')}" data-id="${tp.id}" data-lang="name_${lang}"
+              style="font-size:13px;padding:5px 8px;border:0.5px solid var(--border);border-radius:6px;background:white;outline:none;color:var(--text)"
+              onblur="renameUsageTypeLang(${i},this)" onkeydown="if(event.key==='Enter')this.blur()"/>
+          `).join('')}
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:6px">
+          <button onclick="_retranslateUsageType(${i})"
+            style="font-size:12px;padding:5px 12px;border:0.5px solid var(--border);border-radius:6px;background:white;cursor:pointer;color:var(--text-muted);display:flex;align-items:center;gap:5px">
+            ↻ Re-translate with AI
+          </button>
+        </div>
+      </div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function _toggleUsageTypeExpand(id){
+  const el=document.getElementById('settings-usage-types-list');
+  if(!el) return;
+  el._expanded=(el._expanded===id)?null:id;
+  _renderSettingsUsageTypes();
+}
+
+async function renameUsageTypeLang(i, input){
+  if(!_guardStart('renameUsageTypeLang')) return;
+  try{
+    input.style.border='0.5px solid var(--border)';
+    const id=parseInt(input.dataset.id);
+    const lang=input.dataset.lang;
+    const newVal=input.value.trim();
+    const tp=state.usageTypes[i];
+    if(!tp||!newVal||newVal===(tp[lang]||'')) return;
+    const {error}=await supa.from('pitchops_usage_types').update({[lang]:newVal}).eq('id',id);
+    if(error){showToast(error.message);input.value=tp[lang]||'';return;}
+    tp[lang]=newVal;
+    populateUsageTypeSelects();
+    showToast(t('toast_type_renamed'));
+  }catch(e){showToast('Error: '+esc(e.message));}
+  finally{_guardEnd('renameUsageTypeLang');}
+}
+
+async function addUsageType(){
+  if(!_guardStart('addUsageType')) return;
+  try{
+    const input=document.getElementById('settings-new-usage-type-input');
+    const val=input?.value.trim()||'';
+    if(!val){showToast(t('toast_type_add_hint')||'Enter a type name');return;}
+    if(state.usageTypes.some(tp=>usageTypeName(tp).toLowerCase()===val.toLowerCase())){showToast(t('toast_type_exists'));return;}
+    const srcLang=state.lang||'en';
+    showToast('⏳ Translating...');
+    let translations={name_pl:'',name_en:'',name_es:'',name_fr:'',name_de:'',name_pt:''};
+    translations['name_'+srcLang]=val;
+    try{
+      const langs={en:'English',pl:'Polish',es:'Spanish',fr:'French',de:'German',pt:'Portuguese'};
+      const targets=Object.keys(langs).filter(l=>l!==srcLang);
+      const prompt=`You are a sports venue management expert. Translate this pitch usage type from ${langs[srcLang]} into these languages. Return ONLY a JSON object with keys: ${targets.map(l=>'name_'+l).join(', ')}. No markdown.
+
+Usage type: "${val}"`;
+      const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:200,messages:[{role:'user',content:prompt}]})});
+      const data=await resp.json();
+      const text=(data.content||[]).find(c=>c.type==='text')?.text||'{}';
+      Object.assign(translations,JSON.parse(text.replace(/```json|```/g,'').trim()));
+    }catch(e){console.warn('Auto-translate failed:',e);}
+    const nameEn=translations.name_en||val;
+    const {data:inserted,error}=await supa.from('pitchops_usage_types').insert({name:nameEn,...translations}).select().single();
+    if(error){showToast(error.message);return;}
+    state.usageTypes.push(inserted);
+    if(input) input.value='';
+    _renderSettingsUsageTypes();
+    populateUsageTypeSelects();
+    const cnt=document.getElementById('settings-usage-types-count');
+    if(cnt) cnt.textContent=state.usageTypes.length;
+    showToast(t('toast_type_added'));
+  }catch(e){showToast('Error: '+esc(e.message));}
+  finally{_guardEnd('addUsageType');}
+}
+
+async function removeUsageType(i){
+  if(!_guardStart('removeUsageType')) return;
+  try{
+    const tp=state.usageTypes[i];
+    if(!await confirmAsync((t('confirm_delete_type')||'Remove type "{name}"?').replace('{name}',usageTypeName(tp)))) return;
+    const {error}=await supa.from('pitchops_usage_types').delete().eq('id',tp.id);
+    if(error){showToast('Error: '+esc(error.message));return;}
+    state.usageTypes.splice(i,1);
+    _renderSettingsUsageTypes();
+    populateUsageTypeSelects();
+    showToast(t('toast_type_removed')||'Type removed');
+  }catch(e){showToast('Error: '+esc(e.message));}
+  finally{_guardEnd('removeUsageType');}
+}
+
+async function _retranslateUsageType(i){
+  const tp=state.usageTypes[i]; if(!tp) return;
+  const enName=tp.name_en||tp.name||'';
+  if(!enName) return;
+  showToast('⏳ Re-translating...');
+  try{
+    const prompt=`You are a sports venue management expert. Translate this pitch usage type from English into Polish, Spanish, French, German, Portuguese. Return ONLY a JSON object with keys: name_pl, name_es, name_fr, name_de, name_pt. No markdown.
+
+Usage type: "${enName}"`;
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:200,messages:[{role:'user',content:prompt}]})});
+    const data=await resp.json();
+    const text=(data.content||[]).find(c=>c.type==='text')?.text||'{}';
+    const parsed=JSON.parse(text.replace(/```json|```/g,'').trim());
+    const {error}=await supa.from('pitchops_usage_types').update(parsed).eq('id',tp.id);
+    if(error){showToast(error.message);return;}
+    Object.assign(tp,parsed);
+    _renderSettingsUsageTypes();
+    showToast('✅ Re-translated');
+  }catch(e){showToast('Translation failed: '+e.message);}
+}
+
+async function _retranslateOpType(i){
+  const tp=state.opTypes[i]; if(!tp) return;
+  const enName=tp.name_en||tp.name||'';
+  if(!enName) return;
+  showToast('⏳ Re-translating...');
+  try{
+    const langs={pl:'Polish',es:'Spanish',fr:'French',de:'German',pt:'Portuguese'};
+    const prompt=`You are a professional groundsman/groundkeeper terminology expert. Translate this turf maintenance task from English into the following languages. Return ONLY a JSON object with keys: name_pl, name_es, name_fr, name_de, name_pt. No markdown.
+
+Task: "${enName}"`;
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,messages:[{role:'user',content:prompt}]})});
+    const data=await resp.json();
+    const text=(data.content||[]).find(c=>c.type==='text')?.text||'{}';
+    const parsed=JSON.parse(text.replace(/```json|```/g,'').trim());
+    const {error}=await supa.from('pitchops_op_types').update(parsed).eq('id',tp.id);
+    if(error){showToast(error.message);return;}
+    Object.assign(tp,parsed);
+    _renderSettingsOpTypes();
+    showToast('✅ Re-translated');
+  }catch(e){showToast('Translation failed: '+e.message);}
 }
 
 // ── GANTT ──
@@ -6195,7 +6526,7 @@ function _buildOpChip(o, dStr, vid, chipStyle, cls='gantt-chip'){
 function _buildUsageChip(u, dStr, vid, usageChipStyle, cls='gantt-chip'){
   const cs=usageChipStyle[u.status]||usageChipStyle.planned;
   const tl=u.timeFrom&&u.timeTo?`<span style="font-size:8px;opacity:.75;display:block">${u.timeFrom}–${u.timeTo}</span>`:'';
-  return `<div draggable="true" class="${cls}" ondragstart="onDragStart(event,'usage','${u.id}','${dStr}','${vid}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditUsageModal('${u.id}')" style="${cs}">⚽ ${esc(u.usageType)}${tl}</div>`;
+  return `<div draggable="true" class="${cls}" ondragstart="onDragStart(event,'usage','${u.id}','${dStr}','${vid}')" ondragend="onDragEnd(event)" onclick="event.stopPropagation();openEditUsageModal('${u.id}')" style="${cs}">⚽ ${esc(usageTypeDisplay(u.usageType))}${tl}</div>`;
 }
 function _buildChipDisplay(items, buildFn, maxVisible, overflowColor, overflowBg){
   const visible = items.slice(0, maxVisible);
@@ -6588,6 +6919,7 @@ function switchVenueTab(tab){
 
 function openLogTaskModal(dateStr, timeStr, prefillType, prefillStatus, venueId){
   populateOpTypeSelects();
+  populateUsageTypeSelects();
   document.getElementById('new-op-date').value = dateStr||todayStr();
   document.getElementById('new-op-time-from').value = timeStr||'08:00';
   document.getElementById('new-op-time-to').value = '17:00';
@@ -6984,7 +7316,7 @@ function renderMonthCalendar(venueId, gridId, monthOffset){
       const dUse = usage.filter(u=>(u.date||'').slice(0,10)===dStr);
       const items = [
         ...dOps.map(o=>({action:'edit-op',id:o.id,label:opTypeDisplay(o.type),st:CS[o.status]||CS.planned})),
-        ...dUse.map(u=>({action:'edit-usage',id:u.id,label:u.usageType||'Usage',st:UB})),
+        ...dUse.map(u=>({action:'edit-usage',id:u.id,label:usageTypeDisplay(u.usageType)||'Usage',st:UB})),
       ];
       // Dynamic chip limit: how many chips fit in remaining space after bars
       const CHIP_H = 20; // chip: 10px font + 4px padding + 2px margin + 4px buffer
@@ -7135,7 +7467,7 @@ function renderVenueUsageToday(){
       <div style="width:4px;background:${sc.bar};flex-shrink:0"></div>
       <div style="flex:1;padding:10px 12px;background:${sc.bg}">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-          <div style="font-size:14px;font-weight:600;color:var(--navy)">⚽ ${esc(u.usageType)}</div>
+          <div style="font-size:14px;font-weight:600;color:var(--navy)">⚽ ${esc(usageTypeDisplay(u.usageType))}</div>
           <span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:${sc.bg};color:${sc.color};flex-shrink:0">${sc.icon} ${sc.label}</span>
         </div>
         ${u.teamName?`<div style="font-size:12px;color:var(--text-muted);margin-top:3px">👕 ${esc(u.teamName)}</div>`:''}
@@ -7221,7 +7553,7 @@ function renderVenueUsageHistory(resetPage=true){
       <div style="flex:1;padding:10px 12px;display:flex;align-items:flex-start;gap:10px">
         <div style="width:36px;height:36px;border-radius:8px;background:#E6F1FB;color:#185FA5;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">⚽</div>
         <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:600;color:var(--navy)">${esc(u.usageType)}</div>
+          <div style="font-size:13px;font-weight:600;color:var(--navy)">${esc(usageTypeDisplay(u.usageType))}</div>
           ${u.teamName?`<div style="font-size:11px;color:var(--text-muted);margin-top:1px">👕 ${esc(u.teamName)}</div>`:''}
           ${u.notes?`<div style="font-size:11px;color:var(--text-hint);font-style:italic;margin-top:2px">${esc(u.notes)}</div>`:''}
           ${u.photos&&u.photos.length?`<div class="admin-photo-strip" style="margin-top:6px">${u.photos.map((p,i)=>`<img src="${p}" loading="lazy" alt="Photo ${i+1}" onclick="openLightboxFromUsage('${u.id}',${i})" style="border-radius:6px;cursor:pointer">`).join('')}</div>`:''}
@@ -7543,7 +7875,7 @@ function renderDetailUsage(resetPage=true){
     return `<tr>
       <td style="white-space:nowrap;font-size:12px">${formatDateOnly(u.date)}</td>
       <td><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:${venue?.color||'#888'}"></span>${esc(venue?.name||'Unknown')}</span></td>
-      <td><span style="background:${bg};color:${color};padding:3px 8px;border-radius:6px;font-size:12px;font-weight:600">⚽ ${esc(u.usageType)}</span></td>
+      <td><span style="background:${bg};color:${color};padding:3px 8px;border-radius:6px;font-size:12px;font-weight:600">⚽ ${esc(usageTypeDisplay(u.usageType))}</span></td>
       <td style="font-size:12px">${esc(u.teamName||'—')}</td>
       <td style="font-size:12px">${esc(u.zone||'—')}</td>
       <td style="font-size:12px">${esc(u.weather||'—')}</td>
@@ -8757,8 +9089,7 @@ init();
       <div class="field">
         <label data-i18n="lbl_usage_type">Usage type</label>
         <select id="usage-type-select" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14px">
-          <option value="Match Day">Match Day</option>
-          <option value="Training Session">Training Session</option>
+          <!-- usage types loaded dynamically -->
           <option value="Other">Other</option>
         </select>
       </div>
@@ -8841,8 +9172,7 @@ init();
       <div class="field">
         <label data-i18n="lbl_usage_type">Usage type</label>
         <select id="edit-usage-type">
-          <option value="Match Day">Match Day</option>
-          <option value="Training Session">Training Session</option>
+          <!-- usage types loaded dynamically -->
           <option value="Other">Other</option>
         </select>
       </div>
