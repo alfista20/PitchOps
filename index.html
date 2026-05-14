@@ -5406,7 +5406,7 @@ async function addOpType(){
   // name_en is canonical storage key for operations
   const nameEn = translations.name_en||val;
   const {data:inserted, error} = await supa.from('pitchops_op_types').insert({
-    ...translations
+    name: translations.name_en||val, ...translations
   }).select().single();
   if(error){ showToast(error.message); return; }
   state.opTypes.push(inserted);
@@ -6402,7 +6402,7 @@ async function addUsageType(){
     translations['name_'+srcLang]=val;
     Object.assign(translations,await _autoTranslate(val,srcLang,'sports venue usage type'));
     const nameEn=translations.name_en||val;
-    const {data:inserted,error}=await supa.from('pitchops_usage_types').insert({...translations}).select().single();
+    const {data:inserted,error}=await supa.from('pitchops_usage_types').insert({name:translations.name_en||val,...translations}).select().single();
     if(error){showToast(error.message);return;}
     state.usageTypes.push(inserted);
     if(input) input.value='';
@@ -6437,7 +6437,11 @@ async function _retranslateUsageType(i){
   showToast('⏳ Re-translating...');
   try{
     const parsed=await _autoTranslate(enName,'en','sports venue usage type');
-    const {error}=await supa.from('pitchops_usage_types').update(parsed).eq('id',tp.id);
+    console.log('[retranslate] parsed:', JSON.stringify(parsed));
+    console.log('[retranslate] tp.id:', tp.id);
+    if(!parsed||!Object.keys(parsed).length){showToast('No translations returned');return;}
+    const {data:updData, error}=await supa.from('pitchops_usage_types').update(parsed).eq('id',tp.id).select();
+    console.log('[retranslate] update result:', JSON.stringify(updData), error);
     if(error){showToast(error.message);return;}
     Object.assign(tp,parsed);
     const el2=document.getElementById('settings-usage-types-list');
