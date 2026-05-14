@@ -3901,7 +3901,10 @@ function setLang(l){
   if(typeof renderOpTypesList==='function') renderOpTypesList();
   if(typeof _renderSettingsOpTypes==='function') _renderSettingsOpTypes();
   if(typeof _renderSettingsUsageTypes==='function') _renderSettingsUsageTypes();
-  if(typeof populateUsageTypeSelects==='function') populateUsageTypeSelects();
+  // Re-render calendars so day names update
+  if(typeof renderGantt==='function') try{renderGantt();}catch(e){}
+  if(typeof _refreshCalendars==='function') try{_refreshCalendars();}catch(e){}
+  if(typeof renderVenueSched==='function') try{renderVenueSched();}catch(e){}
 }
 
 // ════════════════════════════════════════
