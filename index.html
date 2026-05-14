@@ -560,7 +560,7 @@ button,input,select,textarea{}
         <select id="filter-usage-type" onchange="renderDetailUsage(true)">
           <option value="">All types</option>
           <!-- usage types loaded dynamically -->
-          <option value="Other">Other</option>
+          <!-- usage types loaded dynamically -->
         </select>
         <input type="date" id="filter-usage-from" onchange="renderDetailUsage(true)"/>
         <input type="date" id="filter-usage-to" onchange="renderDetailUsage(true)"/>
@@ -684,7 +684,7 @@ button,input,select,textarea{}
               <select id="compare-usage-type" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px">
                 <option value="all">All types</option>
                 <!-- usage types loaded dynamically -->
-                <option value="Other">Other</option>
+                <!-- usage types loaded dynamically -->
               </select>
             </div>
           </div>
@@ -1264,7 +1264,7 @@ button,input,select,textarea{}
             <option value="">All types</option>
             <option value="Match Day">Match Day</option>
             <option value="Training Session">Training Session</option>
-            <option value="Other">Other</option>
+            <!-- usage types loaded dynamically -->
           </select>
           <input type="text" id="venue-usage-from" placeholder="From date" data-i18n-placeholder="lbl_from_date"
           onfocus="this.type='date'" onblur="if(!this.value)this.type='text'"
@@ -1838,7 +1838,7 @@ async function loadAll() {
       supa.from('pitchops_operations').select('*').gte('operation_date', cutoff).order('operation_date',{ascending:false}).limit(2000),
       supa.from('pitchops_usage').select('*').gte('usage_date', cutoff).order('usage_date',{ascending:false}).limit(2000),
       supa.from('pitchops_op_types').select('*').order('name'),
-      supa.from('pitchops_usage_types').select('*').order('name'),
+      supa.from('pitchops_usage_types').select('*').order('id'),
     ]);
     state.projects = (proj.data||[]).map(dbToProject);
     state.venues = (ven.data||[]).map(dbToVenue);
@@ -1883,7 +1883,7 @@ async function refreshProjectOps(projectId, silent=false){
     const [ops, types, utypes] = await Promise.all([
       supa.from('pitchops_operations').select('*').in('venue_id', vids).gte('operation_date',ninetyDaysAgoStr()).order('operation_date',{ascending:false}).limit(2000),
       supa.from('pitchops_op_types').select('*').order('name'),
-      supa.from('pitchops_usage_types').select('*').order('name'),
+      supa.from('pitchops_usage_types').select('*').order('id'),
     ]);
     // Merge: keep ops from other venues, replace ops for this project's venues
     state.operations = state.operations.filter(o=>!vids.includes(o.venueId))
@@ -1908,7 +1908,7 @@ async function refreshVenueOps(venueId, silent=false){
     const [ops, types, utypes] = await Promise.all([
       supa.from('pitchops_operations').select('*').eq('venue_id', venueId).gte('operation_date',ninetyDaysAgoStr()).order('operation_date', {ascending:false}).limit(2000),
       supa.from('pitchops_op_types').select('*').order('name'),
-      supa.from('pitchops_usage_types').select('*').order('name'),
+      supa.from('pitchops_usage_types').select('*').order('id'),
     ]);
     state.operations = state.operations.filter(o=>o.venueId!==venueId).concat((ops.data||[]).map(dbToOp));
     state.opTypes = (types.data||[]);
@@ -3838,17 +3838,8 @@ function applyTranslations(l){
     sel.value=cur;
   });
 
-  // ── Usage type select options ──
-  const usageTypeMap=[['Match Day','usage_match'],['Training Session','usage_training'],['Other','usage_other']];
-  ['usage-type-select','edit-usage-type','admin-usage-type'].forEach(id=>{
-    const sel=document.getElementById(id); if(!sel) return;
-    const cur=sel.value;
-    usageTypeMap.forEach(([val,key])=>{
-      const o=sel.querySelector('option[value="'+val+'"]');
-      if(o) o.textContent=T[key]||o.textContent;
-    });
-    sel.value=cur;
-  });
+  // ── Usage type select options — now dynamic from state.usageTypes ──
+  if(typeof populateUsageTypeSelects==='function') populateUsageTypeSelects();
 
   // ── Project status select options ──
   const projStatusMap=[['planned','status_project_planned'],['active','status_active'],['finished','status_finished']];
@@ -4032,7 +4023,7 @@ async function enterViewerDashboard(proj){
   } else { state.operations=[]; }
   const [types_res, utypes_res] = await Promise.all([
     supa.from('pitchops_op_types').select('*').order('name'),
-    supa.from('pitchops_usage_types').select('*').order('name'),
+    supa.from('pitchops_usage_types').select('*').order('id'),
   ]);
   state.opTypes = (types_res.data||[]);
   state.usageTypes = (utypes_res.data||[]);
@@ -5418,7 +5409,7 @@ Task: "${val}"`;
   // name_en is canonical storage key for operations
   const nameEn = translations.name_en||val;
   const {data:inserted, error} = await supa.from('pitchops_op_types').insert({
-    name:nameEn, ...translations
+    ...translations
   }).select().single();
   if(error){ showToast(error.message); return; }
   state.opTypes.push(inserted);
@@ -5986,7 +5977,7 @@ function populateUsageTypeSelects(){
   const freq={};
   (state_admin_usage||[]).concat(state_usage||[]).forEach(u=>{ if(u.type) freq[u.type]=(freq[u.type]||0)+1; });
   const sorted=[...state.usageTypes].sort((a,b)=>(freq[usageTypeKey(b)]||0)-(freq[usageTypeKey(a)]||0));
-  ['new-usage-type','edit-usage-type'].forEach(id=>{
+  ['new-usage-type','edit-usage-type','usage-type-select','admin-usage-type'].forEach(id=>{
     const el=document.getElementById(id); if(!el) return;
     el.innerHTML=sorted.map(tp=>`<option value="${esc(usageTypeKey(tp))}">${esc(usageTypeName(tp))}</option>`).join('');
   });
@@ -6424,7 +6415,7 @@ Usage type: "${val}"`;
       Object.assign(translations,JSON.parse(text.replace(/```json|```/g,'').trim()));
     }catch(e){console.warn('Auto-translate failed:',e);}
     const nameEn=translations.name_en||val;
-    const {data:inserted,error}=await supa.from('pitchops_usage_types').insert({name:nameEn,...translations}).select().single();
+    const {data:inserted,error}=await supa.from('pitchops_usage_types').insert({...translations}).select().single();
     if(error){showToast(error.message);return;}
     state.usageTypes.push(inserted);
     if(input) input.value='';
@@ -7587,7 +7578,9 @@ function openLogUsageModal(dateStr, venueId){
   document.getElementById('usage-date').value=dateStr||todayStr();
   document.getElementById('usage-time-from').value='08:00';
   document.getElementById('usage-time-to').value='17:00';
-  document.getElementById('usage-type-select').value='Training Session';
+  populateUsageTypeSelects(); // ensure dropdown is populated with current language
+  const utSel=document.getElementById('usage-type-select');
+  if(utSel&&utSel.options.length>0) utSel.selectedIndex=0;
   document.getElementById('usage-team').value='';
   document.getElementById('usage-zone-select').value='Full pitch';
   document.getElementById('usage-zone-custom').value='';
@@ -9090,7 +9083,6 @@ init();
         <label data-i18n="lbl_usage_type">Usage type</label>
         <select id="usage-type-select" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14px">
           <!-- usage types loaded dynamically -->
-          <option value="Other">Other</option>
         </select>
       </div>
       <div class="field">
@@ -9173,7 +9165,6 @@ init();
         <label data-i18n="lbl_usage_type">Usage type</label>
         <select id="edit-usage-type">
           <!-- usage types loaded dynamically -->
-          <option value="Other">Other</option>
         </select>
       </div>
       <div class="field">
