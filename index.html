@@ -386,7 +386,7 @@ button,input,select,textarea{}
         Sign in as Master Admin
       </button>
       <div style="text-align:center;font-size:12px;color:var(--text-hint)">— or —</div>
-      <div class="field" style="margin:0"><label data-i18n="lbl_venue_token">Venue access token</label><input id="venue-token-input" type="text" placeholder="Paste your venue token..." autocomplete="off" onkeydown="if(event.key==='Enter')venueTokenLogin()"/></div>
+      <div class="field" style="margin:0"><label data-i18n="lbl_venue_token">Venue access token</label><input id="venue-token-input" type="text" placeholder="Paste your venue token..." autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" onkeydown="if(event.key==='Enter')venueTokenLogin()"/></div>
       <button class="btn btn-blue btn-full" onclick="venueTokenLogin()" data-i18n="btn_access_venue">Access Venue Dashboard</button>
     </div>
     <div style="text-align:center">
@@ -2255,6 +2255,7 @@ const i18n = {
     lbl_today:'DZISIAJ',lbl_tomorrow:'Jutro',
     legend_planned:'Zaplanowane',legend_inprogress:'W trakcie',legend_completed:'Ukończone',legend_missed:'Niewykonane',
     col_tasks:'ZADANIA',col_usage:'UŻYCIE',
+    day_mon:'Pon',day_tue:'Wt',day_wed:'Śr',day_thu:'Czw',day_fri:'Pt',day_sat:'Sob',day_sun:'Nd',
     usage_match:'Mecz',usage_training:'Trening',usage_other:'Inne',
     zone_full:'Całe boisko',zone_half_a:'Połowa A',zone_half_b:'Połowa B',
     zone_third_a:'Tercja A',zone_third_b:'Tercja B',zone_third_c:'Tercja C',
