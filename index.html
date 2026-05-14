@@ -6440,6 +6440,11 @@ async function _retranslateUsageType(i){
     const {error}=await supa.from('pitchops_usage_types').update(parsed).eq('id',tp.id);
     if(error){showToast(error.message);return;}
     Object.assign(tp,parsed);
+    const el2=document.getElementById('settings-usage-types-list');
+    const wasExpanded=el2?el2._expanded:null;
+    _renderSettingsUsageTypes();
+    const el3=document.getElementById('settings-usage-types-list');
+    if(el3&&wasExpanded) el3._expanded=wasExpanded;
     _renderSettingsUsageTypes();
     showToast('✅ Re-translated');
   }catch(e){showToast('Translation failed: '+e.message);}
@@ -6459,6 +6464,11 @@ Task: "${enName}"`;
     const {error}=await supa.from('pitchops_op_types').update(parsed).eq('id',tp.id);
     if(error){showToast(error.message);return;}
     Object.assign(tp,parsed);
+    const elO=document.getElementById('settings-op-types-list');
+    const wasExpandedO=elO?elO._expanded:null;
+    _renderSettingsOpTypes();
+    const elO2=document.getElementById('settings-op-types-list');
+    if(elO2&&wasExpandedO) elO2._expanded=wasExpandedO;
     _renderSettingsOpTypes();
     showToast('✅ Re-translated');
   }catch(e){showToast('Translation failed: '+e.message);}
