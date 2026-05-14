@@ -386,7 +386,7 @@ button,input,select,textarea{}
         Sign in as Master Admin
       </button>
       <div style="text-align:center;font-size:12px;color:var(--text-hint)">— or —</div>
-      <div class="field" style="margin:0"><label data-i18n="lbl_venue_token">Venue access token</label><input id="venue-token-input" type="text" placeholder="Paste your venue token..." onkeydown="if(event.key==='Enter')venueTokenLogin()"/></div>
+      <div class="field" style="margin:0"><label data-i18n="lbl_venue_token">Venue access token</label><input id="venue-token-input" type="text" placeholder="Paste your venue token..." autocomplete="off" onkeydown="if(event.key==='Enter')venueTokenLogin()"/></div>
       <button class="btn btn-blue btn-full" onclick="venueTokenLogin()" data-i18n="btn_access_venue">Access Venue Dashboard</button>
     </div>
     <div style="text-align:center">
@@ -891,7 +891,7 @@ button,input,select,textarea{}
           <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:2px;background:var(--green);display:inline-block"></span><span data-i18n="legend_completed">Completed</span></span>
           <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:2px;background:var(--red);display:inline-block"></span><span data-i18n="legend_missed">Missed</span></span>
         </div>
-        <div id="gantt-grid" style="width:100%"></div>
+        <div id="gantt-grid" style="overflow-x:auto;width:100%"></div>
       </div>
     </div>
     <div id="venue-cal-view" style="display:none">
@@ -6250,67 +6250,13 @@ function renderGantt(){
   const legendBar2=document.getElementById('gantt-legend-bar');
   if(navBar2&&legendBar2) legendBar2.style.top=(52+navBar2.offsetHeight)+'px';
 
-  // Sticky thead: rendered as a SEPARATE sticky div above the scrollable table
-  // This bypasses the overflow-x:auto limitation that kills position:sticky in tables
-  const colWidths='150px'+' 1fr'.repeat(14); // VENUE(2) + 7days x 2cols
-  grid.innerHTML=`
-    <div id="gantt-sticky-head" style="position:sticky;top:134px;z-index:8;background:white;overflow:hidden">
-      <table style="border-collapse:collapse;width:100%;table-layout:fixed;min-width:700px" id="gantt-head-table">
-        <thead>
-          <tr>${headerCols}</tr>
-          <tr>${subHeaderCols}</tr>
-        </thead>
-      </table>
-    </div>
-    <div id="gantt-scroll-body" style="overflow-x:auto;width:100%">
-      <table style="border-collapse:collapse;width:100%;min-width:700px" id="gantt-body-table">
-        <thead style="visibility:hidden;height:0">
-          <tr>${headerCols}</tr>
-          <tr>${subHeaderCols}</tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>`;
-
-  // Sync scroll: when body scrolls horizontally, mirror to sticky head
-  const scrollBody=document.getElementById('gantt-scroll-body');
-  const stickyHead=document.getElementById('gantt-sticky-head');
-  if(scrollBody&&stickyHead){
-    scrollBody.addEventListener('scroll',()=>{ stickyHead.scrollLeft=scrollBody.scrollLeft; });
-  }
-
-  // Sync column widths after layout is complete
-  requestAnimationFrame(()=>{
-    const bodyTable=document.getElementById('gantt-body-table');
-    const headTable=document.getElementById('gantt-head-table');
-    const stickyHead=document.getElementById('gantt-sticky-head');
-    if(!bodyTable||!headTable) return;
-    // Get widths from each col in first tbody row
-    const bodyRow=bodyTable.querySelector('tbody tr');
-    if(!bodyRow) return;
-    const bodyCells=Array.from(bodyRow.cells);
-    // Apply to BOTH header rows
-    [0,1].forEach(rowIdx=>{
-      const headRow=headTable.querySelectorAll('thead tr')[rowIdx];
-      if(!headRow) return;
-      const headCells=Array.from(headRow.cells);
-      let bodyIdx=0;
-      headCells.forEach(th=>{
-        const span=parseInt(th.colSpan)||1;
-        // sum widths of spanned body cells
-        let w=0;
-        for(let s=0;s<span;s++) w+=(bodyCells[bodyIdx+s]?.offsetWidth||0);
-        th.style.width=w+'px';
-        th.style.minWidth=w+'px';
-        th.style.maxWidth=w+'px';
-        bodyIdx+=span;
-      });
-    });
-    const totalW=bodyTable.offsetWidth;
-    headTable.style.width=totalW+'px';
-    headTable.style.minWidth=totalW+'px';
-    if(stickyHead) stickyHead.style.width=(document.getElementById('gantt-scroll-body')?.offsetWidth||totalW)+'px';
-  });
+  grid.innerHTML=`<div style="overflow-x:auto;width:100%"><table style="border-collapse:collapse;width:100%;min-width:700px">
+    <thead>
+      <tr>${headerCols}</tr>
+      <tr>${subHeaderCols}</tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table></div>`;
 }
 
 
