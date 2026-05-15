@@ -1822,9 +1822,22 @@ async function getAdminPassHash(){
 // ── SUPABASE LOADERS ──
 
 // Helper: returns ISO date string for 90 days ago (local time, no UTC offset bug)
+// ── Data window configuration ──────────────────────────────────────────
+// DATA_WINDOW_DAYS: how far back we load records on initial load.
+// DATA_LIMIT: max rows per Supabase query. With 500 rows × 7 queries
+// the worst case memory footprint stays under ~2MB of JSON.
+// For historical data beyond the window, use the date-range filters
+// in the Tasks/Usage list views which query on demand.
+const DATA_WINDOW_DAYS = 60;
+const DATA_LIMIT = 500;
+
 function ninetyDaysAgoStr() {
+  // Legacy name kept for backward compatibility — uses DATA_WINDOW_DAYS
+  return dataWindowStart(DATA_WINDOW_DAYS);
+}
+function dataWindowStart(days) {
   const d = new Date();
-  d.setDate(d.getDate() - 90);
+  d.setDate(d.getDate() - (days || DATA_WINDOW_DAYS));
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
 }
 
@@ -1835,8 +1848,8 @@ async function loadAll() {
     const [proj, ven, ops, usage, types, utypes] = await Promise.all([
       supa.from('pitchops_projects').select('*').order('created_at'),
       supa.from('pitchops_venues').select('*').order('created_at'),
-      supa.from('pitchops_operations').select('*').gte('operation_date', cutoff).order('operation_date',{ascending:false}).limit(2000),
-      supa.from('pitchops_usage').select('*').gte('usage_date', cutoff).order('usage_date',{ascending:false}).limit(2000),
+      supa.from('pitchops_operations').select('id,venue_id,project_id,operation_date,type,zone,equipment,weather,status,staff,notes,photo_urls,planned_start,planned_end,admin_comment').gte('operation_date', cutoff).order('operation_date',{ascending:false}).limit(DATA_LIMIT),
+      supa.from('pitchops_usage').select('*').gte('usage_date', cutoff).order('usage_date',{ascending:false}).limit(DATA_LIMIT),
       supa.from('pitchops_op_types').select('*').order('name'),
       supa.from('pitchops_usage_types').select('*').order('id'),
     ]);
@@ -1881,7 +1894,7 @@ async function refreshProjectOps(projectId, silent=false){
   if(!silent) showLoading(true);
   try {
     const [ops, types, utypes] = await Promise.all([
-      supa.from('pitchops_operations').select('*').in('venue_id', vids).gte('operation_date',ninetyDaysAgoStr()).order('operation_date',{ascending:false}).limit(2000),
+      supa.from('pitchops_operations').select('*').in('venue_id', vids).gte('operation_date',ninetyDaysAgoStr()).order('operation_date',{ascending:false}).limit(DATA_LIMIT),
       supa.from('pitchops_op_types').select('*').order('name'),
       supa.from('pitchops_usage_types').select('*').order('id'),
     ]);
@@ -1906,7 +1919,7 @@ async function refreshVenueOps(venueId, silent=false){
   if(!silent) showLoading(true);
   try {
     const [ops, types, utypes] = await Promise.all([
-      supa.from('pitchops_operations').select('*').eq('venue_id', venueId).gte('operation_date',ninetyDaysAgoStr()).order('operation_date', {ascending:false}).limit(2000),
+      supa.from('pitchops_operations').select('*').eq('venue_id', venueId).gte('operation_date',ninetyDaysAgoStr()).order('operation_date', {ascending:false}).limit(DATA_LIMIT),
       supa.from('pitchops_op_types').select('*').order('name'),
       supa.from('pitchops_usage_types').select('*').order('id'),
     ]);
@@ -2313,6 +2326,47 @@ const i18n = {
     legend_planned:'Zaplanowane',legend_inprogress:'W trakcie',legend_completed:'Ukończone',legend_missed:'Niewykonane',
     col_tasks:'ZADANIA',col_usage:'UŻYCIE',
     day_mon:'Pon',day_tue:'Wt',day_wed:'Śr',day_thu:'Czw',day_fri:'Pt',day_sat:'Sob',day_sun:'Nd',
+    confirm_delete_event:'Usunąć to wydarzenie?',
+    confirm_delete_type:'Usunąć typ zadania "{name}"?',
+    lbl_colour:'Kolor',
+    lbl_comment_placeholder:'Komentarz...',
+    lbl_logged:'zarejestrowano',
+    lbl_required:'wymagane',
+    lbl_search_projects:'Szukaj projektów...',
+    lbl_stat_this_week:'Ten tydzień',
+    lbl_stat_today:'Dziś',
+    lbl_stat_total_tasks:'Łączna liczba zadań',
+    lbl_stat_venues:'Obiekty',
+    lbl_view_only:' — Tylko do odczytu',
+    modal_add_event:'Dodaj wydarzenie',
+    modal_edit_event:'Edytuj wydarzenie',
+    no_projects_search:'Brak projektów pasujących do wyszukiwania.',
+    no_tasks_found:'Nie znaleziono zadań',
+    no_usage_found:'Nie znaleziono użyć',
+    no_usage_today_empty:'Brak zarejestrowanego użycia dziś',
+    placeholder_notes:'Notatki...',
+    placeholder_repeat_pass:'Powtórz nowe hasło',
+    placeholder_zone_custom:'Opisz strefę...',
+    toast_copy_link_fail:'⚠️ Nie można skopiować linku',
+    toast_end_after_start:'Data końcowa musi być po dacie początkowej',
+    toast_enter_event_name:'Podaj nazwę wydarzenia',
+    toast_event_deleted:'Wydarzenie usunięte',
+    toast_event_saved:'Wydarzenie zapisane!',
+    toast_invalid_file_type:'Dozwolone są tylko pliki graficzne (JPG, PNG, WEBP)',
+    toast_login_email_error:'Ten adres e-mail nie ma uprawnień administratora.',
+    toast_login_pass_error:'Nieprawidłowe hasło.',
+    toast_offline_banner:'📡 Brak połączenia — wyświetlane dane z pamięci podręcznej',
+    toast_offline_guard:'⚡ Brak połączenia — przywróć połączenie i spróbuj ponownie',
+    toast_pass_current_wrong:'Aktualne hasło jest nieprawidłowe.',
+    toast_pass_no_match:'Hasła nie pasują do siebie.',
+    toast_pass_too_short:'Nowe hasło musi mieć co najmniej 8 znaków.',
+    toast_preset_name:'Podaj nazwę szablonu',
+    toast_proj_code_exists:'Projekt z tym kodem już istnieje.',
+    toast_proj_required:'Podaj kod i nazwę projektu.',
+    toast_select_dates:'Wybierz datę początkową i końcową',
+    toast_type_add_hint:'Wpisz nazwę typu',
+    toast_type_removed:'Typ usunięty',
+    toast_venue_required:'Nie wybrano obiektu',
     usage_match:'Mecz',usage_training:'Trening',usage_other:'Inne',
     zone_full:'Całe boisko',zone_half_a:'Połowa A',zone_half_b:'Połowa B',
     zone_third_a:'Tercja A',zone_third_b:'Tercja B',zone_third_c:'Tercja C',
@@ -3135,6 +3189,38 @@ const i18n = {
     toast_type_removed:'Type supprimé',
     toast_venue_required:'Aucun site sélectionné',
     day_mon:'Lun',day_tue:'Mar',day_wed:'Mer',day_thu:'Jeu',day_fri:'Ven',day_sat:'Sam',day_sun:'Dim',
+    confirm_delete_type:'Supprimer le type de tâche "{name}" ?',
+    lbl_colour:'Couleur',
+    lbl_comment_placeholder:'Commentaire...',
+    lbl_logged:'enregistré',
+    lbl_search_projects:'Rechercher des projets...',
+    lbl_stat_this_week:'Cette semaine',
+    lbl_stat_today:'Aujourd\'hui',
+    lbl_stat_total_tasks:'Total des tâches',
+    lbl_stat_venues:'Sites',
+    lbl_view_only:' — Lecture seule',
+    modal_add_event:'Ajouter un événement',
+    modal_edit_event:'Modifier l\'événement',
+    no_projects_search:'Aucun projet ne correspond à la recherche.',
+    no_tasks_found:'Aucune tâche trouvée',
+    no_usage_found:'Aucune utilisation trouvée',
+    no_usage_today_empty:'Aucune utilisation enregistrée aujourd\'hui',
+    placeholder_notes:'Notes...',
+    placeholder_repeat_pass:'Répéter le nouveau mot de passe',
+    placeholder_zone_custom:'Décrire la zone...',
+    toast_copy_link_fail:'⚠️ Impossible de copier le lien',
+    toast_event_deleted:'Événement supprimé',
+    toast_event_saved:'Événement enregistré !',
+    toast_invalid_file_type:'Seuls les fichiers image sont autorisés (JPG, PNG, WEBP)',
+    toast_login_email_error:'Cet e-mail n\'est pas autorisé pour l\'accès administrateur.',
+    toast_login_pass_error:'Mot de passe incorrect.',
+    toast_offline_banner:'📡 Hors ligne — affichage des données en cache',
+    toast_offline_guard:'⚡ Hors ligne — veuillez vous reconnecter et réessayer',
+    toast_pass_current_wrong:'Le mot de passe actuel est incorrect.',
+    toast_pass_no_match:'Les mots de passe ne correspondent pas.',
+    toast_pass_too_short:'Le nouveau mot de passe doit contenir au moins 8 caractères.',
+    toast_proj_code_exists:'Un projet avec ce code existe déjà.',
+    toast_proj_required:'Veuillez saisir un code et un nom de projet.',
   },
   de:{
     confirm_delete_type:'Aufgabentyp "{name}" entfernen?',
@@ -4003,7 +4089,7 @@ async function enterViewerDashboard(proj){
   state.venues = allVenues;
   const vids = allVenues.map(v=>v.id);
   if(vids.length){
-    const ops_res = await supa.from('pitchops_operations').select('*').in('venue_id',vids).gte('operation_date',ninetyDaysAgoStr()).order('operation_date',{ascending:false}).limit(2000);
+    const ops_res = await supa.from('pitchops_operations').select('*').in('venue_id',vids).gte('operation_date',ninetyDaysAgoStr()).order('operation_date',{ascending:false}).limit(DATA_LIMIT);
     state.operations = (ops_res.data||[]).map(dbToOp);
   } else { state.operations=[]; }
   const [types_res, utypes_res] = await Promise.all([
@@ -4513,6 +4599,20 @@ async function deleteProject(){
 }
 
 function openProject(pid){
+  // ── Memory management: evict stale ops/usage from previous project ──
+  // Keep only data belonging to the new project's venues to prevent
+  // unbounded growth when navigating between many projects.
+  if(state.currentProjectId && state.currentProjectId !== pid){
+    const newVids = new Set(projectVenues(pid).map(v=>v.id));
+    const prevVids = new Set(projectVenues(state.currentProjectId).map(v=>v.id));
+    const evictVids = [...prevVids].filter(v=>!newVids.has(v));
+    if(evictVids.length){
+      state.operations = state.operations.filter(o=>!evictVids.includes(o.venueId));
+      state_admin_usage = state_admin_usage.filter(u=>!evictVids.includes(u.venueId));
+      if(typeof state_events !== 'undefined')
+        state_events = state_events.filter(e=>!evictVids.includes(e.venueId));
+    }
+  }
   state.currentProjectId=pid;
   renderProjectDetail(pid);
   showScreen('screen-project-detail');
@@ -5359,15 +5459,25 @@ async function renameOpTypeLang(i, input){
   finally { _guardEnd('renameOpType'); }
 }
 
+// Simple in-memory translation cache — keyed by "text|srcLang|domain".
+// Survives the session (page lifetime) and eliminates duplicate API calls
+// when the same task type is re-translated or added multiple times.
+const _translateCache = new Map();
+
 async function _autoTranslate(text, srcLang, domain){
-  // Attempt via Supabase Edge Function; falls back silently
+  const cacheKey = `${text}|${srcLang}|${domain}`;
+  if(_translateCache.has(cacheKey)) return _translateCache.get(cacheKey);
   try{
     const r=await fetch('https://dqlcgqfkyvzneakgcyxq.supabase.co/functions/v1/translate',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer sb_publishable_8_HjwuO-JgyzcpahkWXepg_Z-v3UUYm','apikey':'sb_publishable_8_HjwuO-JgyzcpahkWXepg_Z-v3UUYm'},
       body:JSON.stringify({text,srcLang,domain})
     });
-    if(r.ok) return await r.json();
+    if(r.ok){
+      const result = await r.json();
+      _translateCache.set(cacheKey, result);
+      return result;
+    }
   }catch(e){console.warn('_autoTranslate failed:',e);}
   return {};
 }
@@ -5535,11 +5645,11 @@ function handlePhotoSelect(input, ctx) {
   const files = Array.from(input.files);
   const allowed = MAX_PHOTOS - currentPhotos[ctx].length;
   if(allowed <= 0){ showToast(t('toast_max_photos')); input.value = ''; return; }
-  const MAX_FILE_BYTES = 30 * 1024 * 1024; // 30MB per file
+  const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5MB per file
   let added = 0;
   files.slice(0, allowed).forEach(file => {
     if(!file.type.startsWith('image/')){ showToast(t('toast_invalid_file_type')||'Only image files allowed'); return; }
-    if(file.size > MAX_FILE_BYTES){ showToast((t('toast_file_too_large')||'File too large (max 30MB)')+': '+file.name); return; }
+    if(file.size > MAX_FILE_BYTES){ showToast((t('toast_file_too_large')||'File too large (max 5MB)')+': '+file.name); return; }
     const url = URL.createObjectURL(file);
     currentPhotos[ctx].push({ url, file, uploaded: false });
     added++;
@@ -7059,7 +7169,18 @@ async function deleteMultidayEvent(){
   finally { _guardEnd('deleteMultidayEvent'); }
 }
 
+// Debounced calendar refresh — coalesces rapid sequential calls
+// (e.g. language change + data update firing within same event loop)
+// into a single render, preventing redundant DOM work.
+let _refreshCalTimer = null;
 function _refreshCalendars(){
+  if(_refreshCalTimer) return; // already queued
+  _refreshCalTimer = requestAnimationFrame(()=>{
+    _refreshCalTimer = null;
+    _doRefreshCalendars();
+  });
+}
+function _doRefreshCalendars(){
   // Re-render ALL calendar views that are currently visible
   // Admin project Gantt
   const calContent = document.getElementById('ptab-calendar-content');
@@ -7402,7 +7523,7 @@ function usageToDb(u){
 async function refreshVenueUsage(venueId, silent=false){
   if(!silent) showLoading(true);
   try {
-    const {data} = await supa.from('pitchops_usage').select('*').eq('venue_id',venueId).gte('usage_date',ninetyDaysAgoStr()).order('usage_date',{ascending:false}).limit(2000);
+    const {data} = await supa.from('pitchops_usage').select('*').eq('venue_id',venueId).gte('usage_date',ninetyDaysAgoStr()).order('usage_date',{ascending:false}).limit(DATA_LIMIT);
     state_usage = (data||[]).map(dbToUsage);
   } catch(e){ showToast('Error loading usage: '+esc(e.message)); }
   if(!silent) showLoading(false);
@@ -7794,7 +7915,7 @@ async function refreshProjectUsage(projectId, silent=false){
   if(!vids.length){ state_admin_usage=[]; return; }
   if(!silent) showLoading(true);
   try {
-    const {data}=await supa.from('pitchops_usage').select('*').in('venue_id',vids).gte('usage_date',ninetyDaysAgoStr()).order('usage_date',{ascending:false}).limit(2000);
+    const {data}=await supa.from('pitchops_usage').select('*').in('venue_id',vids).gte('usage_date',ninetyDaysAgoStr()).order('usage_date',{ascending:false}).limit(DATA_LIMIT);
     state_admin_usage=(data||[]).map(dbToAdminUsage);
   } catch(e){ showToast('Error loading usage: '+esc(e.message)); }
   if(!silent) showLoading(false);
